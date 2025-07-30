@@ -1,0 +1,27 @@
+﻿################################################################################
+# This .gitignore file was automatically created by Microsoft(R) Visual Studio.
+################################################################################
+
+/.vs/ArifAIChatbot/copilot-chat/b03e0c47/sessions
+/.vs/ArifAIChatbot/CopilotIndices/17.14.698.11175
+/.vs/ArifAIChatbot/FileContentIndex
+/.vs/ArifAIChatbot/v17
+/.vs
+/chatbot-saas-platform/backend/.vs/ArifPlatformV2/FileContentIndex
+/chatbot-saas-platform/backend/src/AIOrchestrationService/obj/Debug/net9.0
+/chatbot-saas-platform/backend/src/AnalyticsService/obj/Debug/net9.0
+/chatbot-saas-platform/backend/src/ApiGateway/obj/Debug/net9.0
+/chatbot-saas-platform/backend/src/ChatRuntimeService/obj/Debug/net9.0
+/chatbot-saas-platform/backend/src/IdentityService/obj/Debug/net9.0
+/chatbot-saas-platform/backend/src/KnowledgeBaseService/obj/Debug/net9.0
+/chatbot-saas-platform/backend/src/LiveAgentService/obj/Debug/net9.0
+/chatbot-saas-platform/backend/src/NotificationService/obj/Debug/net9.0
+/chatbot-saas-platform/backend/src/Shared/Application/obj/Debug/net9.0
+/chatbot-saas-platform/backend/src/Shared/Domain/obj/Debug/net9.0
+/chatbot-saas-platform/backend/src/Shared/Infrastructure/obj/Debug/net9.0
+/chatbot-saas-platform/backend/src/SubscriptionService/obj/Debug/net9.0
+/chatbot-saas-platform/backend/src/TenantManagementService/obj/Debug/net9.0
+/chatbot-saas-platform/backend/src/WorkflowService/obj/Debug/net9.0
+/chatbot-saas-platform/backend/.vs/ArifPlatformV2/CopilotIndices/17.14.698.11175
+/chatbot-saas-platform/backend/.vs/ArifPlatformV2/copilot-chat/b03e0c47/sessions/bf61db63-3da8-4aa0-8347-efd83012512d
+/chatbot-saas-platform/backend/.vs/ArifPlatformV2/v17/.suo
