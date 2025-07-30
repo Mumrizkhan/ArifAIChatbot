@@ -14,7 +14,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("LiveAgentService")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+13d5be06b2aa102d69d47d50859f40d262639f6c")]
 [assembly: System.Reflection.AssemblyProductAttribute("LiveAgentService")]
 [assembly: System.Reflection.AssemblyTitleAttribute("LiveAgentService")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

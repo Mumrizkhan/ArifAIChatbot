@@ -3,6 +3,10 @@
   "WorkspaceRootPath": "C:\\ArifWorkspace\\ArifAIChatbotGitHub\\ArifAIChatbot\\chatbot-saas-platform\\backend\\",
   "Documents": [
     {
+      "AbsoluteMoniker": "D:0:0:{A1B2C3D4-E5F6-7890-ABCD-EF1234567890}|src\\IdentityService\\IdentityService.csproj|c:\\arifworkspace\\arifaichatbotgithub\\arifaichatbot\\chatbot-saas-platform\\backend\\src\\identityservice\\appsettings.json||{90A6B3A7-C1A3-4009-A288-E2FF89E96FA0}",
+      "RelativeMoniker": "D:0:0:{A1B2C3D4-E5F6-7890-ABCD-EF1234567890}|src\\IdentityService\\IdentityService.csproj|solutionrelative:src\\identityservice\\appsettings.json||{90A6B3A7-C1A3-4009-A288-E2FF89E96FA0}"
+    },
+    {
       "AbsoluteMoniker": "D:0:0:{A1B2C3D4-E5F6-7890-ABCD-EF1234567890}|src\\IdentityService\\IdentityService.csproj|c:\\arifworkspace\\arifaichatbotgithub\\arifaichatbot\\chatbot-saas-platform\\backend\\src\\identityservice\\controllers\\authcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{A1B2C3D4-E5F6-7890-ABCD-EF1234567890}|src\\IdentityService\\IdentityService.csproj|solutionrelative:src\\identityservice\\controllers\\authcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
@@ -243,10 +247,6 @@
       "RelativeMoniker": "D:0:0:{A1B2C3D4-E5F6-7890-ABCD-EF1234567890}|src\\IdentityService\\IdentityService.csproj|solutionrelative:src\\identityservice\\appsettings.development.json||{90A6B3A7-C1A3-4009-A288-E2FF89E96FA0}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{A1B2C3D4-E5F6-7890-ABCD-EF1234567890}|src\\IdentityService\\IdentityService.csproj|c:\\arifworkspace\\arifaichatbotgithub\\arifaichatbot\\chatbot-saas-platform\\backend\\src\\identityservice\\appsettings.json||{90A6B3A7-C1A3-4009-A288-E2FF89E96FA0}",
-      "RelativeMoniker": "D:0:0:{A1B2C3D4-E5F6-7890-ABCD-EF1234567890}|src\\IdentityService\\IdentityService.csproj|solutionrelative:src\\identityservice\\appsettings.json||{90A6B3A7-C1A3-4009-A288-E2FF89E96FA0}"
-    },
-    {
       "AbsoluteMoniker": "D:0:0:{5E79EF5C-B9A7-44B4-934C-BD4EB41F4412}|src\\KnowledgeBaseService\\KnowledgeBaseService.csproj|c:\\arifworkspace\\arifaichatbotgithub\\arifaichatbot\\chatbot-saas-platform\\backend\\src\\knowledgebaseservice\\appsettings.json||{90A6B3A7-C1A3-4009-A288-E2FF89E96FA0}",
       "RelativeMoniker": "D:0:0:{5E79EF5C-B9A7-44B4-934C-BD4EB41F4412}|src\\KnowledgeBaseService\\KnowledgeBaseService.csproj|solutionrelative:src\\knowledgebaseservice\\appsettings.json||{90A6B3A7-C1A3-4009-A288-E2FF89E96FA0}"
     },
@@ -330,7 +330,7 @@
       "DocumentGroups": [
         {
           "DockedWidth": 200,
-          "SelectedChildIndex": 13,
+          "SelectedChildIndex": 18,
           "Children": [
             {
               "$type": "Bookmark",
@@ -362,19 +362,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 4,
-              "Title": "Program.cs",
-              "DocumentMoniker": "C:\\ArifWorkspace\\ArifAIChatbotGitHub\\ArifAIChatbot\\chatbot-saas-platform\\backend\\src\\SubscriptionService\\Program.cs",
-              "RelativeDocumentMoniker": "src\\SubscriptionService\\Program.cs",
-              "ToolTip": "C:\\ArifWorkspace\\ArifAIChatbotGitHub\\ArifAIChatbot\\chatbot-saas-platform\\backend\\src\\SubscriptionService\\Program.cs",
-              "RelativeToolTip": "src\\SubscriptionService\\Program.cs",
-              "ViewState": "AgIAAA8AAAAAAAAAAAAAAAAAAAAGAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-07-28T12:44:38.574Z"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 11,
+              "DocumentIndex": 12,
               "Title": "IdentityService.csproj",
               "DocumentMoniker": "C:\\ArifWorkspace\\ArifAIChatbotGitHub\\ArifAIChatbot\\chatbot-saas-platform\\backend\\src\\IdentityService\\IdentityService.csproj",
               "RelativeDocumentMoniker": "src\\IdentityService\\IdentityService.csproj",
@@ -386,7 +374,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 9,
+              "DocumentIndex": 10,
               "Title": "Program.cs",
               "DocumentMoniker": "C:\\ArifWorkspace\\ArifAIChatbotGitHub\\ArifAIChatbot\\chatbot-saas-platform\\backend\\src\\IdentityService\\Program.cs",
               "RelativeDocumentMoniker": "src\\IdentityService\\Program.cs",
@@ -398,7 +386,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 10,
+              "DocumentIndex": 11,
               "Title": "ServiceCollectionExtensions.cs",
               "DocumentMoniker": "C:\\ArifWorkspace\\ArifAIChatbotGitHub\\ArifAIChatbot\\chatbot-saas-platform\\backend\\src\\Shared\\Infrastructure\\Extensions\\ServiceCollectionExtensions.cs",
               "RelativeDocumentMoniker": "src\\Shared\\Infrastructure\\Extensions\\ServiceCollectionExtensions.cs",
@@ -410,7 +398,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 18,
+              "DocumentIndex": 19,
               "Title": "Program.cs",
               "DocumentMoniker": "C:\\ArifWorkspace\\ArifAIChatbotGitHub\\ArifAIChatbot\\chatbot-saas-platform\\backend\\src\\ChatRuntimeService\\Program.cs",
               "RelativeDocumentMoniker": "src\\ChatRuntimeService\\Program.cs",
@@ -422,7 +410,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 8,
+              "DocumentIndex": 9,
               "Title": "SeedData.cs",
               "DocumentMoniker": "C:\\ArifWorkspace\\ArifAIChatbotGitHub\\ArifAIChatbot\\chatbot-saas-platform\\backend\\src\\Shared\\Infrastructure\\Data\\SeedData.cs",
               "RelativeDocumentMoniker": "src\\Shared\\Infrastructure\\Data\\SeedData.cs",
@@ -434,20 +422,20 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 0,
+              "DocumentIndex": 1,
               "Title": "AuthController.cs",
               "DocumentMoniker": "C:\\ArifWorkspace\\ArifAIChatbotGitHub\\ArifAIChatbot\\chatbot-saas-platform\\backend\\src\\IdentityService\\Controllers\\AuthController.cs",
               "RelativeDocumentMoniker": "src\\IdentityService\\Controllers\\AuthController.cs",
               "ToolTip": "C:\\ArifWorkspace\\ArifAIChatbotGitHub\\ArifAIChatbot\\chatbot-saas-platform\\backend\\src\\IdentityService\\Controllers\\AuthController.cs",
               "RelativeToolTip": "src\\IdentityService\\Controllers\\AuthController.cs",
-              "ViewState": "AgIAAKIAAAAAAAAAAAAUwM0AAAAAAAAAAAAAAA==",
+              "ViewState": "AgIAAKIAAAAAAAAAAAAUwMYAAAAJAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
               "WhenOpened": "2025-07-29T13:24:58.957Z",
               "EditorCaption": ""
             },
             {
               "$type": "Document",
-              "DocumentIndex": 5,
+              "DocumentIndex": 6,
               "Title": "PaymentsController.cs",
               "DocumentMoniker": "C:\\ArifWorkspace\\ArifAIChatbotGitHub\\ArifAIChatbot\\chatbot-saas-platform\\backend\\src\\SubscriptionService\\Controllers\\PaymentsController.cs",
               "RelativeDocumentMoniker": "src\\SubscriptionService\\Controllers\\PaymentsController.cs",
@@ -459,7 +447,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 3,
+              "DocumentIndex": 4,
               "Title": "SubscriptionService.cs",
               "DocumentMoniker": "C:\\ArifWorkspace\\ArifAIChatbotGitHub\\ArifAIChatbot\\chatbot-saas-platform\\backend\\src\\SubscriptionService\\Services\\SubscriptionService.cs",
               "RelativeDocumentMoniker": "src\\SubscriptionService\\Services\\SubscriptionService.cs",
@@ -471,7 +459,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 2,
+              "DocumentIndex": 3,
               "Title": "Program.cs",
               "DocumentMoniker": "C:\\ArifWorkspace\\ArifAIChatbotGitHub\\ArifAIChatbot\\chatbot-saas-platform\\backend\\src\\WorkflowService\\Program.cs",
               "RelativeDocumentMoniker": "src\\WorkflowService\\Program.cs",
@@ -483,7 +471,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 1,
+              "DocumentIndex": 2,
               "Title": "WorkflowExecutionService.cs",
               "DocumentMoniker": "C:\\ArifWorkspace\\ArifAIChatbotGitHub\\ArifAIChatbot\\chatbot-saas-platform\\backend\\src\\WorkflowService\\Services\\WorkflowExecutionService.cs",
               "RelativeDocumentMoniker": "src\\WorkflowService\\Services\\WorkflowExecutionService.cs",
@@ -495,7 +483,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 27,
+              "DocumentIndex": 28,
               "Title": "NotificationHub.cs",
               "DocumentMoniker": "C:\\ArifWorkspace\\ArifAIChatbotGitHub\\ArifAIChatbot\\chatbot-saas-platform\\backend\\src\\NotificationService\\Hubs\\NotificationHub.cs",
               "RelativeDocumentMoniker": "src\\NotificationService\\Hubs\\NotificationHub.cs",
@@ -507,7 +495,32 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 13,
+              "DocumentIndex": 0,
+              "Title": "appsettings.json",
+              "DocumentMoniker": "C:\\ArifWorkspace\\ArifAIChatbotGitHub\\ArifAIChatbot\\chatbot-saas-platform\\backend\\src\\IdentityService\\appsettings.json",
+              "RelativeDocumentMoniker": "src\\IdentityService\\appsettings.json",
+              "ToolTip": "C:\\ArifWorkspace\\ArifAIChatbotGitHub\\ArifAIChatbot\\chatbot-saas-platform\\backend\\src\\IdentityService\\appsettings.json",
+              "RelativeToolTip": "src\\IdentityService\\appsettings.json",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAABAAAAABAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001642|",
+              "WhenOpened": "2025-07-28T12:08:45.254Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 5,
+              "Title": "Program.cs",
+              "DocumentMoniker": "C:\\ArifWorkspace\\ArifAIChatbotGitHub\\ArifAIChatbot\\chatbot-saas-platform\\backend\\src\\SubscriptionService\\Program.cs",
+              "RelativeDocumentMoniker": "src\\SubscriptionService\\Program.cs",
+              "ToolTip": "C:\\ArifWorkspace\\ArifAIChatbotGitHub\\ArifAIChatbot\\chatbot-saas-platform\\backend\\src\\SubscriptionService\\Program.cs",
+              "RelativeToolTip": "src\\SubscriptionService\\Program.cs",
+              "ViewState": "AgIAAA8AAAAAAAAAAAAAAAAAAAAGAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-07-28T12:44:38.574Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 14,
               "Title": "Program.cs",
               "DocumentMoniker": "C:\\ArifWorkspace\\ArifAIChatbotGitHub\\ArifAIChatbot\\chatbot-saas-platform\\backend\\src\\TenantManagementService\\Program.cs",
               "RelativeDocumentMoniker": "src\\TenantManagementService\\Program.cs",
@@ -519,7 +532,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 14,
+              "DocumentIndex": 15,
               "Title": "Program.cs",
               "DocumentMoniker": "C:\\ArifWorkspace\\ArifAIChatbotGitHub\\ArifAIChatbot\\chatbot-saas-platform\\backend\\src\\NotificationService\\Program.cs",
               "RelativeDocumentMoniker": "src\\NotificationService\\Program.cs",
@@ -531,7 +544,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 7,
+              "DocumentIndex": 8,
               "Title": "UserConfiguration.cs",
               "DocumentMoniker": "C:\\ArifWorkspace\\ArifAIChatbotGitHub\\ArifAIChatbot\\chatbot-saas-platform\\backend\\src\\Shared\\Infrastructure\\Persistence\\Configurations\\UserConfiguration.cs",
               "RelativeDocumentMoniker": "src\\Shared\\Infrastructure\\Persistence\\Configurations\\UserConfiguration.cs",
@@ -543,7 +556,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 6,
+              "DocumentIndex": 7,
               "Title": "ApplicationDbContext.cs",
               "DocumentMoniker": "C:\\ArifWorkspace\\ArifAIChatbotGitHub\\ArifAIChatbot\\chatbot-saas-platform\\backend\\src\\Shared\\Infrastructure\\Persistence\\ApplicationDbContext.cs",
               "RelativeDocumentMoniker": "src\\Shared\\Infrastructure\\Persistence\\ApplicationDbContext.cs",
@@ -555,7 +568,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 15,
+              "DocumentIndex": 16,
               "Title": "Program.cs",
               "DocumentMoniker": "C:\\ArifWorkspace\\ArifAIChatbotGitHub\\ArifAIChatbot\\chatbot-saas-platform\\backend\\src\\LiveAgentService\\Program.cs",
               "RelativeDocumentMoniker": "src\\LiveAgentService\\Program.cs",
@@ -567,7 +580,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 16,
+              "DocumentIndex": 17,
               "Title": "Program.cs",
               "DocumentMoniker": "C:\\ArifWorkspace\\ArifAIChatbotGitHub\\ArifAIChatbot\\chatbot-saas-platform\\backend\\src\\KnowledgeBaseService\\Program.cs",
               "RelativeDocumentMoniker": "src\\KnowledgeBaseService\\Program.cs",
@@ -579,7 +592,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 17,
+              "DocumentIndex": 18,
               "Title": "Program.cs",
               "DocumentMoniker": "C:\\ArifWorkspace\\ArifAIChatbotGitHub\\ArifAIChatbot\\chatbot-saas-platform\\backend\\src\\AnalyticsService\\Program.cs",
               "RelativeDocumentMoniker": "src\\AnalyticsService\\Program.cs",
@@ -603,7 +616,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 29,
+              "DocumentIndex": 30,
               "Title": "WorkflowDesignerService.cs",
               "DocumentMoniker": "C:\\ArifWorkspace\\ArifAIChatbotGitHub\\ArifAIChatbot\\chatbot-saas-platform\\backend\\src\\WorkflowService\\Services\\WorkflowDesignerService.cs",
               "RelativeDocumentMoniker": "src\\WorkflowService\\Services\\WorkflowDesignerService.cs",
@@ -615,7 +628,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 28,
+              "DocumentIndex": 29,
               "Title": "WorkflowTemplateService.cs",
               "DocumentMoniker": "C:\\ArifWorkspace\\ArifAIChatbotGitHub\\ArifAIChatbot\\chatbot-saas-platform\\backend\\src\\WorkflowService\\Services\\WorkflowTemplateService.cs",
               "RelativeDocumentMoniker": "src\\WorkflowService\\Services\\WorkflowTemplateService.cs",
@@ -627,7 +640,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 12,
+              "DocumentIndex": 13,
               "Title": "IApplicationDbContext.cs",
               "DocumentMoniker": "C:\\ArifWorkspace\\ArifAIChatbotGitHub\\ArifAIChatbot\\chatbot-saas-platform\\backend\\src\\Shared\\Application\\Common\\Interfaces\\IApplicationDbContext.cs",
               "RelativeDocumentMoniker": "src\\Shared\\Application\\Common\\Interfaces\\IApplicationDbContext.cs",
@@ -639,7 +652,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 26,
+              "DocumentIndex": 27,
               "Title": "PlansController.cs",
               "DocumentMoniker": "C:\\ArifWorkspace\\ArifAIChatbotGitHub\\ArifAIChatbot\\chatbot-saas-platform\\backend\\src\\SubscriptionService\\Controllers\\PlansController.cs",
               "RelativeDocumentMoniker": "src\\SubscriptionService\\Controllers\\PlansController.cs",
@@ -651,7 +664,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 24,
+              "DocumentIndex": 25,
               "Title": "IInvoiceService.cs",
               "DocumentMoniker": "C:\\ArifWorkspace\\ArifAIChatbotGitHub\\ArifAIChatbot\\chatbot-saas-platform\\backend\\src\\SubscriptionService\\Services\\IInvoiceService.cs",
               "RelativeDocumentMoniker": "src\\SubscriptionService\\Services\\IInvoiceService.cs",
@@ -663,7 +676,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 23,
+              "DocumentIndex": 24,
               "Title": "WorkflowService.cs",
               "DocumentMoniker": "C:\\ArifWorkspace\\ArifAIChatbotGitHub\\ArifAIChatbot\\chatbot-saas-platform\\backend\\src\\WorkflowService\\Services\\WorkflowService.cs",
               "RelativeDocumentMoniker": "src\\WorkflowService\\Services\\WorkflowService.cs",
@@ -675,7 +688,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 22,
+              "DocumentIndex": 23,
               "Title": "DocumentProcessingService.cs",
               "DocumentMoniker": "C:\\ArifWorkspace\\ArifAIChatbotGitHub\\ArifAIChatbot\\chatbot-saas-platform\\backend\\src\\KnowledgeBaseService\\Services\\DocumentProcessingService.cs",
               "RelativeDocumentMoniker": "src\\KnowledgeBaseService\\Services\\DocumentProcessingService.cs",
@@ -687,7 +700,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 20,
+              "DocumentIndex": 21,
               "Title": "WorkflowHub.cs",
               "DocumentMoniker": "C:\\ArifWorkspace\\ArifAIChatbotGitHub\\ArifAIChatbot\\chatbot-saas-platform\\backend\\src\\WorkflowService\\Hubs\\WorkflowHub.cs",
               "RelativeDocumentMoniker": "src\\WorkflowService\\Hubs\\WorkflowHub.cs",
@@ -699,7 +712,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 19,
+              "DocumentIndex": 20,
               "Title": "Program.cs",
               "DocumentMoniker": "C:\\ArifWorkspace\\ArifAIChatbotGitHub\\ArifAIChatbot\\chatbot-saas-platform\\backend\\src\\AIOrchestrationService\\Program.cs",
               "RelativeDocumentMoniker": "src\\AIOrchestrationService\\Program.cs",
@@ -711,7 +724,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 21,
+              "DocumentIndex": 22,
               "Title": "ExternalIntegrationService.cs",
               "DocumentMoniker": "C:\\ArifWorkspace\\ArifAIChatbotGitHub\\ArifAIChatbot\\chatbot-saas-platform\\backend\\src\\WorkflowService\\Services\\ExternalIntegrationService.cs",
               "RelativeDocumentMoniker": "src\\WorkflowService\\Services\\ExternalIntegrationService.cs",
@@ -723,7 +736,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 30,
+              "DocumentIndex": 31,
               "Title": "IWorkflowTemplateService.cs",
               "DocumentMoniker": "C:\\ArifWorkspace\\ArifAIChatbotGitHub\\ArifAIChatbot\\chatbot-saas-platform\\backend\\src\\WorkflowService\\Services\\IWorkflowTemplateService.cs",
               "RelativeDocumentMoniker": "src\\WorkflowService\\Services\\IWorkflowTemplateService.cs",
@@ -735,7 +748,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 31,
+              "DocumentIndex": 32,
               "Title": "BillingService.cs",
               "DocumentMoniker": "C:\\ArifWorkspace\\ArifAIChatbotGitHub\\ArifAIChatbot\\chatbot-saas-platform\\backend\\src\\SubscriptionService\\Services\\BillingService.cs",
               "RelativeDocumentMoniker": "src\\SubscriptionService\\Services\\BillingService.cs",
@@ -747,7 +760,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 32,
+              "DocumentIndex": 33,
               "Title": "TemplateService.cs",
               "DocumentMoniker": "C:\\ArifWorkspace\\ArifAIChatbotGitHub\\ArifAIChatbot\\chatbot-saas-platform\\backend\\src\\NotificationService\\Services\\TemplateService.cs",
               "RelativeDocumentMoniker": "src\\NotificationService\\Services\\TemplateService.cs",
@@ -759,7 +772,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 33,
+              "DocumentIndex": 34,
               "Title": "NotificationService.cs",
               "DocumentMoniker": "C:\\ArifWorkspace\\ArifAIChatbotGitHub\\ArifAIChatbot\\chatbot-saas-platform\\backend\\src\\NotificationService\\Services\\NotificationService.cs",
               "RelativeDocumentMoniker": "src\\NotificationService\\Services\\NotificationService.cs",
@@ -771,7 +784,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 34,
+              "DocumentIndex": 35,
               "Title": "VectorSearchService.cs",
               "DocumentMoniker": "C:\\ArifWorkspace\\ArifAIChatbotGitHub\\ArifAIChatbot\\chatbot-saas-platform\\backend\\src\\KnowledgeBaseService\\Services\\VectorSearchService.cs",
               "RelativeDocumentMoniker": "src\\KnowledgeBaseService\\Services\\VectorSearchService.cs",
@@ -783,7 +796,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 25,
+              "DocumentIndex": 26,
               "Title": "InvoiceService.cs",
               "DocumentMoniker": "C:\\ArifWorkspace\\ArifAIChatbotGitHub\\ArifAIChatbot\\chatbot-saas-platform\\backend\\src\\SubscriptionService\\Services\\InvoiceService.cs",
               "RelativeDocumentMoniker": "src\\SubscriptionService\\Services\\InvoiceService.cs",
@@ -795,7 +808,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 36,
+              "DocumentIndex": 37,
               "Title": "WorkflowsController.cs",
               "DocumentMoniker": "C:\\ArifWorkspace\\ArifAIChatbotGitHub\\ArifAIChatbot\\chatbot-saas-platform\\backend\\src\\WorkflowService\\Controllers\\WorkflowsController.cs",
               "RelativeDocumentMoniker": "src\\WorkflowService\\Controllers\\WorkflowsController.cs",
@@ -807,7 +820,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 37,
+              "DocumentIndex": 38,
               "Title": "UsageTrackingService.cs",
               "DocumentMoniker": "C:\\ArifWorkspace\\ArifAIChatbotGitHub\\ArifAIChatbot\\chatbot-saas-platform\\backend\\src\\SubscriptionService\\Services\\UsageTrackingService.cs",
               "RelativeDocumentMoniker": "src\\SubscriptionService\\Services\\UsageTrackingService.cs",
@@ -819,7 +832,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 38,
+              "DocumentIndex": 39,
               "Title": "StripePaymentService.cs",
               "DocumentMoniker": "C:\\ArifWorkspace\\ArifAIChatbotGitHub\\ArifAIChatbot\\chatbot-saas-platform\\backend\\src\\SubscriptionService\\Services\\StripePaymentService.cs",
               "RelativeDocumentMoniker": "src\\SubscriptionService\\Services\\StripePaymentService.cs",
@@ -831,7 +844,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 39,
+              "DocumentIndex": 40,
               "Title": "PlanService.cs",
               "DocumentMoniker": "C:\\ArifWorkspace\\ArifAIChatbotGitHub\\ArifAIChatbot\\chatbot-saas-platform\\backend\\src\\SubscriptionService\\Services\\PlanService.cs",
               "RelativeDocumentMoniker": "src\\SubscriptionService\\Services\\PlanService.cs",
@@ -843,7 +856,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 40,
+              "DocumentIndex": 41,
               "Title": "ISubscriptionService.cs",
               "DocumentMoniker": "C:\\ArifWorkspace\\ArifAIChatbotGitHub\\ArifAIChatbot\\chatbot-saas-platform\\backend\\src\\SubscriptionService\\Services\\ISubscriptionService.cs",
               "RelativeDocumentMoniker": "src\\SubscriptionService\\Services\\ISubscriptionService.cs",
@@ -855,7 +868,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 41,
+              "DocumentIndex": 42,
               "Title": "IPlanService.cs",
               "DocumentMoniker": "C:\\ArifWorkspace\\ArifAIChatbotGitHub\\ArifAIChatbot\\chatbot-saas-platform\\backend\\src\\SubscriptionService\\Services\\IPlanService.cs",
               "RelativeDocumentMoniker": "src\\SubscriptionService\\Services\\IPlanService.cs",
@@ -867,7 +880,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 42,
+              "DocumentIndex": 43,
               "Title": "NotificationsController.cs",
               "DocumentMoniker": "C:\\ArifWorkspace\\ArifAIChatbotGitHub\\ArifAIChatbot\\chatbot-saas-platform\\backend\\src\\NotificationService\\Controllers\\NotificationsController.cs",
               "RelativeDocumentMoniker": "src\\NotificationService\\Controllers\\NotificationsController.cs",
@@ -879,7 +892,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 43,
+              "DocumentIndex": 44,
               "Title": "NotificationModels.cs",
               "DocumentMoniker": "C:\\ArifWorkspace\\ArifAIChatbotGitHub\\ArifAIChatbot\\chatbot-saas-platform\\backend\\src\\NotificationService\\Models\\NotificationModels.cs",
               "RelativeDocumentMoniker": "src\\NotificationService\\Models\\NotificationModels.cs",
@@ -891,7 +904,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 35,
+              "DocumentIndex": 36,
               "Title": "KnowledgeBaseService.cs",
               "DocumentMoniker": "C:\\ArifWorkspace\\ArifAIChatbotGitHub\\ArifAIChatbot\\chatbot-saas-platform\\backend\\src\\KnowledgeBaseService\\Services\\KnowledgeBaseService.cs",
               "RelativeDocumentMoniker": "src\\KnowledgeBaseService\\Services\\KnowledgeBaseService.cs",
@@ -903,7 +916,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 44,
+              "DocumentIndex": 45,
               "Title": "NotificationType.cs",
               "DocumentMoniker": "C:\\ArifWorkspace\\ArifAIChatbotGitHub\\ArifAIChatbot\\chatbot-saas-platform\\backend\\src\\Shared\\Domain\\Enums\\NotificationType.cs",
               "RelativeDocumentMoniker": "src\\Shared\\Domain\\Enums\\NotificationType.cs",
@@ -915,7 +928,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 47,
+              "DocumentIndex": 48,
               "Title": "appsettings.Development.json",
               "DocumentMoniker": "C:\\ArifWorkspace\\ArifAIChatbotGitHub\\ArifAIChatbot\\chatbot-saas-platform\\backend\\src\\SubscriptionService\\appsettings.Development.json",
               "RelativeDocumentMoniker": "src\\SubscriptionService\\appsettings.Development.json",
@@ -927,7 +940,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 56,
+              "DocumentIndex": 57,
               "Title": "appsettings.json",
               "DocumentMoniker": "C:\\ArifWorkspace\\ArifAIChatbotGitHub\\ArifAIChatbot\\chatbot-saas-platform\\backend\\src\\AnalyticsService\\appsettings.json",
               "RelativeDocumentMoniker": "src\\AnalyticsService\\appsettings.json",
@@ -939,7 +952,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 45,
+              "DocumentIndex": 46,
               "Title": "SubscriptionService.csproj",
               "DocumentMoniker": "C:\\ArifWorkspace\\ArifAIChatbotGitHub\\ArifAIChatbot\\chatbot-saas-platform\\backend\\src\\SubscriptionService\\SubscriptionService.csproj",
               "RelativeDocumentMoniker": "src\\SubscriptionService\\SubscriptionService.csproj",
@@ -951,7 +964,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 48,
+              "DocumentIndex": 49,
               "Title": "appsettings.Development.json",
               "DocumentMoniker": "C:\\ArifWorkspace\\ArifAIChatbotGitHub\\ArifAIChatbot\\chatbot-saas-platform\\backend\\src\\TenantManagementService\\appsettings.Development.json",
               "RelativeDocumentMoniker": "src\\TenantManagementService\\appsettings.Development.json",
@@ -963,7 +976,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 49,
+              "DocumentIndex": 50,
               "Title": "appsettings.Development.json",
               "DocumentMoniker": "C:\\ArifWorkspace\\ArifAIChatbotGitHub\\ArifAIChatbot\\chatbot-saas-platform\\backend\\src\\NotificationService\\appsettings.Development.json",
               "RelativeDocumentMoniker": "src\\NotificationService\\appsettings.Development.json",
@@ -975,7 +988,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 50,
+              "DocumentIndex": 51,
               "Title": "appsettings.Development.json",
               "DocumentMoniker": "C:\\ArifWorkspace\\ArifAIChatbotGitHub\\ArifAIChatbot\\chatbot-saas-platform\\backend\\src\\LiveAgentService\\appsettings.Development.json",
               "RelativeDocumentMoniker": "src\\LiveAgentService\\appsettings.Development.json",
@@ -987,7 +1000,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 51,
+              "DocumentIndex": 52,
               "Title": "appsettings.Development.json",
               "DocumentMoniker": "C:\\ArifWorkspace\\ArifAIChatbotGitHub\\ArifAIChatbot\\chatbot-saas-platform\\backend\\src\\KnowledgeBaseService\\appsettings.Development.json",
               "RelativeDocumentMoniker": "src\\KnowledgeBaseService\\appsettings.Development.json",
@@ -999,7 +1012,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 52,
+              "DocumentIndex": 53,
               "Title": "appsettings.Development.json",
               "DocumentMoniker": "C:\\ArifWorkspace\\ArifAIChatbotGitHub\\ArifAIChatbot\\chatbot-saas-platform\\backend\\src\\AIOrchestrationService\\appsettings.Development.json",
               "RelativeDocumentMoniker": "src\\AIOrchestrationService\\appsettings.Development.json",
@@ -1011,7 +1024,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 46,
+              "DocumentIndex": 47,
               "Title": "AnalyticsController.cs",
               "DocumentMoniker": "C:\\ArifWorkspace\\ArifAIChatbotGitHub\\ArifAIChatbot\\chatbot-saas-platform\\backend\\src\\AnalyticsService\\Controllers\\AnalyticsController.cs",
               "RelativeDocumentMoniker": "src\\AnalyticsService\\Controllers\\AnalyticsController.cs",
@@ -1023,7 +1036,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 53,
+              "DocumentIndex": 54,
               "Title": "appsettings.json",
               "DocumentMoniker": "C:\\ArifWorkspace\\ArifAIChatbotGitHub\\ArifAIChatbot\\chatbot-saas-platform\\backend\\src\\WorkflowService\\appsettings.json",
               "RelativeDocumentMoniker": "src\\WorkflowService\\appsettings.json",
@@ -1035,7 +1048,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 58,
+              "DocumentIndex": 59,
               "Title": "appsettings.Development.json",
               "DocumentMoniker": "C:\\ArifWorkspace\\ArifAIChatbotGitHub\\ArifAIChatbot\\chatbot-saas-platform\\backend\\src\\ChatRuntimeService\\appsettings.Development.json",
               "RelativeDocumentMoniker": "src\\ChatRuntimeService\\appsettings.Development.json",
@@ -1047,7 +1060,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 55,
+              "DocumentIndex": 56,
               "Title": "appsettings.Development.json",
               "DocumentMoniker": "C:\\ArifWorkspace\\ArifAIChatbotGitHub\\ArifAIChatbot\\chatbot-saas-platform\\backend\\src\\AnalyticsService\\appsettings.Development.json",
               "RelativeDocumentMoniker": "src\\AnalyticsService\\appsettings.Development.json",
@@ -1059,7 +1072,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 54,
+              "DocumentIndex": 55,
               "Title": "appsettings.json",
               "DocumentMoniker": "C:\\ArifWorkspace\\ArifAIChatbotGitHub\\ArifAIChatbot\\chatbot-saas-platform\\backend\\src\\AIOrchestrationService\\appsettings.json",
               "RelativeDocumentMoniker": "src\\AIOrchestrationService\\appsettings.json",
@@ -1071,19 +1084,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 60,
-              "Title": "appsettings.json",
-              "DocumentMoniker": "C:\\ArifWorkspace\\ArifAIChatbotGitHub\\ArifAIChatbot\\chatbot-saas-platform\\backend\\src\\IdentityService\\appsettings.json",
-              "RelativeDocumentMoniker": "src\\IdentityService\\appsettings.json",
-              "ToolTip": "C:\\ArifWorkspace\\ArifAIChatbotGitHub\\ArifAIChatbot\\chatbot-saas-platform\\backend\\src\\IdentityService\\appsettings.json",
-              "RelativeToolTip": "src\\IdentityService\\appsettings.json",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAA8AAAADAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001642|",
-              "WhenOpened": "2025-07-28T12:08:45.254Z"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 57,
+              "DocumentIndex": 58,
               "Title": "appsettings.json",
               "DocumentMoniker": "C:\\ArifWorkspace\\ArifAIChatbotGitHub\\ArifAIChatbot\\chatbot-saas-platform\\backend\\src\\ChatRuntimeService\\appsettings.json",
               "RelativeDocumentMoniker": "src\\ChatRuntimeService\\appsettings.json",
@@ -1095,7 +1096,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 59,
+              "DocumentIndex": 60,
               "Title": "appsettings.Development.json",
               "DocumentMoniker": "C:\\ArifWorkspace\\ArifAIChatbotGitHub\\ArifAIChatbot\\chatbot-saas-platform\\backend\\src\\IdentityService\\appsettings.Development.json",
               "RelativeDocumentMoniker": "src\\IdentityService\\appsettings.Development.json",

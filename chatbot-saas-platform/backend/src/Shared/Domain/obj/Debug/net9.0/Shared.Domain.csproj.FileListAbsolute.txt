@@ -10,3 +10,16 @@ C:\ArifWorkspace\Arif platform Devin2\chatbot-saas-platform\backend\src\Shared\D
 C:\ArifWorkspace\Arif platform Devin2\chatbot-saas-platform\backend\src\Shared\Domain\obj\Debug\net9.0\refint\Shared.Domain.dll
 C:\ArifWorkspace\Arif platform Devin2\chatbot-saas-platform\backend\src\Shared\Domain\obj\Debug\net9.0\Shared.Domain.pdb
 C:\ArifWorkspace\Arif platform Devin2\chatbot-saas-platform\backend\src\Shared\Domain\obj\Debug\net9.0\ref\Shared.Domain.dll
+C:\ArifWorkspace\ArifAIChatbotGitHub\ArifAIChatbot\chatbot-saas-platform\backend\src\Shared\Domain\bin\Debug\net9.0\Shared.Domain.deps.json
+C:\ArifWorkspace\ArifAIChatbotGitHub\ArifAIChatbot\chatbot-saas-platform\backend\src\Shared\Domain\bin\Debug\net9.0\Shared.Domain.dll
+C:\ArifWorkspace\ArifAIChatbotGitHub\ArifAIChatbot\chatbot-saas-platform\backend\src\Shared\Domain\bin\Debug\net9.0\Shared.Domain.pdb
+C:\ArifWorkspace\ArifAIChatbotGitHub\ArifAIChatbot\chatbot-saas-platform\backend\src\Shared\Domain\obj\Debug\net9.0\Shared.Domain.csproj.AssemblyReference.cache
+C:\ArifWorkspace\ArifAIChatbotGitHub\ArifAIChatbot\chatbot-saas-platform\backend\src\Shared\Domain\obj\Debug\net9.0\Shared.Domain.GeneratedMSBuildEditorConfig.editorconfig
+C:\ArifWorkspace\ArifAIChatbotGitHub\ArifAIChatbot\chatbot-saas-platform\backend\src\Shared\Domain\obj\Debug\net9.0\Shared.Domain.AssemblyInfoInputs.cache
+C:\ArifWorkspace\ArifAIChatbotGitHub\ArifAIChatbot\chatbot-saas-platform\backend\src\Shared\Domain\obj\Debug\net9.0\Shared.Domain.AssemblyInfo.cs
+C:\ArifWorkspace\ArifAIChatbotGitHub\ArifAIChatbot\chatbot-saas-platform\backend\src\Shared\Domain\obj\Debug\net9.0\Shared.Domain.csproj.CoreCompileInputs.cache
+C:\ArifWorkspace\ArifAIChatbotGitHub\ArifAIChatbot\chatbot-saas-platform\backend\src\Shared\Domain\obj\Debug\net9.0\Shared.Domain.sourcelink.json
+C:\ArifWorkspace\ArifAIChatbotGitHub\ArifAIChatbot\chatbot-saas-platform\backend\src\Shared\Domain\obj\Debug\net9.0\Shared.Domain.dll
+C:\ArifWorkspace\ArifAIChatbotGitHub\ArifAIChatbot\chatbot-saas-platform\backend\src\Shared\Domain\obj\Debug\net9.0\refint\Shared.Domain.dll
+C:\ArifWorkspace\ArifAIChatbotGitHub\ArifAIChatbot\chatbot-saas-platform\backend\src\Shared\Domain\obj\Debug\net9.0\Shared.Domain.pdb
+C:\ArifWorkspace\ArifAIChatbotGitHub\ArifAIChatbot\chatbot-saas-platform\backend\src\Shared\Domain\obj\Debug\net9.0\ref\Shared.Domain.dll
