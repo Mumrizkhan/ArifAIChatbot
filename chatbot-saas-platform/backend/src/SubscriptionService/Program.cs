@@ -8,6 +8,7 @@ using Shared.Application.Common.Interfaces;
 using Shared.Infrastructure.Dashboard;
 using Shared.Infrastructure.Persistence;
 using Shared.Infrastructure.Services;
+using Shared.Infrastructure.Extensions;
 using Stripe;
 using SubscriptionService.Services;
 using System.Text;
@@ -43,8 +44,7 @@ builder.Services.AddSwaggerGen(options =>
     });
 });
 
-builder.Services.AddDbContext<ApplicationDbContext>(options =>
-    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+builder.Services.AddInfrastructure(builder.Configuration);
 
 StripeConfiguration.ApiKey = builder.Configuration["Stripe:SecretKey"];
 
@@ -55,10 +55,6 @@ builder.Services.AddHangfire(configuration => configuration
     .UseSqlServerStorage(builder.Configuration.GetConnectionString("HangfireConnection")));
 
 builder.Services.AddHangfireServer();
-
-builder.Services.AddScoped<IApplicationDbContext>(provider => provider.GetRequiredService<ApplicationDbContext>());
-builder.Services.AddScoped<ITenantService, TenantService>();
-builder.Services.AddScoped<ICurrentUserService, CurrentUserService>();
 builder.Services.AddScoped<ISubscriptionService, SubscriptionService.Services.SubscriptionService>();
 builder.Services.AddScoped<IBillingService, SubscriptionService.Services.BillingService>();
 builder.Services.AddScoped<IUsageTrackingService, UsageTrackingService>();

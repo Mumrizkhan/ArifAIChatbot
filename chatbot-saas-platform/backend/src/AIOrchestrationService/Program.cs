@@ -6,6 +6,7 @@ using Microsoft.OpenApi.Models;
 using Shared.Application.Common.Interfaces;
 using Shared.Infrastructure.Persistence;
 using Shared.Infrastructure.Services;
+using Shared.Infrastructure.Extensions;
 using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -39,13 +40,9 @@ builder.Services.AddSwaggerGen(options =>
     });
 });
 
-builder.Services.AddDbContext<ApplicationDbContext>(options =>
-    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
-
-builder.Services.AddScoped<IApplicationDbContext>(provider => provider.GetRequiredService<ApplicationDbContext>());
-builder.Services.AddScoped<ITenantService, TenantService>();
-builder.Services.AddScoped<ICurrentUserService, CurrentUserService>();
-builder.Services.AddScoped<IAIService, OpenAIService>();
+builder.Services.AddInfrastructure(builder.Configuration);
+builder.Services.AddScoped<OpenAIService>();
+builder.Services.AddScoped<IAIService, CachedOpenAIService>();
 builder.Services.AddScoped<IVectorService, QdrantService>();
 builder.Services.AddHttpContextAccessor();
 

@@ -4,9 +4,11 @@ using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using NotificationService.Hubs;
 using NotificationService.Services;
+using NotificationService.Handlers;
 using Shared.Application.Common.Interfaces;
 using Shared.Infrastructure.Persistence;
 using Shared.Infrastructure.Services;
+using Shared.Infrastructure.Extensions;
 using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -41,18 +43,14 @@ builder.Services.AddSwaggerGen(options =>
 });
 builder.Services.AddSignalR();
 
-builder.Services.AddDbContext<ApplicationDbContext>(options =>
-    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
-
-builder.Services.AddScoped<IApplicationDbContext>(provider => provider.GetRequiredService<ApplicationDbContext>());
-builder.Services.AddScoped<ITenantService, TenantService>();
-builder.Services.AddScoped<ICurrentUserService, CurrentUserService>();
+builder.Services.AddInfrastructure(builder.Configuration);
 builder.Services.AddHttpClient();
 builder.Services.AddScoped<IEmailService, EmailService>();
 builder.Services.AddScoped<ISmsService, SmsService>();
 builder.Services.AddScoped<IPushNotificationService, PushNotificationService>();
 builder.Services.AddScoped<ITemplateService, TemplateService>();
 builder.Services.AddScoped<INotificationService, NotificationService.Services.NotificationService>();
+builder.Services.AddScoped<NotificationEventHandlers>();
 builder.Services.AddHttpContextAccessor();
 
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
