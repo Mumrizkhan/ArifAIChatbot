@@ -1,0 +1,5 @@
+.vs/ArifAIChatbot/CopilotIndices/
+bin/
+obj/
+**/bin/
+**/obj/

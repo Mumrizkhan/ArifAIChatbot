@@ -1,3 +1,4 @@
+using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using RabbitMQ.Client;
@@ -5,6 +6,7 @@ using RabbitMQ.Client.Events;
 using System;
 using System.Text;
 using System.Text.Json;
+using System.Threading.Channels;
 using System.Threading.Tasks;
 
 namespace Shared.Infrastructure.Messaging;
@@ -12,7 +14,7 @@ namespace Shared.Infrastructure.Messaging;
 public class RabbitMQMessageBus : IMessageBus, IDisposable
 {
     private readonly IConnection _connection;
-    private readonly IModel _channel;
+    private readonly IChannel _channel;
     private readonly ILogger<RabbitMQMessageBus> _logger;
     private readonly JsonSerializerOptions _jsonOptions;
     private bool _disposed = false;
@@ -39,9 +41,9 @@ public class RabbitMQMessageBus : IMessageBus, IDisposable
                 NetworkRecoveryInterval = TimeSpan.FromSeconds(10)
             };
 
-            _connection = factory.CreateConnection();
-            _channel = _connection.CreateModel();
-            
+            _connection = factory.CreateConnectionAsync().Result;
+            _channel = _connection.CreateChannelAsync().Result;
+
             _logger.LogInformation("RabbitMQ connection established");
         }
         catch (Exception ex)
@@ -60,24 +62,28 @@ public class RabbitMQMessageBus : IMessageBus, IDisposable
             var exchangeName = string.IsNullOrEmpty(exchange) ? "chatbot.events" : exchange;
             var messageRoutingKey = string.IsNullOrEmpty(routingKey) ? typeof(T).Name.ToLowerInvariant() : routingKey;
 
-            _channel.ExchangeDeclare(exchangeName, ExchangeType.Topic, durable: true);
+            await _channel.ExchangeDeclareAsync(exchangeName, ExchangeType.Topic, durable: true);
 
             var messageBody = JsonSerializer.Serialize(message, _jsonOptions);
             var body = Encoding.UTF8.GetBytes(messageBody);
 
-            var properties = _channel.CreateBasicProperties();
+            //Create basic properties for the message
+
+            var properties = new BasicProperties();
+            properties.Persistent = true;
             properties.Persistent = true;
             properties.MessageId = Guid.NewGuid().ToString();
             properties.Timestamp = new AmqpTimestamp(DateTimeOffset.UtcNow.ToUnixTimeSeconds());
             properties.Type = typeof(T).Name;
 
-            _channel.BasicPublish(
-                exchange: exchangeName,
-                routingKey: messageRoutingKey,
-                basicProperties: properties,
-                body: body);
+            await _channel.BasicPublishAsync(
+                 exchange: exchangeName,
+                 routingKey: messageRoutingKey,
+                 mandatory: false,
+                 basicProperties: properties,
+                 body: body);
 
-            _logger.LogDebug("Message published: {MessageType} to {Exchange}/{RoutingKey}", 
+            _logger.LogDebug("Message published: {MessageType} to {Exchange}/{RoutingKey}",
                 typeof(T).Name, exchangeName, messageRoutingKey);
 
             await Task.CompletedTask;
@@ -107,17 +113,17 @@ public class RabbitMQMessageBus : IMessageBus, IDisposable
             var exchangeName = string.IsNullOrEmpty(exchange) ? "chatbot.events" : exchange;
             var messageRoutingKey = string.IsNullOrEmpty(routingKey) ? typeof(T).Name.ToLowerInvariant() : routingKey;
 
-            _channel.ExchangeDeclare(exchangeName, ExchangeType.Topic, durable: true);
-            _channel.QueueDeclare(queueName, durable: true, exclusive: false, autoDelete: false);
-            _channel.QueueBind(queueName, exchangeName, messageRoutingKey);
-            _channel.BasicQos(prefetchSize: 0, prefetchCount: 10, global: false);
+            await _channel.ExchangeDeclareAsync(exchangeName, ExchangeType.Topic, durable: true);
+            await _channel.QueueDeclareAsync(queueName, durable: true, exclusive: false, autoDelete: false);
+            await _channel.QueueBindAsync(queueName, exchangeName, messageRoutingKey);
+            await _channel.BasicQosAsync(prefetchSize: 0, prefetchCount: 10, global: false);
 
-            var consumer = new EventingBasicConsumer(_channel);
-            consumer.Received += async (model, ea) =>
+            var consumer = new AsyncEventingBasicConsumer(_channel);
+            consumer.ReceivedAsync += async (model, ea) =>
             {
                 var body = ea.Body.ToArray();
                 var messageJson = Encoding.UTF8.GetString(body);
-                
+
                 try
                 {
                     var message = JsonSerializer.Deserialize<T>(messageJson, _jsonOptions);
@@ -126,30 +132,30 @@ public class RabbitMQMessageBus : IMessageBus, IDisposable
                         var success = await handler(message);
                         if (success)
                         {
-                            _channel.BasicAck(ea.DeliveryTag, false);
+                            await _channel.BasicAckAsync(ea.DeliveryTag, false);
                             _logger.LogDebug("Message processed successfully: {MessageType}", typeof(T).Name);
                         }
                         else
                         {
-                            _channel.BasicNack(ea.DeliveryTag, false, true);
+                            await _channel.BasicNackAsync(ea.DeliveryTag, false, true);
                             _logger.LogWarning("Message processing failed, requeued: {MessageType}", typeof(T).Name);
                         }
                     }
                     else
                     {
-                        _channel.BasicNack(ea.DeliveryTag, false, false);
+                        await _channel.BasicNackAsync(ea.DeliveryTag, false, false);
                         _logger.LogError("Failed to deserialize message: {MessageType}", typeof(T).Name);
                     }
                 }
                 catch (Exception ex)
                 {
                     _logger.LogError(ex, "Error processing message: {MessageType}", typeof(T).Name);
-                    _channel.BasicNack(ea.DeliveryTag, false, true);
+                    await _channel.BasicNackAsync(ea.DeliveryTag, false, true);
                 }
             };
 
-            _channel.BasicConsume(queue: queueName, autoAck: false, consumer: consumer);
-            _logger.LogInformation("Subscribed to queue: {QueueName} for message type: {MessageType}", 
+            _channel.BasicConsumeAsync(queue: queueName, autoAck: false, consumer: consumer);
+            _logger.LogInformation("Subscribed to queue: {QueueName} for message type: {MessageType}",
                 queueName, typeof(T).Name);
 
             await Task.CompletedTask;
@@ -165,9 +171,9 @@ public class RabbitMQMessageBus : IMessageBus, IDisposable
     {
         if (!_disposed)
         {
-            _channel?.Close();
+            _channel?.CloseAsync();
             _channel?.Dispose();
-            _connection?.Close();
+            _connection?.CloseAsync();
             _connection?.Dispose();
             _disposed = true;
             _logger.LogInformation("RabbitMQ connection disposed");
