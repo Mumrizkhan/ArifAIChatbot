@@ -8,6 +8,7 @@ using Shared.Application.Common.Interfaces;
 using Shared.Infrastructure.Dashboard;
 using Shared.Infrastructure.Persistence;
 using Shared.Infrastructure.Services;
+using Shared.Infrastructure.Extensions;
 using System.Text;
 using WorkflowService.Hubs;
 using WorkflowService.Services;
@@ -44,8 +45,7 @@ builder.Services.AddSwaggerGen(options =>
 });
 builder.Services.AddSignalR();
 
-builder.Services.AddDbContext<ApplicationDbContext>(options =>
-    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+builder.Services.AddInfrastructure(builder.Configuration);
 
 builder.Services.AddHangfire(configuration => configuration
     .SetDataCompatibilityLevel(CompatibilityLevel.Version_180)
@@ -54,10 +54,6 @@ builder.Services.AddHangfire(configuration => configuration
     .UseSqlServerStorage(builder.Configuration.GetConnectionString("HangfireConnection")));
 
 builder.Services.AddHangfireServer();
-
-builder.Services.AddScoped<IApplicationDbContext>(provider => provider.GetRequiredService<ApplicationDbContext>());
-builder.Services.AddScoped<ITenantService, TenantService>();
-builder.Services.AddScoped<ICurrentUserService, CurrentUserService>();
 builder.Services.AddScoped<IWorkflowService, WorkflowService.Services.WorkflowService>();
 builder.Services.AddScoped<IWorkflowExecutionService, WorkflowExecutionService>();
 builder.Services.AddScoped<IWorkflowDesignerService, WorkflowDesignerService>();
