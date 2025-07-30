@@ -1,0 +1,157 @@
+version: '3.8'
+
+services:
+  # SQL Server
+  sqlserver:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    container_name: chatbot-sqlserver
+    environment:
+      - ACCEPT_EULA=Y
+      - SA_PASSWORD=ChatBot123!
+      - MSSQL_PID=Developer
+    ports:
+      - "1433:1433"
+    volumes:
+      - sqlserver_data:/var/opt/mssql
+    networks:
+      - chatbot-network
+
+  # Redis
+  redis:
+    image: redis:7-alpine
+    container_name: chatbot-redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    networks:
+      - chatbot-network
+
+  # RabbitMQ
+  rabbitmq:
+    image: rabbitmq:3.12-management-alpine
+    container_name: chatbot-rabbitmq
+    environment:
+      - RABBITMQ_DEFAULT_USER=chatbot
+      - RABBITMQ_DEFAULT_PASS=chatbot123
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    volumes:
+      - rabbitmq_data:/var/lib/rabbitmq
+    networks:
+      - chatbot-network
+
+  # Qdrant Vector Database
+  qdrant:
+    image: qdrant/qdrant:latest
+    container_name: chatbot-qdrant
+    ports:
+      - "6333:6333"
+      - "6334:6334"
+    volumes:
+      - qdrant_data:/qdrant/storage
+    networks:
+      - chatbot-network
+
+  # API Gateway (Nginx)
+  api-gateway:
+    image: nginx:alpine
+    container_name: chatbot-gateway
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./infrastructure/nginx/nginx.conf:/etc/nginx/nginx.conf
+      - ./infrastructure/nginx/ssl:/etc/nginx/ssl
+    depends_on:
+      - identity-service
+      - tenant-management-service
+      - ai-orchestration-service
+      - chat-runtime-service
+    networks:
+      - chatbot-network
+
+  # Identity Service
+  identity-service:
+    build:
+      context: ./backend/src/IdentityService
+      dockerfile: Dockerfile
+    container_name: chatbot-identity-service
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ConnectionStrings__DefaultConnection=Server=sqlserver;Database=ChatBotIdentity;User Id=sa;Password=ChatBot123!;TrustServerCertificate=true
+      - Redis__ConnectionString=redis:6379
+      - RabbitMQ__ConnectionString=amqp://chatbot:chatbot123@rabbitmq:5672/
+    depends_on:
+      - sqlserver
+      - redis
+      - rabbitmq
+    networks:
+      - chatbot-network
+
+  # Tenant Management Service
+  tenant-management-service:
+    build:
+      context: ./backend/src/TenantManagementService
+      dockerfile: Dockerfile
+    container_name: chatbot-tenant-service
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ConnectionStrings__DefaultConnection=Server=sqlserver;Database=ChatBotTenantManagement;User Id=sa;Password=ChatBot123!;TrustServerCertificate=true
+      - Redis__ConnectionString=redis:6379
+      - RabbitMQ__ConnectionString=amqp://chatbot:chatbot123@rabbitmq:5672/
+    depends_on:
+      - sqlserver
+      - redis
+      - rabbitmq
+    networks:
+      - chatbot-network
+
+  # AI Orchestration Service
+  ai-orchestration-service:
+    build:
+      context: ./backend/src/AIOrchestrationService
+      dockerfile: Dockerfile
+    container_name: chatbot-ai-service
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ConnectionStrings__DefaultConnection=Server=sqlserver;Database=ChatBotAI;User Id=sa;Password=ChatBot123!;TrustServerCertificate=true
+      - Redis__ConnectionString=redis:6379
+      - RabbitMQ__ConnectionString=amqp://chatbot:chatbot123@rabbitmq:5672/
+      - Qdrant__ConnectionString=http://qdrant:6333
+    depends_on:
+      - sqlserver
+      - redis
+      - rabbitmq
+      - qdrant
+    networks:
+      - chatbot-network
+
+  # Chat Runtime Service
+  chat-runtime-service:
+    build:
+      context: ./backend/src/ChatRuntimeService
+      dockerfile: Dockerfile
+    container_name: chatbot-chat-service
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ConnectionStrings__DefaultConnection=Server=sqlserver;Database=ChatBotRuntime;User Id=sa;Password=ChatBot123!;TrustServerCertificate=true
+      - Redis__ConnectionString=redis:6379
+      - RabbitMQ__ConnectionString=amqp://chatbot:chatbot123@rabbitmq:5672/
+    depends_on:
+      - sqlserver
+      - redis
+      - rabbitmq
+    networks:
+      - chatbot-network
+
+volumes:
+  sqlserver_data:
+  redis_data:
+  rabbitmq_data:
+  qdrant_data:
+
+networks:
+  chatbot-network:
+    driver: bridge

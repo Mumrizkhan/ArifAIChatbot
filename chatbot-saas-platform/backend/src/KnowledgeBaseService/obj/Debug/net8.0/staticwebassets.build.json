@@ -1,0 +1,11 @@
+{
+  "Version": 1,
+  "Hash": "1gMNIrTVRyzs8lntPwaapsWW6gKOv3lWVlIDElxHFEc=",
+  "Source": "KnowledgeBaseService",
+  "BasePath": "_content/KnowledgeBaseService",
+  "Mode": "Default",
+  "ManifestType": "Build",
+  "ReferencedProjectsConfiguration": [],
+  "DiscoveryPatterns": [],
+  "Assets": []
+}

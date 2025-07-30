@@ -1,0 +1,51 @@
+[
+  {
+    "Name": "New Profile",
+    "Projects": [
+      {
+        "Path": "src\\ApiGateway\\ApiGateway.csproj",
+        "Action": "Start"
+      },
+      {
+        "Path": "src\\IdentityService\\IdentityService.csproj",
+        "Action": "Start"
+      },
+      {
+        "Path": "src\\TenantManagementService\\TenantManagementService.csproj",
+        "Action": "Start"
+      },
+      {
+        "Path": "src\\AIOrchestrationService\\AIOrchestrationService.csproj",
+        "Action": "Start"
+      },
+      {
+        "Path": "src\\ChatRuntimeService\\ChatRuntimeService.csproj",
+        "Action": "Start"
+      },
+      {
+        "Path": "src\\LiveAgentService\\LiveAgentService.csproj",
+        "Action": "Start"
+      },
+      {
+        "Path": "src\\KnowledgeBaseService\\KnowledgeBaseService.csproj",
+        "Action": "Start"
+      },
+      {
+        "Path": "src\\NotificationService\\NotificationService.csproj",
+        "Action": "Start"
+      },
+      {
+        "Path": "src\\WorkflowService\\WorkflowService.csproj",
+        "Action": "Start"
+      },
+      {
+        "Path": "src\\SubscriptionService\\SubscriptionService.csproj",
+        "Action": "Start"
+      },
+      {
+        "Path": "src\\AnalyticsService\\AnalyticsService.csproj",
+        "Action": "Start"
+      }
+    ]
+  }
+]

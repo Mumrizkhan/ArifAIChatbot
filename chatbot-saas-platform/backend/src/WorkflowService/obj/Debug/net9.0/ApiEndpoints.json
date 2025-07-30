@@ -1,0 +1,329 @@
+[
+  {
+    "ContainingType": "WorkflowService.Controllers.WorkflowsController",
+    "Method": "CreateWorkflow",
+    "RelativePath": "api/Workflows",
+    "HttpMethod": "POST",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "request",
+        "Type": "WorkflowService.Models.CreateWorkflowRequest",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "WorkflowService.Controllers.WorkflowsController",
+    "Method": "GetWorkflows",
+    "RelativePath": "api/Workflows",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "page",
+        "Type": "System.Int32",
+        "IsRequired": false
+      },
+      {
+        "Name": "pageSize",
+        "Type": "System.Int32",
+        "IsRequired": false
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "WorkflowService.Controllers.WorkflowsController",
+    "Method": "GetWorkflow",
+    "RelativePath": "api/Workflows/{workflowId}",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "workflowId",
+        "Type": "System.Guid",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "WorkflowService.Controllers.WorkflowsController",
+    "Method": "UpdateWorkflow",
+    "RelativePath": "api/Workflows/{workflowId}",
+    "HttpMethod": "PUT",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "workflowId",
+        "Type": "System.Guid",
+        "IsRequired": true
+      },
+      {
+        "Name": "workflow",
+        "Type": "Shared.Domain.Entities.Workflow",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "WorkflowService.Controllers.WorkflowsController",
+    "Method": "DeleteWorkflow",
+    "RelativePath": "api/Workflows/{workflowId}",
+    "HttpMethod": "DELETE",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "workflowId",
+        "Type": "System.Guid",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "WorkflowService.Controllers.WorkflowsController",
+    "Method": "ActivateWorkflow",
+    "RelativePath": "api/Workflows/{workflowId}/activate",
+    "HttpMethod": "POST",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "workflowId",
+        "Type": "System.Guid",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "WorkflowService.Controllers.WorkflowsController",
+    "Method": "CloneWorkflow",
+    "RelativePath": "api/Workflows/{workflowId}/clone",
+    "HttpMethod": "POST",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "workflowId",
+        "Type": "System.Guid",
+        "IsRequired": true
+      },
+      {
+        "Name": "request",
+        "Type": "WorkflowService.Controllers.CloneWorkflowRequest",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "WorkflowService.Controllers.WorkflowsController",
+    "Method": "DeactivateWorkflow",
+    "RelativePath": "api/Workflows/{workflowId}/deactivate",
+    "HttpMethod": "POST",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "workflowId",
+        "Type": "System.Guid",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "WorkflowService.Controllers.WorkflowsController",
+    "Method": "ExecuteWorkflow",
+    "RelativePath": "api/Workflows/{workflowId}/execute",
+    "HttpMethod": "POST",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "workflowId",
+        "Type": "System.Guid",
+        "IsRequired": true
+      },
+      {
+        "Name": "request",
+        "Type": "WorkflowService.Models.ExecuteWorkflowRequest",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "WorkflowService.Controllers.WorkflowsController",
+    "Method": "GetWorkflowExecutions",
+    "RelativePath": "api/Workflows/{workflowId}/executions",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "workflowId",
+        "Type": "System.Guid",
+        "IsRequired": true
+      },
+      {
+        "Name": "page",
+        "Type": "System.Int32",
+        "IsRequired": false
+      },
+      {
+        "Name": "pageSize",
+        "Type": "System.Int32",
+        "IsRequired": false
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "WorkflowService.Controllers.WorkflowsController",
+    "Method": "GetAvailableStepTypes",
+    "RelativePath": "api/Workflows/designer/step-types",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "WorkflowService.Controllers.WorkflowsController",
+    "Method": "ValidateWorkflowDefinition",
+    "RelativePath": "api/Workflows/designer/validate",
+    "HttpMethod": "POST",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "definition",
+        "Type": "Shared.Domain.Entities.WorkflowDefinition",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "WorkflowService.Controllers.WorkflowsController",
+    "Method": "GetWorkflowExecution",
+    "RelativePath": "api/Workflows/executions/{executionId}",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "executionId",
+        "Type": "System.Guid",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "WorkflowService.Controllers.WorkflowsController",
+    "Method": "CancelExecution",
+    "RelativePath": "api/Workflows/executions/{executionId}/cancel",
+    "HttpMethod": "POST",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "executionId",
+        "Type": "System.Guid",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "WorkflowService.Controllers.WorkflowsController",
+    "Method": "RetryExecution",
+    "RelativePath": "api/Workflows/executions/{executionId}/retry",
+    "HttpMethod": "POST",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "executionId",
+        "Type": "System.Guid",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "WorkflowService.Controllers.WorkflowsController",
+    "Method": "GetStatistics",
+    "RelativePath": "api/Workflows/statistics",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "startDate",
+        "Type": "System.Nullable\u00601[[System.DateTime, System.Private.CoreLib, Version=9.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]",
+        "IsRequired": false
+      },
+      {
+        "Name": "endDate",
+        "Type": "System.Nullable\u00601[[System.DateTime, System.Private.CoreLib, Version=9.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]",
+        "IsRequired": false
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "WorkflowService.Controllers.WorkflowsController",
+    "Method": "GetTemplates",
+    "RelativePath": "api/Workflows/templates",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "category",
+        "Type": "System.String",
+        "IsRequired": false
+      },
+      {
+        "Name": "publicOnly",
+        "Type": "System.Boolean",
+        "IsRequired": false
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "WorkflowService.Controllers.WorkflowsController",
+    "Method": "CreateWorkflowFromTemplate",
+    "RelativePath": "api/Workflows/templates/{templateId}/create-workflow",
+    "HttpMethod": "POST",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "templateId",
+        "Type": "System.Guid",
+        "IsRequired": true
+      },
+      {
+        "Name": "request",
+        "Type": "WorkflowService.Controllers.CreateFromTemplateRequest",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  }
+]

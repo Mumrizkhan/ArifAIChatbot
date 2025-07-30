@@ -1,0 +1,74 @@
+[
+  {
+    "ContainingType": "AnalyticsService.Controllers.AnalyticsController",
+    "Method": "GetAnalytics",
+    "RelativePath": "api/Analytics",
+    "HttpMethod": "POST",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "request",
+        "Type": "AnalyticsService.Controllers.AnalyticsRequest",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "AnalyticsService.Controllers.AnalyticsController",
+    "Method": "GetConversationsSummary",
+    "RelativePath": "api/Analytics/conversations/summary",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "AnalyticsService.Controllers.AnalyticsController",
+    "Method": "ExportAnalytics",
+    "RelativePath": "api/Analytics/export",
+    "HttpMethod": "POST",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "request",
+        "Type": "AnalyticsService.Controllers.ExportAnalyticsRequest",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "AnalyticsService.Controllers.AnalyticsController",
+    "Method": "GetMessagesSummary",
+    "RelativePath": "api/Analytics/messages/summary",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "AnalyticsService.Controllers.AnalyticsController",
+    "Method": "GetRealtimeAnalytics",
+    "RelativePath": "api/Analytics/realtime",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "AnalyticsService.Controllers.AnalyticsController",
+    "Method": "GetTenantsSummary",
+    "RelativePath": "api/Analytics/tenants/summary",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [],
+    "ReturnTypes": []
+  }
+]

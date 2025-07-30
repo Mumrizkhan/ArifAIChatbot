@@ -1,0 +1,11 @@
+{
+  "Version": 1,
+  "Hash": "RopIpPpQ6ELQel98aWxulwalsvLUlmDzMNTCi6DKQFg=",
+  "Source": "AnalyticsService",
+  "BasePath": "_content/AnalyticsService",
+  "Mode": "Default",
+  "ManifestType": "Build",
+  "ReferencedProjectsConfiguration": [],
+  "DiscoveryPatterns": [],
+  "Assets": []
+}

@@ -1,0 +1,11 @@
+{
+  "Version": 1,
+  "Hash": "OMBzO3NETlhSTBeyrGYFf8sIgEHyEc7QW7GoyTc55DE=",
+  "Source": "WorkflowService",
+  "BasePath": "_content/WorkflowService",
+  "Mode": "Default",
+  "ManifestType": "Build",
+  "ReferencedProjectsConfiguration": [],
+  "DiscoveryPatterns": [],
+  "Assets": []
+}

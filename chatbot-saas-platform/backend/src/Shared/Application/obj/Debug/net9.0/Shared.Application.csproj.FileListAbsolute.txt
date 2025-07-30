@@ -1,0 +1,15 @@
+C:\ArifWorkspace\Arif platform Devin2\chatbot-saas-platform\backend\src\Shared\Application\bin\Debug\net9.0\Shared.Application.deps.json
+C:\ArifWorkspace\Arif platform Devin2\chatbot-saas-platform\backend\src\Shared\Application\bin\Debug\net9.0\Shared.Application.dll
+C:\ArifWorkspace\Arif platform Devin2\chatbot-saas-platform\backend\src\Shared\Application\bin\Debug\net9.0\Shared.Application.pdb
+C:\ArifWorkspace\Arif platform Devin2\chatbot-saas-platform\backend\src\Shared\Application\bin\Debug\net9.0\Shared.Domain.dll
+C:\ArifWorkspace\Arif platform Devin2\chatbot-saas-platform\backend\src\Shared\Application\bin\Debug\net9.0\Shared.Domain.pdb
+C:\ArifWorkspace\Arif platform Devin2\chatbot-saas-platform\backend\src\Shared\Application\obj\Debug\net9.0\Shared.Application.csproj.AssemblyReference.cache
+C:\ArifWorkspace\Arif platform Devin2\chatbot-saas-platform\backend\src\Shared\Application\obj\Debug\net9.0\Shared.Application.GeneratedMSBuildEditorConfig.editorconfig
+C:\ArifWorkspace\Arif platform Devin2\chatbot-saas-platform\backend\src\Shared\Application\obj\Debug\net9.0\Shared.Application.AssemblyInfoInputs.cache
+C:\ArifWorkspace\Arif platform Devin2\chatbot-saas-platform\backend\src\Shared\Application\obj\Debug\net9.0\Shared.Application.AssemblyInfo.cs
+C:\ArifWorkspace\Arif platform Devin2\chatbot-saas-platform\backend\src\Shared\Application\obj\Debug\net9.0\Shared.Application.csproj.CoreCompileInputs.cache
+C:\ArifWorkspace\Arif platform Devin2\chatbot-saas-platform\backend\src\Shared\Application\obj\Debug\net9.0\Shared.A.5A1F1DEE.Up2Date
+C:\ArifWorkspace\Arif platform Devin2\chatbot-saas-platform\backend\src\Shared\Application\obj\Debug\net9.0\Shared.Application.dll
+C:\ArifWorkspace\Arif platform Devin2\chatbot-saas-platform\backend\src\Shared\Application\obj\Debug\net9.0\refint\Shared.Application.dll
+C:\ArifWorkspace\Arif platform Devin2\chatbot-saas-platform\backend\src\Shared\Application\obj\Debug\net9.0\Shared.Application.pdb
+C:\ArifWorkspace\Arif platform Devin2\chatbot-saas-platform\backend\src\Shared\Application\obj\Debug\net9.0\ref\Shared.Application.dll

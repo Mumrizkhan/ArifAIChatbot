@@ -1,0 +1,11 @@
+{
+  "Version": 1,
+  "Hash": "JSS+VC8fzQotuqJUFd72zs05mt7D4A9zP6DvyKPfFVw=",
+  "Source": "TenantManagementService",
+  "BasePath": "_content/TenantManagementService",
+  "Mode": "Default",
+  "ManifestType": "Build",
+  "ReferencedProjectsConfiguration": [],
+  "DiscoveryPatterns": [],
+  "Assets": []
+}

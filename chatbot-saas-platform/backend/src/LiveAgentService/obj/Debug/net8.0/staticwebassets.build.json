@@ -1,0 +1,11 @@
+{
+  "Version": 1,
+  "Hash": "jMWJWjL3+/OET7S6eXmhazlU7BdutiHmjsfn/JWiiT4=",
+  "Source": "LiveAgentService",
+  "BasePath": "_content/LiveAgentService",
+  "Mode": "Default",
+  "ManifestType": "Build",
+  "ReferencedProjectsConfiguration": [],
+  "DiscoveryPatterns": [],
+  "Assets": []
+}
