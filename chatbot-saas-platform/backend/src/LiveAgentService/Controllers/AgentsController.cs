@@ -103,6 +103,29 @@ public class AgentsController : ControllerBase
         }
     }
 
+    [HttpPut("{agentId}/status")]
+    public async Task<IActionResult> UpdateAgentStatus(Guid agentId, [FromBody] UpdateStatusRequest request)
+    {
+        try
+        {
+            if (Enum.TryParse<AgentStatus>(request.Status, out var status))
+            {
+                var updated = await _agentRoutingService.SetAgentStatusAsync(agentId, status);
+                if (updated)
+                {
+                    return Ok(new { message = "Status updated successfully" });
+                }
+            }
+
+            return BadRequest(new { message = "Invalid status" });
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error updating agent status");
+            return StatusCode(500, new { message = "Internal server error" });
+        }
+    }
+
     [HttpGet("status")]
     public async Task<IActionResult> GetStatus()
     {
@@ -295,6 +318,112 @@ public class AgentsController : ControllerBase
         }
     }
 
+    [HttpGet]
+    public async Task<IActionResult> GetAllAgents()
+    {
+        try
+        {
+            var tenantId = _tenantService.GetCurrentTenantId();
+            var agents = await _context.Users
+                .Where(u => u.UserTenants.Any(ut => ut.TenantId == tenantId && ut.Role == TenantRole.Agent))
+                .Select(u => new
+                {
+                    u.Id,
+                    Name = $"{u.FirstName} {u.LastName}",
+                    u.Email,
+                    Avatar = u.AvatarUrl,
+                    Status = "Available",
+                    Skills = new string[] { },
+                    Specializations = new string[] { }
+                })
+                .ToListAsync();
+
+            return Ok(agents);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error getting all agents");
+            return StatusCode(500, new { message = "Internal server error" });
+        }
+    }
+
+    [HttpGet("{id}")]
+    public async Task<IActionResult> GetAgentProfile(Guid id)
+    {
+        try
+        {
+            var tenantId = _tenantService.GetCurrentTenantId();
+            var agent = await _context.Users
+                .FirstOrDefaultAsync(u => u.Id == id && 
+                    u.UserTenants.Any(ut => ut.TenantId == tenantId));
+
+            if (agent == null)
+            {
+                return NotFound(new { message = "Agent not found" });
+            }
+
+            return Ok(new
+            {
+                agent.Id,
+                Name = $"{agent.FirstName} {agent.LastName}",
+                agent.Email,
+                Phone = "",
+                Avatar = agent.AvatarUrl,
+                Bio = "",
+                Location = "",
+                Timezone = "UTC",
+                Language = agent.PreferredLanguage,
+                Skills = new string[] { },
+                Specializations = new string[] { },
+                Status = "Available"
+            });
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error getting agent profile for {AgentId}", id);
+            return StatusCode(500, new { message = "Internal server error" });
+        }
+    }
+
+    [HttpPut("{id}")]
+    public async Task<IActionResult> UpdateAgentProfile(Guid id, [FromBody] UpdateAgentProfileRequest request)
+    {
+        try
+        {
+            var tenantId = _tenantService.GetCurrentTenantId();
+            var agent = await _context.Users
+                .FirstOrDefaultAsync(u => u.Id == id && 
+                    u.UserTenants.Any(ut => ut.TenantId == tenantId));
+
+            if (agent == null)
+            {
+                return NotFound(new { message = "Agent not found" });
+            }
+
+            if (!string.IsNullOrEmpty(request.Name))
+            {
+                var nameParts = request.Name.Split(' ', 2);
+                agent.FirstName = nameParts[0];
+                agent.LastName = nameParts.Length > 1 ? nameParts[1] : "";
+            }
+
+            if (!string.IsNullOrEmpty(request.Email))
+                agent.Email = request.Email;
+
+            if (!string.IsNullOrEmpty(request.Language))
+                agent.PreferredLanguage = request.Language;
+
+            await _context.SaveChangesAsync();
+
+            return Ok(new { message = "Agent profile updated successfully" });
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error updating agent profile for {AgentId}", id);
+            return StatusCode(500, new { message = "Internal server error" });
+        }
+    }
+
     [HttpGet("{agentId}/stats")]
     public async Task<IActionResult> GetAgentStats(Guid agentId, [FromQuery] DateTime? startDate, [FromQuery] DateTime? endDate)
     {
@@ -372,4 +501,17 @@ public class EscalateConversationRequest
 {
     public Guid ConversationId { get; set; }
     public string Reason { get; set; } = string.Empty;
+}
+
+public class UpdateAgentProfileRequest
+{
+    public string? Name { get; set; }
+    public string? Email { get; set; }
+    public string? Phone { get; set; }
+    public string? Bio { get; set; }
+    public string? Location { get; set; }
+    public string? Timezone { get; set; }
+    public string? Language { get; set; }
+    public string[]? Skills { get; set; }
+    public string[]? Specializations { get; set; }
 }
