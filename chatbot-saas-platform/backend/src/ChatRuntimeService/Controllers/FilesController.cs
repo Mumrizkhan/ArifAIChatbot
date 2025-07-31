@@ -90,6 +90,33 @@ public class FilesController : ControllerBase
         }
     }
 
+    [HttpPost("upload")]
+    [AllowAnonymous]
+    public async Task<IActionResult> UploadFileForWidget([FromForm] IFormFile file, [FromForm] string conversationId)
+    {
+        try
+        {
+            if (file == null || file.Length == 0)
+                return BadRequest(new { message = "No file provided" });
+
+            if (!Guid.TryParse(conversationId, out var convId))
+                return BadRequest(new { message = "Invalid conversation ID" });
+
+            var fileUrl = await _fileUploadService.UploadFileAsync(file, conversationId);
+            
+            return Ok(new { fileUrl });
+        }
+        catch (ArgumentException ex)
+        {
+            return BadRequest(new { message = ex.Message });
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error uploading file for widget");
+            return StatusCode(500, new { message = "Internal server error" });
+        }
+    }
+
     private static string GetContentType(string fileName)
     {
         var extension = Path.GetExtension(fileName).ToLowerInvariant();

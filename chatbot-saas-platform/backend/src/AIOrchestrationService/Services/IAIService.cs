@@ -10,4 +10,5 @@ public interface IAIService
     Task<List<string>> ExtractIntentsAsync(string message);
     Task<string> TranslateTextAsync(string text, string targetLanguage);
     Task<string> SummarizeConversationAsync(List<string> messages);
+    Task<string> AnalyzeSentimentAsync(string message);
 }
