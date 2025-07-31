@@ -153,3 +153,65 @@ public class ReportExecutionDto
     public DateTime? CompletedAt { get; set; }
     public string? ResultUrl { get; set; }
 }
+
+public class CompareAnalyticsDto
+{
+    public object Current { get; set; } = new();
+    public object Previous { get; set; } = new();
+    public double Change { get; set; }
+    public double ChangePercent { get; set; }
+}
+
+public class GoalDto
+{
+    public Guid Id { get; set; }
+    public string Name { get; set; } = string.Empty;
+    public double Target { get; set; }
+    public double Progress { get; set; }
+    public string Metric { get; set; } = string.Empty;
+    public DateTime Deadline { get; set; }
+    public DateTime CreatedAt { get; set; }
+}
+
+public class CustomReportDto
+{
+    public int TotalConversations { get; set; }
+    public int TotalMessages { get; set; }
+    public double AverageMessagesPerConversation { get; set; }
+    public int ResolvedConversations { get; set; }
+    public DateTime PeriodStart { get; set; }
+    public DateTime PeriodEnd { get; set; }
+    public DateTime GeneratedAt { get; set; }
+}
+
+public class CompareAnalyticsRequest
+{
+    public string DateFrom { get; set; } = string.Empty;
+    public string DateTo { get; set; } = string.Empty;
+    public string PreviousDateFrom { get; set; } = string.Empty;
+    public string PreviousDateTo { get; set; } = string.Empty;
+    public string Metric { get; set; } = string.Empty;
+}
+
+public class CreateGoalRequest
+{
+    public string Name { get; set; } = string.Empty;
+    public double Target { get; set; }
+    public string Metric { get; set; } = string.Empty;
+    public string Deadline { get; set; } = string.Empty;
+}
+
+public class UpdateGoalRequest
+{
+    public string? Name { get; set; }
+    public double? Target { get; set; }
+    public string? Deadline { get; set; }
+}
+
+public class CustomReportRequest
+{
+    public DateTime StartDate { get; set; }
+    public DateTime EndDate { get; set; }
+    public string? TenantId { get; set; }
+    public List<string> Metrics { get; set; } = new();
+}
