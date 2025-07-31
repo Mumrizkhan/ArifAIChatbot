@@ -3,12 +3,187 @@
   "WorkspaceRootPath": "C:\\ArifWorkspace\\ArifAIChatbotGitHub\\ArifAIChatbot\\chatbot-saas-platform\\backend\\",
   "Documents": [
     {
-      "AbsoluteMoniker": "D:0:0:{A1B2C3D4-E5F6-7890-ABCD-EF1234567890}|src\\IdentityService\\IdentityService.csproj|c:\\arifworkspace\\arifaichatbotgithub\\arifaichatbot\\chatbot-saas-platform\\backend\\src\\identityservice\\appsettings.json||{90A6B3A7-C1A3-4009-A288-E2FF89E96FA0}",
-      "RelativeMoniker": "D:0:0:{A1B2C3D4-E5F6-7890-ABCD-EF1234567890}|src\\IdentityService\\IdentityService.csproj|solutionrelative:src\\identityservice\\appsettings.json||{90A6B3A7-C1A3-4009-A288-E2FF89E96FA0}"
+      "AbsoluteMoniker": "D:0:0:{6DBDBBD9-387F-44F7-8F7A-D559E61543DA}|src\\TenantManagementService\\TenantManagementService.csproj|c:\\arifworkspace\\arifaichatbotgithub\\arifaichatbot\\chatbot-saas-platform\\backend\\src\\tenantmanagementservice\\services\\tenantmanagementservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{6DBDBBD9-387F-44F7-8F7A-D559E61543DA}|src\\TenantManagementService\\TenantManagementService.csproj|solutionrelative:src\\tenantmanagementservice\\services\\tenantmanagementservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{6DBDBBD9-387F-44F7-8F7A-D559E61543DA}|src\\TenantManagementService\\TenantManagementService.csproj|c:\\arifworkspace\\arifaichatbotgithub\\arifaichatbot\\chatbot-saas-platform\\backend\\src\\tenantmanagementservice\\services\\teamservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{6DBDBBD9-387F-44F7-8F7A-D559E61543DA}|src\\TenantManagementService\\TenantManagementService.csproj|solutionrelative:src\\tenantmanagementservice\\services\\teamservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{6DBDBBD9-387F-44F7-8F7A-D559E61543DA}|src\\TenantManagementService\\TenantManagementService.csproj|c:\\arifworkspace\\arifaichatbotgithub\\arifaichatbot\\chatbot-saas-platform\\backend\\src\\tenantmanagementservice\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{6DBDBBD9-387F-44F7-8F7A-D559E61543DA}|src\\TenantManagementService\\TenantManagementService.csproj|solutionrelative:src\\tenantmanagementservice\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{6DBDBBD9-387F-44F7-8F7A-D559E61543DA}|src\\TenantManagementService\\TenantManagementService.csproj|c:\\arifworkspace\\arifaichatbotgithub\\arifaichatbot\\chatbot-saas-platform\\backend\\src\\tenantmanagementservice\\controllers\\tenantscontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{6DBDBBD9-387F-44F7-8F7A-D559E61543DA}|src\\TenantManagementService\\TenantManagementService.csproj|solutionrelative:src\\tenantmanagementservice\\controllers\\tenantscontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{6DBDBBD9-387F-44F7-8F7A-D559E61543DA}|src\\TenantManagementService\\TenantManagementService.csproj|c:\\arifworkspace\\arifaichatbotgithub\\arifaichatbot\\chatbot-saas-platform\\backend\\src\\tenantmanagementservice\\controllers\\teamcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{6DBDBBD9-387F-44F7-8F7A-D559E61543DA}|src\\TenantManagementService\\TenantManagementService.csproj|solutionrelative:src\\tenantmanagementservice\\controllers\\teamcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{6DBDBBD9-387F-44F7-8F7A-D559E61543DA}|src\\TenantManagementService\\TenantManagementService.csproj|c:\\arifworkspace\\arifaichatbotgithub\\arifaichatbot\\chatbot-saas-platform\\backend\\src\\tenantmanagementservice\\controllers\\chatbotconfigscontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{6DBDBBD9-387F-44F7-8F7A-D559E61543DA}|src\\TenantManagementService\\TenantManagementService.csproj|solutionrelative:src\\tenantmanagementservice\\controllers\\chatbotconfigscontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{DAEDC062-3EB7-4A6C-AF2E-E61AA3D35BE0}|src\\SubscriptionService\\SubscriptionService.csproj|c:\\arifworkspace\\arifaichatbotgithub\\arifaichatbot\\chatbot-saas-platform\\backend\\src\\subscriptionservice\\controllers\\subscriptionscontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{DAEDC062-3EB7-4A6C-AF2E-E61AA3D35BE0}|src\\SubscriptionService\\SubscriptionService.csproj|solutionrelative:src\\subscriptionservice\\controllers\\subscriptionscontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{C1FF7A72-8890-484F-85EB-E35BF194E3A7}|src\\Shared\\Domain\\Shared.Domain.csproj|c:\\arifworkspace\\arifaichatbotgithub\\arifaichatbot\\chatbot-saas-platform\\backend\\src\\shared\\domain\\entities\\subscription.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{C1FF7A72-8890-484F-85EB-E35BF194E3A7}|src\\Shared\\Domain\\Shared.Domain.csproj|solutionrelative:src\\shared\\domain\\entities\\subscription.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{81D5978C-FEEB-47BB-BDB6-1AFB04A6CF76}|src\\NotificationService\\NotificationService.csproj|c:\\arifworkspace\\arifaichatbotgithub\\arifaichatbot\\chatbot-saas-platform\\backend\\src\\notificationservice\\controllers\\notificationscontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{81D5978C-FEEB-47BB-BDB6-1AFB04A6CF76}|src\\NotificationService\\NotificationService.csproj|solutionrelative:src\\notificationservice\\controllers\\notificationscontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{82614FEB-2AF6-4080-B301-4B96EBCC53B2}|src\\LiveAgentService\\LiveAgentService.csproj|c:\\arifworkspace\\arifaichatbotgithub\\arifaichatbot\\chatbot-saas-platform\\backend\\src\\liveagentservice\\controllers\\agentscontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{82614FEB-2AF6-4080-B301-4B96EBCC53B2}|src\\LiveAgentService\\LiveAgentService.csproj|solutionrelative:src\\liveagentservice\\controllers\\agentscontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{82614FEB-2AF6-4080-B301-4B96EBCC53B2}|src\\LiveAgentService\\LiveAgentService.csproj|c:\\arifworkspace\\arifaichatbotgithub\\arifaichatbot\\chatbot-saas-platform\\backend\\src\\liveagentservice\\services\\agentmanagementservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{82614FEB-2AF6-4080-B301-4B96EBCC53B2}|src\\LiveAgentService\\LiveAgentService.csproj|solutionrelative:src\\liveagentservice\\services\\agentmanagementservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{04B79A6A-109D-469D-9DBD-C7024ADCB081}|src\\ChatRuntimeService\\ChatRuntimeService.csproj|c:\\arifworkspace\\arifaichatbotgithub\\arifaichatbot\\chatbot-saas-platform\\backend\\src\\chatruntimeservice\\services\\chatservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{04B79A6A-109D-469D-9DBD-C7024ADCB081}|src\\ChatRuntimeService\\ChatRuntimeService.csproj|solutionrelative:src\\chatruntimeservice\\services\\chatservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{04B79A6A-109D-469D-9DBD-C7024ADCB081}|src\\ChatRuntimeService\\ChatRuntimeService.csproj|c:\\arifworkspace\\arifaichatbotgithub\\arifaichatbot\\chatbot-saas-platform\\backend\\src\\chatruntimeservice\\services\\chatruntimeservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{04B79A6A-109D-469D-9DBD-C7024ADCB081}|src\\ChatRuntimeService\\ChatRuntimeService.csproj|solutionrelative:src\\chatruntimeservice\\services\\chatruntimeservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{04B79A6A-109D-469D-9DBD-C7024ADCB081}|src\\ChatRuntimeService\\ChatRuntimeService.csproj|c:\\arifworkspace\\arifaichatbotgithub\\arifaichatbot\\chatbot-saas-platform\\backend\\src\\chatruntimeservice\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{04B79A6A-109D-469D-9DBD-C7024ADCB081}|src\\ChatRuntimeService\\ChatRuntimeService.csproj|solutionrelative:src\\chatruntimeservice\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{04B79A6A-109D-469D-9DBD-C7024ADCB081}|src\\ChatRuntimeService\\ChatRuntimeService.csproj|c:\\arifworkspace\\arifaichatbotgithub\\arifaichatbot\\chatbot-saas-platform\\backend\\src\\chatruntimeservice\\controllers\\chatcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{04B79A6A-109D-469D-9DBD-C7024ADCB081}|src\\ChatRuntimeService\\ChatRuntimeService.csproj|solutionrelative:src\\chatruntimeservice\\controllers\\chatcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{0AC3BE0F-B257-435A-8723-769BB83051F0}|src\\AnalyticsService\\AnalyticsService.csproj|c:\\arifworkspace\\arifaichatbotgithub\\arifaichatbot\\chatbot-saas-platform\\backend\\src\\analyticsservice\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{0AC3BE0F-B257-435A-8723-769BB83051F0}|src\\AnalyticsService\\AnalyticsService.csproj|solutionrelative:src\\analyticsservice\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{0AC3BE0F-B257-435A-8723-769BB83051F0}|src\\AnalyticsService\\AnalyticsService.csproj|c:\\arifworkspace\\arifaichatbotgithub\\arifaichatbot\\chatbot-saas-platform\\backend\\src\\analyticsservice\\services\\analyticsservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{0AC3BE0F-B257-435A-8723-769BB83051F0}|src\\AnalyticsService\\AnalyticsService.csproj|solutionrelative:src\\analyticsservice\\services\\analyticsservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{0AC3BE0F-B257-435A-8723-769BB83051F0}|src\\AnalyticsService\\AnalyticsService.csproj|c:\\arifworkspace\\arifaichatbotgithub\\arifaichatbot\\chatbot-saas-platform\\backend\\src\\analyticsservice\\controllers\\analyticscontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{0AC3BE0F-B257-435A-8723-769BB83051F0}|src\\AnalyticsService\\AnalyticsService.csproj|solutionrelative:src\\analyticsservice\\controllers\\analyticscontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{E5A023D0-D7E4-4010-A001-9D1DA6E01F92}|src\\AIOrchestrationService\\AIOrchestrationService.csproj|c:\\arifworkspace\\arifaichatbotgithub\\arifaichatbot\\chatbot-saas-platform\\backend\\src\\aiorchestrationservice\\services\\aiorchestrationservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{E5A023D0-D7E4-4010-A001-9D1DA6E01F92}|src\\AIOrchestrationService\\AIOrchestrationService.csproj|solutionrelative:src\\aiorchestrationservice\\services\\aiorchestrationservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{E5A023D0-D7E4-4010-A001-9D1DA6E01F92}|src\\AIOrchestrationService\\AIOrchestrationService.csproj|c:\\arifworkspace\\arifaichatbotgithub\\arifaichatbot\\chatbot-saas-platform\\backend\\src\\aiorchestrationservice\\services\\qdrantservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{E5A023D0-D7E4-4010-A001-9D1DA6E01F92}|src\\AIOrchestrationService\\AIOrchestrationService.csproj|solutionrelative:src\\aiorchestrationservice\\services\\qdrantservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{E5A023D0-D7E4-4010-A001-9D1DA6E01F92}|src\\AIOrchestrationService\\AIOrchestrationService.csproj|c:\\arifworkspace\\arifaichatbotgithub\\arifaichatbot\\chatbot-saas-platform\\backend\\src\\aiorchestrationservice\\services\\openaiservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{E5A023D0-D7E4-4010-A001-9D1DA6E01F92}|src\\AIOrchestrationService\\AIOrchestrationService.csproj|solutionrelative:src\\aiorchestrationservice\\services\\openaiservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{E5A023D0-D7E4-4010-A001-9D1DA6E01F92}|src\\AIOrchestrationService\\AIOrchestrationService.csproj|c:\\arifworkspace\\arifaichatbotgithub\\arifaichatbot\\chatbot-saas-platform\\backend\\src\\aiorchestrationservice\\controllers\\aicontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{E5A023D0-D7E4-4010-A001-9D1DA6E01F92}|src\\AIOrchestrationService\\AIOrchestrationService.csproj|solutionrelative:src\\aiorchestrationservice\\controllers\\aicontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A1B2C3D4-E5F6-7890-ABCD-EF1234567890}|src\\IdentityService\\IdentityService.csproj|c:\\arifworkspace\\arifaichatbotgithub\\arifaichatbot\\chatbot-saas-platform\\backend\\src\\identityservice\\controllers\\userscontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{A1B2C3D4-E5F6-7890-ABCD-EF1234567890}|src\\IdentityService\\IdentityService.csproj|solutionrelative:src\\identityservice\\controllers\\userscontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
       "AbsoluteMoniker": "D:0:0:{A1B2C3D4-E5F6-7890-ABCD-EF1234567890}|src\\IdentityService\\IdentityService.csproj|c:\\arifworkspace\\arifaichatbotgithub\\arifaichatbot\\chatbot-saas-platform\\backend\\src\\identityservice\\controllers\\authcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{A1B2C3D4-E5F6-7890-ABCD-EF1234567890}|src\\IdentityService\\IdentityService.csproj|solutionrelative:src\\identityservice\\controllers\\authcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A1B2C3D4-E5F6-7890-ABCD-EF1234567890}|src\\IdentityService\\IdentityService.csproj|c:\\arifworkspace\\arifaichatbotgithub\\arifaichatbot\\chatbot-saas-platform\\backend\\src\\identityservice\\services\\usermanagementservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{A1B2C3D4-E5F6-7890-ABCD-EF1234567890}|src\\IdentityService\\IdentityService.csproj|solutionrelative:src\\identityservice\\services\\usermanagementservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A1B2C3D4-E5F6-7890-ABCD-EF1234567890}|src\\IdentityService\\IdentityService.csproj|c:\\arifworkspace\\arifaichatbotgithub\\arifaichatbot\\chatbot-saas-platform\\backend\\src\\identityservice\\services\\authservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{A1B2C3D4-E5F6-7890-ABCD-EF1234567890}|src\\IdentityService\\IdentityService.csproj|solutionrelative:src\\identityservice\\services\\authservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{8EADF689-F81C-4CD7-A862-C48AF986FA5F}|src\\WorkflowService\\WorkflowService.csproj|c:\\arifworkspace\\arifaichatbotgithub\\arifaichatbot\\chatbot-saas-platform\\backend\\src\\workflowservice\\controllers\\workflowscontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{8EADF689-F81C-4CD7-A862-C48AF986FA5F}|src\\WorkflowService\\WorkflowService.csproj|solutionrelative:src\\workflowservice\\controllers\\workflowscontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{DAEDC062-3EB7-4A6C-AF2E-E61AA3D35BE0}|src\\SubscriptionService\\SubscriptionService.csproj|c:\\arifworkspace\\arifaichatbotgithub\\arifaichatbot\\chatbot-saas-platform\\backend\\src\\subscriptionservice\\controllers\\planscontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{DAEDC062-3EB7-4A6C-AF2E-E61AA3D35BE0}|src\\SubscriptionService\\SubscriptionService.csproj|solutionrelative:src\\subscriptionservice\\controllers\\planscontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{DAEDC062-3EB7-4A6C-AF2E-E61AA3D35BE0}|src\\SubscriptionService\\SubscriptionService.csproj|c:\\arifworkspace\\arifaichatbotgithub\\arifaichatbot\\chatbot-saas-platform\\backend\\src\\subscriptionservice\\controllers\\paymentscontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{DAEDC062-3EB7-4A6C-AF2E-E61AA3D35BE0}|src\\SubscriptionService\\SubscriptionService.csproj|solutionrelative:src\\subscriptionservice\\controllers\\paymentscontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{5E79EF5C-B9A7-44B4-934C-BD4EB41F4412}|src\\KnowledgeBaseService\\KnowledgeBaseService.csproj|c:\\arifworkspace\\arifaichatbotgithub\\arifaichatbot\\chatbot-saas-platform\\backend\\src\\knowledgebaseservice\\controllers\\documentscontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{5E79EF5C-B9A7-44B4-934C-BD4EB41F4412}|src\\KnowledgeBaseService\\KnowledgeBaseService.csproj|solutionrelative:src\\knowledgebaseservice\\controllers\\documentscontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A1B2C3D4-E5F6-7890-ABCD-EF1234567890}|src\\IdentityService\\IdentityService.csproj|c:\\arifworkspace\\arifaichatbotgithub\\arifaichatbot\\chatbot-saas-platform\\backend\\src\\identityservice\\identityservice.csproj||{FA3CD31E-987B-443A-9B81-186104E8DAC1}|",
+      "RelativeMoniker": "D:0:0:{A1B2C3D4-E5F6-7890-ABCD-EF1234567890}|src\\IdentityService\\IdentityService.csproj|solutionrelative:src\\identityservice\\identityservice.csproj||{FA3CD31E-987B-443A-9B81-186104E8DAC1}|"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{04B79A6A-109D-469D-9DBD-C7024ADCB081}|src\\ChatRuntimeService\\ChatRuntimeService.csproj|c:\\arifworkspace\\arifaichatbotgithub\\arifaichatbot\\chatbot-saas-platform\\backend\\src\\chatruntimeservice\\controllers\\filescontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{04B79A6A-109D-469D-9DBD-C7024ADCB081}|src\\ChatRuntimeService\\ChatRuntimeService.csproj|solutionrelative:src\\chatruntimeservice\\controllers\\filescontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{0AC3BE0F-B257-435A-8723-769BB83051F0}|src\\AnalyticsService\\AnalyticsService.csproj|c:\\arifworkspace\\arifaichatbotgithub\\arifaichatbot\\chatbot-saas-platform\\backend\\src\\analyticsservice\\analyticsservice.csproj||{FA3CD31E-987B-443A-9B81-186104E8DAC1}|",
+      "RelativeMoniker": "D:0:0:{0AC3BE0F-B257-435A-8723-769BB83051F0}|src\\AnalyticsService\\AnalyticsService.csproj|solutionrelative:src\\analyticsservice\\analyticsservice.csproj||{FA3CD31E-987B-443A-9B81-186104E8DAC1}|"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{C05D3126-3CAE-4D3D-89B7-4BAB316A0607}|src\\Shared\\Infrastructure\\Shared.Infrastructure.csproj|c:\\arifworkspace\\arifaichatbotgithub\\arifaichatbot\\chatbot-saas-platform\\backend\\src\\shared\\infrastructure\\data\\seeddata.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{C05D3126-3CAE-4D3D-89B7-4BAB316A0607}|src\\Shared\\Infrastructure\\Shared.Infrastructure.csproj|solutionrelative:src\\shared\\infrastructure\\data\\seeddata.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\makhan\\AppData\\Local\\SourceServer\\234840dfdf2a7897a37feb72ea9c4b2c23da88f9d3742a728c3187bf87f2a6a7\\chatbot-saas-platform\\backend\\src\\IdentityService\\Controllers\\AuthController.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{C05D3126-3CAE-4D3D-89B7-4BAB316A0607}|src\\Shared\\Infrastructure\\Shared.Infrastructure.csproj|c:\\arifworkspace\\arifaichatbotgithub\\arifaichatbot\\chatbot-saas-platform\\backend\\src\\shared\\infrastructure\\services\\tenantservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{C05D3126-3CAE-4D3D-89B7-4BAB316A0607}|src\\Shared\\Infrastructure\\Shared.Infrastructure.csproj|solutionrelative:src\\shared\\infrastructure\\services\\tenantservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{C05D3126-3CAE-4D3D-89B7-4BAB316A0607}|src\\Shared\\Infrastructure\\Shared.Infrastructure.csproj|c:\\arifworkspace\\arifaichatbotgithub\\arifaichatbot\\chatbot-saas-platform\\backend\\src\\shared\\infrastructure\\services\\currentuserservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{C05D3126-3CAE-4D3D-89B7-4BAB316A0607}|src\\Shared\\Infrastructure\\Shared.Infrastructure.csproj|solutionrelative:src\\shared\\infrastructure\\services\\currentuserservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A1B2C3D4-E5F6-7890-ABCD-EF1234567890}|src\\IdentityService\\IdentityService.csproj|c:\\arifworkspace\\arifaichatbotgithub\\arifaichatbot\\chatbot-saas-platform\\backend\\src\\identityservice\\appsettings.development.json||{90A6B3A7-C1A3-4009-A288-E2FF89E96FA0}",
+      "RelativeMoniker": "D:0:0:{A1B2C3D4-E5F6-7890-ABCD-EF1234567890}|src\\IdentityService\\IdentityService.csproj|solutionrelative:src\\identityservice\\appsettings.development.json||{90A6B3A7-C1A3-4009-A288-E2FF89E96FA0}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A1B2C3D4-E5F6-7890-ABCD-EF1234567890}|src\\IdentityService\\IdentityService.csproj|c:\\arifworkspace\\arifaichatbotgithub\\arifaichatbot\\chatbot-saas-platform\\backend\\src\\identityservice\\appsettings.json||{90A6B3A7-C1A3-4009-A288-E2FF89E96FA0}",
+      "RelativeMoniker": "D:0:0:{A1B2C3D4-E5F6-7890-ABCD-EF1234567890}|src\\IdentityService\\IdentityService.csproj|solutionrelative:src\\identityservice\\appsettings.json||{90A6B3A7-C1A3-4009-A288-E2FF89E96FA0}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{E5A023D0-D7E4-4010-A001-9D1DA6E01F92}|src\\AIOrchestrationService\\AIOrchestrationService.csproj|c:\\arifworkspace\\arifaichatbotgithub\\arifaichatbot\\chatbot-saas-platform\\backend\\src\\aiorchestrationservice\\aiorchestrationservice.csproj||{FA3CD31E-987B-443A-9B81-186104E8DAC1}|",
+      "RelativeMoniker": "D:0:0:{E5A023D0-D7E4-4010-A001-9D1DA6E01F92}|src\\AIOrchestrationService\\AIOrchestrationService.csproj|solutionrelative:src\\aiorchestrationservice\\aiorchestrationservice.csproj||{FA3CD31E-987B-443A-9B81-186104E8DAC1}|"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{C05D3126-3CAE-4D3D-89B7-4BAB316A0607}|src\\Shared\\Infrastructure\\Shared.Infrastructure.csproj|c:\\arifworkspace\\arifaichatbotgithub\\arifaichatbot\\chatbot-saas-platform\\backend\\src\\shared\\infrastructure\\messaging\\imessagebus.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{C05D3126-3CAE-4D3D-89B7-4BAB316A0607}|src\\Shared\\Infrastructure\\Shared.Infrastructure.csproj|solutionrelative:src\\shared\\infrastructure\\messaging\\imessagebus.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{5E79EF5C-B9A7-44B4-934C-BD4EB41F4412}|src\\KnowledgeBaseService\\KnowledgeBaseService.csproj|c:\\arifworkspace\\arifaichatbotgithub\\arifaichatbot\\chatbot-saas-platform\\backend\\src\\knowledgebaseservice\\services\\asyncdocumentprocessingservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{5E79EF5C-B9A7-44B4-934C-BD4EB41F4412}|src\\KnowledgeBaseService\\KnowledgeBaseService.csproj|solutionrelative:src\\knowledgebaseservice\\services\\asyncdocumentprocessingservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{C05D3126-3CAE-4D3D-89B7-4BAB316A0607}|src\\Shared\\Infrastructure\\Shared.Infrastructure.csproj|c:\\arifworkspace\\arifaichatbotgithub\\arifaichatbot\\chatbot-saas-platform\\backend\\src\\shared\\infrastructure\\services\\cacheservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{C05D3126-3CAE-4D3D-89B7-4BAB316A0607}|src\\Shared\\Infrastructure\\Shared.Infrastructure.csproj|solutionrelative:src\\shared\\infrastructure\\services\\cacheservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{C05D3126-3CAE-4D3D-89B7-4BAB316A0607}|src\\Shared\\Infrastructure\\Shared.Infrastructure.csproj|c:\\arifworkspace\\arifaichatbotgithub\\arifaichatbot\\chatbot-saas-platform\\backend\\src\\shared\\infrastructure\\services\\icacheservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{C05D3126-3CAE-4D3D-89B7-4BAB316A0607}|src\\Shared\\Infrastructure\\Shared.Infrastructure.csproj|solutionrelative:src\\shared\\infrastructure\\services\\icacheservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{E5A023D0-D7E4-4010-A001-9D1DA6E01F92}|src\\AIOrchestrationService\\AIOrchestrationService.csproj|c:\\arifworkspace\\arifaichatbotgithub\\arifaichatbot\\chatbot-saas-platform\\backend\\src\\aiorchestrationservice\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{E5A023D0-D7E4-4010-A001-9D1DA6E01F92}|src\\AIOrchestrationService\\AIOrchestrationService.csproj|solutionrelative:src\\aiorchestrationservice\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{5E79EF5C-B9A7-44B4-934C-BD4EB41F4412}|src\\KnowledgeBaseService\\KnowledgeBaseService.csproj|c:\\arifworkspace\\arifaichatbotgithub\\arifaichatbot\\chatbot-saas-platform\\backend\\src\\knowledgebaseservice\\appsettings.json||{90A6B3A7-C1A3-4009-A288-E2FF89E96FA0}",
+      "RelativeMoniker": "D:0:0:{5E79EF5C-B9A7-44B4-934C-BD4EB41F4412}|src\\KnowledgeBaseService\\KnowledgeBaseService.csproj|solutionrelative:src\\knowledgebaseservice\\appsettings.json||{90A6B3A7-C1A3-4009-A288-E2FF89E96FA0}"
     },
     {
       "AbsoluteMoniker": "D:0:0:{8EADF689-F81C-4CD7-A862-C48AF986FA5F}|src\\WorkflowService\\WorkflowService.csproj|c:\\arifworkspace\\arifaichatbotgithub\\arifaichatbot\\chatbot-saas-platform\\backend\\src\\workflowservice\\services\\workflowexecutionservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
@@ -19,48 +194,12 @@
       "RelativeMoniker": "D:0:0:{8EADF689-F81C-4CD7-A862-C48AF986FA5F}|src\\WorkflowService\\WorkflowService.csproj|solutionrelative:src\\workflowservice\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{DAEDC062-3EB7-4A6C-AF2E-E61AA3D35BE0}|src\\SubscriptionService\\SubscriptionService.csproj|c:\\arifworkspace\\arifaichatbotgithub\\arifaichatbot\\chatbot-saas-platform\\backend\\src\\subscriptionservice\\services\\subscriptionservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{DAEDC062-3EB7-4A6C-AF2E-E61AA3D35BE0}|src\\SubscriptionService\\SubscriptionService.csproj|solutionrelative:src\\subscriptionservice\\services\\subscriptionservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
       "AbsoluteMoniker": "D:0:0:{DAEDC062-3EB7-4A6C-AF2E-E61AA3D35BE0}|src\\SubscriptionService\\SubscriptionService.csproj|c:\\arifworkspace\\arifaichatbotgithub\\arifaichatbot\\chatbot-saas-platform\\backend\\src\\subscriptionservice\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{DAEDC062-3EB7-4A6C-AF2E-E61AA3D35BE0}|src\\SubscriptionService\\SubscriptionService.csproj|solutionrelative:src\\subscriptionservice\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{DAEDC062-3EB7-4A6C-AF2E-E61AA3D35BE0}|src\\SubscriptionService\\SubscriptionService.csproj|c:\\arifworkspace\\arifaichatbotgithub\\arifaichatbot\\chatbot-saas-platform\\backend\\src\\subscriptionservice\\controllers\\paymentscontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{DAEDC062-3EB7-4A6C-AF2E-E61AA3D35BE0}|src\\SubscriptionService\\SubscriptionService.csproj|solutionrelative:src\\subscriptionservice\\controllers\\paymentscontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{C05D3126-3CAE-4D3D-89B7-4BAB316A0607}|src\\Shared\\Infrastructure\\Shared.Infrastructure.csproj|c:\\arifworkspace\\arifaichatbotgithub\\arifaichatbot\\chatbot-saas-platform\\backend\\src\\shared\\infrastructure\\persistence\\applicationdbcontext.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{C05D3126-3CAE-4D3D-89B7-4BAB316A0607}|src\\Shared\\Infrastructure\\Shared.Infrastructure.csproj|solutionrelative:src\\shared\\infrastructure\\persistence\\applicationdbcontext.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{C05D3126-3CAE-4D3D-89B7-4BAB316A0607}|src\\Shared\\Infrastructure\\Shared.Infrastructure.csproj|c:\\arifworkspace\\arifaichatbotgithub\\arifaichatbot\\chatbot-saas-platform\\backend\\src\\shared\\infrastructure\\persistence\\configurations\\userconfiguration.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{C05D3126-3CAE-4D3D-89B7-4BAB316A0607}|src\\Shared\\Infrastructure\\Shared.Infrastructure.csproj|solutionrelative:src\\shared\\infrastructure\\persistence\\configurations\\userconfiguration.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{C05D3126-3CAE-4D3D-89B7-4BAB316A0607}|src\\Shared\\Infrastructure\\Shared.Infrastructure.csproj|c:\\arifworkspace\\arifaichatbotgithub\\arifaichatbot\\chatbot-saas-platform\\backend\\src\\shared\\infrastructure\\data\\seeddata.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{C05D3126-3CAE-4D3D-89B7-4BAB316A0607}|src\\Shared\\Infrastructure\\Shared.Infrastructure.csproj|solutionrelative:src\\shared\\infrastructure\\data\\seeddata.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{A1B2C3D4-E5F6-7890-ABCD-EF1234567890}|src\\IdentityService\\IdentityService.csproj|c:\\arifworkspace\\arifaichatbotgithub\\arifaichatbot\\chatbot-saas-platform\\backend\\src\\identityservice\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{A1B2C3D4-E5F6-7890-ABCD-EF1234567890}|src\\IdentityService\\IdentityService.csproj|solutionrelative:src\\identityservice\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
       "AbsoluteMoniker": "D:0:0:{C05D3126-3CAE-4D3D-89B7-4BAB316A0607}|src\\Shared\\Infrastructure\\Shared.Infrastructure.csproj|c:\\arifworkspace\\arifaichatbotgithub\\arifaichatbot\\chatbot-saas-platform\\backend\\src\\shared\\infrastructure\\extensions\\servicecollectionextensions.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{C05D3126-3CAE-4D3D-89B7-4BAB316A0607}|src\\Shared\\Infrastructure\\Shared.Infrastructure.csproj|solutionrelative:src\\shared\\infrastructure\\extensions\\servicecollectionextensions.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{A1B2C3D4-E5F6-7890-ABCD-EF1234567890}|src\\IdentityService\\IdentityService.csproj|c:\\arifworkspace\\arifaichatbotgithub\\arifaichatbot\\chatbot-saas-platform\\backend\\src\\identityservice\\identityservice.csproj||{FA3CD31E-987B-443A-9B81-186104E8DAC1}|",
-      "RelativeMoniker": "D:0:0:{A1B2C3D4-E5F6-7890-ABCD-EF1234567890}|src\\IdentityService\\IdentityService.csproj|solutionrelative:src\\identityservice\\identityservice.csproj||{FA3CD31E-987B-443A-9B81-186104E8DAC1}|"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{8D853380-908C-423B-BA66-DA07B78C9B99}|src\\Shared\\Application\\Shared.Application.csproj|c:\\arifworkspace\\arifaichatbotgithub\\arifaichatbot\\chatbot-saas-platform\\backend\\src\\shared\\application\\common\\interfaces\\iapplicationdbcontext.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{8D853380-908C-423B-BA66-DA07B78C9B99}|src\\Shared\\Application\\Shared.Application.csproj|solutionrelative:src\\shared\\application\\common\\interfaces\\iapplicationdbcontext.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{6DBDBBD9-387F-44F7-8F7A-D559E61543DA}|src\\TenantManagementService\\TenantManagementService.csproj|c:\\arifworkspace\\arifaichatbotgithub\\arifaichatbot\\chatbot-saas-platform\\backend\\src\\tenantmanagementservice\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{6DBDBBD9-387F-44F7-8F7A-D559E61543DA}|src\\TenantManagementService\\TenantManagementService.csproj|solutionrelative:src\\tenantmanagementservice\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
       "AbsoluteMoniker": "D:0:0:{81D5978C-FEEB-47BB-BDB6-1AFB04A6CF76}|src\\NotificationService\\NotificationService.csproj|c:\\arifworkspace\\arifaichatbotgithub\\arifaichatbot\\chatbot-saas-platform\\backend\\src\\notificationservice\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
@@ -73,18 +212,6 @@
     {
       "AbsoluteMoniker": "D:0:0:{5E79EF5C-B9A7-44B4-934C-BD4EB41F4412}|src\\KnowledgeBaseService\\KnowledgeBaseService.csproj|c:\\arifworkspace\\arifaichatbotgithub\\arifaichatbot\\chatbot-saas-platform\\backend\\src\\knowledgebaseservice\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{5E79EF5C-B9A7-44B4-934C-BD4EB41F4412}|src\\KnowledgeBaseService\\KnowledgeBaseService.csproj|solutionrelative:src\\knowledgebaseservice\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{0AC3BE0F-B257-435A-8723-769BB83051F0}|src\\AnalyticsService\\AnalyticsService.csproj|c:\\arifworkspace\\arifaichatbotgithub\\arifaichatbot\\chatbot-saas-platform\\backend\\src\\analyticsservice\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{0AC3BE0F-B257-435A-8723-769BB83051F0}|src\\AnalyticsService\\AnalyticsService.csproj|solutionrelative:src\\analyticsservice\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{04B79A6A-109D-469D-9DBD-C7024ADCB081}|src\\ChatRuntimeService\\ChatRuntimeService.csproj|c:\\arifworkspace\\arifaichatbotgithub\\arifaichatbot\\chatbot-saas-platform\\backend\\src\\chatruntimeservice\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{04B79A6A-109D-469D-9DBD-C7024ADCB081}|src\\ChatRuntimeService\\ChatRuntimeService.csproj|solutionrelative:src\\chatruntimeservice\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{E5A023D0-D7E4-4010-A001-9D1DA6E01F92}|src\\AIOrchestrationService\\AIOrchestrationService.csproj|c:\\arifworkspace\\arifaichatbotgithub\\arifaichatbot\\chatbot-saas-platform\\backend\\src\\aiorchestrationservice\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{E5A023D0-D7E4-4010-A001-9D1DA6E01F92}|src\\AIOrchestrationService\\AIOrchestrationService.csproj|solutionrelative:src\\aiorchestrationservice\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
       "AbsoluteMoniker": "D:0:0:{8EADF689-F81C-4CD7-A862-C48AF986FA5F}|src\\WorkflowService\\WorkflowService.csproj|c:\\arifworkspace\\arifaichatbotgithub\\arifaichatbot\\chatbot-saas-platform\\backend\\src\\workflowservice\\hubs\\workflowhub.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
@@ -111,10 +238,6 @@
       "RelativeMoniker": "D:0:0:{DAEDC062-3EB7-4A6C-AF2E-E61AA3D35BE0}|src\\SubscriptionService\\SubscriptionService.csproj|solutionrelative:src\\subscriptionservice\\services\\invoiceservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{DAEDC062-3EB7-4A6C-AF2E-E61AA3D35BE0}|src\\SubscriptionService\\SubscriptionService.csproj|c:\\arifworkspace\\arifaichatbotgithub\\arifaichatbot\\chatbot-saas-platform\\backend\\src\\subscriptionservice\\controllers\\planscontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{DAEDC062-3EB7-4A6C-AF2E-E61AA3D35BE0}|src\\SubscriptionService\\SubscriptionService.csproj|solutionrelative:src\\subscriptionservice\\controllers\\planscontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
       "AbsoluteMoniker": "D:0:0:{81D5978C-FEEB-47BB-BDB6-1AFB04A6CF76}|src\\NotificationService\\NotificationService.csproj|c:\\arifworkspace\\arifaichatbotgithub\\arifaichatbot\\chatbot-saas-platform\\backend\\src\\notificationservice\\hubs\\notificationhub.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{81D5978C-FEEB-47BB-BDB6-1AFB04A6CF76}|src\\NotificationService\\NotificationService.csproj|solutionrelative:src\\notificationservice\\hubs\\notificationhub.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
@@ -131,28 +254,12 @@
       "RelativeMoniker": "D:0:0:{8EADF689-F81C-4CD7-A862-C48AF986FA5F}|src\\WorkflowService\\WorkflowService.csproj|solutionrelative:src\\workflowservice\\services\\iworkflowtemplateservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{DAEDC062-3EB7-4A6C-AF2E-E61AA3D35BE0}|src\\SubscriptionService\\SubscriptionService.csproj|c:\\arifworkspace\\arifaichatbotgithub\\arifaichatbot\\chatbot-saas-platform\\backend\\src\\subscriptionservice\\services\\billingservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{DAEDC062-3EB7-4A6C-AF2E-E61AA3D35BE0}|src\\SubscriptionService\\SubscriptionService.csproj|solutionrelative:src\\subscriptionservice\\services\\billingservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
       "AbsoluteMoniker": "D:0:0:{81D5978C-FEEB-47BB-BDB6-1AFB04A6CF76}|src\\NotificationService\\NotificationService.csproj|c:\\arifworkspace\\arifaichatbotgithub\\arifaichatbot\\chatbot-saas-platform\\backend\\src\\notificationservice\\services\\templateservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{81D5978C-FEEB-47BB-BDB6-1AFB04A6CF76}|src\\NotificationService\\NotificationService.csproj|solutionrelative:src\\notificationservice\\services\\templateservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
       "AbsoluteMoniker": "D:0:0:{81D5978C-FEEB-47BB-BDB6-1AFB04A6CF76}|src\\NotificationService\\NotificationService.csproj|c:\\arifworkspace\\arifaichatbotgithub\\arifaichatbot\\chatbot-saas-platform\\backend\\src\\notificationservice\\services\\notificationservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{81D5978C-FEEB-47BB-BDB6-1AFB04A6CF76}|src\\NotificationService\\NotificationService.csproj|solutionrelative:src\\notificationservice\\services\\notificationservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{5E79EF5C-B9A7-44B4-934C-BD4EB41F4412}|src\\KnowledgeBaseService\\KnowledgeBaseService.csproj|c:\\arifworkspace\\arifaichatbotgithub\\arifaichatbot\\chatbot-saas-platform\\backend\\src\\knowledgebaseservice\\services\\vectorsearchservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{5E79EF5C-B9A7-44B4-934C-BD4EB41F4412}|src\\KnowledgeBaseService\\KnowledgeBaseService.csproj|solutionrelative:src\\knowledgebaseservice\\services\\vectorsearchservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{5E79EF5C-B9A7-44B4-934C-BD4EB41F4412}|src\\KnowledgeBaseService\\KnowledgeBaseService.csproj|c:\\arifworkspace\\arifaichatbotgithub\\arifaichatbot\\chatbot-saas-platform\\backend\\src\\knowledgebaseservice\\services\\knowledgebaseservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{5E79EF5C-B9A7-44B4-934C-BD4EB41F4412}|src\\KnowledgeBaseService\\KnowledgeBaseService.csproj|solutionrelative:src\\knowledgebaseservice\\services\\knowledgebaseservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{8EADF689-F81C-4CD7-A862-C48AF986FA5F}|src\\WorkflowService\\WorkflowService.csproj|c:\\arifworkspace\\arifaichatbotgithub\\arifaichatbot\\chatbot-saas-platform\\backend\\src\\workflowservice\\controllers\\workflowscontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{8EADF689-F81C-4CD7-A862-C48AF986FA5F}|src\\WorkflowService\\WorkflowService.csproj|solutionrelative:src\\workflowservice\\controllers\\workflowscontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
       "AbsoluteMoniker": "D:0:0:{DAEDC062-3EB7-4A6C-AF2E-E61AA3D35BE0}|src\\SubscriptionService\\SubscriptionService.csproj|c:\\arifworkspace\\arifaichatbotgithub\\arifaichatbot\\chatbot-saas-platform\\backend\\src\\subscriptionservice\\services\\usagetrackingservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
@@ -167,16 +274,8 @@
       "RelativeMoniker": "D:0:0:{DAEDC062-3EB7-4A6C-AF2E-E61AA3D35BE0}|src\\SubscriptionService\\SubscriptionService.csproj|solutionrelative:src\\subscriptionservice\\services\\planservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{DAEDC062-3EB7-4A6C-AF2E-E61AA3D35BE0}|src\\SubscriptionService\\SubscriptionService.csproj|c:\\arifworkspace\\arifaichatbotgithub\\arifaichatbot\\chatbot-saas-platform\\backend\\src\\subscriptionservice\\services\\isubscriptionservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{DAEDC062-3EB7-4A6C-AF2E-E61AA3D35BE0}|src\\SubscriptionService\\SubscriptionService.csproj|solutionrelative:src\\subscriptionservice\\services\\isubscriptionservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
       "AbsoluteMoniker": "D:0:0:{DAEDC062-3EB7-4A6C-AF2E-E61AA3D35BE0}|src\\SubscriptionService\\SubscriptionService.csproj|c:\\arifworkspace\\arifaichatbotgithub\\arifaichatbot\\chatbot-saas-platform\\backend\\src\\subscriptionservice\\services\\iplanservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{DAEDC062-3EB7-4A6C-AF2E-E61AA3D35BE0}|src\\SubscriptionService\\SubscriptionService.csproj|solutionrelative:src\\subscriptionservice\\services\\iplanservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{81D5978C-FEEB-47BB-BDB6-1AFB04A6CF76}|src\\NotificationService\\NotificationService.csproj|c:\\arifworkspace\\arifaichatbotgithub\\arifaichatbot\\chatbot-saas-platform\\backend\\src\\notificationservice\\controllers\\notificationscontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{81D5978C-FEEB-47BB-BDB6-1AFB04A6CF76}|src\\NotificationService\\NotificationService.csproj|solutionrelative:src\\notificationservice\\controllers\\notificationscontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
       "AbsoluteMoniker": "D:0:0:{81D5978C-FEEB-47BB-BDB6-1AFB04A6CF76}|src\\NotificationService\\NotificationService.csproj|c:\\arifworkspace\\arifaichatbotgithub\\arifaichatbot\\chatbot-saas-platform\\backend\\src\\notificationservice\\models\\notificationmodels.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
@@ -189,10 +288,6 @@
     {
       "AbsoluteMoniker": "D:0:0:{DAEDC062-3EB7-4A6C-AF2E-E61AA3D35BE0}|src\\SubscriptionService\\SubscriptionService.csproj|c:\\arifworkspace\\arifaichatbotgithub\\arifaichatbot\\chatbot-saas-platform\\backend\\src\\subscriptionservice\\subscriptionservice.csproj||{FA3CD31E-987B-443A-9B81-186104E8DAC1}|",
       "RelativeMoniker": "D:0:0:{DAEDC062-3EB7-4A6C-AF2E-E61AA3D35BE0}|src\\SubscriptionService\\SubscriptionService.csproj|solutionrelative:src\\subscriptionservice\\subscriptionservice.csproj||{FA3CD31E-987B-443A-9B81-186104E8DAC1}|"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{0AC3BE0F-B257-435A-8723-769BB83051F0}|src\\AnalyticsService\\AnalyticsService.csproj|c:\\arifworkspace\\arifaichatbotgithub\\arifaichatbot\\chatbot-saas-platform\\backend\\src\\analyticsservice\\controllers\\analyticscontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{0AC3BE0F-B257-435A-8723-769BB83051F0}|src\\AnalyticsService\\AnalyticsService.csproj|solutionrelative:src\\analyticsservice\\controllers\\analyticscontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
       "AbsoluteMoniker": "D:0:0:{DAEDC062-3EB7-4A6C-AF2E-E61AA3D35BE0}|src\\SubscriptionService\\SubscriptionService.csproj|c:\\arifworkspace\\arifaichatbotgithub\\arifaichatbot\\chatbot-saas-platform\\backend\\src\\subscriptionservice\\appsettings.development.json||{90A6B3A7-C1A3-4009-A288-E2FF89E96FA0}",
@@ -241,14 +336,6 @@
     {
       "AbsoluteMoniker": "D:0:0:{04B79A6A-109D-469D-9DBD-C7024ADCB081}|src\\ChatRuntimeService\\ChatRuntimeService.csproj|c:\\arifworkspace\\arifaichatbotgithub\\arifaichatbot\\chatbot-saas-platform\\backend\\src\\chatruntimeservice\\appsettings.development.json||{90A6B3A7-C1A3-4009-A288-E2FF89E96FA0}",
       "RelativeMoniker": "D:0:0:{04B79A6A-109D-469D-9DBD-C7024ADCB081}|src\\ChatRuntimeService\\ChatRuntimeService.csproj|solutionrelative:src\\chatruntimeservice\\appsettings.development.json||{90A6B3A7-C1A3-4009-A288-E2FF89E96FA0}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{A1B2C3D4-E5F6-7890-ABCD-EF1234567890}|src\\IdentityService\\IdentityService.csproj|c:\\arifworkspace\\arifaichatbotgithub\\arifaichatbot\\chatbot-saas-platform\\backend\\src\\identityservice\\appsettings.development.json||{90A6B3A7-C1A3-4009-A288-E2FF89E96FA0}",
-      "RelativeMoniker": "D:0:0:{A1B2C3D4-E5F6-7890-ABCD-EF1234567890}|src\\IdentityService\\IdentityService.csproj|solutionrelative:src\\identityservice\\appsettings.development.json||{90A6B3A7-C1A3-4009-A288-E2FF89E96FA0}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{5E79EF5C-B9A7-44B4-934C-BD4EB41F4412}|src\\KnowledgeBaseService\\KnowledgeBaseService.csproj|c:\\arifworkspace\\arifaichatbotgithub\\arifaichatbot\\chatbot-saas-platform\\backend\\src\\knowledgebaseservice\\appsettings.json||{90A6B3A7-C1A3-4009-A288-E2FF89E96FA0}",
-      "RelativeMoniker": "D:0:0:{5E79EF5C-B9A7-44B4-934C-BD4EB41F4412}|src\\KnowledgeBaseService\\KnowledgeBaseService.csproj|solutionrelative:src\\knowledgebaseservice\\appsettings.json||{90A6B3A7-C1A3-4009-A288-E2FF89E96FA0}"
     },
     {
       "AbsoluteMoniker": "D:0:0:{82614FEB-2AF6-4080-B301-4B96EBCC53B2}|src\\LiveAgentService\\LiveAgentService.csproj|c:\\arifworkspace\\arifaichatbotgithub\\arifaichatbot\\chatbot-saas-platform\\backend\\src\\liveagentservice\\appsettings.json||{90A6B3A7-C1A3-4009-A288-E2FF89E96FA0}",
@@ -307,16 +394,8 @@
       "RelativeMoniker": "D:0:0:{04B79A6A-109D-469D-9DBD-C7024ADCB081}|src\\ChatRuntimeService\\ChatRuntimeService.csproj|solutionrelative:src\\chatruntimeservice\\chatruntimeservice.csproj||{FA3CD31E-987B-443A-9B81-186104E8DAC1}|"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{0AC3BE0F-B257-435A-8723-769BB83051F0}|src\\AnalyticsService\\AnalyticsService.csproj|c:\\arifworkspace\\arifaichatbotgithub\\arifaichatbot\\chatbot-saas-platform\\backend\\src\\analyticsservice\\analyticsservice.csproj||{FA3CD31E-987B-443A-9B81-186104E8DAC1}|",
-      "RelativeMoniker": "D:0:0:{0AC3BE0F-B257-435A-8723-769BB83051F0}|src\\AnalyticsService\\AnalyticsService.csproj|solutionrelative:src\\analyticsservice\\analyticsservice.csproj||{FA3CD31E-987B-443A-9B81-186104E8DAC1}|"
-    },
-    {
       "AbsoluteMoniker": "D:0:0:{967A9878-9005-C8B0-725C-1F34134168DB}|src\\ApiGateway\\ApiGateway.csproj|c:\\arifworkspace\\arifaichatbotgithub\\arifaichatbot\\chatbot-saas-platform\\backend\\src\\apigateway\\appsettings.json||{90A6B3A7-C1A3-4009-A288-E2FF89E96FA0}",
       "RelativeMoniker": "D:0:0:{967A9878-9005-C8B0-725C-1F34134168DB}|src\\ApiGateway\\ApiGateway.csproj|solutionrelative:src\\apigateway\\appsettings.json||{90A6B3A7-C1A3-4009-A288-E2FF89E96FA0}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{E5A023D0-D7E4-4010-A001-9D1DA6E01F92}|src\\AIOrchestrationService\\AIOrchestrationService.csproj|c:\\arifworkspace\\arifaichatbotgithub\\arifaichatbot\\chatbot-saas-platform\\backend\\src\\aiorchestrationservice\\aiorchestrationservice.csproj||{FA3CD31E-987B-443A-9B81-186104E8DAC1}|",
-      "RelativeMoniker": "D:0:0:{E5A023D0-D7E4-4010-A001-9D1DA6E01F92}|src\\AIOrchestrationService\\AIOrchestrationService.csproj|solutionrelative:src\\aiorchestrationservice\\aiorchestrationservice.csproj||{FA3CD31E-987B-443A-9B81-186104E8DAC1}|"
     },
     {
       "AbsoluteMoniker": "D:0:0:{A1B2C3D4-E5F6-7890-ABCD-EF1234567890}|src\\IdentityService\\IdentityService.csproj|c:\\arifworkspace\\arifaichatbotgithub\\arifaichatbot\\chatbot-saas-platform\\backend\\src\\identityservice\\migrations\\20250729134445_initial.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
@@ -330,8 +409,216 @@
       "DocumentGroups": [
         {
           "DockedWidth": 200,
-          "SelectedChildIndex": 18,
+          "SelectedChildIndex": 0,
           "Children": [
+            {
+              "$type": "Document",
+              "DocumentIndex": 0,
+              "Title": "TenantManagementService.cs",
+              "DocumentMoniker": "C:\\ArifWorkspace\\ArifAIChatbotGitHub\\ArifAIChatbot\\chatbot-saas-platform\\backend\\src\\TenantManagementService\\Services\\TenantManagementService.cs",
+              "RelativeDocumentMoniker": "src\\TenantManagementService\\Services\\TenantManagementService.cs",
+              "ToolTip": "C:\\ArifWorkspace\\ArifAIChatbotGitHub\\ArifAIChatbot\\chatbot-saas-platform\\backend\\src\\TenantManagementService\\Services\\TenantManagementService.cs",
+              "RelativeToolTip": "src\\TenantManagementService\\Services\\TenantManagementService.cs",
+              "ViewState": "AgIAAGsAAAAAAAAAAAAowH4AAAA3AAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-07-31T13:41:58.675Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 1,
+              "Title": "TeamService.cs",
+              "DocumentMoniker": "C:\\ArifWorkspace\\ArifAIChatbotGitHub\\ArifAIChatbot\\chatbot-saas-platform\\backend\\src\\TenantManagementService\\Services\\TeamService.cs",
+              "RelativeDocumentMoniker": "src\\TenantManagementService\\Services\\TeamService.cs",
+              "ToolTip": "C:\\ArifWorkspace\\ArifAIChatbotGitHub\\ArifAIChatbot\\chatbot-saas-platform\\backend\\src\\TenantManagementService\\Services\\TeamService.cs",
+              "RelativeToolTip": "src\\TenantManagementService\\Services\\TeamService.cs",
+              "ViewState": "AgIAAIsAAAAAAAAAAAAUwLAAAAArAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-07-31T13:41:01.632Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 3,
+              "Title": "TenantsController.cs",
+              "DocumentMoniker": "C:\\ArifWorkspace\\ArifAIChatbotGitHub\\ArifAIChatbot\\chatbot-saas-platform\\backend\\src\\TenantManagementService\\Controllers\\TenantsController.cs",
+              "RelativeDocumentMoniker": "src\\TenantManagementService\\Controllers\\TenantsController.cs",
+              "ToolTip": "C:\\ArifWorkspace\\ArifAIChatbotGitHub\\ArifAIChatbot\\chatbot-saas-platform\\backend\\src\\TenantManagementService\\Controllers\\TenantsController.cs",
+              "RelativeToolTip": "src\\TenantManagementService\\Controllers\\TenantsController.cs",
+              "ViewState": "AgIAAGkAAAAAAAAAAAAowBQAAAAvAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-07-31T13:37:44.446Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 4,
+              "Title": "TeamController.cs",
+              "DocumentMoniker": "C:\\ArifWorkspace\\ArifAIChatbotGitHub\\ArifAIChatbot\\chatbot-saas-platform\\backend\\src\\TenantManagementService\\Controllers\\TeamController.cs",
+              "RelativeDocumentMoniker": "src\\TenantManagementService\\Controllers\\TeamController.cs",
+              "ToolTip": "C:\\ArifWorkspace\\ArifAIChatbotGitHub\\ArifAIChatbot\\chatbot-saas-platform\\backend\\src\\TenantManagementService\\Controllers\\TeamController.cs",
+              "RelativeToolTip": "src\\TenantManagementService\\Controllers\\TeamController.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAA8AAAAgAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-07-31T13:37:23.991Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 5,
+              "Title": "ChatbotConfigsController.cs",
+              "DocumentMoniker": "C:\\ArifWorkspace\\ArifAIChatbotGitHub\\ArifAIChatbot\\chatbot-saas-platform\\backend\\src\\TenantManagementService\\Controllers\\ChatbotConfigsController.cs",
+              "RelativeDocumentMoniker": "src\\TenantManagementService\\Controllers\\ChatbotConfigsController.cs",
+              "ToolTip": "C:\\ArifWorkspace\\ArifAIChatbotGitHub\\ArifAIChatbot\\chatbot-saas-platform\\backend\\src\\TenantManagementService\\Controllers\\ChatbotConfigsController.cs",
+              "RelativeToolTip": "src\\TenantManagementService\\Controllers\\ChatbotConfigsController.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAABYAAAAIAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-07-31T13:37:09.581Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 7,
+              "Title": "Subscription.cs",
+              "DocumentMoniker": "C:\\ArifWorkspace\\ArifAIChatbotGitHub\\ArifAIChatbot\\chatbot-saas-platform\\backend\\src\\Shared\\Domain\\Entities\\Subscription.cs",
+              "RelativeDocumentMoniker": "src\\Shared\\Domain\\Entities\\Subscription.cs",
+              "ToolTip": "C:\\ArifWorkspace\\ArifAIChatbotGitHub\\ArifAIChatbot\\chatbot-saas-platform\\backend\\src\\Shared\\Domain\\Entities\\Subscription.cs",
+              "RelativeToolTip": "src\\Shared\\Domain\\Entities\\Subscription.cs",
+              "ViewState": "AgIAAH0AAAAAAAAAAAA0wJYAAAAQAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-07-31T13:20:28.002Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 6,
+              "Title": "SubscriptionsController.cs",
+              "DocumentMoniker": "C:\\ArifWorkspace\\ArifAIChatbotGitHub\\ArifAIChatbot\\chatbot-saas-platform\\backend\\src\\SubscriptionService\\Controllers\\SubscriptionsController.cs",
+              "RelativeDocumentMoniker": "src\\SubscriptionService\\Controllers\\SubscriptionsController.cs",
+              "ToolTip": "C:\\ArifWorkspace\\ArifAIChatbotGitHub\\ArifAIChatbot\\chatbot-saas-platform\\backend\\src\\SubscriptionService\\Controllers\\SubscriptionsController.cs",
+              "RelativeToolTip": "src\\SubscriptionService\\Controllers\\SubscriptionsController.cs",
+              "ViewState": "AgIAAJsBAAAAAAAAAAAiwLoBAAAdAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-07-31T13:07:20.377Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 10,
+              "Title": "AgentManagementService.cs",
+              "DocumentMoniker": "C:\\ArifWorkspace\\ArifAIChatbotGitHub\\ArifAIChatbot\\chatbot-saas-platform\\backend\\src\\LiveAgentService\\Services\\AgentManagementService.cs",
+              "RelativeDocumentMoniker": "src\\LiveAgentService\\Services\\AgentManagementService.cs",
+              "ToolTip": "C:\\ArifWorkspace\\ArifAIChatbotGitHub\\ArifAIChatbot\\chatbot-saas-platform\\backend\\src\\LiveAgentService\\Services\\AgentManagementService.cs",
+              "RelativeToolTip": "src\\LiveAgentService\\Services\\AgentManagementService.cs",
+              "ViewState": "AgIAAI8AAAAAAAAAAAAwwJgAAAAcAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-07-31T12:51:46.574Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 9,
+              "Title": "AgentsController.cs",
+              "DocumentMoniker": "C:\\ArifWorkspace\\ArifAIChatbotGitHub\\ArifAIChatbot\\chatbot-saas-platform\\backend\\src\\LiveAgentService\\Controllers\\AgentsController.cs",
+              "RelativeDocumentMoniker": "src\\LiveAgentService\\Controllers\\AgentsController.cs",
+              "ToolTip": "C:\\ArifWorkspace\\ArifAIChatbotGitHub\\ArifAIChatbot\\chatbot-saas-platform\\backend\\src\\LiveAgentService\\Controllers\\AgentsController.cs",
+              "RelativeToolTip": "src\\LiveAgentService\\Controllers\\AgentsController.cs",
+              "ViewState": "AgIAADABAAAAAAAAAAAAAEsBAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-07-31T12:49:47.609Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 11,
+              "Title": "ChatService.cs",
+              "DocumentMoniker": "C:\\ArifWorkspace\\ArifAIChatbotGitHub\\ArifAIChatbot\\chatbot-saas-platform\\backend\\src\\ChatRuntimeService\\Services\\ChatService.cs",
+              "RelativeDocumentMoniker": "src\\ChatRuntimeService\\Services\\ChatService.cs",
+              "ToolTip": "C:\\ArifWorkspace\\ArifAIChatbotGitHub\\ArifAIChatbot\\chatbot-saas-platform\\backend\\src\\ChatRuntimeService\\Services\\ChatService.cs",
+              "RelativeToolTip": "src\\ChatRuntimeService\\Services\\ChatService.cs",
+              "ViewState": "AgIAAGcAAAAAAAAAAAAgwIoAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-07-31T12:48:12.027Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 12,
+              "Title": "ChatRuntimeService.cs",
+              "DocumentMoniker": "C:\\ArifWorkspace\\ArifAIChatbotGitHub\\ArifAIChatbot\\chatbot-saas-platform\\backend\\src\\ChatRuntimeService\\Services\\ChatRuntimeService.cs",
+              "RelativeDocumentMoniker": "src\\ChatRuntimeService\\Services\\ChatRuntimeService.cs",
+              "ToolTip": "C:\\ArifWorkspace\\ArifAIChatbotGitHub\\ArifAIChatbot\\chatbot-saas-platform\\backend\\src\\ChatRuntimeService\\Services\\ChatRuntimeService.cs",
+              "RelativeToolTip": "src\\ChatRuntimeService\\Services\\ChatRuntimeService.cs",
+              "ViewState": "AgIAAGcAAAAAAAAAAAAowJQAAAAzAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-07-31T12:46:38.453Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 14,
+              "Title": "ChatController.cs",
+              "DocumentMoniker": "C:\\ArifWorkspace\\ArifAIChatbotGitHub\\ArifAIChatbot\\chatbot-saas-platform\\backend\\src\\ChatRuntimeService\\Controllers\\ChatController.cs",
+              "RelativeDocumentMoniker": "src\\ChatRuntimeService\\Controllers\\ChatController.cs",
+              "ToolTip": "C:\\ArifWorkspace\\ArifAIChatbotGitHub\\ArifAIChatbot\\chatbot-saas-platform\\backend\\src\\ChatRuntimeService\\Controllers\\ChatController.cs",
+              "RelativeToolTip": "src\\ChatRuntimeService\\Controllers\\ChatController.cs",
+              "ViewState": "AgIAAEoAAAAAAAAAAAAQwGkAAAAcAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-07-31T12:44:26.498Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 2,
+              "Title": "Program.cs",
+              "DocumentMoniker": "C:\\ArifWorkspace\\ArifAIChatbotGitHub\\ArifAIChatbot\\chatbot-saas-platform\\backend\\src\\TenantManagementService\\Program.cs",
+              "RelativeDocumentMoniker": "src\\TenantManagementService\\Program.cs",
+              "ToolTip": "C:\\ArifWorkspace\\ArifAIChatbotGitHub\\ArifAIChatbot\\chatbot-saas-platform\\backend\\src\\TenantManagementService\\Program.cs",
+              "RelativeToolTip": "src\\TenantManagementService\\Program.cs",
+              "ViewState": "AgIAABQAAAAAAAAAAAAQwC0AAAAbAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-07-29T06:04:50.322Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 16,
+              "Title": "AnalyticsService.cs",
+              "DocumentMoniker": "C:\\ArifWorkspace\\ArifAIChatbotGitHub\\ArifAIChatbot\\chatbot-saas-platform\\backend\\src\\AnalyticsService\\Services\\AnalyticsService.cs",
+              "RelativeDocumentMoniker": "src\\AnalyticsService\\Services\\AnalyticsService.cs",
+              "ToolTip": "C:\\ArifWorkspace\\ArifAIChatbotGitHub\\ArifAIChatbot\\chatbot-saas-platform\\backend\\src\\AnalyticsService\\Services\\AnalyticsService.cs",
+              "RelativeToolTip": "src\\AnalyticsService\\Services\\AnalyticsService.cs",
+              "ViewState": "AgIAAOYAAAAAAAAAAAAmwAkBAAAKAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-07-31T12:36:47.791Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 18,
+              "Title": "AIOrchestrationService.cs",
+              "DocumentMoniker": "C:\\ArifWorkspace\\ArifAIChatbotGitHub\\ArifAIChatbot\\chatbot-saas-platform\\backend\\src\\AIOrchestrationService\\Services\\AIOrchestrationService.cs",
+              "RelativeDocumentMoniker": "src\\AIOrchestrationService\\Services\\AIOrchestrationService.cs",
+              "ToolTip": "C:\\ArifWorkspace\\ArifAIChatbotGitHub\\ArifAIChatbot\\chatbot-saas-platform\\backend\\src\\AIOrchestrationService\\Services\\AIOrchestrationService.cs",
+              "RelativeToolTip": "src\\AIOrchestrationService\\Services\\AIOrchestrationService.cs",
+              "ViewState": "AgIAABgAAAAAAAAAAAAhwCkAAAAVAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-07-31T12:34:40.221Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 19,
+              "Title": "QdrantService.cs",
+              "DocumentMoniker": "C:\\ArifWorkspace\\ArifAIChatbotGitHub\\ArifAIChatbot\\chatbot-saas-platform\\backend\\src\\AIOrchestrationService\\Services\\QdrantService.cs",
+              "RelativeDocumentMoniker": "src\\AIOrchestrationService\\Services\\QdrantService.cs",
+              "ToolTip": "C:\\ArifWorkspace\\ArifAIChatbotGitHub\\ArifAIChatbot\\chatbot-saas-platform\\backend\\src\\AIOrchestrationService\\Services\\QdrantService.cs",
+              "RelativeToolTip": "src\\AIOrchestrationService\\Services\\QdrantService.cs",
+              "ViewState": "AgIAAIcAAAAAAAAAAAAowAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-07-31T12:34:22.713Z",
+              "EditorCaption": ""
+            },
             {
               "$type": "Bookmark",
               "Name": "ST:0:0:{6324226f-61b6-4f28-92ee-18d4b5fe1e48}"
@@ -362,80 +649,124 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 12,
-              "Title": "IdentityService.csproj",
-              "DocumentMoniker": "C:\\ArifWorkspace\\ArifAIChatbotGitHub\\ArifAIChatbot\\chatbot-saas-platform\\backend\\src\\IdentityService\\IdentityService.csproj",
-              "RelativeDocumentMoniker": "src\\IdentityService\\IdentityService.csproj",
-              "ToolTip": "C:\\ArifWorkspace\\ArifAIChatbotGitHub\\ArifAIChatbot\\chatbot-saas-platform\\backend\\src\\IdentityService\\IdentityService.csproj",
-              "RelativeToolTip": "src\\IdentityService\\IdentityService.csproj",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAB0AAAAAAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000758|",
-              "WhenOpened": "2025-07-28T12:21:09.409Z"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 10,
-              "Title": "Program.cs",
-              "DocumentMoniker": "C:\\ArifWorkspace\\ArifAIChatbotGitHub\\ArifAIChatbot\\chatbot-saas-platform\\backend\\src\\IdentityService\\Program.cs",
-              "RelativeDocumentMoniker": "src\\IdentityService\\Program.cs",
-              "ToolTip": "C:\\ArifWorkspace\\ArifAIChatbotGitHub\\ArifAIChatbot\\chatbot-saas-platform\\backend\\src\\IdentityService\\Program.cs",
-              "RelativeToolTip": "src\\IdentityService\\Program.cs",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAADAAAAAAAAAAAAAAAA==",
+              "DocumentIndex": 20,
+              "Title": "OpenAIService.cs",
+              "DocumentMoniker": "C:\\ArifWorkspace\\ArifAIChatbotGitHub\\ArifAIChatbot\\chatbot-saas-platform\\backend\\src\\AIOrchestrationService\\Services\\OpenAIService.cs",
+              "RelativeDocumentMoniker": "src\\AIOrchestrationService\\Services\\OpenAIService.cs",
+              "ToolTip": "C:\\ArifWorkspace\\ArifAIChatbotGitHub\\ArifAIChatbot\\chatbot-saas-platform\\backend\\src\\AIOrchestrationService\\Services\\OpenAIService.cs",
+              "RelativeToolTip": "src\\AIOrchestrationService\\Services\\OpenAIService.cs",
+              "ViewState": "AgIAAAMAAAAAAAAAAAAAABQAAAA0AAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-07-28T12:59:44.366Z"
+              "WhenOpened": "2025-07-31T12:34:10.503Z",
+              "EditorCaption": ""
             },
             {
               "$type": "Document",
-              "DocumentIndex": 11,
-              "Title": "ServiceCollectionExtensions.cs",
-              "DocumentMoniker": "C:\\ArifWorkspace\\ArifAIChatbotGitHub\\ArifAIChatbot\\chatbot-saas-platform\\backend\\src\\Shared\\Infrastructure\\Extensions\\ServiceCollectionExtensions.cs",
-              "RelativeDocumentMoniker": "src\\Shared\\Infrastructure\\Extensions\\ServiceCollectionExtensions.cs",
-              "ToolTip": "C:\\ArifWorkspace\\ArifAIChatbotGitHub\\ArifAIChatbot\\chatbot-saas-platform\\backend\\src\\Shared\\Infrastructure\\Extensions\\ServiceCollectionExtensions.cs",
-              "RelativeToolTip": "src\\Shared\\Infrastructure\\Extensions\\ServiceCollectionExtensions.cs",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "DocumentIndex": 24,
+              "Title": "UserManagementService.cs",
+              "DocumentMoniker": "C:\\ArifWorkspace\\ArifAIChatbotGitHub\\ArifAIChatbot\\chatbot-saas-platform\\backend\\src\\IdentityService\\Services\\UserManagementService.cs",
+              "RelativeDocumentMoniker": "src\\IdentityService\\Services\\UserManagementService.cs",
+              "ToolTip": "C:\\ArifWorkspace\\ArifAIChatbotGitHub\\ArifAIChatbot\\chatbot-saas-platform\\backend\\src\\IdentityService\\Services\\UserManagementService.cs",
+              "RelativeToolTip": "src\\IdentityService\\Services\\UserManagementService.cs",
+              "ViewState": "AgIAAGMAAAAAAAAAAAAowBUAAAAxAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-07-29T13:06:00.723Z"
+              "WhenOpened": "2025-07-31T12:16:37.098Z",
+              "EditorCaption": ""
             },
             {
               "$type": "Document",
-              "DocumentIndex": 19,
-              "Title": "Program.cs",
-              "DocumentMoniker": "C:\\ArifWorkspace\\ArifAIChatbotGitHub\\ArifAIChatbot\\chatbot-saas-platform\\backend\\src\\ChatRuntimeService\\Program.cs",
-              "RelativeDocumentMoniker": "src\\ChatRuntimeService\\Program.cs",
-              "ToolTip": "C:\\ArifWorkspace\\ArifAIChatbotGitHub\\ArifAIChatbot\\chatbot-saas-platform\\backend\\src\\ChatRuntimeService\\Program.cs",
-              "RelativeToolTip": "src\\ChatRuntimeService\\Program.cs",
-              "ViewState": "AgIAADkAAAAAAAAAAAAAAFkAAAAHAAAAAAAAAA==",
+              "DocumentIndex": 8,
+              "Title": "NotificationsController.cs",
+              "DocumentMoniker": "C:\\ArifWorkspace\\ArifAIChatbotGitHub\\ArifAIChatbot\\chatbot-saas-platform\\backend\\src\\NotificationService\\Controllers\\NotificationsController.cs",
+              "RelativeDocumentMoniker": "src\\NotificationService\\Controllers\\NotificationsController.cs",
+              "ToolTip": "C:\\ArifWorkspace\\ArifAIChatbotGitHub\\ArifAIChatbot\\chatbot-saas-platform\\backend\\src\\NotificationService\\Controllers\\NotificationsController.cs",
+              "RelativeToolTip": "src\\NotificationService\\Controllers\\NotificationsController.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAABkBAAAaAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-07-29T06:03:35.805Z"
+              "WhenOpened": "2025-07-29T10:15:02.718Z",
+              "EditorCaption": ""
             },
             {
               "$type": "Document",
-              "DocumentIndex": 9,
-              "Title": "SeedData.cs",
-              "DocumentMoniker": "C:\\ArifWorkspace\\ArifAIChatbotGitHub\\ArifAIChatbot\\chatbot-saas-platform\\backend\\src\\Shared\\Infrastructure\\Data\\SeedData.cs",
-              "RelativeDocumentMoniker": "src\\Shared\\Infrastructure\\Data\\SeedData.cs",
-              "ToolTip": "C:\\ArifWorkspace\\ArifAIChatbotGitHub\\ArifAIChatbot\\chatbot-saas-platform\\backend\\src\\Shared\\Infrastructure\\Data\\SeedData.cs",
-              "RelativeToolTip": "src\\Shared\\Infrastructure\\Data\\SeedData.cs",
-              "ViewState": "AgIAADYAAAAAAAAAAAAvwDkAAAAEAAAAAAAAAA==",
+              "DocumentIndex": 25,
+              "Title": "AuthService.cs",
+              "DocumentMoniker": "C:\\ArifWorkspace\\ArifAIChatbotGitHub\\ArifAIChatbot\\chatbot-saas-platform\\backend\\src\\IdentityService\\Services\\AuthService.cs",
+              "RelativeDocumentMoniker": "src\\IdentityService\\Services\\AuthService.cs",
+              "ToolTip": "C:\\ArifWorkspace\\ArifAIChatbotGitHub\\ArifAIChatbot\\chatbot-saas-platform\\backend\\src\\IdentityService\\Services\\AuthService.cs",
+              "RelativeToolTip": "src\\IdentityService\\Services\\AuthService.cs",
+              "ViewState": "AgIAADAAAAAAAAAAAAAuwG4AAABQAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-07-28T14:43:57.834Z"
+              "WhenOpened": "2025-07-31T12:13:57.076Z",
+              "EditorCaption": ""
             },
             {
               "$type": "Document",
-              "DocumentIndex": 1,
+              "DocumentIndex": 23,
               "Title": "AuthController.cs",
               "DocumentMoniker": "C:\\ArifWorkspace\\ArifAIChatbotGitHub\\ArifAIChatbot\\chatbot-saas-platform\\backend\\src\\IdentityService\\Controllers\\AuthController.cs",
               "RelativeDocumentMoniker": "src\\IdentityService\\Controllers\\AuthController.cs",
               "ToolTip": "C:\\ArifWorkspace\\ArifAIChatbotGitHub\\ArifAIChatbot\\chatbot-saas-platform\\backend\\src\\IdentityService\\Controllers\\AuthController.cs",
               "RelativeToolTip": "src\\IdentityService\\Controllers\\AuthController.cs",
-              "ViewState": "AgIAAKIAAAAAAAAAAAAUwMYAAAAJAAAAAAAAAA==",
+              "ViewState": "AgIAAPAAAAAAAAAAAAAiwNQAAAAmAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-07-29T13:24:58.957Z",
+              "WhenOpened": "2025-07-31T12:03:01.956Z",
               "EditorCaption": ""
             },
             {
               "$type": "Document",
-              "DocumentIndex": 6,
+              "DocumentIndex": 22,
+              "Title": "UsersController.cs",
+              "DocumentMoniker": "C:\\ArifWorkspace\\ArifAIChatbotGitHub\\ArifAIChatbot\\chatbot-saas-platform\\backend\\src\\IdentityService\\Controllers\\UsersController.cs",
+              "RelativeDocumentMoniker": "src\\IdentityService\\Controllers\\UsersController.cs",
+              "ToolTip": "C:\\ArifWorkspace\\ArifAIChatbotGitHub\\ArifAIChatbot\\chatbot-saas-platform\\backend\\src\\IdentityService\\Controllers\\UsersController.cs",
+              "RelativeToolTip": "src\\IdentityService\\Controllers\\UsersController.cs",
+              "ViewState": "AgIAAGQAAAAAAAAAAAAkwJcAAAAJAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-07-31T11:39:19.974Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 21,
+              "Title": "AIController.cs",
+              "DocumentMoniker": "C:\\ArifWorkspace\\ArifAIChatbotGitHub\\ArifAIChatbot\\chatbot-saas-platform\\backend\\src\\AIOrchestrationService\\Controllers\\AIController.cs",
+              "RelativeDocumentMoniker": "src\\AIOrchestrationService\\Controllers\\AIController.cs",
+              "ToolTip": "C:\\ArifWorkspace\\ArifAIChatbotGitHub\\ArifAIChatbot\\chatbot-saas-platform\\backend\\src\\AIOrchestrationService\\Controllers\\AIController.cs",
+              "RelativeToolTip": "src\\AIOrchestrationService\\Controllers\\AIController.cs",
+              "ViewState": "AgIAAIQAAAAAAAAAAAAiwFEAAAA5AAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-07-30T09:58:28.498Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 17,
+              "Title": "AnalyticsController.cs",
+              "DocumentMoniker": "C:\\ArifWorkspace\\ArifAIChatbotGitHub\\ArifAIChatbot\\chatbot-saas-platform\\backend\\src\\AnalyticsService\\Controllers\\AnalyticsController.cs",
+              "RelativeDocumentMoniker": "src\\AnalyticsService\\Controllers\\AnalyticsController.cs",
+              "ToolTip": "C:\\ArifWorkspace\\ArifAIChatbotGitHub\\ArifAIChatbot\\chatbot-saas-platform\\backend\\src\\AnalyticsService\\Controllers\\AnalyticsController.cs",
+              "RelativeToolTip": "src\\AnalyticsService\\Controllers\\AnalyticsController.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAFECAAADAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-07-29T07:55:02.619Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 13,
+              "Title": "Program.cs",
+              "DocumentMoniker": "C:\\ArifWorkspace\\ArifAIChatbotGitHub\\ArifAIChatbot\\chatbot-saas-platform\\backend\\src\\ChatRuntimeService\\Program.cs",
+              "RelativeDocumentMoniker": "src\\ChatRuntimeService\\Program.cs",
+              "ToolTip": "C:\\ArifWorkspace\\ArifAIChatbotGitHub\\ArifAIChatbot\\chatbot-saas-platform\\backend\\src\\ChatRuntimeService\\Program.cs",
+              "RelativeToolTip": "src\\ChatRuntimeService\\Program.cs",
+              "ViewState": "AgIAABQAAAAAAAAAAAAQwC0AAAAqAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-07-29T06:03:35.805Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 28,
               "Title": "PaymentsController.cs",
               "DocumentMoniker": "C:\\ArifWorkspace\\ArifAIChatbotGitHub\\ArifAIChatbot\\chatbot-saas-platform\\backend\\src\\SubscriptionService\\Controllers\\PaymentsController.cs",
               "RelativeDocumentMoniker": "src\\SubscriptionService\\Controllers\\PaymentsController.cs",
@@ -443,23 +774,155 @@
               "RelativeToolTip": "src\\SubscriptionService\\Controllers\\PaymentsController.cs",
               "ViewState": "AgIAAAAAAAAAAAAAAAAAAAIAAAAJAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-07-29T08:18:26.495Z"
+              "WhenOpened": "2025-07-29T08:18:26.495Z",
+              "EditorCaption": ""
             },
             {
               "$type": "Document",
-              "DocumentIndex": 4,
-              "Title": "SubscriptionService.cs",
-              "DocumentMoniker": "C:\\ArifWorkspace\\ArifAIChatbotGitHub\\ArifAIChatbot\\chatbot-saas-platform\\backend\\src\\SubscriptionService\\Services\\SubscriptionService.cs",
-              "RelativeDocumentMoniker": "src\\SubscriptionService\\Services\\SubscriptionService.cs",
-              "ToolTip": "C:\\ArifWorkspace\\ArifAIChatbotGitHub\\ArifAIChatbot\\chatbot-saas-platform\\backend\\src\\SubscriptionService\\Services\\SubscriptionService.cs",
-              "RelativeToolTip": "src\\SubscriptionService\\Services\\SubscriptionService.cs",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAQAAAAGAAAAAAAAAA==",
+              "DocumentIndex": 15,
+              "Title": "Program.cs",
+              "DocumentMoniker": "C:\\ArifWorkspace\\ArifAIChatbotGitHub\\ArifAIChatbot\\chatbot-saas-platform\\backend\\src\\AnalyticsService\\Program.cs",
+              "RelativeDocumentMoniker": "src\\AnalyticsService\\Program.cs",
+              "ToolTip": "C:\\ArifWorkspace\\ArifAIChatbotGitHub\\ArifAIChatbot\\chatbot-saas-platform\\backend\\src\\AnalyticsService\\Program.cs",
+              "RelativeToolTip": "src\\AnalyticsService\\Program.cs",
+              "ViewState": "AgIAABIAAAAAAAAAAAAawCwAAAAfAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-07-29T10:29:27.027Z"
+              "WhenOpened": "2025-07-29T06:03:21.14Z",
+              "EditorCaption": ""
             },
             {
               "$type": "Document",
-              "DocumentIndex": 3,
+              "DocumentIndex": 31,
+              "Title": "FilesController.cs",
+              "DocumentMoniker": "C:\\ArifWorkspace\\ArifAIChatbotGitHub\\ArifAIChatbot\\chatbot-saas-platform\\backend\\src\\ChatRuntimeService\\Controllers\\FilesController.cs",
+              "RelativeDocumentMoniker": "src\\ChatRuntimeService\\Controllers\\FilesController.cs",
+              "ToolTip": "C:\\ArifWorkspace\\ArifAIChatbotGitHub\\ArifAIChatbot\\chatbot-saas-platform\\backend\\src\\ChatRuntimeService\\Controllers\\FilesController.cs",
+              "RelativeToolTip": "src\\ChatRuntimeService\\Controllers\\FilesController.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-07-31T11:39:12.49Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 30,
+              "Title": "IdentityService.csproj",
+              "DocumentMoniker": "C:\\ArifWorkspace\\ArifAIChatbotGitHub\\ArifAIChatbot\\chatbot-saas-platform\\backend\\src\\IdentityService\\IdentityService.csproj",
+              "RelativeDocumentMoniker": "src\\IdentityService\\IdentityService.csproj",
+              "ToolTip": "C:\\ArifWorkspace\\ArifAIChatbotGitHub\\ArifAIChatbot\\chatbot-saas-platform\\backend\\src\\IdentityService\\IdentityService.csproj",
+              "RelativeToolTip": "src\\IdentityService\\IdentityService.csproj",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAB0AAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000758|",
+              "WhenOpened": "2025-07-28T12:21:09.409Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 29,
+              "Title": "DocumentsController.cs",
+              "DocumentMoniker": "C:\\ArifWorkspace\\ArifAIChatbotGitHub\\ArifAIChatbot\\chatbot-saas-platform\\backend\\src\\KnowledgeBaseService\\Controllers\\DocumentsController.cs",
+              "RelativeDocumentMoniker": "src\\KnowledgeBaseService\\Controllers\\DocumentsController.cs",
+              "ToolTip": "C:\\ArifWorkspace\\ArifAIChatbotGitHub\\ArifAIChatbot\\chatbot-saas-platform\\backend\\src\\KnowledgeBaseService\\Controllers\\DocumentsController.cs",
+              "RelativeToolTip": "src\\KnowledgeBaseService\\Controllers\\DocumentsController.cs",
+              "ViewState": "AgIAAAYAAAAAAAAAAAAAADoAAABUAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-07-30T10:00:38.191Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 27,
+              "Title": "PlansController.cs",
+              "DocumentMoniker": "C:\\ArifWorkspace\\ArifAIChatbotGitHub\\ArifAIChatbot\\chatbot-saas-platform\\backend\\src\\SubscriptionService\\Controllers\\PlansController.cs",
+              "RelativeDocumentMoniker": "src\\SubscriptionService\\Controllers\\PlansController.cs",
+              "ToolTip": "C:\\ArifWorkspace\\ArifAIChatbotGitHub\\ArifAIChatbot\\chatbot-saas-platform\\backend\\src\\SubscriptionService\\Controllers\\PlansController.cs",
+              "RelativeToolTip": "src\\SubscriptionService\\Controllers\\PlansController.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAGAAAAA9AAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-07-29T10:30:57.157Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 26,
+              "Title": "WorkflowsController.cs",
+              "DocumentMoniker": "C:\\ArifWorkspace\\ArifAIChatbotGitHub\\ArifAIChatbot\\chatbot-saas-platform\\backend\\src\\WorkflowService\\Controllers\\WorkflowsController.cs",
+              "RelativeDocumentMoniker": "src\\WorkflowService\\Controllers\\WorkflowsController.cs",
+              "ToolTip": "C:\\ArifWorkspace\\ArifAIChatbotGitHub\\ArifAIChatbot\\chatbot-saas-platform\\backend\\src\\WorkflowService\\Controllers\\WorkflowsController.cs",
+              "RelativeToolTip": "src\\WorkflowService\\Controllers\\WorkflowsController.cs",
+              "ViewState": "AgIAAA0BAAAAAAAAAAAUwLQBAABRAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-07-29T10:23:40.11Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 35,
+              "Title": "TenantService.cs",
+              "DocumentMoniker": "C:\\ArifWorkspace\\ArifAIChatbotGitHub\\ArifAIChatbot\\chatbot-saas-platform\\backend\\src\\Shared\\Infrastructure\\Services\\TenantService.cs",
+              "RelativeDocumentMoniker": "src\\Shared\\Infrastructure\\Services\\TenantService.cs",
+              "ToolTip": "C:\\ArifWorkspace\\ArifAIChatbotGitHub\\ArifAIChatbot\\chatbot-saas-platform\\backend\\src\\Shared\\Infrastructure\\Services\\TenantService.cs",
+              "RelativeToolTip": "src\\Shared\\Infrastructure\\Services\\TenantService.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAABEAAABPAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-07-30T14:08:02.094Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 36,
+              "Title": "CurrentUserService.cs",
+              "DocumentMoniker": "C:\\ArifWorkspace\\ArifAIChatbotGitHub\\ArifAIChatbot\\chatbot-saas-platform\\backend\\src\\Shared\\Infrastructure\\Services\\CurrentUserService.cs",
+              "RelativeDocumentMoniker": "src\\Shared\\Infrastructure\\Services\\CurrentUserService.cs",
+              "ToolTip": "C:\\ArifWorkspace\\ArifAIChatbotGitHub\\ArifAIChatbot\\chatbot-saas-platform\\backend\\src\\Shared\\Infrastructure\\Services\\CurrentUserService.cs",
+              "RelativeToolTip": "src\\Shared\\Infrastructure\\Services\\CurrentUserService.cs",
+              "ViewState": "AgIAAAcAAAAAAAAAAAAIwCAAAABTAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-07-30T14:07:51.433Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 33,
+              "Title": "SeedData.cs",
+              "DocumentMoniker": "C:\\ArifWorkspace\\ArifAIChatbotGitHub\\ArifAIChatbot\\chatbot-saas-platform\\backend\\src\\Shared\\Infrastructure\\Data\\SeedData.cs",
+              "RelativeDocumentMoniker": "src\\Shared\\Infrastructure\\Data\\SeedData.cs",
+              "ToolTip": "C:\\ArifWorkspace\\ArifAIChatbotGitHub\\ArifAIChatbot\\chatbot-saas-platform\\backend\\src\\Shared\\Infrastructure\\Data\\SeedData.cs",
+              "RelativeToolTip": "src\\Shared\\Infrastructure\\Data\\SeedData.cs",
+              "ViewState": "AgIAADYAAAAAAAAAAAAvwFEAAAA2AAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-07-28T14:43:57.834Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 44,
+              "Title": "Program.cs",
+              "DocumentMoniker": "C:\\ArifWorkspace\\ArifAIChatbotGitHub\\ArifAIChatbot\\chatbot-saas-platform\\backend\\src\\AIOrchestrationService\\Program.cs",
+              "RelativeDocumentMoniker": "src\\AIOrchestrationService\\Program.cs",
+              "ToolTip": "C:\\ArifWorkspace\\ArifAIChatbotGitHub\\ArifAIChatbot\\chatbot-saas-platform\\backend\\src\\AIOrchestrationService\\Program.cs",
+              "RelativeToolTip": "src\\AIOrchestrationService\\Program.cs",
+              "ViewState": "AgIAABUAAAAAAAAAAAAawC0AAAAxAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-07-30T09:56:23.378Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 40,
+              "Title": "IMessageBus.cs",
+              "DocumentMoniker": "C:\\ArifWorkspace\\ArifAIChatbotGitHub\\ArifAIChatbot\\chatbot-saas-platform\\backend\\src\\Shared\\Infrastructure\\Messaging\\IMessageBus.cs",
+              "RelativeDocumentMoniker": "src\\Shared\\Infrastructure\\Messaging\\IMessageBus.cs",
+              "ToolTip": "C:\\ArifWorkspace\\ArifAIChatbotGitHub\\ArifAIChatbot\\chatbot-saas-platform\\backend\\src\\Shared\\Infrastructure\\Messaging\\IMessageBus.cs",
+              "RelativeToolTip": "src\\Shared\\Infrastructure\\Messaging\\IMessageBus.cs",
+              "ViewState": "AgIAAAoAAAAAAAAAAAA5wBEAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-07-30T10:50:33.716Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 47,
               "Title": "Program.cs",
               "DocumentMoniker": "C:\\ArifWorkspace\\ArifAIChatbotGitHub\\ArifAIChatbot\\chatbot-saas-platform\\backend\\src\\WorkflowService\\Program.cs",
               "RelativeDocumentMoniker": "src\\WorkflowService\\Program.cs",
@@ -471,31 +934,50 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 2,
-              "Title": "WorkflowExecutionService.cs",
-              "DocumentMoniker": "C:\\ArifWorkspace\\ArifAIChatbotGitHub\\ArifAIChatbot\\chatbot-saas-platform\\backend\\src\\WorkflowService\\Services\\WorkflowExecutionService.cs",
-              "RelativeDocumentMoniker": "src\\WorkflowService\\Services\\WorkflowExecutionService.cs",
-              "ToolTip": "C:\\ArifWorkspace\\ArifAIChatbotGitHub\\ArifAIChatbot\\chatbot-saas-platform\\backend\\src\\WorkflowService\\Services\\WorkflowExecutionService.cs",
-              "RelativeToolTip": "src\\WorkflowService\\Services\\WorkflowExecutionService.cs",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAA4AAABFAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-07-29T10:31:46.887Z"
+              "DocumentIndex": 32,
+              "Title": "AnalyticsService.csproj",
+              "DocumentMoniker": "C:\\ArifWorkspace\\ArifAIChatbotGitHub\\ArifAIChatbot\\chatbot-saas-platform\\backend\\src\\AnalyticsService\\AnalyticsService.csproj",
+              "RelativeDocumentMoniker": "src\\AnalyticsService\\AnalyticsService.csproj",
+              "ToolTip": "C:\\ArifWorkspace\\ArifAIChatbotGitHub\\ArifAIChatbot\\chatbot-saas-platform\\backend\\src\\AnalyticsService\\AnalyticsService.csproj",
+              "RelativeToolTip": "src\\AnalyticsService\\AnalyticsService.csproj",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAD0AAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000758|",
+              "WhenOpened": "2025-07-28T12:20:56.087Z",
+              "EditorCaption": ""
             },
             {
               "$type": "Document",
-              "DocumentIndex": 28,
-              "Title": "NotificationHub.cs",
-              "DocumentMoniker": "C:\\ArifWorkspace\\ArifAIChatbotGitHub\\ArifAIChatbot\\chatbot-saas-platform\\backend\\src\\NotificationService\\Hubs\\NotificationHub.cs",
-              "RelativeDocumentMoniker": "src\\NotificationService\\Hubs\\NotificationHub.cs",
-              "ToolTip": "C:\\ArifWorkspace\\ArifAIChatbotGitHub\\ArifAIChatbot\\chatbot-saas-platform\\backend\\src\\NotificationService\\Hubs\\NotificationHub.cs",
-              "RelativeToolTip": "src\\NotificationService\\Hubs\\NotificationHub.cs",
-              "ViewState": "AgIAADcAAAAAAAAAAAAQwFAAAAA9AAAAAAAAAA==",
+              "DocumentIndex": 34,
+              "Title": "AuthController.cs",
+              "DocumentMoniker": "C:\\Users\\makhan\\AppData\\Local\\SourceServer\\234840dfdf2a7897a37feb72ea9c4b2c23da88f9d3742a728c3187bf87f2a6a7\\chatbot-saas-platform\\backend\\src\\IdentityService\\Controllers\\AuthController.cs",
+              "RelativeDocumentMoniker": "..\\..\\..\\..\\..\\Users\\makhan\\AppData\\Local\\SourceServer\\234840dfdf2a7897a37feb72ea9c4b2c23da88f9d3742a728c3187bf87f2a6a7\\chatbot-saas-platform\\backend\\src\\IdentityService\\Controllers\\AuthController.cs",
+              "ToolTip": "C:\\Users\\makhan\\AppData\\Local\\SourceServer\\234840dfdf2a7897a37feb72ea9c4b2c23da88f9d3742a728c3187bf87f2a6a7\\chatbot-saas-platform\\backend\\src\\IdentityService\\Controllers\\AuthController.cs [Read Only]",
+              "RelativeToolTip": "..\\..\\..\\..\\..\\Users\\makhan\\AppData\\Local\\SourceServer\\234840dfdf2a7897a37feb72ea9c4b2c23da88f9d3742a728c3187bf87f2a6a7\\chatbot-saas-platform\\backend\\src\\IdentityService\\Controllers\\AuthController.cs [Read Only]",
+              "ViewState": "AgIAADoAAAAAAAAAAAAnwFkAAAA+AAAAAQAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-07-29T10:30:46.061Z"
+              "WhenOpened": "2025-07-30T14:08:31.894Z",
+              "EditorCaption": " [Read Only]"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:0:0:{1c4feeaa-4718-4aa9-859d-94ce25d182ba}"
             },
             {
               "$type": "Document",
-              "DocumentIndex": 0,
+              "DocumentIndex": 39,
+              "Title": "AIOrchestrationService.csproj",
+              "DocumentMoniker": "C:\\ArifWorkspace\\ArifAIChatbotGitHub\\ArifAIChatbot\\chatbot-saas-platform\\backend\\src\\AIOrchestrationService\\AIOrchestrationService.csproj",
+              "RelativeDocumentMoniker": "src\\AIOrchestrationService\\AIOrchestrationService.csproj",
+              "ToolTip": "C:\\ArifWorkspace\\ArifAIChatbotGitHub\\ArifAIChatbot\\chatbot-saas-platform\\backend\\src\\AIOrchestrationService\\AIOrchestrationService.csproj",
+              "RelativeToolTip": "src\\AIOrchestrationService\\AIOrchestrationService.csproj",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAABYAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000758|",
+              "WhenOpened": "2025-07-28T12:10:11.605Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 38,
               "Title": "appsettings.json",
               "DocumentMoniker": "C:\\ArifWorkspace\\ArifAIChatbotGitHub\\ArifAIChatbot\\chatbot-saas-platform\\backend\\src\\IdentityService\\appsettings.json",
               "RelativeDocumentMoniker": "src\\IdentityService\\appsettings.json",
@@ -508,7 +990,108 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 5,
+              "DocumentIndex": 37,
+              "Title": "appsettings.Development.json",
+              "DocumentMoniker": "C:\\ArifWorkspace\\ArifAIChatbotGitHub\\ArifAIChatbot\\chatbot-saas-platform\\backend\\src\\IdentityService\\appsettings.Development.json",
+              "RelativeDocumentMoniker": "src\\IdentityService\\appsettings.Development.json",
+              "ToolTip": "C:\\ArifWorkspace\\ArifAIChatbotGitHub\\ArifAIChatbot\\chatbot-saas-platform\\backend\\src\\IdentityService\\appsettings.Development.json",
+              "RelativeToolTip": "src\\IdentityService\\appsettings.Development.json",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAABEAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001642|",
+              "WhenOpened": "2025-07-28T12:11:49.633Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 43,
+              "Title": "ICacheService.cs",
+              "DocumentMoniker": "C:\\ArifWorkspace\\ArifAIChatbotGitHub\\ArifAIChatbot\\chatbot-saas-platform\\backend\\src\\Shared\\Infrastructure\\Services\\ICacheService.cs",
+              "RelativeDocumentMoniker": "src\\Shared\\Infrastructure\\Services\\ICacheService.cs",
+              "ToolTip": "C:\\ArifWorkspace\\ArifAIChatbotGitHub\\ArifAIChatbot\\chatbot-saas-platform\\backend\\src\\Shared\\Infrastructure\\Services\\ICacheService.cs",
+              "RelativeToolTip": "src\\Shared\\Infrastructure\\Services\\ICacheService.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-07-30T10:49:08.433Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 42,
+              "Title": "CacheService.cs",
+              "DocumentMoniker": "C:\\ArifWorkspace\\ArifAIChatbotGitHub\\ArifAIChatbot\\chatbot-saas-platform\\backend\\src\\Shared\\Infrastructure\\Services\\CacheService.cs",
+              "RelativeDocumentMoniker": "src\\Shared\\Infrastructure\\Services\\CacheService.cs",
+              "ToolTip": "C:\\ArifWorkspace\\ArifAIChatbotGitHub\\ArifAIChatbot\\chatbot-saas-platform\\backend\\src\\Shared\\Infrastructure\\Services\\CacheService.cs",
+              "RelativeToolTip": "src\\Shared\\Infrastructure\\Services\\CacheService.cs",
+              "ViewState": "AgIAACIAAAAAAAAAAAAQwAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-07-30T10:49:15.161Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 41,
+              "Title": "AsyncDocumentProcessingService.cs",
+              "DocumentMoniker": "C:\\ArifWorkspace\\ArifAIChatbotGitHub\\ArifAIChatbot\\chatbot-saas-platform\\backend\\src\\KnowledgeBaseService\\Services\\AsyncDocumentProcessingService.cs",
+              "RelativeDocumentMoniker": "src\\KnowledgeBaseService\\Services\\AsyncDocumentProcessingService.cs",
+              "ToolTip": "C:\\ArifWorkspace\\ArifAIChatbotGitHub\\ArifAIChatbot\\chatbot-saas-platform\\backend\\src\\KnowledgeBaseService\\Services\\AsyncDocumentProcessingService.cs",
+              "RelativeToolTip": "src\\KnowledgeBaseService\\Services\\AsyncDocumentProcessingService.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAEUAAABEAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-07-30T10:49:40.693Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 46,
+              "Title": "WorkflowExecutionService.cs",
+              "DocumentMoniker": "C:\\ArifWorkspace\\ArifAIChatbotGitHub\\ArifAIChatbot\\chatbot-saas-platform\\backend\\src\\WorkflowService\\Services\\WorkflowExecutionService.cs",
+              "RelativeDocumentMoniker": "src\\WorkflowService\\Services\\WorkflowExecutionService.cs",
+              "ToolTip": "C:\\ArifWorkspace\\ArifAIChatbotGitHub\\ArifAIChatbot\\chatbot-saas-platform\\backend\\src\\WorkflowService\\Services\\WorkflowExecutionService.cs",
+              "RelativeToolTip": "src\\WorkflowService\\Services\\WorkflowExecutionService.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAA4AAABFAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-07-29T10:31:46.887Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 59,
+              "Title": "NotificationHub.cs",
+              "DocumentMoniker": "C:\\ArifWorkspace\\ArifAIChatbotGitHub\\ArifAIChatbot\\chatbot-saas-platform\\backend\\src\\NotificationService\\Hubs\\NotificationHub.cs",
+              "RelativeDocumentMoniker": "src\\NotificationService\\Hubs\\NotificationHub.cs",
+              "ToolTip": "C:\\ArifWorkspace\\ArifAIChatbotGitHub\\ArifAIChatbot\\chatbot-saas-platform\\backend\\src\\NotificationService\\Hubs\\NotificationHub.cs",
+              "RelativeToolTip": "src\\NotificationService\\Hubs\\NotificationHub.cs",
+              "ViewState": "AgIAADcAAAAAAAAAAAAQwFAAAAA9AAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-07-29T10:30:46.061Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 49,
+              "Title": "ServiceCollectionExtensions.cs",
+              "DocumentMoniker": "C:\\ArifWorkspace\\ArifAIChatbotGitHub\\ArifAIChatbot\\chatbot-saas-platform\\backend\\src\\Shared\\Infrastructure\\Extensions\\ServiceCollectionExtensions.cs",
+              "RelativeDocumentMoniker": "src\\Shared\\Infrastructure\\Extensions\\ServiceCollectionExtensions.cs",
+              "ToolTip": "C:\\ArifWorkspace\\ArifAIChatbotGitHub\\ArifAIChatbot\\chatbot-saas-platform\\backend\\src\\Shared\\Infrastructure\\Extensions\\ServiceCollectionExtensions.cs",
+              "RelativeToolTip": "src\\Shared\\Infrastructure\\Extensions\\ServiceCollectionExtensions.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-07-29T13:06:00.723Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 45,
+              "Title": "appsettings.json",
+              "DocumentMoniker": "C:\\ArifWorkspace\\ArifAIChatbotGitHub\\ArifAIChatbot\\chatbot-saas-platform\\backend\\src\\KnowledgeBaseService\\appsettings.json",
+              "RelativeDocumentMoniker": "src\\KnowledgeBaseService\\appsettings.json",
+              "ToolTip": "C:\\ArifWorkspace\\ArifAIChatbotGitHub\\ArifAIChatbot\\chatbot-saas-platform\\backend\\src\\KnowledgeBaseService\\appsettings.json",
+              "RelativeToolTip": "src\\KnowledgeBaseService\\appsettings.json",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAABYAAAAYAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001642|",
+              "WhenOpened": "2025-07-28T12:15:06.052Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 48,
               "Title": "Program.cs",
               "DocumentMoniker": "C:\\ArifWorkspace\\ArifAIChatbotGitHub\\ArifAIChatbot\\chatbot-saas-platform\\backend\\src\\SubscriptionService\\Program.cs",
               "RelativeDocumentMoniker": "src\\SubscriptionService\\Program.cs",
@@ -520,19 +1103,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 14,
-              "Title": "Program.cs",
-              "DocumentMoniker": "C:\\ArifWorkspace\\ArifAIChatbotGitHub\\ArifAIChatbot\\chatbot-saas-platform\\backend\\src\\TenantManagementService\\Program.cs",
-              "RelativeDocumentMoniker": "src\\TenantManagementService\\Program.cs",
-              "ToolTip": "C:\\ArifWorkspace\\ArifAIChatbotGitHub\\ArifAIChatbot\\chatbot-saas-platform\\backend\\src\\TenantManagementService\\Program.cs",
-              "RelativeToolTip": "src\\TenantManagementService\\Program.cs",
-              "ViewState": "AgIAACcAAAAAAAAAAAAAAE8AAAAAAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-07-29T06:04:50.322Z"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 15,
+              "DocumentIndex": 50,
               "Title": "Program.cs",
               "DocumentMoniker": "C:\\ArifWorkspace\\ArifAIChatbotGitHub\\ArifAIChatbot\\chatbot-saas-platform\\backend\\src\\NotificationService\\Program.cs",
               "RelativeDocumentMoniker": "src\\NotificationService\\Program.cs",
@@ -544,31 +1115,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 8,
-              "Title": "UserConfiguration.cs",
-              "DocumentMoniker": "C:\\ArifWorkspace\\ArifAIChatbotGitHub\\ArifAIChatbot\\chatbot-saas-platform\\backend\\src\\Shared\\Infrastructure\\Persistence\\Configurations\\UserConfiguration.cs",
-              "RelativeDocumentMoniker": "src\\Shared\\Infrastructure\\Persistence\\Configurations\\UserConfiguration.cs",
-              "ToolTip": "C:\\ArifWorkspace\\ArifAIChatbotGitHub\\ArifAIChatbot\\chatbot-saas-platform\\backend\\src\\Shared\\Infrastructure\\Persistence\\Configurations\\UserConfiguration.cs",
-              "RelativeToolTip": "src\\Shared\\Infrastructure\\Persistence\\Configurations\\UserConfiguration.cs",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-07-29T14:31:43.493Z"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 7,
-              "Title": "ApplicationDbContext.cs",
-              "DocumentMoniker": "C:\\ArifWorkspace\\ArifAIChatbotGitHub\\ArifAIChatbot\\chatbot-saas-platform\\backend\\src\\Shared\\Infrastructure\\Persistence\\ApplicationDbContext.cs",
-              "RelativeDocumentMoniker": "src\\Shared\\Infrastructure\\Persistence\\ApplicationDbContext.cs",
-              "ToolTip": "C:\\ArifWorkspace\\ArifAIChatbotGitHub\\ArifAIChatbot\\chatbot-saas-platform\\backend\\src\\Shared\\Infrastructure\\Persistence\\ApplicationDbContext.cs",
-              "RelativeToolTip": "src\\Shared\\Infrastructure\\Persistence\\ApplicationDbContext.cs",
-              "ViewState": "AgIAADIAAAAAAAAAAAAAwEgAAAAKAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-07-29T14:31:48.225Z"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 16,
+              "DocumentIndex": 51,
               "Title": "Program.cs",
               "DocumentMoniker": "C:\\ArifWorkspace\\ArifAIChatbotGitHub\\ArifAIChatbot\\chatbot-saas-platform\\backend\\src\\LiveAgentService\\Program.cs",
               "RelativeDocumentMoniker": "src\\LiveAgentService\\Program.cs",
@@ -580,7 +1127,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 17,
+              "DocumentIndex": 52,
               "Title": "Program.cs",
               "DocumentMoniker": "C:\\ArifWorkspace\\ArifAIChatbotGitHub\\ArifAIChatbot\\chatbot-saas-platform\\backend\\src\\KnowledgeBaseService\\Program.cs",
               "RelativeDocumentMoniker": "src\\KnowledgeBaseService\\Program.cs",
@@ -592,19 +1139,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 18,
-              "Title": "Program.cs",
-              "DocumentMoniker": "C:\\ArifWorkspace\\ArifAIChatbotGitHub\\ArifAIChatbot\\chatbot-saas-platform\\backend\\src\\AnalyticsService\\Program.cs",
-              "RelativeDocumentMoniker": "src\\AnalyticsService\\Program.cs",
-              "ToolTip": "C:\\ArifWorkspace\\ArifAIChatbotGitHub\\ArifAIChatbot\\chatbot-saas-platform\\backend\\src\\AnalyticsService\\Program.cs",
-              "RelativeToolTip": "src\\AnalyticsService\\Program.cs",
-              "ViewState": "AgIAADAAAAAAAAAAAAAAAE8AAAAYAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-07-29T06:03:21.14Z"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 79,
+              "DocumentIndex": 99,
               "Title": "20250729134445_Initial.cs",
               "DocumentMoniker": "C:\\ArifWorkspace\\ArifAIChatbotGitHub\\ArifAIChatbot\\chatbot-saas-platform\\backend\\src\\IdentityService\\Migrations\\20250729134445_Initial.cs",
               "RelativeDocumentMoniker": "src\\IdentityService\\Migrations\\20250729134445_Initial.cs",
@@ -616,7 +1151,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 30,
+              "DocumentIndex": 61,
               "Title": "WorkflowDesignerService.cs",
               "DocumentMoniker": "C:\\ArifWorkspace\\ArifAIChatbotGitHub\\ArifAIChatbot\\chatbot-saas-platform\\backend\\src\\WorkflowService\\Services\\WorkflowDesignerService.cs",
               "RelativeDocumentMoniker": "src\\WorkflowService\\Services\\WorkflowDesignerService.cs",
@@ -628,7 +1163,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 29,
+              "DocumentIndex": 60,
               "Title": "WorkflowTemplateService.cs",
               "DocumentMoniker": "C:\\ArifWorkspace\\ArifAIChatbotGitHub\\ArifAIChatbot\\chatbot-saas-platform\\backend\\src\\WorkflowService\\Services\\WorkflowTemplateService.cs",
               "RelativeDocumentMoniker": "src\\WorkflowService\\Services\\WorkflowTemplateService.cs",
@@ -640,31 +1175,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 13,
-              "Title": "IApplicationDbContext.cs",
-              "DocumentMoniker": "C:\\ArifWorkspace\\ArifAIChatbotGitHub\\ArifAIChatbot\\chatbot-saas-platform\\backend\\src\\Shared\\Application\\Common\\Interfaces\\IApplicationDbContext.cs",
-              "RelativeDocumentMoniker": "src\\Shared\\Application\\Common\\Interfaces\\IApplicationDbContext.cs",
-              "ToolTip": "C:\\ArifWorkspace\\ArifAIChatbotGitHub\\ArifAIChatbot\\chatbot-saas-platform\\backend\\src\\Shared\\Application\\Common\\Interfaces\\IApplicationDbContext.cs",
-              "RelativeToolTip": "src\\Shared\\Application\\Common\\Interfaces\\IApplicationDbContext.cs",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAACEAAAAAAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-07-29T08:37:41.394Z"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 27,
-              "Title": "PlansController.cs",
-              "DocumentMoniker": "C:\\ArifWorkspace\\ArifAIChatbotGitHub\\ArifAIChatbot\\chatbot-saas-platform\\backend\\src\\SubscriptionService\\Controllers\\PlansController.cs",
-              "RelativeDocumentMoniker": "src\\SubscriptionService\\Controllers\\PlansController.cs",
-              "ToolTip": "C:\\ArifWorkspace\\ArifAIChatbotGitHub\\ArifAIChatbot\\chatbot-saas-platform\\backend\\src\\SubscriptionService\\Controllers\\PlansController.cs",
-              "RelativeToolTip": "src\\SubscriptionService\\Controllers\\PlansController.cs",
-              "ViewState": "AgIAAEcAAAAAAAAAAAAQwGAAAAA9AAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-07-29T10:30:57.157Z"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 25,
+              "DocumentIndex": 57,
               "Title": "IInvoiceService.cs",
               "DocumentMoniker": "C:\\ArifWorkspace\\ArifAIChatbotGitHub\\ArifAIChatbot\\chatbot-saas-platform\\backend\\src\\SubscriptionService\\Services\\IInvoiceService.cs",
               "RelativeDocumentMoniker": "src\\SubscriptionService\\Services\\IInvoiceService.cs",
@@ -676,7 +1187,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 24,
+              "DocumentIndex": 56,
               "Title": "WorkflowService.cs",
               "DocumentMoniker": "C:\\ArifWorkspace\\ArifAIChatbotGitHub\\ArifAIChatbot\\chatbot-saas-platform\\backend\\src\\WorkflowService\\Services\\WorkflowService.cs",
               "RelativeDocumentMoniker": "src\\WorkflowService\\Services\\WorkflowService.cs",
@@ -688,7 +1199,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 23,
+              "DocumentIndex": 55,
               "Title": "DocumentProcessingService.cs",
               "DocumentMoniker": "C:\\ArifWorkspace\\ArifAIChatbotGitHub\\ArifAIChatbot\\chatbot-saas-platform\\backend\\src\\KnowledgeBaseService\\Services\\DocumentProcessingService.cs",
               "RelativeDocumentMoniker": "src\\KnowledgeBaseService\\Services\\DocumentProcessingService.cs",
@@ -700,7 +1211,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 21,
+              "DocumentIndex": 53,
               "Title": "WorkflowHub.cs",
               "DocumentMoniker": "C:\\ArifWorkspace\\ArifAIChatbotGitHub\\ArifAIChatbot\\chatbot-saas-platform\\backend\\src\\WorkflowService\\Hubs\\WorkflowHub.cs",
               "RelativeDocumentMoniker": "src\\WorkflowService\\Hubs\\WorkflowHub.cs",
@@ -712,19 +1223,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 20,
-              "Title": "Program.cs",
-              "DocumentMoniker": "C:\\ArifWorkspace\\ArifAIChatbotGitHub\\ArifAIChatbot\\chatbot-saas-platform\\backend\\src\\AIOrchestrationService\\Program.cs",
-              "RelativeDocumentMoniker": "src\\AIOrchestrationService\\Program.cs",
-              "ToolTip": "C:\\ArifWorkspace\\ArifAIChatbotGitHub\\ArifAIChatbot\\chatbot-saas-platform\\backend\\src\\AIOrchestrationService\\Program.cs",
-              "RelativeToolTip": "src\\AIOrchestrationService\\Program.cs",
-              "ViewState": "AgIAADYAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-07-29T11:26:28.615Z"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 22,
+              "DocumentIndex": 54,
               "Title": "ExternalIntegrationService.cs",
               "DocumentMoniker": "C:\\ArifWorkspace\\ArifAIChatbotGitHub\\ArifAIChatbot\\chatbot-saas-platform\\backend\\src\\WorkflowService\\Services\\ExternalIntegrationService.cs",
               "RelativeDocumentMoniker": "src\\WorkflowService\\Services\\ExternalIntegrationService.cs",
@@ -736,7 +1235,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 31,
+              "DocumentIndex": 62,
               "Title": "IWorkflowTemplateService.cs",
               "DocumentMoniker": "C:\\ArifWorkspace\\ArifAIChatbotGitHub\\ArifAIChatbot\\chatbot-saas-platform\\backend\\src\\WorkflowService\\Services\\IWorkflowTemplateService.cs",
               "RelativeDocumentMoniker": "src\\WorkflowService\\Services\\IWorkflowTemplateService.cs",
@@ -748,19 +1247,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 32,
-              "Title": "BillingService.cs",
-              "DocumentMoniker": "C:\\ArifWorkspace\\ArifAIChatbotGitHub\\ArifAIChatbot\\chatbot-saas-platform\\backend\\src\\SubscriptionService\\Services\\BillingService.cs",
-              "RelativeDocumentMoniker": "src\\SubscriptionService\\Services\\BillingService.cs",
-              "ToolTip": "C:\\ArifWorkspace\\ArifAIChatbotGitHub\\ArifAIChatbot\\chatbot-saas-platform\\backend\\src\\SubscriptionService\\Services\\BillingService.cs",
-              "RelativeToolTip": "src\\SubscriptionService\\Services\\BillingService.cs",
-              "ViewState": "AgIAANEAAAAAAAAAAAAAwOkAAAAWAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-07-29T10:29:01.272Z"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 33,
+              "DocumentIndex": 63,
               "Title": "TemplateService.cs",
               "DocumentMoniker": "C:\\ArifWorkspace\\ArifAIChatbotGitHub\\ArifAIChatbot\\chatbot-saas-platform\\backend\\src\\NotificationService\\Services\\TemplateService.cs",
               "RelativeDocumentMoniker": "src\\NotificationService\\Services\\TemplateService.cs",
@@ -772,7 +1259,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 34,
+              "DocumentIndex": 64,
               "Title": "NotificationService.cs",
               "DocumentMoniker": "C:\\ArifWorkspace\\ArifAIChatbotGitHub\\ArifAIChatbot\\chatbot-saas-platform\\backend\\src\\NotificationService\\Services\\NotificationService.cs",
               "RelativeDocumentMoniker": "src\\NotificationService\\Services\\NotificationService.cs",
@@ -784,19 +1271,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 35,
-              "Title": "VectorSearchService.cs",
-              "DocumentMoniker": "C:\\ArifWorkspace\\ArifAIChatbotGitHub\\ArifAIChatbot\\chatbot-saas-platform\\backend\\src\\KnowledgeBaseService\\Services\\VectorSearchService.cs",
-              "RelativeDocumentMoniker": "src\\KnowledgeBaseService\\Services\\VectorSearchService.cs",
-              "ToolTip": "C:\\ArifWorkspace\\ArifAIChatbotGitHub\\ArifAIChatbot\\chatbot-saas-platform\\backend\\src\\KnowledgeBaseService\\Services\\VectorSearchService.cs",
-              "RelativeToolTip": "src\\KnowledgeBaseService\\Services\\VectorSearchService.cs",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAsAAAAjAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-07-29T10:28:16.871Z"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 26,
+              "DocumentIndex": 58,
               "Title": "InvoiceService.cs",
               "DocumentMoniker": "C:\\ArifWorkspace\\ArifAIChatbotGitHub\\ArifAIChatbot\\chatbot-saas-platform\\backend\\src\\SubscriptionService\\Services\\InvoiceService.cs",
               "RelativeDocumentMoniker": "src\\SubscriptionService\\Services\\InvoiceService.cs",
@@ -808,19 +1283,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 37,
-              "Title": "WorkflowsController.cs",
-              "DocumentMoniker": "C:\\ArifWorkspace\\ArifAIChatbotGitHub\\ArifAIChatbot\\chatbot-saas-platform\\backend\\src\\WorkflowService\\Controllers\\WorkflowsController.cs",
-              "RelativeDocumentMoniker": "src\\WorkflowService\\Controllers\\WorkflowsController.cs",
-              "ToolTip": "C:\\ArifWorkspace\\ArifAIChatbotGitHub\\ArifAIChatbot\\chatbot-saas-platform\\backend\\src\\WorkflowService\\Controllers\\WorkflowsController.cs",
-              "RelativeToolTip": "src\\WorkflowService\\Controllers\\WorkflowsController.cs",
-              "ViewState": "AgIAAJ0BAAAAAAAAAAAiwLQBAABRAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-07-29T10:23:40.11Z"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 38,
+              "DocumentIndex": 65,
               "Title": "UsageTrackingService.cs",
               "DocumentMoniker": "C:\\ArifWorkspace\\ArifAIChatbotGitHub\\ArifAIChatbot\\chatbot-saas-platform\\backend\\src\\SubscriptionService\\Services\\UsageTrackingService.cs",
               "RelativeDocumentMoniker": "src\\SubscriptionService\\Services\\UsageTrackingService.cs",
@@ -832,7 +1295,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 39,
+              "DocumentIndex": 66,
               "Title": "StripePaymentService.cs",
               "DocumentMoniker": "C:\\ArifWorkspace\\ArifAIChatbotGitHub\\ArifAIChatbot\\chatbot-saas-platform\\backend\\src\\SubscriptionService\\Services\\StripePaymentService.cs",
               "RelativeDocumentMoniker": "src\\SubscriptionService\\Services\\StripePaymentService.cs",
@@ -844,7 +1307,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 40,
+              "DocumentIndex": 67,
               "Title": "PlanService.cs",
               "DocumentMoniker": "C:\\ArifWorkspace\\ArifAIChatbotGitHub\\ArifAIChatbot\\chatbot-saas-platform\\backend\\src\\SubscriptionService\\Services\\PlanService.cs",
               "RelativeDocumentMoniker": "src\\SubscriptionService\\Services\\PlanService.cs",
@@ -856,19 +1319,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 41,
-              "Title": "ISubscriptionService.cs",
-              "DocumentMoniker": "C:\\ArifWorkspace\\ArifAIChatbotGitHub\\ArifAIChatbot\\chatbot-saas-platform\\backend\\src\\SubscriptionService\\Services\\ISubscriptionService.cs",
-              "RelativeDocumentMoniker": "src\\SubscriptionService\\Services\\ISubscriptionService.cs",
-              "ToolTip": "C:\\ArifWorkspace\\ArifAIChatbotGitHub\\ArifAIChatbot\\chatbot-saas-platform\\backend\\src\\SubscriptionService\\Services\\ISubscriptionService.cs",
-              "RelativeToolTip": "src\\SubscriptionService\\Services\\ISubscriptionService.cs",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAcAAAALAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-07-29T10:19:08.33Z"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 42,
+              "DocumentIndex": 68,
               "Title": "IPlanService.cs",
               "DocumentMoniker": "C:\\ArifWorkspace\\ArifAIChatbotGitHub\\ArifAIChatbot\\chatbot-saas-platform\\backend\\src\\SubscriptionService\\Services\\IPlanService.cs",
               "RelativeDocumentMoniker": "src\\SubscriptionService\\Services\\IPlanService.cs",
@@ -880,19 +1331,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 43,
-              "Title": "NotificationsController.cs",
-              "DocumentMoniker": "C:\\ArifWorkspace\\ArifAIChatbotGitHub\\ArifAIChatbot\\chatbot-saas-platform\\backend\\src\\NotificationService\\Controllers\\NotificationsController.cs",
-              "RelativeDocumentMoniker": "src\\NotificationService\\Controllers\\NotificationsController.cs",
-              "ToolTip": "C:\\ArifWorkspace\\ArifAIChatbotGitHub\\ArifAIChatbot\\chatbot-saas-platform\\backend\\src\\NotificationService\\Controllers\\NotificationsController.cs",
-              "RelativeToolTip": "src\\NotificationService\\Controllers\\NotificationsController.cs",
-              "ViewState": "AgIAAP4AAAAAAAAAAAAUwBkBAAAaAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-07-29T10:15:02.718Z"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 44,
+              "DocumentIndex": 69,
               "Title": "NotificationModels.cs",
               "DocumentMoniker": "C:\\ArifWorkspace\\ArifAIChatbotGitHub\\ArifAIChatbot\\chatbot-saas-platform\\backend\\src\\NotificationService\\Models\\NotificationModels.cs",
               "RelativeDocumentMoniker": "src\\NotificationService\\Models\\NotificationModels.cs",
@@ -904,19 +1343,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 36,
-              "Title": "KnowledgeBaseService.cs",
-              "DocumentMoniker": "C:\\ArifWorkspace\\ArifAIChatbotGitHub\\ArifAIChatbot\\chatbot-saas-platform\\backend\\src\\KnowledgeBaseService\\Services\\KnowledgeBaseService.cs",
-              "RelativeDocumentMoniker": "src\\KnowledgeBaseService\\Services\\KnowledgeBaseService.cs",
-              "ToolTip": "C:\\ArifWorkspace\\ArifAIChatbotGitHub\\ArifAIChatbot\\chatbot-saas-platform\\backend\\src\\KnowledgeBaseService\\Services\\KnowledgeBaseService.cs",
-              "RelativeToolTip": "src\\KnowledgeBaseService\\Services\\KnowledgeBaseService.cs",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAcAAAA1AAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-07-28T12:49:41.09Z"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 45,
+              "DocumentIndex": 70,
               "Title": "NotificationType.cs",
               "DocumentMoniker": "C:\\ArifWorkspace\\ArifAIChatbotGitHub\\ArifAIChatbot\\chatbot-saas-platform\\backend\\src\\Shared\\Domain\\Enums\\NotificationType.cs",
               "RelativeDocumentMoniker": "src\\Shared\\Domain\\Enums\\NotificationType.cs",
@@ -928,7 +1355,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 48,
+              "DocumentIndex": 72,
               "Title": "appsettings.Development.json",
               "DocumentMoniker": "C:\\ArifWorkspace\\ArifAIChatbotGitHub\\ArifAIChatbot\\chatbot-saas-platform\\backend\\src\\SubscriptionService\\appsettings.Development.json",
               "RelativeDocumentMoniker": "src\\SubscriptionService\\appsettings.Development.json",
@@ -940,7 +1367,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 57,
+              "DocumentIndex": 81,
               "Title": "appsettings.json",
               "DocumentMoniker": "C:\\ArifWorkspace\\ArifAIChatbotGitHub\\ArifAIChatbot\\chatbot-saas-platform\\backend\\src\\AnalyticsService\\appsettings.json",
               "RelativeDocumentMoniker": "src\\AnalyticsService\\appsettings.json",
@@ -952,7 +1379,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 46,
+              "DocumentIndex": 71,
               "Title": "SubscriptionService.csproj",
               "DocumentMoniker": "C:\\ArifWorkspace\\ArifAIChatbotGitHub\\ArifAIChatbot\\chatbot-saas-platform\\backend\\src\\SubscriptionService\\SubscriptionService.csproj",
               "RelativeDocumentMoniker": "src\\SubscriptionService\\SubscriptionService.csproj",
@@ -960,11 +1387,12 @@
               "RelativeToolTip": "src\\SubscriptionService\\SubscriptionService.csproj",
               "ViewState": "AgIAAAAAAAAAAAAAAAAAACkAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000758|",
-              "WhenOpened": "2025-07-28T12:21:31.344Z"
+              "WhenOpened": "2025-07-28T12:21:31.344Z",
+              "EditorCaption": ""
             },
             {
               "$type": "Document",
-              "DocumentIndex": 49,
+              "DocumentIndex": 73,
               "Title": "appsettings.Development.json",
               "DocumentMoniker": "C:\\ArifWorkspace\\ArifAIChatbotGitHub\\ArifAIChatbot\\chatbot-saas-platform\\backend\\src\\TenantManagementService\\appsettings.Development.json",
               "RelativeDocumentMoniker": "src\\TenantManagementService\\appsettings.Development.json",
@@ -976,7 +1404,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 50,
+              "DocumentIndex": 74,
               "Title": "appsettings.Development.json",
               "DocumentMoniker": "C:\\ArifWorkspace\\ArifAIChatbotGitHub\\ArifAIChatbot\\chatbot-saas-platform\\backend\\src\\NotificationService\\appsettings.Development.json",
               "RelativeDocumentMoniker": "src\\NotificationService\\appsettings.Development.json",
@@ -988,7 +1416,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 51,
+              "DocumentIndex": 75,
               "Title": "appsettings.Development.json",
               "DocumentMoniker": "C:\\ArifWorkspace\\ArifAIChatbotGitHub\\ArifAIChatbot\\chatbot-saas-platform\\backend\\src\\LiveAgentService\\appsettings.Development.json",
               "RelativeDocumentMoniker": "src\\LiveAgentService\\appsettings.Development.json",
@@ -1000,7 +1428,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 52,
+              "DocumentIndex": 76,
               "Title": "appsettings.Development.json",
               "DocumentMoniker": "C:\\ArifWorkspace\\ArifAIChatbotGitHub\\ArifAIChatbot\\chatbot-saas-platform\\backend\\src\\KnowledgeBaseService\\appsettings.Development.json",
               "RelativeDocumentMoniker": "src\\KnowledgeBaseService\\appsettings.Development.json",
@@ -1012,7 +1440,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 53,
+              "DocumentIndex": 77,
               "Title": "appsettings.Development.json",
               "DocumentMoniker": "C:\\ArifWorkspace\\ArifAIChatbotGitHub\\ArifAIChatbot\\chatbot-saas-platform\\backend\\src\\AIOrchestrationService\\appsettings.Development.json",
               "RelativeDocumentMoniker": "src\\AIOrchestrationService\\appsettings.Development.json",
@@ -1024,19 +1452,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 47,
-              "Title": "AnalyticsController.cs",
-              "DocumentMoniker": "C:\\ArifWorkspace\\ArifAIChatbotGitHub\\ArifAIChatbot\\chatbot-saas-platform\\backend\\src\\AnalyticsService\\Controllers\\AnalyticsController.cs",
-              "RelativeDocumentMoniker": "src\\AnalyticsService\\Controllers\\AnalyticsController.cs",
-              "ToolTip": "C:\\ArifWorkspace\\ArifAIChatbotGitHub\\ArifAIChatbot\\chatbot-saas-platform\\backend\\src\\AnalyticsService\\Controllers\\AnalyticsController.cs",
-              "RelativeToolTip": "src\\AnalyticsService\\Controllers\\AnalyticsController.cs",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAABMAAAAFAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-07-29T07:55:02.619Z"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 54,
+              "DocumentIndex": 78,
               "Title": "appsettings.json",
               "DocumentMoniker": "C:\\ArifWorkspace\\ArifAIChatbotGitHub\\ArifAIChatbot\\chatbot-saas-platform\\backend\\src\\WorkflowService\\appsettings.json",
               "RelativeDocumentMoniker": "src\\WorkflowService\\appsettings.json",
@@ -1048,7 +1464,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 59,
+              "DocumentIndex": 83,
               "Title": "appsettings.Development.json",
               "DocumentMoniker": "C:\\ArifWorkspace\\ArifAIChatbotGitHub\\ArifAIChatbot\\chatbot-saas-platform\\backend\\src\\ChatRuntimeService\\appsettings.Development.json",
               "RelativeDocumentMoniker": "src\\ChatRuntimeService\\appsettings.Development.json",
@@ -1060,7 +1476,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 56,
+              "DocumentIndex": 80,
               "Title": "appsettings.Development.json",
               "DocumentMoniker": "C:\\ArifWorkspace\\ArifAIChatbotGitHub\\ArifAIChatbot\\chatbot-saas-platform\\backend\\src\\AnalyticsService\\appsettings.Development.json",
               "RelativeDocumentMoniker": "src\\AnalyticsService\\appsettings.Development.json",
@@ -1072,7 +1488,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 55,
+              "DocumentIndex": 79,
               "Title": "appsettings.json",
               "DocumentMoniker": "C:\\ArifWorkspace\\ArifAIChatbotGitHub\\ArifAIChatbot\\chatbot-saas-platform\\backend\\src\\AIOrchestrationService\\appsettings.json",
               "RelativeDocumentMoniker": "src\\AIOrchestrationService\\appsettings.json",
@@ -1084,7 +1500,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 58,
+              "DocumentIndex": 82,
               "Title": "appsettings.json",
               "DocumentMoniker": "C:\\ArifWorkspace\\ArifAIChatbotGitHub\\ArifAIChatbot\\chatbot-saas-platform\\backend\\src\\ChatRuntimeService\\appsettings.json",
               "RelativeDocumentMoniker": "src\\ChatRuntimeService\\appsettings.json",
@@ -1096,31 +1512,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 60,
-              "Title": "appsettings.Development.json",
-              "DocumentMoniker": "C:\\ArifWorkspace\\ArifAIChatbotGitHub\\ArifAIChatbot\\chatbot-saas-platform\\backend\\src\\IdentityService\\appsettings.Development.json",
-              "RelativeDocumentMoniker": "src\\IdentityService\\appsettings.Development.json",
-              "ToolTip": "C:\\ArifWorkspace\\ArifAIChatbotGitHub\\ArifAIChatbot\\chatbot-saas-platform\\backend\\src\\IdentityService\\appsettings.Development.json",
-              "RelativeToolTip": "src\\IdentityService\\appsettings.Development.json",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAABEAAAAAAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001642|",
-              "WhenOpened": "2025-07-28T12:11:49.633Z"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 61,
-              "Title": "appsettings.json",
-              "DocumentMoniker": "C:\\ArifWorkspace\\ArifAIChatbotGitHub\\ArifAIChatbot\\chatbot-saas-platform\\backend\\src\\KnowledgeBaseService\\appsettings.json",
-              "RelativeDocumentMoniker": "src\\KnowledgeBaseService\\appsettings.json",
-              "ToolTip": "C:\\ArifWorkspace\\ArifAIChatbotGitHub\\ArifAIChatbot\\chatbot-saas-platform\\backend\\src\\KnowledgeBaseService\\appsettings.json",
-              "RelativeToolTip": "src\\KnowledgeBaseService\\appsettings.json",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAcAAAAAAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001642|",
-              "WhenOpened": "2025-07-28T12:15:06.052Z"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 67,
+              "DocumentIndex": 89,
               "Title": "Program.cs",
               "DocumentMoniker": "C:\\ArifWorkspace\\ArifAIChatbotGitHub\\ArifAIChatbot\\chatbot-saas-platform\\backend\\src\\ApiGateway\\Program.cs",
               "RelativeDocumentMoniker": "src\\ApiGateway\\Program.cs",
@@ -1132,7 +1524,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 66,
+              "DocumentIndex": 88,
               "Title": "ocelot.json",
               "DocumentMoniker": "C:\\ArifWorkspace\\ArifAIChatbotGitHub\\ArifAIChatbot\\chatbot-saas-platform\\backend\\src\\ApiGateway\\ocelot.json",
               "RelativeDocumentMoniker": "src\\ApiGateway\\ocelot.json",
@@ -1144,7 +1536,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 62,
+              "DocumentIndex": 84,
               "Title": "appsettings.json",
               "DocumentMoniker": "C:\\ArifWorkspace\\ArifAIChatbotGitHub\\ArifAIChatbot\\chatbot-saas-platform\\backend\\src\\LiveAgentService\\appsettings.json",
               "RelativeDocumentMoniker": "src\\LiveAgentService\\appsettings.json",
@@ -1156,7 +1548,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 63,
+              "DocumentIndex": 85,
               "Title": "appsettings.json",
               "DocumentMoniker": "C:\\ArifWorkspace\\ArifAIChatbotGitHub\\ArifAIChatbot\\chatbot-saas-platform\\backend\\src\\NotificationService\\appsettings.json",
               "RelativeDocumentMoniker": "src\\NotificationService\\appsettings.json",
@@ -1168,7 +1560,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 64,
+              "DocumentIndex": 86,
               "Title": "appsettings.json",
               "DocumentMoniker": "C:\\ArifWorkspace\\ArifAIChatbotGitHub\\ArifAIChatbot\\chatbot-saas-platform\\backend\\src\\TenantManagementService\\appsettings.json",
               "RelativeDocumentMoniker": "src\\TenantManagementService\\appsettings.json",
@@ -1180,7 +1572,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 65,
+              "DocumentIndex": 87,
               "Title": "appsettings.json",
               "DocumentMoniker": "C:\\ArifWorkspace\\ArifAIChatbotGitHub\\ArifAIChatbot\\chatbot-saas-platform\\backend\\src\\SubscriptionService\\appsettings.json",
               "RelativeDocumentMoniker": "src\\SubscriptionService\\appsettings.json",
@@ -1192,7 +1584,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 68,
+              "DocumentIndex": 90,
               "Title": "launchSettings.json",
               "DocumentMoniker": "C:\\ArifWorkspace\\ArifAIChatbotGitHub\\ArifAIChatbot\\chatbot-saas-platform\\backend\\src\\ApiGateway\\Properties\\launchSettings.json",
               "RelativeDocumentMoniker": "src\\ApiGateway\\Properties\\launchSettings.json",
@@ -1204,7 +1596,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 69,
+              "DocumentIndex": 91,
               "Title": "appsettings.Development.json",
               "DocumentMoniker": "C:\\ArifWorkspace\\ArifAIChatbotGitHub\\ArifAIChatbot\\chatbot-saas-platform\\backend\\src\\ApiGateway\\appsettings.Development.json",
               "RelativeDocumentMoniker": "src\\ApiGateway\\appsettings.Development.json",
@@ -1216,19 +1608,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 78,
-              "Title": "AIOrchestrationService.csproj",
-              "DocumentMoniker": "C:\\ArifWorkspace\\ArifAIChatbotGitHub\\ArifAIChatbot\\chatbot-saas-platform\\backend\\src\\AIOrchestrationService\\AIOrchestrationService.csproj",
-              "RelativeDocumentMoniker": "src\\AIOrchestrationService\\AIOrchestrationService.csproj",
-              "ToolTip": "C:\\ArifWorkspace\\ArifAIChatbotGitHub\\ArifAIChatbot\\chatbot-saas-platform\\backend\\src\\AIOrchestrationService\\AIOrchestrationService.csproj",
-              "RelativeToolTip": "src\\AIOrchestrationService\\AIOrchestrationService.csproj",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAABYAAAAAAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000758|",
-              "WhenOpened": "2025-07-28T12:10:11.605Z"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 70,
+              "DocumentIndex": 92,
               "Title": "WorkflowService.csproj",
               "DocumentMoniker": "C:\\ArifWorkspace\\ArifAIChatbotGitHub\\ArifAIChatbot\\chatbot-saas-platform\\backend\\src\\WorkflowService\\WorkflowService.csproj",
               "RelativeDocumentMoniker": "src\\WorkflowService\\WorkflowService.csproj",
@@ -1236,11 +1616,12 @@
               "RelativeToolTip": "src\\WorkflowService\\WorkflowService.csproj",
               "ViewState": "AgIAAAYAAAAAAAAAAAAAABoAAABDAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000758|",
-              "WhenOpened": "2025-07-28T12:21:50.606Z"
+              "WhenOpened": "2025-07-28T12:21:50.606Z",
+              "EditorCaption": ""
             },
             {
               "$type": "Document",
-              "DocumentIndex": 71,
+              "DocumentIndex": 93,
               "Title": "TenantManagementService.csproj",
               "DocumentMoniker": "C:\\ArifWorkspace\\ArifAIChatbotGitHub\\ArifAIChatbot\\chatbot-saas-platform\\backend\\src\\TenantManagementService\\TenantManagementService.csproj",
               "RelativeDocumentMoniker": "src\\TenantManagementService\\TenantManagementService.csproj",
@@ -1248,11 +1629,12 @@
               "RelativeToolTip": "src\\TenantManagementService\\TenantManagementService.csproj",
               "ViewState": "AgIAAAAAAAAAAAAAAAAAABUAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000758|",
-              "WhenOpened": "2025-07-28T12:21:36.528Z"
+              "WhenOpened": "2025-07-28T12:21:36.528Z",
+              "EditorCaption": ""
             },
             {
               "$type": "Document",
-              "DocumentIndex": 72,
+              "DocumentIndex": 94,
               "Title": "NotificationService.csproj",
               "DocumentMoniker": "C:\\ArifWorkspace\\ArifAIChatbotGitHub\\ArifAIChatbot\\chatbot-saas-platform\\backend\\src\\NotificationService\\NotificationService.csproj",
               "RelativeDocumentMoniker": "src\\NotificationService\\NotificationService.csproj",
@@ -1260,11 +1642,12 @@
               "RelativeToolTip": "src\\NotificationService\\NotificationService.csproj",
               "ViewState": "AgIAAAAAAAAAAAAAAAAAACQAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000758|",
-              "WhenOpened": "2025-07-28T12:21:26.023Z"
+              "WhenOpened": "2025-07-28T12:21:26.023Z",
+              "EditorCaption": ""
             },
             {
               "$type": "Document",
-              "DocumentIndex": 73,
+              "DocumentIndex": 95,
               "Title": "LiveAgentService.csproj",
               "DocumentMoniker": "C:\\ArifWorkspace\\ArifAIChatbotGitHub\\ArifAIChatbot\\chatbot-saas-platform\\backend\\src\\LiveAgentService\\LiveAgentService.csproj",
               "RelativeDocumentMoniker": "src\\LiveAgentService\\LiveAgentService.csproj",
@@ -1272,11 +1655,12 @@
               "RelativeToolTip": "src\\LiveAgentService\\LiveAgentService.csproj",
               "ViewState": "AgIAAAAAAAAAAAAAAAAAAB4AAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000758|",
-              "WhenOpened": "2025-07-28T12:21:20.051Z"
+              "WhenOpened": "2025-07-28T12:21:20.051Z",
+              "EditorCaption": ""
             },
             {
               "$type": "Document",
-              "DocumentIndex": 74,
+              "DocumentIndex": 96,
               "Title": "KnowledgeBaseService.csproj",
               "DocumentMoniker": "C:\\ArifWorkspace\\ArifAIChatbotGitHub\\ArifAIChatbot\\chatbot-saas-platform\\backend\\src\\KnowledgeBaseService\\KnowledgeBaseService.csproj",
               "RelativeDocumentMoniker": "src\\KnowledgeBaseService\\KnowledgeBaseService.csproj",
@@ -1284,11 +1668,12 @@
               "RelativeToolTip": "src\\KnowledgeBaseService\\KnowledgeBaseService.csproj",
               "ViewState": "AgIAAAAAAAAAAAAAAAAAACgAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000758|",
-              "WhenOpened": "2025-07-28T12:21:14.775Z"
+              "WhenOpened": "2025-07-28T12:21:14.775Z",
+              "EditorCaption": ""
             },
             {
               "$type": "Document",
-              "DocumentIndex": 75,
+              "DocumentIndex": 97,
               "Title": "ChatRuntimeService.csproj",
               "DocumentMoniker": "C:\\ArifWorkspace\\ArifAIChatbotGitHub\\ArifAIChatbot\\chatbot-saas-platform\\backend\\src\\ChatRuntimeService\\ChatRuntimeService.csproj",
               "RelativeDocumentMoniker": "src\\ChatRuntimeService\\ChatRuntimeService.csproj",
@@ -1296,23 +1681,12 @@
               "RelativeToolTip": "src\\ChatRuntimeService\\ChatRuntimeService.csproj",
               "ViewState": "AgIAAAAAAAAAAAAAAAAAAB4AAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000758|",
-              "WhenOpened": "2025-07-28T12:21:03.905Z"
+              "WhenOpened": "2025-07-28T12:21:03.905Z",
+              "EditorCaption": ""
             },
             {
               "$type": "Document",
-              "DocumentIndex": 76,
-              "Title": "AnalyticsService.csproj",
-              "DocumentMoniker": "C:\\ArifWorkspace\\ArifAIChatbotGitHub\\ArifAIChatbot\\chatbot-saas-platform\\backend\\src\\AnalyticsService\\AnalyticsService.csproj",
-              "RelativeDocumentMoniker": "src\\AnalyticsService\\AnalyticsService.csproj",
-              "ToolTip": "C:\\ArifWorkspace\\ArifAIChatbotGitHub\\ArifAIChatbot\\chatbot-saas-platform\\backend\\src\\AnalyticsService\\AnalyticsService.csproj",
-              "RelativeToolTip": "src\\AnalyticsService\\AnalyticsService.csproj",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAD0AAAAAAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000758|",
-              "WhenOpened": "2025-07-28T12:20:56.087Z"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 77,
+              "DocumentIndex": 98,
               "Title": "appsettings.json",
               "DocumentMoniker": "C:\\ArifWorkspace\\ArifAIChatbotGitHub\\ArifAIChatbot\\chatbot-saas-platform\\backend\\src\\ApiGateway\\appsettings.json",
               "RelativeDocumentMoniker": "src\\ApiGateway\\appsettings.json",
