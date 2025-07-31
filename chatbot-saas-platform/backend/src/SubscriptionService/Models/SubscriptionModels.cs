@@ -229,3 +229,37 @@ public class UsageStatistics
     public DateTime PeriodStart { get; set; }
     public DateTime PeriodEnd { get; set; }
 }
+public class ApplyCouponRequest
+{
+    public string CouponCode { get; set; } = string.Empty;
+}
+
+public class UpdateTaxInfoRequest
+{
+    public string? TaxId { get; set; }
+    public bool? TaxExempt { get; set; }
+    public string? BusinessType { get; set; }
+}
+
+public class PreviewChangeRequest
+{
+    public Guid NewPlanId { get; set; }
+    public string BillingCycle { get; set; } = "monthly";
+}
+
+public class UpgradeSubscriptionRequest
+{
+    public Guid NewPlanId { get; set; }
+}
+
+public class DowngradeSubscriptionRequest
+{
+    public Guid NewPlanId { get; set; }
+}
+
+public class RecordUsageRequest
+{
+    public string MetricName { get; set; } = string.Empty;
+    public int Quantity { get; set; }
+    public Dictionary<string, object> Metadata { get; set; } = new();
+}

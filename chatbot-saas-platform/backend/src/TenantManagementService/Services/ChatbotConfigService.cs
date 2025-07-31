@@ -163,9 +163,9 @@ public class ChatbotConfigService : IChatbotConfigService
             .Select(d => new
             {
                 d.Id,
-                d.Name,
-                d.Type,
-                d.Size,
+                d.Title,
+                d.FileType,
+                d.FileSize,
                 d.CreatedAt
             })
             .ToListAsync();
@@ -192,9 +192,9 @@ public class ChatbotConfigService : IChatbotConfigService
 
         var doc = new Document
         {
-            Name = document.FileName,
-            Type = document.ContentType,
-            Size = document.Length,
+            Title = document.FileName,
+            FileType = document.ContentType,
+            FileSize = document.Length,
             FilePath = filePath,
             ChatbotConfigId = configId,
             TenantId = tenantId,

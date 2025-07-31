@@ -2,6 +2,7 @@ using Microsoft.EntityFrameworkCore;
 using Shared.Application.Common.Interfaces;
 using Shared.Domain.Entities;
 using LiveAgentService.Models;
+using Shared.Domain.Enums;
 
 namespace LiveAgentService.Services;
 
@@ -119,9 +120,9 @@ public class AgentManagementService : IAgentManagementService
             PeriodStart = start,
             PeriodEnd = end,
             TotalConversations = conversations.Count,
-            ResolvedConversations = conversations.Count(c => c.Status == "Resolved"),
-            AverageResponseTime = conversations.Any() ? conversations.Average(c => c.AverageResponseTime ?? 0) : 0,
-            AverageResolutionTime = 0,
+            ResolvedConversations = conversations.Count(c => c.Status ==  ConversationStatus.Resolved),
+            AverageResponseTime =new TimeSpan(Convert.ToInt64( conversations.Any() ? conversations.Average(c => c.AverageResponseTime ?? 0) : 0)),
+            AverageResolutionTime = new TimeSpan(),
             CustomerSatisfactionScore = conversations.Where(c => c.Rating.HasValue).Any() 
                 ? conversations.Where(c => c.Rating.HasValue).Average(c => c.Rating.Value) 
                 : 0,

@@ -32,6 +32,8 @@ public class UserDto
     public DateTime CreatedAt { get; set; }
     public DateTime? LastLoginAt { get; set; }
     public string PreferredLanguage { get; set; } = string.Empty;
+    public string? PhoneNumber { get; internal set; }
+    public object AvatarUrl { get; internal set; }
 }
 
 public class CreateUserRequest

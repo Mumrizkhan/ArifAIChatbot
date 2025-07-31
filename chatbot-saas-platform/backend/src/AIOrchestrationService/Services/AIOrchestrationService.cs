@@ -31,7 +31,7 @@ public class AIOrchestrationService : IAIOrchestrationService
         var aiRequest = new AIRequest
         {
             Message = request.Message,
-            ConversationId = conversation.Id.ToString(),
+            ConversationId = conversation.Id,
             Language = request.Language,
             Context = request.Context
         };
@@ -74,6 +74,26 @@ public class AIOrchestrationService : IAIOrchestrationService
             Intents = aiResponse.Intents,
             Metadata = aiResponse.Metadata
         };
+    }
+
+    private async Task<Conversation> GetOrCreateConversationAsync(Guid conversationId, Guid tenantId)
+    {
+        var existing = await _context.Conversations
+            .FirstOrDefaultAsync(c => c.Id == conversationId && c.TenantId == tenantId);
+
+        if (existing != null)
+            return existing;
+
+        var conversation = new Conversation
+        {
+            TenantId = tenantId,
+            Status = Shared.Domain.Enums.ConversationStatus.Active,
+            CreatedAt = DateTime.UtcNow
+        };
+
+        _context.Conversations.Add(conversation);
+        await _context.SaveChangesAsync();
+        return conversation;
     }
 
     public async Task<SentimentAnalysisResponse> AnalyzeSentimentAsync(SentimentAnalysisRequest request, Guid tenantId)
@@ -123,7 +143,7 @@ public class AIOrchestrationService : IAIOrchestrationService
         var conversation = new Conversation
         {
             TenantId = tenantId,
-            Status = "Active",
+            Status = Shared.Domain.Enums.ConversationStatus.Active,
             CreatedAt = DateTime.UtcNow
         };
 

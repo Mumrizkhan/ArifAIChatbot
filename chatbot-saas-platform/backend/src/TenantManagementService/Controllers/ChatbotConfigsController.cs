@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using TenantManagementService.Services;
 using TenantManagementService.Models;
 using Shared.Infrastructure.Services;
+using Shared.Application.Common.Interfaces;
 
 namespace TenantManagementService.Controllers;
 

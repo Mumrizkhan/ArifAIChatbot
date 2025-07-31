@@ -1,6 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using Shared.Application.Common.Interfaces;
 using Shared.Domain.Entities;
+using Shared.Domain.Enums;
 using TenantManagementService.Models;
 
 namespace TenantManagementService.Services;
@@ -173,7 +174,7 @@ public class TeamService : ITeamService
             LastName = user.LastName,
             Role = userTenant.Role.ToString(),
             IsActive = userTenant.IsActive,
-            JoinedAt = userTenant.JoinedAt ?? DateTime.UtcNow
+            JoinedAt = userTenant.JoinedAt 
         };
     }
 }

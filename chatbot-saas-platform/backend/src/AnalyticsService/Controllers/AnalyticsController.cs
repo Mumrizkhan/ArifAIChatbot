@@ -534,69 +534,69 @@ public class AnalyticsController : ControllerBase
     }
 }
 
-public class CustomReportRequest
-{
-    public DateTime StartDate { get; set; }
-    public DateTime EndDate { get; set; }
-    public string? TenantId { get; set; }
-    public List<string> Metrics { get; set; } = new();
-}
+//public class CustomReportRequest
+//{
+//    public DateTime StartDate { get; set; }
+//    public DateTime EndDate { get; set; }
+//    public string? TenantId { get; set; }
+//    public List<string> Metrics { get; set; } = new();
+//}
 
-public class CompareAnalyticsRequest
-{
-    public string DateFrom { get; set; } = string.Empty;
-    public string DateTo { get; set; } = string.Empty;
-    public string PreviousDateFrom { get; set; } = string.Empty;
-    public string PreviousDateTo { get; set; } = string.Empty;
-    public string Metric { get; set; } = string.Empty;
-}
+//public class CompareAnalyticsRequest
+//{
+//    public string DateFrom { get; set; } = string.Empty;
+//    public string DateTo { get; set; } = string.Empty;
+//    public string PreviousDateFrom { get; set; } = string.Empty;
+//    public string PreviousDateTo { get; set; } = string.Empty;
+//    public string Metric { get; set; } = string.Empty;
+//}
 
-public class CreateGoalRequest
-{
-    public string Name { get; set; } = string.Empty;
-    public double Target { get; set; }
-    public string Metric { get; set; } = string.Empty;
-    public string Deadline { get; set; } = string.Empty;
-}
+//public class CreateGoalRequest
+//{
+//    public string Name { get; set; } = string.Empty;
+//    public double Target { get; set; }
+//    public string Metric { get; set; } = string.Empty;
+//    public string Deadline { get; set; } = string.Empty;
+//}
 
-public class UpdateGoalRequest
-{
-    public string? Name { get; set; }
-    public double? Target { get; set; }
-    public string? Deadline { get; set; }
-}
+//public class UpdateGoalRequest
+//{
+//    public string? Name { get; set; }
+//    public double? Target { get; set; }
+//    public string? Deadline { get; set; }
+//}
 
-public class CreateReportRequest
-{
-    public string Name { get; set; } = string.Empty;
-    public string Type { get; set; } = string.Empty;
-    public List<string> Metrics { get; set; } = new();
-}
+//public class CreateReportRequest
+//{
+//    public string Name { get; set; } = string.Empty;
+//    public string Type { get; set; } = string.Empty;
+//    public List<string> Metrics { get; set; } = new();
+//}
 
-public class UpdateReportRequest
-{
-    public string? Name { get; set; }
-    public string? Type { get; set; }
-    public List<string>? Metrics { get; set; }
-}
+//public class UpdateReportRequest
+//{
+//    public string? Name { get; set; }
+//    public string? Type { get; set; }
+//    public List<string>? Metrics { get; set; }
+//}
 
-public class AnalyticsRequest
-{
-    public DateTime StartDate { get; set; }
-    public DateTime EndDate { get; set; }
-}
+//public class AnalyticsRequest
+//{
+//    public DateTime StartDate { get; set; }
+//    public DateTime EndDate { get; set; }
+//}
 
-public class ExportAnalyticsRequest
-{
-    public DateTime StartDate { get; set; }
-    public DateTime EndDate { get; set; }
-    public string Format { get; set; } = "csv";
-}
+//public class ExportAnalyticsRequest
+//{
+//    public DateTime StartDate { get; set; }
+//    public DateTime EndDate { get; set; }
+//    public string Format { get; set; } = "csv";
+//}
 
-public class CustomReportRequest
-{
-    public string ReportType { get; set; } = string.Empty;
-    public DateTime StartDate { get; set; }
-    public DateTime EndDate { get; set; }
-    public List<string> Metrics { get; set; } = new();
-}
+//public class CustomReportRequest
+//{
+//    public string ReportType { get; set; } = string.Empty;
+//    public DateTime StartDate { get; set; }
+//    public DateTime EndDate { get; set; }
+//    public List<string> Metrics { get; set; } = new();
+//}

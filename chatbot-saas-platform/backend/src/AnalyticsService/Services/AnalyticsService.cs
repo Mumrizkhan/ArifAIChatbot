@@ -22,8 +22,8 @@ public class AnalyticsService : IAnalyticsService
         return new ConversationsSummaryDto
         {
             TotalConversations = conversations.Count,
-            ActiveConversations = conversations.Count(c => c.Status == "Active"),
-            CompletedConversations = conversations.Count(c => c.Status == "Completed"),
+            ActiveConversations = conversations.Count(c => c.Status == Shared.Domain.Enums.ConversationStatus.Active),
+            CompletedConversations = conversations.Count(c => c.Status == Shared.Domain.Enums.ConversationStatus.Completed),
             AverageResponseTime = conversations.Any() ? conversations.Average(c => c.AverageResponseTime ?? 0) : 0
         };
     }
@@ -57,10 +57,10 @@ public class AnalyticsService : IAnalyticsService
     public async Task<RealtimeAnalyticsDto> GetRealtimeAnalyticsAsync()
     {
         var activeConversations = await _context.Conversations
-            .CountAsync(c => c.Status == "Active");
+            .CountAsync(c => c.Status == Shared.Domain.Enums.ConversationStatus.Active);
         
         var availableAgents = await _context.Users
-            .CountAsync(u => u.Role == "Agent" && u.IsOnline);
+            .CountAsync(u => u.Role == Shared.Domain.Enums.UserRole.Agent && u.IsOnline);
 
         return new RealtimeAnalyticsDto
         {
@@ -149,8 +149,8 @@ public class AnalyticsService : IAnalyticsService
         return new ConversationMetricsDto
         {
             Total = conversations.Count,
-            Completed = conversations.Count(c => c.Status == "Completed"),
-            Active = conversations.Count(c => c.Status == "Active"),
+            Completed = conversations.Count(c => c.Status == Shared.Domain.Enums.ConversationStatus.Completed),
+            Active = conversations.Count(c => c.Status == Shared.Domain.Enums.ConversationStatus.Active),
             AverageRating = conversations.Where(c => c.Rating.HasValue).Any() 
                 ? conversations.Where(c => c.Rating.HasValue).Average(c => c.Rating.Value) 
                 : 0
@@ -159,7 +159,7 @@ public class AnalyticsService : IAnalyticsService
 
     public async Task<AgentMetricsDto> GetAgentMetricsAsync(string timeRange, string? tenantId)
     {
-        var query = _context.Users.Where(u => u.Role == "Agent");
+        var query = _context.Users.Where(u => u.Role == Shared.Domain.Enums.UserRole.Agent);
         
         if (!string.IsNullOrEmpty(tenantId) && Guid.TryParse(tenantId, out var tid))
         {
@@ -261,8 +261,8 @@ public class AnalyticsService : IAnalyticsService
         return new SubscriptionMetricsDto
         {
             TotalSubscriptions = subscriptions.Count,
-            ActiveSubscriptions = subscriptions.Count(s => s.Status == "Active"),
-            TotalRevenue = subscriptions.Where(s => s.Status == "Active").Sum(s => s.Amount)
+            ActiveSubscriptions = subscriptions.Count(s => s.Status == Shared.Domain.Entities.SubscriptionStatus.Active),
+            TotalRevenue = subscriptions.Where(s => s.Status ==  Shared.Domain.Entities.SubscriptionStatus.Active).Sum(s => s.Amount)
         };
     }
 

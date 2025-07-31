@@ -25,6 +25,8 @@ public class AIResponse
     public TimeSpan ProcessingTime { get; set; }
     public bool IsSuccessful { get; set; } = true;
     public string? ErrorMessage { get; set; }
+    public string Response { get; internal set; }
+    public string ConversationId { get; internal set; }
 }
 
 public class ConversationMessage
@@ -66,4 +68,110 @@ public class TranslationRequest
     public string Text { get; set; } = string.Empty;
     public string SourceLanguage { get; set; } = "auto";
     public string TargetLanguage { get; set; } = "en";
+}
+
+public class ChatRequest
+{
+    public string Message { get; set; } = string.Empty;
+    public Guid ConversationId { get; set; }
+    public string? Language { get; set; }
+    public string? Model { get; set; }
+    public double? Temperature { get; set; }
+    public int? MaxTokens { get; set; }
+    public Dictionary<string, object> Context { get; internal set; }
+}
+
+public class ChatResponse
+{
+    public string Content { get; set; } = string.Empty;
+    public string Language { get; set; } = string.Empty;
+    public List<string> Intents { get; set; } = new();
+    public double Confidence { get; set; }
+    public List<string> SourceDocuments { get; set; } = new();
+    public int TokensUsed { get; set; }
+    public TimeSpan ProcessingTime { get; set; }
+    public bool IsSuccessful { get; set; }
+    public string? ErrorMessage { get; set; }
+}
+
+public class TranslateRequest
+{
+    public string Text { get; set; } = string.Empty;
+    public string? SourceLanguage { get; set; }
+    public string TargetLanguage { get; set; } = string.Empty;
+}
+
+public class TranslateResponse
+{
+    public string OriginalText { get; set; } = string.Empty;
+    public string TranslatedText { get; set; } = string.Empty;
+    public string SourceLanguage { get; set; } = string.Empty;
+    public string TargetLanguage { get; set; } = string.Empty;
+}
+
+public class SummarizeRequest
+{
+    public Guid ConversationId { get; set; }
+}
+
+public class SummarizeResponse
+{
+    public Guid ConversationId { get; set; }
+    public string Summary { get; set; } = string.Empty;
+    public int MessageCount { get; set; }
+}
+
+public class IntentRequest
+{
+    public string Message { get; set; } = string.Empty;
+}
+
+public class IntentResponse
+{
+    public string Message { get; set; } = string.Empty;
+    public List<string> Intents { get; set; } = new();
+}
+
+public class SentimentRequest
+{
+    public string Message { get; set; } = string.Empty;
+}
+
+public class SentimentResponse
+{
+    public string Message { get; set; } = string.Empty;
+    public string Sentiment { get; set; } = string.Empty;
+}
+
+public class SentimentAnalysisRequest
+{
+    public string Message { get; set; } = string.Empty;
+    public string? Language { get; set; }
+}
+
+public class SentimentAnalysisResponse
+{
+    public string Sentiment { get; set; } = string.Empty;
+    public double Score { get; set; }
+    public double Confidence { get; set; }
+}
+
+public class IntentRecognitionRequest
+{
+    public string Message { get; set; } = string.Empty;
+    public string? Language { get; set; }
+}
+
+public class IntentRecognitionResponse
+{
+    public string Intent { get; set; } = string.Empty;
+    public double Confidence { get; set; }
+    public Dictionary<string, object> Entities { get; set; } = new();
+}
+
+public class SearchRequest
+{
+    public string Query { get; set; } = string.Empty;
+    public int Limit { get; set; } = 3;
+    public string? CollectionName { get; set; }
 }

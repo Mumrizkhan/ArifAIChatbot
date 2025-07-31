@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Shared.Domain.Enums;
 
 namespace Shared.Domain.Entities
 {
@@ -153,6 +154,7 @@ namespace Shared.Domain.Entities
         Incomplete,
         IncompleteExpired
     }
+
 
     public enum BillingCycle
     {

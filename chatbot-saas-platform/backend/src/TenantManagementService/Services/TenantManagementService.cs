@@ -1,6 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using Shared.Application.Common.Interfaces;
 using Shared.Domain.Entities;
+using Shared.Domain.Enums;
 using TenantManagementService.Models;
 
 namespace TenantManagementService.Services;
@@ -68,7 +69,7 @@ public class TenantManagementService : ITenantManagementService
         if (!string.IsNullOrEmpty(search))
         {
             query = query.Where(t => t.Name.Contains(search) || 
-                                   (t.Description != null && t.Description.Contains(search)));
+                                   (t.Domain != null && t.Domain.Contains(search)));
         }
 
         var totalCount = await query.CountAsync();
@@ -100,8 +101,8 @@ public class TenantManagementService : ITenantManagementService
         if (!string.IsNullOrEmpty(request.Name))
             tenant.Name = request.Name;
         
-        if (request.Description != null)
-            tenant.Description = request.Description;
+        if (request.CustomDomain != null)
+            tenant.CustomDomain = request.CustomDomain;
         
         if (request.LogoUrl != null)
             tenant.LogoUrl = request.LogoUrl;

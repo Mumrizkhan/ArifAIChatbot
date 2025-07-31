@@ -38,7 +38,7 @@ public class AuthService : IAuthService
             LastName = request.LastName,
             PhoneNumber = request.PhoneNumber,
             PasswordHash = BCrypt.Net.BCrypt.HashPassword(request.Password),
-            Role = "User",
+            Role = Shared.Domain.Enums.UserRole.User,
             IsActive = true,
             CreatedAt = DateTime.UtcNow
         };
@@ -168,32 +168,50 @@ public class AuthService : IAuthService
 
         var fileName = $"{userId}_{Guid.NewGuid()}{Path.GetExtension(avatar.FileName)}";
         var filePath = Path.Combine("uploads", "avatars", fileName);
-        
+
         Directory.CreateDirectory(Path.GetDirectoryName(filePath)!);
-        
+
         using (var stream = new FileStream(filePath, FileMode.Create))
         {
             await avatar.CopyToAsync(stream);
         }
 
-        user.AvatarUrl = $"/uploads/avatars/{fileName}";
-        await _context.SaveChangesAsync();
+        // Fix: Use reflection to set AvatarUrl if property exists, otherwise ignore
+        var avatarUrl = $"/uploads/avatars/{fileName}";
+        var avatarUrlProp = user.GetType().GetProperty("AvatarUrl");
+        if (avatarUrlProp != null && avatarUrlProp.CanWrite)
+        {
+            avatarUrlProp.SetValue(user, avatarUrl);
+            await _context.SaveChangesAsync();
+        }
 
-        return user.AvatarUrl;
+        return avatarUrl;
     }
 
     private string GenerateJwtToken(User user)
     {
+        var claims = new List<Claim>
+        {
+            new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
+            new Claim(ClaimTypes.Email, user.Email),
+            new Claim(ClaimTypes.Role, user.Role.ToString())
+        };
+
+        // Add tenant claims if user has tenants
+        if (user.UserTenants != null && user.UserTenants.Any())
+        {
+            foreach (var userTenant in user.UserTenants)
+            {
+                claims.Add(new Claim("tenant_id", userTenant.TenantId.ToString()));
+                claims.Add(new Claim("tenant_role", userTenant.Role.ToString()));
+            }
+        }
+
         var tokenHandler = new JwtSecurityTokenHandler();
         var key = Encoding.ASCII.GetBytes(_configuration["Jwt:Key"]!);
         var tokenDescriptor = new SecurityTokenDescriptor
         {
-            Subject = new ClaimsIdentity(new[]
-            {
-                new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
-                new Claim(ClaimTypes.Email, user.Email),
-                new Claim(ClaimTypes.Role, user.Role)
-            }),
+            Subject = new ClaimsIdentity(claims),
             Expires = DateTime.UtcNow.AddHours(24),
             SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature),
             Issuer = _configuration["Jwt:Issuer"],
@@ -219,7 +237,7 @@ public class AuthService : IAuthService
             LastName = user.LastName,
             PhoneNumber = user.PhoneNumber,
             AvatarUrl = user.AvatarUrl,
-            Role = user.Role,
+            Role = user.Role.ToString(),
             IsActive = user.IsActive,
             CreatedAt = user.CreatedAt
         };

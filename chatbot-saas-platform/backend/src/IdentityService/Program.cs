@@ -9,6 +9,7 @@ using Shared.Infrastructure.Persistence;
 using Shared.Infrastructure.Services;
 using Shared.Infrastructure.Extensions;
 using System.Text;
+using IdentityService.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 

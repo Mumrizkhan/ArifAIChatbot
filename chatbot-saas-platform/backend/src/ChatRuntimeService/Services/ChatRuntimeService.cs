@@ -2,6 +2,7 @@ using Microsoft.EntityFrameworkCore;
 using Shared.Application.Common.Interfaces;
 using Shared.Domain.Entities;
 using ChatRuntimeService.Models;
+using Shared.Domain.Enums;
 
 namespace ChatRuntimeService.Services;
 
@@ -22,7 +23,7 @@ public class ChatRuntimeService : IChatRuntimeService
         {
             TenantId = tenantId,
             UserId = request.UserId,
-            Status = "Active",
+            Status =  Shared.Domain.Enums.ConversationStatus.Active,
             CreatedAt = DateTime.UtcNow
         };
 
@@ -80,7 +81,7 @@ public class ChatRuntimeService : IChatRuntimeService
         return new ConversationDetailDto
         {
             Id = conversation.Id,
-            Status = conversation.Status,
+            Status = conversation.Status.ToString(),
             TenantId = conversation.TenantId,
             UserId = conversation.UserId,
             AssignedAgentId = conversation.AssignedAgentId,
@@ -111,7 +112,7 @@ public class ChatRuntimeService : IChatRuntimeService
 
         if (conversation == null) return false;
 
-        conversation.Status = request.Status;
+        conversation.Status =Enum.Parse<ConversationStatus>( request.Status);
         conversation.UpdatedAt = DateTime.UtcNow;
         await _context.SaveChangesAsync();
         return true;
@@ -145,7 +146,7 @@ public class ChatRuntimeService : IChatRuntimeService
         return new ConversationDto
         {
             Id = conversation.Id,
-            Status = conversation.Status,
+            Status = conversation.Status.ToString(),
             TenantId = conversation.TenantId,
             UserId = conversation.UserId,
             AssignedAgentId = conversation.AssignedAgentId,

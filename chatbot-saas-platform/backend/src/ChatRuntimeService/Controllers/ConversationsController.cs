@@ -252,7 +252,7 @@ public class ConversationsController : ControllerBase
                 ConversationId = id,
                 Content = request.Content,
                 Type = request.Type,
-                Sender = "agent",
+                Sender =MessageSender.Agent,
                 SenderId = _currentUserService.UserId,
                 CreatedAt = DateTime.UtcNow,
                 TenantId = _tenantService.GetCurrentTenantId(),
@@ -286,7 +286,7 @@ public class ConversationsController : ControllerBase
 public class SendMessageRequest
 {
     public string Content { get; set; } = string.Empty;
-    public string Type { get; set; } = "text";
+    public MessageType Type { get; set; } = MessageType.Text;
     public Dictionary<string, object>? Metadata { get; set; }
 }
 

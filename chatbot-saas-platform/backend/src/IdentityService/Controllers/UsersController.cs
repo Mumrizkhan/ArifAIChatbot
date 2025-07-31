@@ -166,7 +166,4 @@ public class UsersController : ControllerBase
     }
 }
 
-public class AssignRoleRequest
-{
-    public string Role { get; set; } = string.Empty;
-}
+

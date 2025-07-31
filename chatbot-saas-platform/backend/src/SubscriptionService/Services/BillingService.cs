@@ -282,6 +282,43 @@ public class BillingService : IBillingService
         }
     }
 
+    public async Task<CouponResult> ApplyCouponAsync(string couponCode, Guid tenantId)
+    {
+        // TODO: Implement actual coupon logic
+        if (couponCode == "DISCOUNT10")
+        {
+            return new CouponResult
+            {
+                IsValid = true,
+                DiscountAmount = 10,
+                DiscountPercentage = 10,
+                ErrorMessage = null
+            };
+        }
+        return new CouponResult
+        {
+            IsValid = false,
+            DiscountAmount = 0,
+            DiscountPercentage = 0,
+            ErrorMessage = "Invalid coupon code"
+        };
+    }
+
+    public async Task<List<TaxRate>> GetTaxRatesAsync(string? country, string? state)
+    {
+        // TODO: Implement actual tax rate lookup
+        return new List<TaxRate>
+        {
+            new TaxRate
+            {
+                Country = country ?? "US",
+                State = state ?? "CA",
+                Rate = 0.075m,
+                Description = "California Sales Tax"
+            }
+        };
+    }
+
     private string GenerateInvoiceNumber()
     {
         var timestamp = DateTime.UtcNow.ToString("yyyyMMdd");

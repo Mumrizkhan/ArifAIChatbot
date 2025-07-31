@@ -38,7 +38,7 @@ public class ChatService : IChatService
             conversation = new Conversation
             {
                 TenantId = tenantId,
-                Status = "Active",
+                Status =  Shared.Domain.Enums.ConversationStatus.Active,
                 CreatedAt = DateTime.UtcNow
             };
 
@@ -89,7 +89,7 @@ public class ChatService : IChatService
         var conversation = new Conversation
         {
             TenantId = tenantId,
-            Status = "Active",
+            Status = Shared.Domain.Enums.ConversationStatus.Active,
             CreatedAt = DateTime.UtcNow
         };
 
@@ -113,7 +113,7 @@ public class ChatService : IChatService
         return new ConversationDto
         {
             Id = conversation.Id,
-            Status = conversation.Status,
+            Status = conversation.Status.ToString(),
             TenantId = conversation.TenantId,
             UserId = conversation.UserId,
             AssignedAgentId = conversation.AssignedAgentId,
@@ -130,7 +130,7 @@ public class ChatService : IChatService
 
         if (conversation == null) return false;
 
-        conversation.Status = "Escalated";
+        conversation.Status = Shared.Domain.Enums.ConversationStatus.Escalated;
         conversation.UpdatedAt = DateTime.UtcNow;
         await _context.SaveChangesAsync();
         return true;

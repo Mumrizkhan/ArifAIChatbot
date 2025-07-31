@@ -17,4 +17,6 @@ public interface ISubscriptionService
     Task ProcessSubscriptionRenewalsAsync();
     Task ProcessTrialExpirationsAsync();
     Task<BillingStatistics> GetBillingStatisticsAsync(DateTime? startDate = null, DateTime? endDate = null);
+    Task<PreviewSubscriptionChangeResult> PreviewSubscriptionChangeAsync(Guid newPlanId, Guid tenantId, BillingCycle billingCycle);
+
 }

@@ -56,5 +56,9 @@ public class UserConfiguration : IEntityTypeConfiguration<User>
             .WithOne(ut => ut.User)
             .HasForeignKey(ut => ut.UserId)
             .OnDelete(DeleteBehavior.Cascade);
+        builder.HasMany(u => u.AssignedConversations)
+    .WithOne(c => c.AssignedAgent)
+    .HasForeignKey(c => c.AssignedAgentId)
+    .OnDelete(DeleteBehavior.SetNull);
     }
 }

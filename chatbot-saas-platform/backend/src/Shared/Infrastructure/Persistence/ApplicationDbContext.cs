@@ -55,6 +55,8 @@ public class ApplicationDbContext : DbContext, IApplicationDbContext
 
     public DbSet<NotificationPreference> NotificationPreferences => Set<NotificationPreference>();
 
+    public DbSet<ChatbotConfig> ChatbotConfigs => Set<ChatbotConfig>();
+
     public new DbSet<TEntity> Set<TEntity>() where TEntity : class => base.Set<TEntity>();
     public EntityEntry<TEntity> Entry<TEntity>(TEntity entity) where TEntity : class
        => base.Entry(entity);

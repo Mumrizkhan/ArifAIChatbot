@@ -37,6 +37,7 @@ public class UpdateTenantRequest
     public string? DefaultLanguage { get; set; }
     public bool IsRtlEnabled { get; set; } = false;
     public string? LogoUrl { get; set; }
+    public bool? IsActive { get; internal set; }
 }
 
 public class TenantSettingsDto

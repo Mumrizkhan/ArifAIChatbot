@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using Shared.Application.Common.Interfaces;
 using SubscriptionService.Services;
 using SubscriptionService.Models;
+using Shared.Domain.Entities;
 
 namespace SubscriptionService.Controllers;
 
@@ -436,39 +437,10 @@ public class SubscriptionsController : ControllerBase
     {
         try
         {
-            var totalRevenue = await _context.Subscriptions
-                .Where(s => s.Status == Shared.Domain.Enums.SubscriptionStatus.Active)
-                .SumAsync(s => s.Amount);
+         var stats=await  _subscriptionService.GetBillingStatisticsAsync();
+          
 
-            var activeSubscriptions = await _context.Subscriptions
-                .CountAsync(s => s.Status == Shared.Domain.Enums.SubscriptionStatus.Active);
-
-            var trialSubscriptions = await _context.Subscriptions
-                .CountAsync(s => s.Status == Shared.Domain.Enums.SubscriptionStatus.Trial);
-
-            var cancelledSubscriptions = await _context.Subscriptions
-                .CountAsync(s => s.Status == Shared.Domain.Enums.SubscriptionStatus.Cancelled);
-
-            var monthlyRevenue = await _context.Subscriptions
-                .Where(s => s.Status == Shared.Domain.Enums.SubscriptionStatus.Active && 
-                           s.BillingCycle == "monthly")
-                .SumAsync(s => s.Amount);
-
-            var yearlyRevenue = await _context.Subscriptions
-                .Where(s => s.Status == Shared.Domain.Enums.SubscriptionStatus.Active && 
-                           s.BillingCycle == "yearly")
-                .SumAsync(s => s.Amount);
-
-            return Ok(new
-            {
-                TotalRevenue = totalRevenue,
-                MonthlyRevenue = monthlyRevenue,
-                YearlyRevenue = yearlyRevenue,
-                ActiveSubscriptions = activeSubscriptions,
-                TrialSubscriptions = trialSubscriptions,
-                CancelledSubscriptions = cancelledSubscriptions,
-                TotalSubscriptions = activeSubscriptions + trialSubscriptions + cancelledSubscriptions
-            });
+            return Ok(stats);
         }
         catch (Exception ex)
         {
@@ -527,16 +499,9 @@ public class SubscriptionsController : ControllerBase
         {
             var tenantId = _tenantService.GetCurrentTenantId();
             var preview = await _subscriptionService.PreviewSubscriptionChangeAsync(
-                request.NewPlanId, tenantId, request.BillingCycle);
+                request.NewPlanId, tenantId,Enum.Parse<BillingCycle>( request.BillingCycle));
 
-            return Ok(new
-            {
-                CurrentPlan = preview.CurrentPlan,
-                NewPlan = preview.NewPlan,
-                ProrationAmount = preview.ProrationAmount,
-                NextBillingAmount = preview.NextBillingAmount,
-                EffectiveDate = preview.EffectiveDate
-            });
+            return Ok(preview);
         }
         catch (Exception ex)
         {
@@ -647,37 +612,4 @@ public class SubscriptionsController : ControllerBase
     }
 }
 
-public class ApplyCouponRequest
-{
-    public string CouponCode { get; set; } = string.Empty;
-}
 
-public class UpdateTaxInfoRequest
-{
-    public string? TaxId { get; set; }
-    public bool? TaxExempt { get; set; }
-    public string? BusinessType { get; set; }
-}
-
-public class PreviewChangeRequest
-{
-    public Guid NewPlanId { get; set; }
-    public string BillingCycle { get; set; } = "monthly";
-}
-
-public class UpgradeSubscriptionRequest
-{
-    public Guid NewPlanId { get; set; }
-}
-
-public class DowngradeSubscriptionRequest
-{
-    public Guid NewPlanId { get; set; }
-}
-
-public class RecordUsageRequest
-{
-    public string MetricName { get; set; } = string.Empty;
-    public int Quantity { get; set; }
-    public Dictionary<string, object> Metadata { get; set; } = new();
-}

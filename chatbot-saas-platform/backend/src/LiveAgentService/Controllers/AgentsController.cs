@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using LiveAgentService.Services;
 using LiveAgentService.Models;
 using Shared.Infrastructure.Services;
+using Shared.Application.Common.Interfaces;
 
 namespace LiveAgentService.Controllers;
 
@@ -324,7 +325,7 @@ public class AgentsController : ControllerBase
             var tenantId = _tenantService.GetCurrentTenantId();
             var agent = await _agentManagementService.GetAgentProfileAsync(id, tenantId);
 
-            if (agent == null)
+            if (agent==null)
             {
                 return NotFound(new { message = "Agent not found" });
             }
@@ -377,44 +378,4 @@ public class AgentsController : ControllerBase
     }
 }
 
-public class UpdateStatusRequest
-{
-    public string Status { get; set; } = string.Empty;
-}
 
-public class AssignConversationRequest
-{
-    public Guid ConversationId { get; set; }
-    public Guid AgentId { get; set; }
-}
-
-public class TransferConversationRequest
-{
-    public Guid ConversationId { get; set; }
-    public Guid ToAgentId { get; set; }
-    public string Reason { get; set; } = string.Empty;
-}
-
-public class NextInQueueRequest
-{
-    public string? Department { get; set; }
-}
-
-public class EscalateConversationRequest
-{
-    public Guid ConversationId { get; set; }
-    public string Reason { get; set; } = string.Empty;
-}
-
-public class UpdateAgentProfileRequest
-{
-    public string? Name { get; set; }
-    public string? Email { get; set; }
-    public string? Phone { get; set; }
-    public string? Bio { get; set; }
-    public string? Location { get; set; }
-    public string? Timezone { get; set; }
-    public string? Language { get; set; }
-    public string[]? Skills { get; set; }
-    public string[]? Specializations { get; set; }
-}
