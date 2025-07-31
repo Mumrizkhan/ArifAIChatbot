@@ -89,31 +89,48 @@ public class TenantsController : ControllerBase
     }
 
     [HttpGet]
-    public async Task<IActionResult> GetTenants()
+    public async Task<IActionResult> GetTenants([FromQuery] int page = 1, [FromQuery] int pageSize = 20, [FromQuery] string? search = null)
     {
         try
         {
-            var userTenants = await _context.UserTenants
-                .Include(ut => ut.Tenant)
-                .Where(ut => ut.UserId == _currentUserService.UserId)
-                .Select(ut => new TenantDto
+            var query = _context.Tenants.AsQueryable();
+
+            if (!string.IsNullOrEmpty(search))
+            {
+                query = query.Where(t => t.Name.Contains(search) || 
+                                        t.Subdomain.Contains(search) ||
+                                        (t.CustomDomain != null && t.CustomDomain.Contains(search)));
+            }
+
+            var totalCount = await query.CountAsync();
+            var tenants = await query
+                .OrderByDescending(t => t.CreatedAt)
+                .Skip((page - 1) * pageSize)
+                .Take(pageSize)
+                .Select(t => new TenantDto
                 {
-                    Id = ut.Tenant.Id,
-                    Name = ut.Tenant.Name,
-                    Subdomain = ut.Tenant.Subdomain,
-                    CustomDomain = ut.Tenant.CustomDomain,
-                    Status = ut.Tenant.Status.ToString(),
-                    PrimaryColor = ut.Tenant.PrimaryColor,
-                    SecondaryColor = ut.Tenant.SecondaryColor,
-                    DefaultLanguage = ut.Tenant.DefaultLanguage,
-                    IsRtlEnabled = ut.Tenant.IsRtlEnabled,
-                    TrialEndsAt = ut.Tenant.TrialEndsAt,
-                    CreatedAt = ut.Tenant.CreatedAt,
-                    Role = ut.Role.ToString()
+                    Id = t.Id,
+                    Name = t.Name,
+                    Subdomain = t.Subdomain,
+                    CustomDomain = t.CustomDomain,
+                    Status = t.Status.ToString(),
+                    PrimaryColor = t.PrimaryColor,
+                    SecondaryColor = t.SecondaryColor,
+                    DefaultLanguage = t.DefaultLanguage,
+                    IsRtlEnabled = t.IsRtlEnabled,
+                    TrialEndsAt = t.TrialEndsAt,
+                    CreatedAt = t.CreatedAt,
+                    LogoUrl = t.LogoUrl
                 })
                 .ToListAsync();
 
-            return Ok(userTenants);
+            return Ok(new
+            {
+                data = tenants,
+                totalCount,
+                currentPage = page,
+                pageSize
+            });
         }
         catch (Exception ex)
         {
@@ -301,6 +318,68 @@ public class TenantsController : ControllerBase
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error updating tenant settings");
+            return StatusCode(500, new { message = "Internal server error" });
+        }
+    }
+
+    [HttpGet("{id}/stats")]
+    public async Task<IActionResult> GetTenantStats(Guid id)
+    {
+        try
+        {
+            var tenant = await _context.Tenants.FirstOrDefaultAsync(t => t.Id == id);
+            if (tenant == null)
+            {
+                return NotFound(new { message = "Tenant not found" });
+            }
+
+            var conversationCount = await _context.Conversations
+                .CountAsync(c => c.TenantId == id);
+            
+            var messageCount = await _context.Messages
+                .CountAsync(m => m.TenantId == id);
+            
+            var userCount = await _context.UserTenants
+                .CountAsync(ut => ut.TenantId == id && ut.IsActive);
+
+            var stats = new
+            {
+                TotalConversations = conversationCount,
+                TotalMessages = messageCount,
+                TotalUsers = userCount,
+                Status = tenant.Status.ToString(),
+                CreatedAt = tenant.CreatedAt,
+                TrialEndsAt = tenant.TrialEndsAt
+            };
+
+            return Ok(stats);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error getting tenant stats for {TenantId}", id);
+            return StatusCode(500, new { message = "Internal server error" });
+        }
+    }
+
+    [HttpDelete("{id}")]
+    public async Task<IActionResult> DeleteTenant(Guid id)
+    {
+        try
+        {
+            var tenant = await _context.Tenants.FirstOrDefaultAsync(t => t.Id == id);
+            if (tenant == null)
+            {
+                return NotFound(new { message = "Tenant not found" });
+            }
+
+            tenant.Status = TenantStatus.Inactive;
+            await _context.SaveChangesAsync();
+
+            return Ok(new { message = "Tenant deleted successfully" });
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error deleting tenant {TenantId}", id);
             return StatusCode(500, new { message = "Internal server error" });
         }
     }
