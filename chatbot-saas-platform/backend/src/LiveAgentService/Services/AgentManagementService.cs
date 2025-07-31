@@ -19,7 +19,7 @@ public class AgentManagementService : IAgentManagementService
     public async Task<List<AgentDto>> GetAllAgentsAsync(Guid tenantId)
     {
         var agents = await _context.Users
-            .Where(u => u.TenantId == tenantId && u.Role == "Agent")
+            .Where(u => u.UserTenants.Any(ut => ut.TenantId == tenantId && ut.Role == TenantRole.Agent))
             .ToListAsync();
 
         return agents.Select(MapToAgentDto).ToList();
@@ -28,7 +28,8 @@ public class AgentManagementService : IAgentManagementService
     public async Task<AgentProfileDto?> GetAgentProfileAsync(Guid id, Guid tenantId)
     {
         var agent = await _context.Users
-            .FirstOrDefaultAsync(u => u.Id == id && u.TenantId == tenantId && u.Role == "Agent");
+            .FirstOrDefaultAsync(u => u.Id == id && 
+                u.UserTenants.Any(ut => ut.TenantId == tenantId));
 
         return agent != null ? MapToAgentProfileDto(agent) : null;
     }
@@ -36,17 +37,24 @@ public class AgentManagementService : IAgentManagementService
     public async Task<bool> UpdateAgentProfileAsync(Guid id, UpdateAgentProfileRequest request, Guid tenantId)
     {
         var agent = await _context.Users
-            .FirstOrDefaultAsync(u => u.Id == id && u.TenantId == tenantId && u.Role == "Agent");
+            .FirstOrDefaultAsync(u => u.Id == id && 
+                u.UserTenants.Any(ut => ut.TenantId == tenantId));
 
         if (agent == null) return false;
 
-        if (!string.IsNullOrEmpty(request.FirstName))
-            agent.FirstName = request.FirstName;
-        
-        if (!string.IsNullOrEmpty(request.LastName))
-            agent.LastName = request.LastName;
+        if (!string.IsNullOrEmpty(request.Name))
+        {
+            var nameParts = request.Name.Split(' ', 2);
+            agent.FirstName = nameParts[0];
+            agent.LastName = nameParts.Length > 1 ? nameParts[1] : "";
+        }
 
-        agent.UpdatedAt = DateTime.UtcNow;
+        if (!string.IsNullOrEmpty(request.Email))
+            agent.Email = request.Email;
+
+        if (!string.IsNullOrEmpty(request.Language))
+            agent.PreferredLanguage = request.Language;
+
         await _context.SaveChangesAsync();
         return true;
     }
@@ -60,17 +68,33 @@ public class AgentManagementService : IAgentManagementService
             .Where(c => c.AssignedAgentId == agentId && 
                        c.TenantId == tenantId &&
                        c.CreatedAt >= start && c.CreatedAt <= end)
+            .Include(c => c.Messages)
             .ToListAsync();
+
+        var totalConversations = conversations.Count;
+        var resolvedConversations = conversations.Count(c => c.Status == ConversationStatus.Resolved);
+        var averageResponseTime = conversations
+            .Where(c => c.Messages.Any())
+            .Select(c => c.Messages.Where(m => m.Sender == MessageSender.Agent).FirstOrDefault()?.CreatedAt - c.CreatedAt)
+            .Where(t => t.HasValue)
+            .DefaultIfEmpty(TimeSpan.Zero)
+            .Average(t => t?.TotalMinutes ?? 0);
+
+        var customerSatisfactionRating = conversations
+            .Where(c => c.CustomerSatisfactionRating.HasValue)
+            .Average(c => c.CustomerSatisfactionRating) ?? 0;
 
         return new AgentStatsDto
         {
-            TotalConversations = conversations.Count,
-            ActiveConversations = conversations.Count(c => c.Status == "Active"),
-            ResolvedConversations = conversations.Count(c => c.Status == "Resolved"),
-            AverageResponseTime = conversations.Any() ? conversations.Average(c => c.AverageResponseTime ?? 0) : 0,
-            CustomerSatisfactionRating = conversations.Where(c => c.Rating.HasValue).Any() 
-                ? conversations.Where(c => c.Rating.HasValue).Average(c => c.Rating.Value) 
-                : 0
+            AgentId = agentId,
+            PeriodStart = start,
+            PeriodEnd = end,
+            TotalConversations = totalConversations,
+            ResolvedConversations = resolvedConversations,
+            ResolutionRate = totalConversations > 0 ? (double)resolvedConversations / totalConversations : 0,
+            AverageResponseTimeMinutes = averageResponseTime,
+            CustomerSatisfactionRating = customerSatisfactionRating,
+            ActiveConversations = conversations.Count(c => c.Status == ConversationStatus.Active)
         };
     }
 
@@ -108,14 +132,86 @@ public class AgentManagementService : IAgentManagementService
     public async Task<bool> UpdateAgentStatusAsync(Guid agentId, string status, Guid tenantId)
     {
         var agent = await _context.Users
-            .FirstOrDefaultAsync(u => u.Id == agentId && u.TenantId == tenantId && u.Role == "Agent");
+            .FirstOrDefaultAsync(u => u.Id == agentId && 
+                u.UserTenants.Any(ut => ut.TenantId == tenantId));
 
         if (agent == null) return false;
 
-        agent.IsOnline = status == "online";
-        agent.UpdatedAt = DateTime.UtcNow;
+        agent.Status = status;
         await _context.SaveChangesAsync();
         return true;
+    }
+
+    public async Task<object> GetAgentWorkloadsAsync(Guid tenantId)
+    {
+        var agents = await _context.Users
+            .Where(u => u.UserTenants.Any(ut => ut.TenantId == tenantId && ut.Role == TenantRole.Agent))
+            .Select(u => new
+            {
+                u.Id,
+                u.FirstName,
+                u.LastName,
+                u.Status,
+                ActiveConversations = u.AssignedConversations.Count(c => c.Status == ConversationStatus.Active),
+                TotalConversations = u.AssignedConversations.Count()
+            })
+            .ToListAsync();
+
+        return agents;
+    }
+
+    public async Task<object> GetMyConversationsAsync(Guid agentId, Guid tenantId)
+    {
+        var conversations = await _context.Conversations
+            .Where(c => c.AssignedAgentId == agentId && c.TenantId == tenantId)
+            .Select(c => new
+            {
+                c.Id,
+                c.Status,
+                c.CreatedAt,
+                c.UpdatedAt,
+                MessageCount = c.MessageCount,
+                LastMessage = c.Messages.OrderByDescending(m => m.CreatedAt).FirstOrDefault()
+            })
+            .ToListAsync();
+
+        return conversations;
+    }
+
+    public async Task<bool> AssignConversationAsync(Guid conversationId, Guid agentId, Guid tenantId)
+    {
+        var conversation = await _context.Conversations
+            .FirstOrDefaultAsync(c => c.Id == conversationId && c.TenantId == tenantId);
+
+        if (conversation == null) return false;
+
+        conversation.AssignedAgentId = agentId;
+        conversation.Status = ConversationStatus.Active;
+        await _context.SaveChangesAsync();
+        return true;
+    }
+
+    public async Task<object> GetQueueAsync(Guid tenantId)
+    {
+        var queuedConversations = await _context.Conversations
+            .Where(c => c.TenantId == tenantId && c.AssignedAgentId == null && c.Status == ConversationStatus.Queued)
+            .Select(c => new
+            {
+                c.Id,
+                c.CreatedAt,
+                c.Priority,
+                WaitTime = DateTime.UtcNow - c.CreatedAt,
+                MessageCount = c.MessageCount
+            })
+            .ToListAsync();
+
+        return new
+        {
+            QueuedConversations = queuedConversations,
+            TotalInQueue = queuedConversations.Count,
+            AverageWaitTime = queuedConversations.Any() ? 
+                queuedConversations.Average(c => (DateTime.UtcNow - c.CreatedAt).TotalMinutes) : 0
+        };
     }
 
     private AgentDto MapToAgentDto(User user)
@@ -123,12 +219,12 @@ public class AgentManagementService : IAgentManagementService
         return new AgentDto
         {
             Id = user.Id,
+            Name = $"{user.FirstName} {user.LastName}",
             Email = user.Email,
-            FirstName = user.FirstName,
-            LastName = user.LastName,
-            Status = user.IsOnline ? "online" : "offline",
-            IsOnline = user.IsOnline,
-            CreatedAt = user.CreatedAt
+            Avatar = user.AvatarUrl,
+            Status = "Available",
+            Skills = new string[] { },
+            Specializations = new string[] { }
         };
     }
 
@@ -137,13 +233,17 @@ public class AgentManagementService : IAgentManagementService
         return new AgentProfileDto
         {
             Id = user.Id,
+            Name = $"{user.FirstName} {user.LastName}",
             Email = user.Email,
-            FirstName = user.FirstName,
-            LastName = user.LastName,
-            AvatarUrl = user.AvatarUrl,
-            Status = user.IsOnline ? "online" : "offline",
-            IsOnline = user.IsOnline,
-            Skills = new List<string>()
+            Phone = "",
+            Avatar = user.AvatarUrl,
+            Bio = "",
+            Location = "",
+            Timezone = "UTC",
+            Language = user.PreferredLanguage,
+            Skills = new string[] { },
+            Specializations = new string[] { },
+            Status = "Available"
         };
     }
 }

@@ -4,26 +4,39 @@ public class TenantDto
 {
     public Guid Id { get; set; }
     public string Name { get; set; } = string.Empty;
-    public string? Description { get; set; }
-    public string? LogoUrl { get; set; }
-    public bool IsActive { get; set; }
+    public string Subdomain { get; set; } = string.Empty;
+    public string? CustomDomain { get; set; }
+    public string Status { get; set; } = string.Empty;
+    public string PrimaryColor { get; set; } = string.Empty;
+    public string SecondaryColor { get; set; } = string.Empty;
+    public string DefaultLanguage { get; set; } = string.Empty;
+    public bool IsRtlEnabled { get; set; }
+    public DateTime? TrialEndsAt { get; set; }
     public DateTime CreatedAt { get; set; }
-    public DateTime? UpdatedAt { get; set; }
+    public string? LogoUrl { get; set; }
+    public string? Role { get; set; }
 }
 
 public class CreateTenantRequest
 {
     public string Name { get; set; } = string.Empty;
-    public string? Description { get; set; }
-    public string? LogoUrl { get; set; }
+    public string Subdomain { get; set; } = string.Empty;
+    public string? CustomDomain { get; set; }
+    public string? PrimaryColor { get; set; }
+    public string? SecondaryColor { get; set; }
+    public string? DefaultLanguage { get; set; }
+    public bool IsRtlEnabled { get; set; } = false;
 }
 
 public class UpdateTenantRequest
 {
     public string? Name { get; set; }
-    public string? Description { get; set; }
+    public string? CustomDomain { get; set; }
+    public string? PrimaryColor { get; set; }
+    public string? SecondaryColor { get; set; }
+    public string? DefaultLanguage { get; set; }
+    public bool IsRtlEnabled { get; set; } = false;
     public string? LogoUrl { get; set; }
-    public bool? IsActive { get; set; }
 }
 
 public class TenantSettingsDto
@@ -99,6 +112,13 @@ public class AddTeamMemberRequest
 
 public class UpdateTeamMemberRequest
 {
+    public string? Role { get; set; }
+    public bool? IsActive { get; set; }
+}
+
+public class BulkUpdateMembersRequest
+{
+    public List<Guid> MemberIds { get; set; } = new();
     public string? Role { get; set; }
     public bool? IsActive { get; set; }
 }

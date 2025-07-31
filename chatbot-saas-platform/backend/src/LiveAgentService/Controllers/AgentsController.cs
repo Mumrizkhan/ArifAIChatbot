@@ -1,10 +1,8 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using Shared.Application.Common.Interfaces;
-using Shared.Domain.Enums;
 using LiveAgentService.Services;
 using LiveAgentService.Models;
+using Shared.Infrastructure.Services;
 
 namespace LiveAgentService.Controllers;
 
@@ -13,7 +11,7 @@ namespace LiveAgentService.Controllers;
 [Authorize]
 public class AgentsController : ControllerBase
 {
-    private readonly IApplicationDbContext _context;
+    private readonly IAgentManagementService _agentManagementService;
     private readonly ICurrentUserService _currentUserService;
     private readonly ITenantService _tenantService;
     private readonly IAgentRoutingService _agentRoutingService;
@@ -21,14 +19,14 @@ public class AgentsController : ControllerBase
     private readonly ILogger<AgentsController> _logger;
 
     public AgentsController(
-        IApplicationDbContext context,
+        IAgentManagementService agentManagementService,
         ICurrentUserService currentUserService,
         ITenantService tenantService,
         IAgentRoutingService agentRoutingService,
         IQueueManagementService queueManagementService,
         ILogger<AgentsController> logger)
     {
-        _context = context;
+        _agentManagementService = agentManagementService;
         _currentUserService = currentUserService;
         _tenantService = tenantService;
         _agentRoutingService = agentRoutingService;
@@ -291,23 +289,7 @@ public class AgentsController : ControllerBase
             var start = startDate ?? DateTime.UtcNow.AddDays(-30);
             var end = endDate ?? DateTime.UtcNow;
 
-            var conversations = await _context.Conversations
-                .Where(c => c.AssignedAgentId == agentId.Value &&
-                           c.CreatedAt >= start && c.CreatedAt <= end)
-                .ToListAsync();
-
-            var metrics = new AgentPerformanceMetrics
-            {
-                AgentId = agentId.Value,
-                AgentName = _currentUserService.Email ?? "Agent",
-                ConversationsHandled = conversations.Count,
-                AverageResponseTime = TimeSpan.FromMinutes(2), // Simplified
-                AverageResolutionTime = TimeSpan.FromMinutes(15), // Simplified
-                CustomerSatisfactionRating = conversations.Where(c => c.CustomerSatisfactionRating.HasValue)
-                    .Average(c => c.CustomerSatisfactionRating) ?? 0,
-                PeriodStart = start,
-                PeriodEnd = end
-            };
+            var metrics = await _agentManagementService.GetPerformanceMetricsAsync(agentId.Value, start, end);
 
             return Ok(metrics);
         }
@@ -324,20 +306,7 @@ public class AgentsController : ControllerBase
         try
         {
             var tenantId = _tenantService.GetCurrentTenantId();
-            var agents = await _context.Users
-                .Where(u => u.UserTenants.Any(ut => ut.TenantId == tenantId && ut.Role == TenantRole.Agent))
-                .Select(u => new
-                {
-                    u.Id,
-                    Name = $"{u.FirstName} {u.LastName}",
-                    u.Email,
-                    Avatar = u.AvatarUrl,
-                    Status = "Available",
-                    Skills = new string[] { },
-                    Specializations = new string[] { }
-                })
-                .ToListAsync();
-
+            var agents = await _agentManagementService.GetAllAgentsAsync(tenantId);
             return Ok(agents);
         }
         catch (Exception ex)
@@ -353,30 +322,14 @@ public class AgentsController : ControllerBase
         try
         {
             var tenantId = _tenantService.GetCurrentTenantId();
-            var agent = await _context.Users
-                .FirstOrDefaultAsync(u => u.Id == id && 
-                    u.UserTenants.Any(ut => ut.TenantId == tenantId));
+            var agent = await _agentManagementService.GetAgentProfileAsync(id, tenantId);
 
             if (agent == null)
             {
                 return NotFound(new { message = "Agent not found" });
             }
 
-            return Ok(new
-            {
-                agent.Id,
-                Name = $"{agent.FirstName} {agent.LastName}",
-                agent.Email,
-                Phone = "",
-                Avatar = agent.AvatarUrl,
-                Bio = "",
-                Location = "",
-                Timezone = "UTC",
-                Language = agent.PreferredLanguage,
-                Skills = new string[] { },
-                Specializations = new string[] { },
-                Status = "Available"
-            });
+            return Ok(agent);
         }
         catch (Exception ex)
         {
@@ -391,29 +344,12 @@ public class AgentsController : ControllerBase
         try
         {
             var tenantId = _tenantService.GetCurrentTenantId();
-            var agent = await _context.Users
-                .FirstOrDefaultAsync(u => u.Id == id && 
-                    u.UserTenants.Any(ut => ut.TenantId == tenantId));
+            var updated = await _agentManagementService.UpdateAgentProfileAsync(id, request, tenantId);
 
-            if (agent == null)
+            if (!updated)
             {
                 return NotFound(new { message = "Agent not found" });
             }
-
-            if (!string.IsNullOrEmpty(request.Name))
-            {
-                var nameParts = request.Name.Split(' ', 2);
-                agent.FirstName = nameParts[0];
-                agent.LastName = nameParts.Length > 1 ? nameParts[1] : "";
-            }
-
-            if (!string.IsNullOrEmpty(request.Email))
-                agent.Email = request.Email;
-
-            if (!string.IsNullOrEmpty(request.Language))
-                agent.PreferredLanguage = request.Language;
-
-            await _context.SaveChangesAsync();
 
             return Ok(new { message = "Agent profile updated successfully" });
         }
@@ -430,41 +366,8 @@ public class AgentsController : ControllerBase
         try
         {
             var tenantId = _tenantService.GetCurrentTenantId();
-            var start = startDate ?? DateTime.UtcNow.AddDays(-30);
-            var end = endDate ?? DateTime.UtcNow;
-
-            var conversations = await _context.Conversations
-                .Where(c => c.AssignedAgentId == agentId && 
-                           c.TenantId == tenantId &&
-                           c.CreatedAt >= start && c.CreatedAt <= end)
-                .Include(c => c.Messages)
-                .ToListAsync();
-
-            var totalConversations = conversations.Count;
-            var resolvedConversations = conversations.Count(c => c.Status == ConversationStatus.Resolved);
-            var averageResponseTime = conversations
-                .Where(c => c.Messages.Any())
-                .Select(c => c.Messages.Where(m => m.Sender == MessageSender.Agent).FirstOrDefault()?.CreatedAt - c.CreatedAt)
-                .Where(t => t.HasValue)
-                .DefaultIfEmpty(TimeSpan.Zero)
-                .Average(t => t?.TotalMinutes ?? 0);
-
-            var customerSatisfactionRating = conversations
-                .Where(c => c.CustomerSatisfactionRating.HasValue)
-                .Average(c => c.CustomerSatisfactionRating) ?? 0;
-
-            return Ok(new
-            {
-                AgentId = agentId,
-                PeriodStart = start,
-                PeriodEnd = end,
-                TotalConversations = totalConversations,
-                ResolvedConversations = resolvedConversations,
-                ResolutionRate = totalConversations > 0 ? (double)resolvedConversations / totalConversations : 0,
-                AverageResponseTimeMinutes = averageResponseTime,
-                CustomerSatisfactionRating = customerSatisfactionRating,
-                ActiveConversations = conversations.Count(c => c.Status == ConversationStatus.Active)
-            });
+            var stats = await _agentManagementService.GetAgentStatsAsync(agentId, tenantId, startDate, endDate);
+            return Ok(stats);
         }
         catch (Exception ex)
         {

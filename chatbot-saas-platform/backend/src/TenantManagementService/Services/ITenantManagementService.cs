@@ -14,6 +14,8 @@ public interface ITenantManagementService
     Task<TenantStatsDto?> GetTenantStatsAsync(Guid id);
     Task<bool> DeleteTenantAsync(Guid id);
     Task<string> UploadTenantLogoAsync(Guid? tenantId, IFormFile logo);
+    Task<TenantDto?> GetTenantByUserAsync(Guid tenantId, Guid userId);
+    Task<TenantDto?> UpdateTenantByUserAsync(Guid tenantId, UpdateTenantRequest request, Guid userId);
 }
 
 public interface IChatbotConfigService
@@ -23,6 +25,13 @@ public interface IChatbotConfigService
     Task<ChatbotConfigDto?> GetChatbotConfigAsync(Guid id, Guid tenantId);
     Task<ChatbotConfigDto?> UpdateChatbotConfigAsync(Guid id, UpdateChatbotConfigRequest request, Guid tenantId);
     Task<bool> DeleteChatbotConfigAsync(Guid id, Guid tenantId);
+    Task<string> UploadAvatarAsync(Guid configId, IFormFile avatar, Guid tenantId);
+    Task<object> GetAnalyticsAsync(Guid configId, Guid tenantId);
+    Task<object> GetTrainingDataAsync(Guid configId, Guid tenantId);
+    Task<bool> TrainChatbotAsync(Guid configId, Guid tenantId);
+    Task<object> GetKnowledgeBaseAsync(Guid configId, Guid tenantId);
+    Task<bool> AddKnowledgeBaseDocumentAsync(Guid configId, IFormFile document, Guid tenantId);
+    Task<bool> RemoveKnowledgeBaseDocumentAsync(Guid configId, Guid documentId, Guid tenantId);
 }
 
 public interface ITeamService
@@ -31,4 +40,11 @@ public interface ITeamService
     Task<List<TeamMemberDto>> GetTeamMembersAsync(Guid tenantId);
     Task<TeamMemberDto?> UpdateTeamMemberAsync(Guid id, UpdateTeamMemberRequest request, Guid tenantId);
     Task<bool> RemoveTeamMemberAsync(Guid id, Guid tenantId);
+    Task<List<object>> GetTeamRolesAsync();
+    Task<object> GetTeamStatsAsync(Guid tenantId);
+    Task<object> GetTeamPermissionsAsync();
+    Task<bool> ResendInvitationAsync(Guid id, Guid tenantId);
+    Task<bool> CancelInvitationAsync(Guid id, Guid tenantId);
+    Task<bool> BulkUpdateMembersAsync(BulkUpdateMembersRequest request, Guid tenantId);
+    Task<List<object>> ExportTeamDataAsync(Guid tenantId);
 }
