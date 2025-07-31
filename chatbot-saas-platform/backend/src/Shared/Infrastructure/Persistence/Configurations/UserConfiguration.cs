@@ -1,6 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using Shared.Domain.Entities;
+using Shared.Domain.Enums;
 
 namespace Shared.Infrastructure.Persistence.Configurations;
 
@@ -60,5 +61,15 @@ public class UserConfiguration : IEntityTypeConfiguration<User>
     .WithOne(c => c.AssignedAgent)
     .HasForeignKey(c => c.AssignedAgentId)
     .OnDelete(DeleteBehavior.SetNull);
+        builder.Property(u => u.AvatarUrl)
+            .HasMaxLength(500);
+        builder.Property(u => u.PasswordResetToken)
+            .HasMaxLength(100);
+        builder.Property(u => u.PasswordResetTokenExpiry);
+        builder.Property(u => u.IsOnline)
+            .IsRequired()
+            .HasDefaultValue(false);
+        builder.Property(u => u.Status);
+           
     }
 }

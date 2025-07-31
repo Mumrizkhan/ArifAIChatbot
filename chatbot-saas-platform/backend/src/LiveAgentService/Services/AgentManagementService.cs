@@ -130,7 +130,7 @@ public class AgentManagementService : IAgentManagementService
         };
     }
 
-    public async Task<bool> UpdateAgentStatusAsync(Guid agentId, string status, Guid tenantId)
+    public async Task<bool> UpdateAgentStatusAsync(Guid agentId, UserStatus status, Guid tenantId)
     {
         var agent = await _context.Users
             .FirstOrDefaultAsync(u => u.Id == agentId && 
@@ -246,5 +246,21 @@ public class AgentManagementService : IAgentManagementService
             Specializations = new string[] { },
             Status = "Available"
         };
+    }
+
+    public async Task<bool> UpdateAgentStatusAsync(Guid agentId, string status, Guid tenantId)
+    {
+        if (!Enum.TryParse<UserStatus>(status, true, out var parsedStatus))
+            return false;
+
+        var agent = await _context.Users
+            .FirstOrDefaultAsync(u => u.Id == agentId &&
+                u.UserTenants.Any(ut => ut.TenantId == tenantId));
+
+        if (agent == null) return false;
+
+        agent.Status = parsedStatus;
+        await _context.SaveChangesAsync();
+        return true;
     }
 }

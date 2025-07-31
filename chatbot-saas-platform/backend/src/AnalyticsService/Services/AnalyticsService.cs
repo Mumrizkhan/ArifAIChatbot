@@ -60,7 +60,7 @@ public class AnalyticsService : IAnalyticsService
             .CountAsync(c => c.Status == Shared.Domain.Enums.ConversationStatus.Active);
         
         var availableAgents = await _context.Users
-            .CountAsync(u => u.Role == Shared.Domain.Enums.UserRole.Agent && u.IsOnline);
+            .CountAsync(u => u.Role == Shared.Domain.Enums.UserRole.Agent && (u.IsOnline || u.Status== Shared.Domain.Enums.UserStatus.Online));
 
         return new RealtimeAnalyticsDto
         {
@@ -171,7 +171,7 @@ public class AnalyticsService : IAnalyticsService
         return new AgentMetricsDto
         {
             TotalAgents = agents.Count,
-            ActiveAgents = agents.Count(a => a.IsOnline),
+            ActiveAgents = agents.Count(a => (a.IsOnline|| a.Status== Shared.Domain.Enums.UserStatus.Online)),
             AverageResponseTime = 120,
             AverageRating = 4.5
         };

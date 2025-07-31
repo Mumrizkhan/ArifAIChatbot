@@ -23,6 +23,6 @@ public class User : AggregateRoot
     public string? PasswordResetToken { get; set; }
     public DateTime? PasswordResetTokenExpiry { get; set; }
     public bool IsOnline { get; set; }
-    public object Status { get; set; }
+    public UserStatus? Status { get; set; }
     
 }

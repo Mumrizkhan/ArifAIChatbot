@@ -29,6 +29,6 @@ public class Conversation : AggregateRoot
     
     public ICollection<Message> Messages { get; set; } = new List<Message>();
     public int? AverageResponseTime { get; set; }
-    public object Priority { get; set; }
+    public int? Priority { get; set; }
     public Guid ChatbotConfigId { get; set; }
 }
