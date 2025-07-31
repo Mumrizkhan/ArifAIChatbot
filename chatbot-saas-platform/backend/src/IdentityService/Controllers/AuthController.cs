@@ -94,7 +94,7 @@ public class AuthController : ControllerBase
                     .Where(x => x.UserId == user.Id)
                     .LoadAsync();
             }
-            var tusers = _context.UserTenants.Where(x => x.UserId == user.Id).ToList();
+           
             if (user == null || !BCrypt.Net.BCrypt.Verify(request.Password, user.PasswordHash))
             {
                 return Unauthorized(new { message = "Invalid email or password" });
