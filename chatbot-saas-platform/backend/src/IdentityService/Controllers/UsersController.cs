@@ -1,9 +1,8 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
+using IdentityService.Services;
+using IdentityService.Models;
 using Shared.Application.Common.Interfaces;
-using Shared.Domain.Entities;
-using Shared.Domain.Enums;
 
 namespace IdentityService.Controllers;
 
@@ -12,16 +11,16 @@ namespace IdentityService.Controllers;
 [Authorize(Roles = "Admin")]
 public class UsersController : ControllerBase
 {
-    private readonly IApplicationDbContext _context;
+    private readonly IUserManagementService _userManagementService;
     private readonly ICurrentUserService _currentUserService;
     private readonly ILogger<UsersController> _logger;
 
     public UsersController(
-        IApplicationDbContext context,
+        IUserManagementService userManagementService,
         ICurrentUserService currentUserService,
         ILogger<UsersController> logger)
     {
-        _context = context;
+        _userManagementService = userManagementService;
         _currentUserService = currentUserService;
         _logger = logger;
     }
@@ -31,39 +30,13 @@ public class UsersController : ControllerBase
     {
         try
         {
-            var query = _context.Users.AsQueryable();
-
-            if (!string.IsNullOrEmpty(search))
-            {
-                query = query.Where(u => u.Email.Contains(search) || 
-                                        u.FirstName.Contains(search) || 
-                                        u.LastName.Contains(search));
-            }
-
-            var totalCount = await query.CountAsync();
-            var users = await query
-                .OrderByDescending(u => u.CreatedAt)
-                .Skip((page - 1) * pageSize)
-                .Take(pageSize)
-                .Select(u => new
-                {
-                    u.Id,
-                    u.Email,
-                    u.FirstName,
-                    u.LastName,
-                    u.Role,
-                    u.IsActive,
-                    u.CreatedAt,
-                    u.LastLoginAt
-                })
-                .ToListAsync();
-
+            var result = await _userManagementService.GetUsersAsync(page, pageSize, search);
             return Ok(new
             {
-                data = users,
-                totalCount,
-                currentPage = page,
-                pageSize
+                data = result.Data,
+                totalCount = result.TotalCount,
+                currentPage = result.CurrentPage,
+                pageSize = result.PageSize
             });
         }
         catch (Exception ex)
@@ -78,7 +51,7 @@ public class UsersController : ControllerBase
     {
         try
         {
-            var user = await _context.Users.FirstOrDefaultAsync(u => u.Id == id);
+            var user = await _userManagementService.GetUserAsync(id);
             if (user == null)
             {
                 return NotFound(new { message = "User not found" });
@@ -109,34 +82,21 @@ public class UsersController : ControllerBase
     {
         try
         {
-            if (await _context.Users.AnyAsync(u => u.Email == request.Email))
-            {
-                return BadRequest(new { message = "Email already exists" });
-            }
-
-            var user = new User
-            {
-                Email = request.Email,
-                FirstName = request.FirstName,
-                LastName = request.LastName,
-                Role = Enum.Parse<UserRole>(request.Role),
-                IsActive = true,
-                CreatedAt = DateTime.UtcNow
-            };
-
-            _context.Users.Add(user);
-            await _context.SaveChangesAsync();
-
+            var user = await _userManagementService.CreateUserAsync(request);
             return Ok(new
             {
                 user.Id,
                 user.Email,
                 user.FirstName,
                 user.LastName,
-                Role = user.Role.ToString(),
+                Role = user.Role,
                 user.IsActive,
                 user.CreatedAt
             });
+        }
+        catch (InvalidOperationException ex)
+        {
+            return BadRequest(new { message = ex.Message });
         }
         catch (Exception ex)
         {
@@ -150,22 +110,11 @@ public class UsersController : ControllerBase
     {
         try
         {
-            var user = await _context.Users.FirstOrDefaultAsync(u => u.Id == id);
-            if (user == null)
+            var result = await _userManagementService.UpdateUserAsync(id, request);
+            if (!result)
             {
                 return NotFound(new { message = "User not found" });
             }
-
-            user.FirstName = request.FirstName ?? user.FirstName;
-            user.LastName = request.LastName ?? user.LastName;
-            user.IsActive = request.IsActive ?? user.IsActive;
-            
-            if (!string.IsNullOrEmpty(request.Role))
-            {
-                user.Role = Enum.Parse<UserRole>(request.Role);
-            }
-
-            await _context.SaveChangesAsync();
 
             return Ok(new { message = "User updated successfully" });
         }
@@ -181,14 +130,11 @@ public class UsersController : ControllerBase
     {
         try
         {
-            var user = await _context.Users.FirstOrDefaultAsync(u => u.Id == id);
-            if (user == null)
+            var result = await _userManagementService.DeleteUserAsync(id);
+            if (!result)
             {
                 return NotFound(new { message = "User not found" });
             }
-
-            user.IsActive = false;
-            await _context.SaveChangesAsync();
 
             return Ok(new { message = "User deleted successfully" });
         }
@@ -204,14 +150,11 @@ public class UsersController : ControllerBase
     {
         try
         {
-            var user = await _context.Users.FirstOrDefaultAsync(u => u.Id == userId);
-            if (user == null)
+            var result = await _userManagementService.AssignRoleAsync(userId, request.Role);
+            if (!result)
             {
                 return NotFound(new { message = "User not found" });
             }
-
-            user.Role = Enum.Parse<UserRole>(request.Role);
-            await _context.SaveChangesAsync();
 
             return Ok(new { message = "Role assigned successfully" });
         }
@@ -221,22 +164,6 @@ public class UsersController : ControllerBase
             return StatusCode(500, new { message = "Internal server error" });
         }
     }
-}
-
-public class CreateUserRequest
-{
-    public string Email { get; set; } = string.Empty;
-    public string FirstName { get; set; } = string.Empty;
-    public string LastName { get; set; } = string.Empty;
-    public string Role { get; set; } = "User";
-}
-
-public class UpdateUserRequest
-{
-    public string? FirstName { get; set; }
-    public string? LastName { get; set; }
-    public string? Role { get; set; }
-    public bool? IsActive { get; set; }
 }
 
 public class AssignRoleRequest
