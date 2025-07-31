@@ -1,23 +1,22 @@
-import React, { useState } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
-import { Navigate } from 'react-router-dom';
-import { useTranslation } from 'react-i18next';
-import { useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
-import * as z from 'zod';
-import { AppDispatch, RootState } from '../../store/store';
-import { login } from '../../store/slices/authSlice';
-import { Button } from '../../components/ui/button';
-import { Input } from '../../components/ui/input';
-import { Label } from '../../components/ui/label';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../../components/ui/card';
-import { Alert, AlertDescription } from '../../components/ui/alert';
-import { Checkbox } from '../../components/ui/checkbox';
-import { Loader2, Eye, EyeOff } from 'lucide-react';
-
+import React, { useState } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import { Navigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
+import { useForm, Controller } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import * as z from "zod";
+import { AppDispatch, RootState } from "../../store/store";
+import { login } from "../../store/slices/authSlice";
+import { Button } from "../../components/ui/button";
+import { Input } from "../../components/ui/input";
+import { Label } from "../../components/ui/label";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../../components/ui/card";
+import { Alert, AlertDescription } from "../../components/ui/alert";
+import { Checkbox } from "../../components/ui/checkbox";
+import { Loader2, Eye, EyeOff } from "lucide-react";
 const loginSchema = z.object({
-  email: z.string().email('Invalid email address'),
-  password: z.string().min(6, 'Password must be at least 6 characters'),
+  email: z.string().email("Invalid email address"),
+  password: z.string().min(6, "Password must be at least 6 characters"),
   rememberMe: z.boolean().optional(),
 });
 
@@ -32,16 +31,19 @@ const LoginPage: React.FC = () => {
   const {
     register,
     handleSubmit,
+    control,
     formState: { errors },
   } = useForm<LoginFormData>({
     resolver: zodResolver(loginSchema),
+    defaultValues: {
+      rememberMe: false,
+    },
   });
-
   const onSubmit = async (data: LoginFormData) => {
     try {
       await dispatch(login({ email: data.email, password: data.password })).unwrap();
     } catch (error) {
-      console.error('Login failed:', error);
+      console.error("Login failed:", error);
     }
   };
 
@@ -53,12 +55,8 @@ const LoginPage: React.FC = () => {
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-gray-900 dark:to-gray-800 p-4">
       <Card className="w-full max-w-md">
         <CardHeader className="space-y-1">
-          <CardTitle className="text-2xl font-bold text-center">
-            {t('auth.login')}
-          </CardTitle>
-          <CardDescription className="text-center">
-            {t('auth.welcomeBack')}
-          </CardDescription>
+          <CardTitle className="text-2xl font-bold text-center">{t("auth.login")}</CardTitle>
+          <CardDescription className="text-center">{t("auth.welcomeBack")}</CardDescription>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
@@ -67,30 +65,26 @@ const LoginPage: React.FC = () => {
                 <AlertDescription>{error}</AlertDescription>
               </Alert>
             )}
-
             <div className="space-y-2">
-              <Label htmlFor="email">{t('auth.email')}</Label>
+              <Label htmlFor="email">{t("auth.email")}</Label>
               <Input
                 id="email"
                 type="email"
                 placeholder="admin@example.com"
-                {...register('email')}
-                className={errors.email ? 'border-red-500' : ''}
+                {...register("email")}
+                className={errors.email ? "border-red-500" : ""}
               />
-              {errors.email && (
-                <p className="text-sm text-red-500">{errors.email.message}</p>
-              )}
+              {errors.email && <p className="text-sm text-red-500">{errors.email.message}</p>}
             </div>
-
             <div className="space-y-2">
-              <Label htmlFor="password">{t('auth.password')}</Label>
+              <Label htmlFor="password">{t("auth.password")}</Label>
               <div className="relative">
                 <Input
                   id="password"
-                  type={showPassword ? 'text' : 'password'}
+                  type={showPassword ? "text" : "password"}
                   placeholder="••••••••"
-                  {...register('password')}
-                  className={errors.password ? 'border-red-500 pr-10' : 'pr-10'}
+                  {...register("password")}
+                  className={errors.password ? "border-red-500 pr-10" : "pr-10"}
                 />
                 <Button
                   type="button"
@@ -99,43 +93,35 @@ const LoginPage: React.FC = () => {
                   className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
                   onClick={() => setShowPassword(!showPassword)}
                 >
-                  {showPassword ? (
-                    <EyeOff className="h-4 w-4" />
-                  ) : (
-                    <Eye className="h-4 w-4" />
-                  )}
+                  {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                 </Button>
               </div>
-              {errors.password && (
-                <p className="text-sm text-red-500">{errors.password.message}</p>
-              )}
+              {errors.password && <p className="text-sm text-red-500">{errors.password.message}</p>}
             </div>
-
             <div className="flex items-center space-x-2">
-              <Checkbox id="rememberMe" {...register('rememberMe')} />
+              <Controller
+                name="rememberMe"
+                control={control}
+                defaultValue={false}
+                render={({ field }) => <Checkbox id="rememberMe" checked={field.value} onCheckedChange={field.onChange} />}
+              />
               <Label htmlFor="rememberMe" className="text-sm">
-                {t('auth.rememberMe')}
+                {t("auth.rememberMe")}
               </Label>
             </div>
-
-            <Button
-              type="submit"
-              className="w-full"
-              disabled={isLoading}
-            >
+            <Button type="submit" className="w-full" disabled={isLoading}>
               {isLoading ? (
                 <>
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  {t('common.loading')}
+                  {t("common.loading")}
                 </>
               ) : (
-                t('auth.login')
+                t("auth.login")
               )}
             </Button>
-
             <div className="text-center">
               <Button variant="link" className="text-sm">
-                {t('auth.forgotPassword')}
+                {t("auth.forgotPassword")}
               </Button>
             </div>
           </form>

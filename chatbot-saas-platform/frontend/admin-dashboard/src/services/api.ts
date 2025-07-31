@@ -1,6 +1,6 @@
-import axios, { AxiosInstance, AxiosResponse } from 'axios';
+import axios, { AxiosInstance, AxiosResponse } from "axios";
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080/api';
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "http://localhost:8000";
 
 class ApiClient {
   private client: AxiosInstance;
@@ -10,13 +10,13 @@ class ApiClient {
       baseURL: API_BASE_URL,
       timeout: 10000,
       headers: {
-        'Content-Type': 'application/json',
+        "Content-Type": "application/json",
       },
     });
 
     this.client.interceptors.request.use(
       (config) => {
-        const token = localStorage.getItem('token');
+        const token = localStorage.getItem("token");
         if (token) {
           config.headers.Authorization = `Bearer ${token}`;
         }
@@ -29,8 +29,8 @@ class ApiClient {
       (response) => response,
       (error) => {
         if (error.response?.status === 401) {
-          localStorage.removeItem('token');
-          window.location.href = '/login';
+          localStorage.removeItem("token");
+          window.location.href = "/login";
         }
         return Promise.reject(error);
       }
@@ -62,26 +62,26 @@ const apiClient = new ApiClient();
 
 export const authApi = {
   login: async (email: string, password: string) => {
-    return apiClient.post<{ user: any; token: string }>('/identity/auth/login', {
+    return apiClient.post<{ user: any; token: string }>("/identity/auth/login", {
       email,
       password,
     });
   },
 
   register: async (userData: any) => {
-    return apiClient.post<{ user: any; token: string }>('/identity/auth/register', userData);
+    return apiClient.post<{ user: any; token: string }>("/identity/auth/register", userData);
   },
 
   getCurrentUser: async () => {
-    return apiClient.get<any>('/identity/auth/me');
+    return apiClient.get<any>("/identity/auth/me");
   },
 
   refreshToken: async () => {
-    return apiClient.post<{ token: string }>('/identity/auth/refresh');
+    return apiClient.post<{ token: string }>("/identity/auth/refresh");
   },
 
   logout: async () => {
-    return apiClient.post('/identity/auth/logout');
+    return apiClient.post("/identity/auth/logout");
   },
 };
 
@@ -105,7 +105,7 @@ export const tenantApi = {
   },
 
   createTenant: async (tenantData: any) => {
-    return apiClient.post<any>('/tenant-management/tenants', tenantData);
+    return apiClient.post<any>("/tenant-management/tenants", tenantData);
   },
 
   updateTenant: async (id: string, tenantData: any) => {
@@ -141,7 +141,7 @@ export const userApi = {
   },
 
   createUser: async (userData: any) => {
-    return apiClient.post<any>('/identity/users', userData);
+    return apiClient.post<any>("/identity/users", userData);
   },
 
   updateUser: async (id: string, userData: any) => {
@@ -159,35 +159,35 @@ export const userApi = {
 
 export const analyticsApi = {
   getDashboardStats: async () => {
-    return apiClient.get<any>('/analytics/dashboard');
+    return apiClient.get<any>("/analytics/dashboard");
   },
 
   getConversationMetrics: async (timeRange: string, tenantId?: string) => {
     const params = new URLSearchParams({ timeRange });
-    if (tenantId) params.append('tenantId', tenantId);
+    if (tenantId) params.append("tenantId", tenantId);
     return apiClient.get<any>(`/analytics/conversations?${params}`);
   },
 
   getAgentMetrics: async (timeRange: string, tenantId?: string) => {
     const params = new URLSearchParams({ timeRange });
-    if (tenantId) params.append('tenantId', tenantId);
+    if (tenantId) params.append("tenantId", tenantId);
     return apiClient.get<any>(`/analytics/agents?${params}`);
   },
 
   getBotMetrics: async (timeRange: string, tenantId?: string) => {
     const params = new URLSearchParams({ timeRange });
-    if (tenantId) params.append('tenantId', tenantId);
+    if (tenantId) params.append("tenantId", tenantId);
     return apiClient.get<any>(`/analytics/bot?${params}`);
   },
 
   getCustomReport: async (reportConfig: any) => {
-    return apiClient.post<any>('/analytics/reports/custom', reportConfig);
+    return apiClient.post<any>("/analytics/reports/custom", reportConfig);
   },
 };
 
 export const subscriptionApi = {
   getPlans: async () => {
-    return apiClient.get<any[]>('/subscription/plans');
+    return apiClient.get<any[]>("/subscription/plans");
   },
 
   getSubscriptions: async (page: number, pageSize: number) => {
@@ -204,7 +204,7 @@ export const subscriptionApi = {
   },
 
   createSubscription: async (subscriptionData: any) => {
-    return apiClient.post<any>('/subscription/subscriptions', subscriptionData);
+    return apiClient.post<any>("/subscription/subscriptions", subscriptionData);
   },
 
   updateSubscription: async (id: string, subscriptionData: any) => {
@@ -216,7 +216,7 @@ export const subscriptionApi = {
   },
 
   getBillingStats: async () => {
-    return apiClient.get<any>('/subscription/billing/stats');
+    return apiClient.get<any>("/subscription/billing/stats");
   },
 };
 

@@ -1,5 +1,5 @@
-import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit';
-import { authApi } from '../../services/api';
+import { createSlice, createAsyncThunk, PayloadAction } from "@reduxjs/toolkit";
+import { authApi } from "../../services/api";
 
 interface User {
   id: string;
@@ -20,33 +20,30 @@ interface AuthState {
 
 const initialState: AuthState = {
   user: null,
-  token: localStorage.getItem('token'),
+  token: localStorage.getItem("token"),
   isAuthenticated: false,
   isLoading: false,
   error: null,
 };
 
-export const login = createAsyncThunk(
-  'auth/login',
-  async ({ email, password }: { email: string; password: string }) => {
-    const response = await authApi.login(email, password);
-    localStorage.setItem('token', response.token);
-    return response;
-  }
-);
+export const login = createAsyncThunk("auth/login", async ({ email, password }: { email: string; password: string }) => {
+  const response = await authApi.login(email, password);
+  localStorage.setItem("token", response.token);
+  return response;
+});
 
-export const logout = createAsyncThunk('auth/logout', async () => {
-  localStorage.removeItem('token');
+export const logout = createAsyncThunk("auth/logout", async () => {
+  localStorage.removeItem("token");
   return null;
 });
 
-export const getCurrentUser = createAsyncThunk('auth/getCurrentUser', async () => {
+export const getCurrentUser = createAsyncThunk("auth/getCurrentUser", async () => {
   const response = await authApi.getCurrentUser();
   return response;
 });
 
 const authSlice = createSlice({
-  name: 'auth',
+  name: "auth",
   initialState,
   reducers: {
     clearError: (state) => {
@@ -55,7 +52,7 @@ const authSlice = createSlice({
     setToken: (state, action: PayloadAction<string>) => {
       state.token = action.payload;
       state.isAuthenticated = true;
-      localStorage.setItem('token', action.payload);
+      localStorage.setItem("token", action.payload);
     },
   },
   extraReducers: (builder) => {
@@ -73,7 +70,7 @@ const authSlice = createSlice({
       })
       .addCase(login.rejected, (state, action) => {
         state.isLoading = false;
-        state.error = action.error.message || 'Login failed';
+        state.error = action.error.message || "Login failed";
         state.isAuthenticated = false;
       })
       .addCase(logout.fulfilled, (state) => {
