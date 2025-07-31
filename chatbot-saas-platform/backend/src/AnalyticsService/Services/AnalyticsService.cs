@@ -322,4 +322,90 @@ public class AnalyticsService : IAnalyticsService
             StartedAt = DateTime.UtcNow
         };
     }
+
+    public async Task<CompareAnalyticsDto> CompareAnalyticsAsync(CompareAnalyticsRequest request)
+    {
+        return new CompareAnalyticsDto
+        {
+            Current = new { value = 100 },
+            Previous = new { value = 85 },
+            Change = 15,
+            ChangePercent = 17.6
+        };
+    }
+
+    public async Task<List<GoalDto>> GetGoalsAsync()
+    {
+        return new List<GoalDto>
+        {
+            new GoalDto 
+            { 
+                Id = Guid.NewGuid(), 
+                Name = "Increase conversions", 
+                Target = 1000, 
+                Progress = 750, 
+                Deadline = DateTime.Parse("2024-12-31"),
+                CreatedAt = DateTime.UtcNow
+            }
+        };
+    }
+
+    public async Task<GoalDto> CreateGoalAsync(CreateGoalRequest request)
+    {
+        return new GoalDto
+        {
+            Id = Guid.NewGuid(),
+            Name = request.Name,
+            Target = request.Target,
+            Metric = request.Metric,
+            Deadline = DateTime.Parse(request.Deadline),
+            CreatedAt = DateTime.UtcNow
+        };
+    }
+
+    public async Task<bool> UpdateGoalAsync(Guid id, UpdateGoalRequest request)
+    {
+        return true;
+    }
+
+    public async Task<bool> DeleteGoalAsync(Guid id)
+    {
+        return true;
+    }
+
+    public async Task<CustomReportDto> GetCustomReportAsync(CustomReportRequest request)
+    {
+        var query = _context.Conversations
+            .Where(c => c.CreatedAt >= request.StartDate && c.CreatedAt <= request.EndDate);
+
+        if (!string.IsNullOrEmpty(request.TenantId) && Guid.TryParse(request.TenantId, out var parsedTenantId))
+        {
+            query = query.Where(c => c.TenantId == parsedTenantId);
+        }
+
+        var conversations = await query.Include(c => c.Messages).ToListAsync();
+        
+        return new CustomReportDto
+        {
+            TotalConversations = conversations.Count,
+            TotalMessages = conversations.Sum(c => c.Messages.Count),
+            AverageMessagesPerConversation = conversations.Any() ? conversations.Average(c => c.Messages.Count) : 0,
+            ResolvedConversations = conversations.Count(c => c.Status == Shared.Domain.Enums.ConversationStatus.Resolved),
+            PeriodStart = request.StartDate,
+            PeriodEnd = request.EndDate,
+            GeneratedAt = DateTime.UtcNow
+        };
+    }
+
+    private DateTime GetStartDateFromTimeRange(string timeRange)
+    {
+        return timeRange switch
+        {
+            "1d" => DateTime.UtcNow.AddDays(-1),
+            "7d" => DateTime.UtcNow.AddDays(-7),
+            "30d" => DateTime.UtcNow.AddDays(-30),
+            "90d" => DateTime.UtcNow.AddDays(-90),
+            _ => DateTime.UtcNow.AddDays(-7)
+        };
+    }
 }

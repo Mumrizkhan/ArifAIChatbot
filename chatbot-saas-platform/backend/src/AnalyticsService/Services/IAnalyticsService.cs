@@ -25,4 +25,10 @@ public interface IAnalyticsService
     Task<bool> UpdateReportAsync(Guid id, UpdateReportRequest request);
     Task<bool> DeleteReportAsync(Guid id);
     Task<ReportExecutionDto> RunReportAsync(Guid id);
+    Task<CompareAnalyticsDto> CompareAnalyticsAsync(CompareAnalyticsRequest request);
+    Task<List<GoalDto>> GetGoalsAsync();
+    Task<GoalDto> CreateGoalAsync(CreateGoalRequest request);
+    Task<bool> UpdateGoalAsync(Guid id, UpdateGoalRequest request);
+    Task<bool> DeleteGoalAsync(Guid id);
+    Task<CustomReportDto> GetCustomReportAsync(CustomReportRequest request);
 }
