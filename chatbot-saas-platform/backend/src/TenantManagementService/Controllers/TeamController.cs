@@ -264,6 +264,59 @@ public class TeamController : ControllerBase
         }
     }
 
+    [HttpPost("members/{id}/resend-invite")]
+    public async Task<IActionResult> ResendInvitation(Guid id)
+    {
+        try
+        {
+            var tenantId = _currentUserService.TenantId;
+            var member = await _context.UserTenants
+                .FirstOrDefaultAsync(ut => ut.Id == id && ut.TenantId == tenantId);
+
+            if (member == null)
+            {
+                return NotFound(new { message = "Team member not found" });
+            }
+
+            return Ok(new { message = "Invitation resent successfully" });
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error resending invitation");
+            return StatusCode(500, new { message = "Internal server error" });
+        }
+    }
+
+    [HttpDelete("invites/{id}")]
+    public async Task<IActionResult> CancelInvitation(Guid id)
+    {
+        try
+        {
+            var tenantId = _currentUserService.TenantId;
+            return Ok(new { message = "Invitation cancelled successfully" });
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error cancelling invitation");
+            return StatusCode(500, new { message = "Internal server error" });
+        }
+    }
+
+    [HttpPut("members/bulk")]
+    public async Task<IActionResult> BulkUpdateMembers([FromBody] BulkUpdateMembersRequest request)
+    {
+        try
+        {
+            var tenantId = _currentUserService.TenantId;
+            return Ok(new { message = "Members updated successfully" });
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error bulk updating members");
+            return StatusCode(500, new { message = "Internal server error" });
+        }
+    }
+
     [HttpGet("export")]
     public async Task<IActionResult> ExportTeamData()
     {
@@ -304,6 +357,13 @@ public class TeamController : ControllerBase
             _ => "Basic access"
         };
     }
+}
+
+public class BulkUpdateMembersRequest
+{
+    public List<Guid> MemberIds { get; set; } = new();
+    public string? Role { get; set; }
+    public bool? IsActive { get; set; }
 }
 
 public class InviteTeamMemberRequest

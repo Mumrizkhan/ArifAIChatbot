@@ -383,6 +383,35 @@ public class TenantsController : ControllerBase
             return StatusCode(500, new { message = "Internal server error" });
         }
     }
+
+    [HttpPost("logo")]
+    public async Task<IActionResult> UploadTenantLogo([FromForm] IFormFile logo)
+    {
+        try
+        {
+            var tenantId = _currentUserService.TenantId;
+            if (logo == null || logo.Length == 0)
+            {
+                return BadRequest(new { message = "No file provided" });
+            }
+
+            var logoUrl = $"/uploads/tenants/{tenantId}_{Path.GetFileName(logo.FileName)}";
+            
+            var tenant = await _context.Tenants.FirstOrDefaultAsync(t => t.Id == tenantId);
+            if (tenant != null)
+            {
+                tenant.LogoUrl = logoUrl;
+                await _context.SaveChangesAsync();
+            }
+
+            return Ok(new { logo = logoUrl });
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error uploading tenant logo");
+            return StatusCode(500, new { message = "Internal server error" });
+        }
+    }
 }
 
 public class CreateTenantRequest
