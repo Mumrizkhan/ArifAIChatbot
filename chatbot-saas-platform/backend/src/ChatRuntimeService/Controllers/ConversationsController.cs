@@ -231,6 +231,63 @@ public class ConversationsController : ControllerBase
             return StatusCode(500, new { message = "Internal server error" });
         }
     }
+
+    [HttpPost("{id}/messages")]
+    [Authorize]
+    public async Task<IActionResult> SendMessage(Guid id, [FromBody] SendMessageRequest request)
+    {
+        try
+        {
+            var conversation = await _context.Conversations
+                .FirstOrDefaultAsync(c => c.Id == id && c.TenantId == _tenantService.GetCurrentTenantId());
+
+            if (conversation == null)
+            {
+                return NotFound(new { message = "Conversation not found" });
+            }
+
+            var message = new Message
+            {
+                Id = Guid.NewGuid(),
+                ConversationId = id,
+                Content = request.Content,
+                Type = request.Type,
+                Sender = "agent",
+                SenderId = _currentUserService.UserId,
+                CreatedAt = DateTime.UtcNow,
+                TenantId = _tenantService.GetCurrentTenantId(),
+                IsRead = false
+            };
+
+            _context.Messages.Add(message);
+            conversation.MessageCount++;
+            conversation.UpdatedAt = DateTime.UtcNow;
+            await _context.SaveChangesAsync();
+
+            return Ok(new
+            {
+                message.Id,
+                message.Content,
+                message.Type,
+                message.Sender,
+                message.SenderId,
+                message.CreatedAt,
+                message.IsRead
+            });
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, $"Error sending message to conversation {id}");
+            return StatusCode(500, new { message = "Internal server error" });
+        }
+    }
+}
+
+public class SendMessageRequest
+{
+    public string Content { get; set; } = string.Empty;
+    public string Type { get; set; } = "text";
+    public Dictionary<string, object>? Metadata { get; set; }
 }
 
 public class CreateConversationRequest

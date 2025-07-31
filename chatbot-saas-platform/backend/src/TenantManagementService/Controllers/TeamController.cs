@@ -189,6 +189,121 @@ public class TeamController : ControllerBase
             return StatusCode(500, new { message = "Internal server error" });
         }
     }
+
+    [HttpGet("roles")]
+    public async Task<IActionResult> GetTeamRoles()
+    {
+        try
+        {
+            var roles = Enum.GetValues<TenantRole>()
+                .Select(r => new { 
+                    Value = r.ToString(), 
+                    Name = r.ToString(),
+                    Description = GetRoleDescription(r)
+                })
+                .ToList();
+
+            return Ok(roles);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error getting team roles");
+            return StatusCode(500, new { message = "Internal server error" });
+        }
+    }
+
+    [HttpGet("stats")]
+    public async Task<IActionResult> GetTeamStats()
+    {
+        try
+        {
+            var tenantId = _tenantService.GetCurrentTenantId();
+            var members = await _context.UserTenants
+                .Where(ut => ut.TenantId == tenantId && ut.IsActive)
+                .ToListAsync();
+
+            var stats = new
+            {
+                TotalMembers = members.Count,
+                ActiveMembers = members.Count(m => m.IsActive),
+                RoleDistribution = members.GroupBy(m => m.Role)
+                    .Select(g => new { Role = g.Key.ToString(), Count = g.Count() })
+                    .ToList(),
+                RecentJoins = members.Where(m => m.CreatedAt >= DateTime.UtcNow.AddDays(-30)).Count()
+            };
+
+            return Ok(stats);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error getting team stats");
+            return StatusCode(500, new { message = "Internal server error" });
+        }
+    }
+
+    [HttpGet("permissions")]
+    public async Task<IActionResult> GetTeamPermissions()
+    {
+        try
+        {
+            var permissions = new
+            {
+                CanInviteMembers = true,
+                CanRemoveMembers = true,
+                CanChangeRoles = true,
+                CanViewAnalytics = true,
+                CanManageSettings = true
+            };
+
+            return Ok(permissions);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error getting team permissions");
+            return StatusCode(500, new { message = "Internal server error" });
+        }
+    }
+
+    [HttpGet("export")]
+    public async Task<IActionResult> ExportTeamData()
+    {
+        try
+        {
+            var tenantId = _tenantService.GetCurrentTenantId();
+            var members = await _context.UserTenants
+                .Include(ut => ut.User)
+                .Where(ut => ut.TenantId == tenantId && ut.IsActive)
+                .Select(ut => new
+                {
+                    ut.User.Email,
+                    ut.User.FirstName,
+                    ut.User.LastName,
+                    Role = ut.Role.ToString(),
+                    JoinedAt = ut.CreatedAt,
+                    LastLogin = ut.User.LastLoginAt
+                })
+                .ToListAsync();
+
+            return Ok(members);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error exporting team data");
+            return StatusCode(500, new { message = "Internal server error" });
+        }
+    }
+
+    private string GetRoleDescription(TenantRole role)
+    {
+        return role switch
+        {
+            TenantRole.Owner => "Full access to all features and settings",
+            TenantRole.Admin => "Manage team members and most settings",
+            TenantRole.Manager => "Manage conversations and basic settings",
+            TenantRole.Agent => "Handle customer conversations",
+            _ => "Basic access"
+        };
+    }
 }
 
 public class InviteTeamMemberRequest
