@@ -170,6 +170,204 @@ public class AnalyticsController : ControllerBase
             return StatusCode(500, new { message = "Internal server error" });
         }
     }
+
+    [HttpGet("dashboard")]
+    public async Task<IActionResult> GetDashboardStats()
+    {
+        try
+        {
+            var totalTenants = await _context.Tenants.CountAsync();
+            var activeTenants = await _context.Tenants
+                .CountAsync(t => t.Status == Shared.Domain.Enums.TenantStatus.Active);
+            var totalUsers = await _context.Users.CountAsync();
+            var activeUsers = await _context.Users
+                .CountAsync(u => u.IsActive);
+            var totalConversations = await _context.Conversations.CountAsync();
+            var activeConversations = await _context.Conversations
+                .CountAsync(c => c.Status == Shared.Domain.Enums.ConversationStatus.Active);
+            var totalMessages = await _context.Messages.CountAsync();
+            var todayMessages = await _context.Messages
+                .CountAsync(m => m.CreatedAt.Date == DateTime.UtcNow.Date);
+
+            return Ok(new
+            {
+                TotalTenants = totalTenants,
+                ActiveTenants = activeTenants,
+                TotalUsers = totalUsers,
+                ActiveUsers = activeUsers,
+                TotalConversations = totalConversations,
+                ActiveConversations = activeConversations,
+                TotalMessages = totalMessages,
+                TodayMessages = todayMessages
+            });
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error getting dashboard stats");
+            return StatusCode(500, new { message = "Internal server error" });
+        }
+    }
+
+    [HttpGet("conversations")]
+    public async Task<IActionResult> GetConversationMetrics([FromQuery] string timeRange = "7d", [FromQuery] string? tenantId = null)
+    {
+        try
+        {
+            var startDate = GetStartDateFromTimeRange(timeRange);
+            var query = _context.Conversations
+                .Where(c => c.CreatedAt >= startDate);
+
+            if (!string.IsNullOrEmpty(tenantId) && Guid.TryParse(tenantId, out var parsedTenantId))
+            {
+                query = query.Where(c => c.TenantId == parsedTenantId);
+            }
+
+            var conversations = await query.ToListAsync();
+            var totalConversations = conversations.Count;
+            var resolvedConversations = conversations.Count(c => c.Status == Shared.Domain.Enums.ConversationStatus.Resolved);
+            var averageRating = conversations
+                .Where(c => c.CustomerSatisfactionRating.HasValue)
+                .Average(c => c.CustomerSatisfactionRating) ?? 0;
+
+            return Ok(new
+            {
+                TotalConversations = totalConversations,
+                ResolvedConversations = resolvedConversations,
+                ResolutionRate = totalConversations > 0 ? (double)resolvedConversations / totalConversations : 0,
+                AverageRating = averageRating,
+                TimeRange = timeRange
+            });
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error getting conversation metrics");
+            return StatusCode(500, new { message = "Internal server error" });
+        }
+    }
+
+    [HttpGet("agents")]
+    public async Task<IActionResult> GetAgentMetrics([FromQuery] string timeRange = "7d", [FromQuery] string? tenantId = null)
+    {
+        try
+        {
+            var startDate = GetStartDateFromTimeRange(timeRange);
+            var query = _context.UserTenants
+                .Include(ut => ut.User)
+                .Where(ut => ut.Role == Shared.Domain.Enums.TenantRole.Agent && ut.IsActive);
+
+            if (!string.IsNullOrEmpty(tenantId) && Guid.TryParse(tenantId, out var parsedTenantId))
+            {
+                query = query.Where(ut => ut.TenantId == parsedTenantId);
+            }
+
+            var agents = await query.ToListAsync();
+            var totalAgents = agents.Count;
+            var activeAgents = agents.Count(a => a.User.LastLoginAt >= startDate);
+
+            return Ok(new
+            {
+                TotalAgents = totalAgents,
+                ActiveAgents = activeAgents,
+                TimeRange = timeRange
+            });
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error getting agent metrics");
+            return StatusCode(500, new { message = "Internal server error" });
+        }
+    }
+
+    [HttpGet("bot")]
+    public async Task<IActionResult> GetBotMetrics([FromQuery] string timeRange = "7d", [FromQuery] string? tenantId = null)
+    {
+        try
+        {
+            var startDate = GetStartDateFromTimeRange(timeRange);
+            var query = _context.Messages
+                .Where(m => m.CreatedAt >= startDate && m.Sender == Shared.Domain.Enums.MessageSender.Bot);
+
+            if (!string.IsNullOrEmpty(tenantId) && Guid.TryParse(tenantId, out var parsedTenantId))
+            {
+                query = query.Where(m => m.TenantId == parsedTenantId);
+            }
+
+            var botMessages = await query.CountAsync();
+            var totalMessages = await _context.Messages
+                .Where(m => m.CreatedAt >= startDate)
+                .CountAsync();
+
+            var botResponseRate = totalMessages > 0 ? (double)botMessages / totalMessages : 0;
+
+            return Ok(new
+            {
+                BotMessages = botMessages,
+                TotalMessages = totalMessages,
+                BotResponseRate = botResponseRate,
+                TimeRange = timeRange
+            });
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error getting bot metrics");
+            return StatusCode(500, new { message = "Internal server error" });
+        }
+    }
+
+    [HttpPost("reports/custom")]
+    public async Task<IActionResult> GetCustomReport([FromBody] CustomReportRequest request)
+    {
+        try
+        {
+            var query = _context.Conversations
+                .Where(c => c.CreatedAt >= request.StartDate && c.CreatedAt <= request.EndDate);
+
+            if (!string.IsNullOrEmpty(request.TenantId) && Guid.TryParse(request.TenantId, out var parsedTenantId))
+            {
+                query = query.Where(c => c.TenantId == parsedTenantId);
+            }
+
+            var conversations = await query.Include(c => c.Messages).ToListAsync();
+            
+            var report = new
+            {
+                TotalConversations = conversations.Count,
+                TotalMessages = conversations.Sum(c => c.Messages.Count),
+                AverageMessagesPerConversation = conversations.Any() ? conversations.Average(c => c.Messages.Count) : 0,
+                ResolvedConversations = conversations.Count(c => c.Status == Shared.Domain.Enums.ConversationStatus.Resolved),
+                PeriodStart = request.StartDate,
+                PeriodEnd = request.EndDate,
+                GeneratedAt = DateTime.UtcNow
+            };
+
+            return Ok(report);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error generating custom report");
+            return StatusCode(500, new { message = "Internal server error" });
+        }
+    }
+
+    private DateTime GetStartDateFromTimeRange(string timeRange)
+    {
+        return timeRange switch
+        {
+            "1d" => DateTime.UtcNow.AddDays(-1),
+            "7d" => DateTime.UtcNow.AddDays(-7),
+            "30d" => DateTime.UtcNow.AddDays(-30),
+            "90d" => DateTime.UtcNow.AddDays(-90),
+            _ => DateTime.UtcNow.AddDays(-7)
+        };
+    }
+}
+
+public class CustomReportRequest
+{
+    public DateTime StartDate { get; set; }
+    public DateTime EndDate { get; set; }
+    public string? TenantId { get; set; }
+    public List<string> Metrics { get; set; } = new();
 }
 
 public class AnalyticsRequest

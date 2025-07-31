@@ -431,6 +431,52 @@ public class SubscriptionsController : ControllerBase
         }
     }
 
+    [HttpGet("billing/stats")]
+    public async Task<IActionResult> GetBillingStats()
+    {
+        try
+        {
+            var totalRevenue = await _context.Subscriptions
+                .Where(s => s.Status == Shared.Domain.Enums.SubscriptionStatus.Active)
+                .SumAsync(s => s.Amount);
+
+            var activeSubscriptions = await _context.Subscriptions
+                .CountAsync(s => s.Status == Shared.Domain.Enums.SubscriptionStatus.Active);
+
+            var trialSubscriptions = await _context.Subscriptions
+                .CountAsync(s => s.Status == Shared.Domain.Enums.SubscriptionStatus.Trial);
+
+            var cancelledSubscriptions = await _context.Subscriptions
+                .CountAsync(s => s.Status == Shared.Domain.Enums.SubscriptionStatus.Cancelled);
+
+            var monthlyRevenue = await _context.Subscriptions
+                .Where(s => s.Status == Shared.Domain.Enums.SubscriptionStatus.Active && 
+                           s.BillingCycle == "monthly")
+                .SumAsync(s => s.Amount);
+
+            var yearlyRevenue = await _context.Subscriptions
+                .Where(s => s.Status == Shared.Domain.Enums.SubscriptionStatus.Active && 
+                           s.BillingCycle == "yearly")
+                .SumAsync(s => s.Amount);
+
+            return Ok(new
+            {
+                TotalRevenue = totalRevenue,
+                MonthlyRevenue = monthlyRevenue,
+                YearlyRevenue = yearlyRevenue,
+                ActiveSubscriptions = activeSubscriptions,
+                TrialSubscriptions = trialSubscriptions,
+                CancelledSubscriptions = cancelledSubscriptions,
+                TotalSubscriptions = activeSubscriptions + trialSubscriptions + cancelledSubscriptions
+            });
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error getting billing stats");
+            return StatusCode(500, new { message = "Internal server error" });
+        }
+    }
+
     [HttpPost("apply-coupon")]
     public async Task<IActionResult> ApplyCoupon([FromBody] ApplyCouponRequest request)
     {
