@@ -10,7 +10,8 @@ import {
   CreditCard,
   Settings,
   ChevronLeft,
-  ChevronRight
+  ChevronRight,
+  Workflow
 } from 'lucide-react';
 
 interface SidebarProps {
@@ -28,6 +29,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onToggle }) => {
     { name: t('navigation.chatbot'), href: '/chatbot', icon: Bot },
     { name: t('navigation.team'), href: '/team', icon: Users },
     { name: t('navigation.analytics'), href: '/analytics', icon: BarChart3 },
+    { name: t('navigation.workflows'), href: '/workflows', icon: Workflow },
     { name: t('navigation.subscription'), href: '/subscription', icon: CreditCard },
     { name: t('navigation.settings'), href: '/settings', icon: Settings },
   ];

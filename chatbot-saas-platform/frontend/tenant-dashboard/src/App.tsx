@@ -16,6 +16,7 @@ import AnalyticsPage from './pages/analytics/AnalyticsPage';
 import BrandingPage from './pages/branding/BrandingPage';
 import IntegrationsPage from './pages/integrations/IntegrationsPage';
 import SettingsPage from './pages/settings/SettingsPage';
+import WorkflowsPage from './pages/workflows/WorkflowsPage';
 import './i18n';
 
 function AppContent() {
@@ -67,6 +68,7 @@ function AppContent() {
                   <Route path="/analytics" element={<AnalyticsPage />} />
                   <Route path="/branding" element={<BrandingPage />} />
                   <Route path="/integrations" element={<IntegrationsPage />} />
+                  <Route path="/workflows" element={<WorkflowsPage />} />
                   <Route path="/settings" element={<SettingsPage />} />
                 </Routes>
               </Layout>

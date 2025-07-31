@@ -80,6 +80,25 @@ export type {
   UpdateSubscriptionData
 } from './subscriptionService';
 
+export { WorkflowService } from './workflowService';
+export type {
+  Workflow,
+  WorkflowDefinition,
+  WorkflowStep,
+  WorkflowConnection,
+  WorkflowTrigger,
+  WorkflowSettings,
+  WorkflowExecution,
+  WorkflowStepExecution,
+  WorkflowTemplate,
+  WorkflowStatistics,
+  CreateWorkflowData,
+  UpdateWorkflowData,
+  ExecuteWorkflowData,
+  WorkflowStepType,
+  WorkflowTriggerType
+} from './workflowService';
+
 // Service helper functions
 export const handleApiError = (error: any): string => {
   if (error?.message) {

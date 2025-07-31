@@ -35,6 +35,7 @@
     "chatbot": "Chatbot",
     "team": "Team",
     "analytics": "Analytics",
+    "workflows": "Workflows",
     "subscription": "Subscription",
     "settings": "Settings"
   },
@@ -291,6 +292,28 @@
     "smsNotifications": "SMS Notifications",
     "pushNotifications": "Push Notifications",
     "updateSettings": "Update Settings"
+  },
+  "workflows": {
+    "title": "Workflows",
+    "description": "Automate your business processes with custom workflows",
+    "createNew": "Create Workflow",
+    "createFirst": "Create Your First Workflow",
+    "noWorkflows": "No workflows found",
+    "noWorkflowsDescription": "Get started by creating your first automated workflow",
+    "name": "Name",
+    "status": "Status",
+    "executions": "Executions",
+    "lastExecuted": "Last Executed",
+    "actions": "Actions",
+    "edit": "Edit",
+    "execute": "Execute",
+    "clone": "Clone",
+    "delete": "Delete",
+    "never": "Never",
+    "confirmDelete": "Are you sure you want to delete this workflow?",
+    "create": "Create",
+    "namePlaceholder": "Enter workflow name",
+    "descriptionPlaceholder": "Enter workflow description"
   },
   "errors": {
     "networkError": "Network error occurred",
