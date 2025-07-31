@@ -430,6 +430,85 @@ public class SubscriptionsController : ControllerBase
             return StatusCode(500, new { message = "Internal server error" });
         }
     }
+
+    [HttpPost("apply-coupon")]
+    public async Task<IActionResult> ApplyCoupon([FromBody] ApplyCouponRequest request)
+    {
+        try
+        {
+            var tenantId = _tenantService.GetCurrentTenantId();
+            var result = await _billingService.ApplyCouponAsync(request.CouponCode, tenantId);
+
+            if (result.IsValid)
+            {
+                return Ok(new
+                {
+                    CouponCode = request.CouponCode,
+                    DiscountAmount = result.DiscountAmount,
+                    DiscountPercentage = result.DiscountPercentage,
+                    Message = "Coupon applied successfully"
+                });
+            }
+
+            return BadRequest(new { message = result.ErrorMessage ?? "Invalid coupon code" });
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error applying coupon");
+            return StatusCode(500, new { message = "Internal server error" });
+        }
+    }
+
+    [HttpGet("tax-rates")]
+    public async Task<IActionResult> GetTaxRates([FromQuery] string? country, [FromQuery] string? state)
+    {
+        try
+        {
+            var taxRates = await _billingService.GetTaxRatesAsync(country, state);
+            return Ok(taxRates);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error getting tax rates");
+            return StatusCode(500, new { message = "Internal server error" });
+        }
+    }
+
+    [HttpPost("preview-change")]
+    public async Task<IActionResult> PreviewSubscriptionChange([FromBody] PreviewChangeRequest request)
+    {
+        try
+        {
+            var tenantId = _tenantService.GetCurrentTenantId();
+            var preview = await _subscriptionService.PreviewSubscriptionChangeAsync(
+                request.NewPlanId, tenantId, request.BillingCycle);
+
+            return Ok(new
+            {
+                CurrentPlan = preview.CurrentPlan,
+                NewPlan = preview.NewPlan,
+                ProrationAmount = preview.ProrationAmount,
+                NextBillingAmount = preview.NextBillingAmount,
+                EffectiveDate = preview.EffectiveDate
+            });
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error previewing subscription change");
+            return StatusCode(500, new { message = "Internal server error" });
+        }
+    }
+}
+
+public class ApplyCouponRequest
+{
+    public string CouponCode { get; set; } = string.Empty;
+}
+
+public class PreviewChangeRequest
+{
+    public Guid NewPlanId { get; set; }
+    public string BillingCycle { get; set; } = "monthly";
 }
 
 public class UpgradeSubscriptionRequest
