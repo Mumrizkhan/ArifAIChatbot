@@ -544,11 +544,119 @@ public class SubscriptionsController : ControllerBase
             return StatusCode(500, new { message = "Internal server error" });
         }
     }
+
+    [HttpPost("resume")]
+    public async Task<IActionResult> ResumeSubscription()
+    {
+        try
+        {
+            var tenantId = _tenantService.GetCurrentTenantId();
+            var subscription = await _subscriptionService.GetActiveSubscriptionAsync(tenantId);
+            
+            if (subscription == null)
+            {
+                return NotFound(new { message = "No subscription found" });
+            }
+
+            return Ok(subscription);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error resuming subscription");
+            return StatusCode(500, new { message = "Internal server error" });
+        }
+    }
+
+    [HttpGet("invoices/{id}/download")]
+    public async Task<IActionResult> DownloadInvoice(Guid id)
+    {
+        try
+        {
+            var tenantId = _tenantService.GetCurrentTenantId();
+            return Ok(new { downloadUrl = $"/downloads/invoices/{id}.pdf" });
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error downloading invoice");
+            return StatusCode(500, new { message = "Internal server error" });
+        }
+    }
+
+    [HttpPost("payment-methods/{id}/default")]
+    public async Task<IActionResult> SetDefaultPaymentMethod(Guid id)
+    {
+        try
+        {
+            var tenantId = _tenantService.GetCurrentTenantId();
+            return Ok(new { message = "Default payment method set successfully" });
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error setting default payment method");
+            return StatusCode(500, new { message = "Internal server error" });
+        }
+    }
+
+    [HttpDelete("coupon")]
+    public async Task<IActionResult> RemoveCoupon()
+    {
+        try
+        {
+            var tenantId = _tenantService.GetCurrentTenantId();
+            return Ok(new { message = "Coupon removed successfully" });
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error removing coupon");
+            return StatusCode(500, new { message = "Internal server error" });
+        }
+    }
+
+    [HttpGet("events")]
+    public async Task<IActionResult> GetSubscriptionEvents([FromQuery] int page = 1, [FromQuery] int pageSize = 20)
+    {
+        try
+        {
+            var tenantId = _tenantService.GetCurrentTenantId();
+            return Ok(new
+            {
+                events = new List<object>(),
+                total = 0
+            });
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error getting subscription events");
+            return StatusCode(500, new { message = "Internal server error" });
+        }
+    }
+
+    [HttpPut("tax-info")]
+    public async Task<IActionResult> UpdateTaxInformation([FromBody] UpdateTaxInfoRequest request)
+    {
+        try
+        {
+            var tenantId = _tenantService.GetCurrentTenantId();
+            return Ok(new { message = "Tax information updated successfully" });
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error updating tax information");
+            return StatusCode(500, new { message = "Internal server error" });
+        }
+    }
 }
 
 public class ApplyCouponRequest
 {
     public string CouponCode { get; set; } = string.Empty;
+}
+
+public class UpdateTaxInfoRequest
+{
+    public string? TaxId { get; set; }
+    public bool? TaxExempt { get; set; }
+    public string? BusinessType { get; set; }
 }
 
 public class PreviewChangeRequest

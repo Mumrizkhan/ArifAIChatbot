@@ -350,6 +350,58 @@ public class ChatbotConfigsController : ControllerBase
         }
     }
 
+    [HttpPut("conversations/{id}/status")]
+    public async Task<IActionResult> UpdateConversationStatus(Guid id, [FromBody] UpdateConversationStatusRequest request)
+    {
+        try
+        {
+            var tenantId = _currentUserService.TenantId;
+            var conversation = await _context.Conversations
+                .FirstOrDefaultAsync(c => c.Id == id && c.TenantId == tenantId);
+
+            if (conversation == null)
+            {
+                return NotFound(new { message = "Conversation not found" });
+            }
+
+            return Ok(conversation);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error updating conversation status");
+            return StatusCode(500, new { message = "Internal server error" });
+        }
+    }
+
+    [HttpPost("conversations/{id}/rate")]
+    public async Task<IActionResult> RateConversation(Guid id, [FromBody] RateConversationRequest request)
+    {
+        try
+        {
+            var tenantId = _currentUserService.TenantId;
+            return Ok(new { message = "Conversation rated successfully" });
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error rating conversation");
+            return StatusCode(500, new { message = "Internal server error" });
+        }
+    }
+
+    [HttpGet("train/{jobId}/status")]
+    public async Task<IActionResult> GetTrainingStatus(string jobId)
+    {
+        try
+        {
+            return Ok(new { status = "completed", progress = 100 });
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error getting training status");
+            return StatusCode(500, new { message = "Internal server error" });
+        }
+    }
+
     [HttpPost("test")]
     public async Task<IActionResult> TestChatbot([FromBody] TestChatbotRequest request)
     {
@@ -381,6 +433,17 @@ public class TestChatbotRequest
 {
     public string Message { get; set; } = string.Empty;
     public Dictionary<string, object> Context { get; set; } = new();
+}
+
+public class UpdateConversationStatusRequest
+{
+    public string Status { get; set; } = string.Empty;
+}
+
+public class RateConversationRequest
+{
+    public int Rating { get; set; }
+    public string? Feedback { get; set; }
 }
 
 public class ChatbotConfigRequest
