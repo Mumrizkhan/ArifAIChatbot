@@ -18,19 +18,47 @@ public class TenantManagementService : ITenantManagementService
 
     public async Task<TenantDto> CreateTenantAsync(CreateTenantRequest request, Guid? userId)
     {
+        if (await _context.Tenants.AnyAsync(t => t.Subdomain == request.Subdomain))
+        {
+            throw new InvalidOperationException("Subdomain already exists");
+        }
+
         var tenant = new Tenant
         {
             Name = request.Name,
-            Description = request.Description,
-            LogoUrl = request.LogoUrl,
-            IsActive = true,
+            Subdomain = request.Subdomain,
+            CustomDomain = request.CustomDomain,
+            Status = TenantStatus.Trial,
+            DatabaseConnectionString = GenerateTenantConnectionString(request.Subdomain),
+            PrimaryColor = request.PrimaryColor ?? "#3B82F6",
+            SecondaryColor = request.SecondaryColor ?? "#64748B",
+            DefaultLanguage = request.DefaultLanguage ?? "en",
+            IsRtlEnabled = request.IsRtlEnabled,
+            TrialEndsAt = DateTime.UtcNow.AddDays(14),
             CreatedAt = DateTime.UtcNow
         };
 
         _context.Tenants.Add(tenant);
-        await _context.SaveChangesAsync();
 
+        if (userId.HasValue)
+        {
+            var userTenant = new UserTenant
+            {
+                UserId = userId.Value,
+                TenantId = tenant.Id,
+                Role = TenantRole.Owner,
+                IsActive = true
+            };
+            _context.UserTenants.Add(userTenant);
+        }
+
+        await _context.SaveChangesAsync();
         return MapToDto(tenant);
+    }
+
+    private string GenerateTenantConnectionString(string subdomain)
+    {
+        return $"Server=localhost,1433;Database=ArifPlatform_{subdomain};User Id=sa;Password=YourStrong@Passw0rd;TrustServerCertificate=true;";
     }
 
     public async Task<PaginatedResult<TenantDto>> GetTenantsAsync(int page, int pageSize, string? search)
@@ -165,17 +193,59 @@ public class TenantManagementService : ITenantManagementService
         return logoUrl;
     }
 
+    public async Task<TenantDto?> GetTenantByUserAsync(Guid tenantId, Guid userId)
+    {
+        var userTenant = await _context.UserTenants
+            .Include(ut => ut.Tenant)
+            .FirstOrDefaultAsync(ut => ut.TenantId == tenantId && ut.UserId == userId);
+
+        if (userTenant == null) return null;
+
+        var tenantDto = MapToDto(userTenant.Tenant);
+        tenantDto.Role = userTenant.Role.ToString();
+        return tenantDto;
+    }
+
+    public async Task<TenantDto?> UpdateTenantByUserAsync(Guid tenantId, UpdateTenantRequest request, Guid userId)
+    {
+        var userTenant = await _context.UserTenants
+            .Include(ut => ut.Tenant)
+            .FirstOrDefaultAsync(ut => ut.TenantId == tenantId && ut.UserId == userId);
+
+        if (userTenant == null || (userTenant.Role != TenantRole.Owner && userTenant.Role != TenantRole.Admin))
+        {
+            return null;
+        }
+
+        var tenant = userTenant.Tenant;
+        tenant.Name = request.Name ?? tenant.Name;
+        tenant.CustomDomain = request.CustomDomain;
+        tenant.PrimaryColor = request.PrimaryColor ?? tenant.PrimaryColor;
+        tenant.SecondaryColor = request.SecondaryColor ?? tenant.SecondaryColor;
+        tenant.DefaultLanguage = request.DefaultLanguage ?? tenant.DefaultLanguage;
+        tenant.IsRtlEnabled = request.IsRtlEnabled;
+        tenant.LogoUrl = request.LogoUrl;
+
+        await _context.SaveChangesAsync();
+        return MapToDto(tenant);
+    }
+
     private TenantDto MapToDto(Tenant tenant)
     {
         return new TenantDto
         {
             Id = tenant.Id,
             Name = tenant.Name,
-            Description = tenant.Description,
-            LogoUrl = tenant.LogoUrl,
-            IsActive = tenant.IsActive,
+            Subdomain = tenant.Subdomain,
+            CustomDomain = tenant.CustomDomain,
+            Status = tenant.Status.ToString(),
+            PrimaryColor = tenant.PrimaryColor,
+            SecondaryColor = tenant.SecondaryColor,
+            DefaultLanguage = tenant.DefaultLanguage,
+            IsRtlEnabled = tenant.IsRtlEnabled,
+            TrialEndsAt = tenant.TrialEndsAt,
             CreatedAt = tenant.CreatedAt,
-            UpdatedAt = tenant.UpdatedAt
+            LogoUrl = tenant.LogoUrl
         };
     }
 }
