@@ -193,8 +193,8 @@ public class AIController : ControllerBase
         }
     }
 
-    [HttpPost("extract-intents")]
-    [Authorize]
+    [HttpPost("intents")]
+    [AllowAnonymous]
     public async Task<IActionResult> ExtractIntents([FromBody] IntentRequest request)
     {
         try
@@ -210,6 +210,27 @@ public class AIController : ControllerBase
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error extracting intents");
+            return StatusCode(500, new { message = "Internal server error" });
+        }
+    }
+
+    [HttpPost("sentiment")]
+    [AllowAnonymous]
+    public async Task<IActionResult> AnalyzeSentiment([FromBody] SentimentRequest request)
+    {
+        try
+        {
+            var sentiment = await _aiService.AnalyzeSentimentAsync(request.Message);
+            
+            return Ok(new SentimentResponse
+            {
+                Message = request.Message,
+                Sentiment = sentiment
+            });
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error analyzing sentiment");
             return StatusCode(500, new { message = "Internal server error" });
         }
     }
@@ -295,4 +316,15 @@ public class IntentResponse
 {
     public string Message { get; set; } = string.Empty;
     public List<string> Intents { get; set; } = new();
+}
+
+public class SentimentRequest
+{
+    public string Message { get; set; } = string.Empty;
+}
+
+public class SentimentResponse
+{
+    public string Message { get; set; } = string.Empty;
+    public string Sentiment { get; set; } = string.Empty;
 }
