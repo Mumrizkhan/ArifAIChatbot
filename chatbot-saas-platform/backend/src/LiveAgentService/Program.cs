@@ -45,6 +45,7 @@ builder.Services.AddSignalR();
 builder.Services.AddInfrastructure(builder.Configuration);
 builder.Services.AddScoped<IAgentRoutingService, AgentRoutingService>();
 builder.Services.AddScoped<IQueueManagementService, QueueManagementService>();
+builder.Services.AddScoped<IAgentManagementService, AgentManagementService>();
 builder.Services.AddHttpContextAccessor();
 
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
