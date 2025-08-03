@@ -1,7 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.EntityFrameworkCore;
-using Shared.Infrastructure.Persistence;
+using AnalyticsService.Services;
+using AnalyticsService.Models;
 
 namespace AnalyticsService.Controllers;
 
@@ -10,58 +10,71 @@ namespace AnalyticsService.Controllers;
 [Authorize]
 public class AnalyticsController : ControllerBase
 {
-    private readonly ApplicationDbContext _context;
+    private readonly IAnalyticsService _analyticsService;
     private readonly ILogger<AnalyticsController> _logger;
 
-    public AnalyticsController(ApplicationDbContext context, ILogger<AnalyticsController> logger)
+    public AnalyticsController(IAnalyticsService analyticsService, ILogger<AnalyticsController> logger)
     {
-        _context = context;
+        _analyticsService = analyticsService;
         _logger = logger;
     }
 
     [HttpGet("conversations/summary")]
     public async Task<IActionResult> GetConversationsSummary()
     {
-        var totalConversations = await _context.Conversations.CountAsync();
-        var activeConversations = await _context.Conversations
-            .CountAsync(c => c.Status == Shared.Domain.Enums.ConversationStatus.Active);
-        var resolvedConversations = await _context.Conversations
-            .CountAsync(c => c.Status == Shared.Domain.Enums.ConversationStatus.Resolved);
-
-        return Ok(new
+        try
         {
-            TotalConversations = totalConversations,
-            ActiveConversations = activeConversations,
-            ResolvedConversations = resolvedConversations
-        });
+            var summary = await _analyticsService.GetConversationsSummaryAsync();
+            return Ok(new
+            {
+                TotalConversations = summary.TotalConversations,
+                ActiveConversations = summary.ActiveConversations,
+                ResolvedConversations = summary.CompletedConversations
+            });
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error getting conversations summary");
+            return StatusCode(500, new { message = "Internal server error" });
+        }
     }
 
     [HttpGet("messages/summary")]
     public async Task<IActionResult> GetMessagesSummary()
     {
-        var totalMessages = await _context.Messages.CountAsync();
-        var todayMessages = await _context.Messages
-            .CountAsync(m => m.CreatedAt.Date == DateTime.UtcNow.Date);
-
-        return Ok(new
+        try
         {
-            TotalMessages = totalMessages,
-            TodayMessages = todayMessages
-        });
+            var summary = await _analyticsService.GetMessagesSummaryAsync();
+            return Ok(new
+            {
+                TotalMessages = summary.TotalMessages,
+                TodayMessages = summary.TotalMessages
+            });
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error getting messages summary");
+            return StatusCode(500, new { message = "Internal server error" });
+        }
     }
 
     [HttpGet("tenants/summary")]
     public async Task<IActionResult> GetTenantsSummary()
     {
-        var totalTenants = await _context.Tenants.CountAsync();
-        var activeTenants = await _context.Tenants
-            .CountAsync(t => t.Status == Shared.Domain.Enums.TenantStatus.Active);
-
-        return Ok(new
+        try
         {
-            TotalTenants = totalTenants,
-            ActiveTenants = activeTenants
-        });
+            var summary = await _analyticsService.GetTenantsSummaryAsync();
+            return Ok(new
+            {
+                TotalTenants = summary.TotalTenants,
+                ActiveTenants = summary.ActiveTenants
+            });
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error getting tenants summary");
+            return StatusCode(500, new { message = "Internal server error" });
+        }
     }
 
     [HttpGet("realtime")]
@@ -69,26 +82,13 @@ public class AnalyticsController : ControllerBase
     {
         try
         {
-            var now = DateTime.UtcNow;
-            var hourAgo = now.AddHours(-1);
-
-            var activeConversations = await _context.Conversations
-                .CountAsync(c => c.Status == Shared.Domain.Enums.ConversationStatus.Active);
-
-            var recentMessages = await _context.Messages
-                .CountAsync(m => m.CreatedAt >= hourAgo);
-
-            var onlineAgents = await _context.UserTenants
-                .Include(ut => ut.User)
-                .CountAsync(ut => ut.User.LastLoginAt >= hourAgo &&
-                                 (ut.Role == Shared.Domain.Enums.TenantRole.Agent || ut.Role == Shared.Domain.Enums.TenantRole.Admin));
-
+            var analytics = await _analyticsService.GetRealtimeAnalyticsAsync();
             return Ok(new
             {
-                ActiveConversations = activeConversations,
-                RecentMessages = recentMessages,
-                OnlineAgents = onlineAgents,
-                Timestamp = now
+                ActiveConversations = analytics.OngoingConversations,
+                RecentMessages = analytics.ActiveUsers,
+                OnlineAgents = analytics.AvailableAgents,
+                Timestamp = DateTime.UtcNow
             });
         }
         catch (Exception ex)
@@ -103,29 +103,8 @@ public class AnalyticsController : ControllerBase
     {
         try
         {
-            var conversations = await _context.Conversations
-                .Where(c => c.CreatedAt >= request.StartDate &&
-                           c.CreatedAt <= request.EndDate)
-                .Include(c => c.Messages)
-                .ToListAsync();
-
-            var totalConversations = conversations.Count;
-            var resolvedConversations = conversations.Count(c => c.Status == Shared.Domain.Enums.ConversationStatus.Resolved);
-            var averageMessages = conversations.Any() ? conversations.Average(c => c.Messages.Count) : 0;
-            var averageRating = conversations
-                .Where(c => c.CustomerSatisfactionRating.HasValue)
-                .Average(c => c.CustomerSatisfactionRating) ?? 0;
-
-            return Ok(new
-            {
-                TotalConversations = totalConversations,
-                ResolvedConversations = resolvedConversations,
-                ResolutionRate = totalConversations > 0 ? (double)resolvedConversations / totalConversations : 0,
-                AverageMessagesPerConversation = averageMessages,
-                AverageCustomerSatisfaction = averageRating,
-                PeriodStart = request.StartDate,
-                PeriodEnd = request.EndDate
-            });
+            var analytics = await _analyticsService.GetAnalyticsAsync(request);
+            return Ok(analytics);
         }
         catch (Exception ex)
         {
@@ -139,29 +118,7 @@ public class AnalyticsController : ControllerBase
     {
         try
         {
-            var conversations = await _context.Conversations
-                .Where(c => c.CreatedAt >= request.StartDate &&
-                           c.CreatedAt <= request.EndDate)
-                .Include(c => c.Messages)
-                .ToListAsync();
-
-            var csvContent = "Date,Conversations,Messages,Resolution Rate\n";
-            var groupedByDate = conversations
-                .GroupBy(c => c.CreatedAt.Date)
-                .OrderBy(g => g.Key);
-
-            foreach (var group in groupedByDate)
-            {
-                var date = group.Key.ToString("yyyy-MM-dd");
-                var convCount = group.Count();
-                var msgCount = group.Sum(c => c.Messages.Count);
-                var resolved = group.Count(c => c.Status == Shared.Domain.Enums.ConversationStatus.Resolved);
-                var resolutionRate = convCount > 0 ? (double)resolved / convCount : 0;
-
-                csvContent += $"{date},{convCount},{msgCount},{resolutionRate:P}\n";
-            }
-
-            var bytes = System.Text.Encoding.UTF8.GetBytes(csvContent);
+            var bytes = await _analyticsService.ExportAnalyticsAsync(request);
             return File(bytes, "text/csv", $"analytics-{DateTime.UtcNow:yyyyMMdd}.csv");
         }
         catch (Exception ex)
@@ -170,17 +127,476 @@ public class AnalyticsController : ControllerBase
             return StatusCode(500, new { message = "Internal server error" });
         }
     }
+
+    [HttpGet("dashboard")]
+    public async Task<IActionResult> GetDashboardStats()
+    {
+        try
+        {
+            var stats = await _analyticsService.GetDashboardStatsAsync();
+            return Ok(new
+            {
+                TotalTenants = stats.TotalUsers,
+                ActiveTenants = stats.TotalUsers,
+                TotalUsers = stats.TotalUsers,
+                ActiveUsers = stats.TotalUsers,
+                TotalConversations = stats.TotalConversations,
+                ActiveConversations = stats.TotalConversations,
+                TotalMessages = stats.TotalMessages,
+                TodayMessages = stats.TotalMessages
+            });
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error getting dashboard stats");
+            return StatusCode(500, new { message = "Internal server error" });
+        }
+    }
+
+    [HttpGet("conversations")]
+    public async Task<IActionResult> GetConversationMetrics([FromQuery] string timeRange = "7d", [FromQuery] string? tenantId = null)
+    {
+        try
+        {
+            var metrics = await _analyticsService.GetConversationMetricsAsync(timeRange, tenantId);
+            return Ok(new
+            {
+                TotalConversations = metrics.Total,
+                ResolvedConversations = metrics.Completed,
+                ResolutionRate = metrics.Total > 0 ? (double)metrics.Completed / metrics.Total : 0,
+                AverageRating = metrics.AverageRating,
+                TimeRange = timeRange
+            });
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error getting conversation metrics");
+            return StatusCode(500, new { message = "Internal server error" });
+        }
+    }
+
+    [HttpGet("agents")]
+    public async Task<IActionResult> GetAgentMetrics([FromQuery] string timeRange = "7d", [FromQuery] string? tenantId = null)
+    {
+        try
+        {
+            var metrics = await _analyticsService.GetAgentMetricsAsync(timeRange, tenantId);
+            return Ok(new
+            {
+                TotalAgents = metrics.TotalAgents,
+                ActiveAgents = metrics.ActiveAgents,
+                TimeRange = timeRange
+            });
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error getting agent metrics");
+            return StatusCode(500, new { message = "Internal server error" });
+        }
+    }
+
+    [HttpGet("bot")]
+    public async Task<IActionResult> GetBotMetrics([FromQuery] string timeRange = "7d", [FromQuery] string? tenantId = null)
+    {
+        try
+        {
+            var metrics = await _analyticsService.GetBotMetricsAsync(timeRange, tenantId);
+            return Ok(new
+            {
+                BotMessages = metrics.TotalInteractions,
+                TotalMessages = metrics.TotalInteractions,
+                BotResponseRate = metrics.SuccessRate,
+                TimeRange = timeRange
+            });
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error getting bot metrics");
+            return StatusCode(500, new { message = "Internal server error" });
+        }
+    }
+
+    [HttpGet("overview")]
+    public async Task<IActionResult> GetOverviewMetrics([FromQuery] string? dateFrom, [FromQuery] string? dateTo, [FromQuery] string granularity = "day")
+    {
+        try
+        {
+            var metrics = await _analyticsService.GetOverviewMetricsAsync(dateFrom, dateTo, granularity);
+            return Ok(new
+            {
+                ConversationsByDate = metrics.ConversationsByDate,
+                MessagesByDate = metrics.MessagesByDate,
+                Granularity = granularity
+            });
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error getting overview metrics");
+            return StatusCode(500, new { message = "Internal server error" });
+        }
+    }
+
+    [HttpGet("users")]
+    public async Task<IActionResult> GetUserMetrics([FromQuery] string? dateFrom, [FromQuery] string? dateTo, [FromQuery] string granularity = "day")
+    {
+        try
+        {
+            var metrics = await _analyticsService.GetUserMetricsAsync(dateFrom, dateTo, granularity);
+            return Ok(new
+            {
+                TotalUsers = metrics.TotalUsers,
+                ActiveUsers = metrics.ActiveUsers,
+                NewUsers = metrics.NewUsers,
+                Granularity = granularity
+            });
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error getting user metrics");
+            return StatusCode(500, new { message = "Internal server error" });
+        }
+    }
+
+    [HttpGet("chatbot")]
+    public async Task<IActionResult> GetChatbotMetrics([FromQuery] string? dateFrom, [FromQuery] string? dateTo, [FromQuery] string granularity = "day")
+    {
+        try
+        {
+            var metrics = await _analyticsService.GetChatbotMetricsAsync(dateFrom, dateTo, granularity);
+            return Ok(new
+            {
+                TotalChatbots = metrics.TotalChatbots,
+                ActiveChatbots = metrics.ActiveChatbots,
+                AverageUptime = metrics.AverageUptime,
+                Granularity = granularity
+            });
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error getting chatbot metrics");
+            return StatusCode(500, new { message = "Internal server error" });
+        }
+    }
+
+    [HttpGet("subscription")]
+    public async Task<IActionResult> GetSubscriptionMetrics([FromQuery] string? dateFrom, [FromQuery] string? dateTo, [FromQuery] string granularity = "day")
+    {
+        try
+        {
+            var metrics = await _analyticsService.GetSubscriptionMetricsAsync(dateFrom, dateTo, granularity);
+            return Ok(new
+            {
+                TotalSubscriptions = metrics.TotalSubscriptions,
+                ActiveSubscriptions = metrics.ActiveSubscriptions,
+                TotalRevenue = metrics.TotalRevenue,
+                Granularity = granularity
+            });
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error getting subscription metrics");
+            return StatusCode(500, new { message = "Internal server error" });
+        }
+    }
+
+    [HttpGet("performance")]
+    public async Task<IActionResult> GetPerformanceMetrics([FromQuery] string? dateFrom, [FromQuery] string? dateTo)
+    {
+        try
+        {
+            var metrics = await _analyticsService.GetPerformanceMetricsAsync(dateFrom, dateTo);
+            return Ok(new
+            {
+                AverageResponseTime = metrics.AverageResponseTime,
+                SystemUptime = metrics.SystemUptime,
+                ErrorRate = metrics.ErrorRate
+            });
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error getting performance metrics");
+            return StatusCode(500, new { message = "Internal server error" });
+        }
+    }
+
+    [HttpGet("reports")]
+    public async Task<IActionResult> GetReports()
+    {
+        try
+        {
+            var reports = await _analyticsService.GetReportsAsync();
+            return Ok(reports);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error getting reports");
+            return StatusCode(500, new { message = "Internal server error" });
+        }
+    }
+
+    [HttpGet("reports/{id}")]
+    public async Task<IActionResult> GetReport(Guid id)
+    {
+        try
+        {
+            var report = await _analyticsService.GetReportAsync(id);
+            return Ok(report);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error getting report");
+            return StatusCode(500, new { message = "Internal server error" });
+        }
+    }
+
+    [HttpPost("reports")]
+    public async Task<IActionResult> CreateReport([FromBody] CreateReportRequest request)
+    {
+        try
+        {
+            var report = await _analyticsService.CreateReportAsync(request);
+            return Ok(new { id = report.Id, message = "Report created successfully" });
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error creating report");
+            return StatusCode(500, new { message = "Internal server error" });
+        }
+    }
+
+    [HttpPut("reports/{id}")]
+    public async Task<IActionResult> UpdateReport(Guid id, [FromBody] UpdateReportRequest request)
+    {
+        try
+        {
+            var result = await _analyticsService.UpdateReportAsync(id, request);
+            if (!result)
+            {
+                return NotFound(new { message = "Report not found" });
+            }
+            return Ok(new { message = "Report updated successfully" });
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error updating report");
+            return StatusCode(500, new { message = "Internal server error" });
+        }
+    }
+
+    [HttpDelete("reports/{id}")]
+    public async Task<IActionResult> DeleteReport(Guid id)
+    {
+        try
+        {
+            var result = await _analyticsService.DeleteReportAsync(id);
+            if (!result)
+            {
+                return NotFound(new { message = "Report not found" });
+            }
+            return Ok(new { message = "Report deleted successfully" });
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error deleting report");
+            return StatusCode(500, new { message = "Internal server error" });
+        }
+    }
+
+    [HttpPost("reports/{id}/run")]
+    public async Task<IActionResult> RunReport(Guid id)
+    {
+        try
+        {
+            var execution = await _analyticsService.RunReportAsync(id);
+            return Ok(new { data = execution, executedAt = DateTime.UtcNow });
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error running report");
+            return StatusCode(500, new { message = "Internal server error" });
+        }
+    }
+
+    [HttpPost("compare")]
+    public async Task<IActionResult> CompareAnalytics([FromBody] CompareAnalyticsRequest request)
+    {
+        try
+        {
+            var comparison = await _analyticsService.CompareAnalyticsAsync(request);
+            return Ok(new
+            {
+                current = comparison.Current,
+                previous = comparison.Previous,
+                change = comparison.Change,
+                changePercent = comparison.ChangePercent
+            });
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error comparing analytics");
+            return StatusCode(500, new { message = "Internal server error" });
+        }
+    }
+
+    [HttpGet("goals")]
+    public async Task<IActionResult> GetGoals()
+    {
+        try
+        {
+            var goals = await _analyticsService.GetGoalsAsync();
+            return Ok(goals);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error getting goals");
+            return StatusCode(500, new { message = "Internal server error" });
+        }
+    }
+
+    [HttpPost("goals")]
+    public async Task<IActionResult> CreateGoal([FromBody] CreateGoalRequest request)
+    {
+        try
+        {
+            var goal = await _analyticsService.CreateGoalAsync(request);
+            return Ok(new { id = goal.Id, message = "Goal created successfully" });
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error creating goal");
+            return StatusCode(500, new { message = "Internal server error" });
+        }
+    }
+
+    [HttpPut("goals/{id}")]
+    public async Task<IActionResult> UpdateGoal(Guid id, [FromBody] UpdateGoalRequest request)
+    {
+        try
+        {
+            var result = await _analyticsService.UpdateGoalAsync(id, request);
+            if (!result)
+            {
+                return NotFound(new { message = "Goal not found" });
+            }
+            return Ok(new { message = "Goal updated successfully" });
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error updating goal");
+            return StatusCode(500, new { message = "Internal server error" });
+        }
+    }
+
+    [HttpDelete("goals/{id}")]
+    public async Task<IActionResult> DeleteGoal(Guid id)
+    {
+        try
+        {
+            var result = await _analyticsService.DeleteGoalAsync(id);
+            if (!result)
+            {
+                return NotFound(new { message = "Goal not found" });
+            }
+            return Ok(new { message = "Goal deleted successfully" });
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error deleting goal");
+            return StatusCode(500, new { message = "Internal server error" });
+        }
+    }
+
+    [HttpPost("reports/custom")]
+    public async Task<IActionResult> GetCustomReport([FromBody] CustomReportRequest request)
+    {
+        try
+        {
+            var report = await _analyticsService.GetCustomReportAsync(request);
+            return Ok(report);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error generating custom report");
+            return StatusCode(500, new { message = "Internal server error" });
+        }
+    }
+
+    private DateTime GetStartDateFromTimeRange(string timeRange)
+    {
+        return timeRange switch
+        {
+            "1d" => DateTime.UtcNow.AddDays(-1),
+            "7d" => DateTime.UtcNow.AddDays(-7),
+            "30d" => DateTime.UtcNow.AddDays(-30),
+            "90d" => DateTime.UtcNow.AddDays(-90),
+            _ => DateTime.UtcNow.AddDays(-7)
+        };
+    }
 }
 
-public class AnalyticsRequest
-{
-    public DateTime StartDate { get; set; }
-    public DateTime EndDate { get; set; }
-}
+//public class CustomReportRequest
+//{
+//    public DateTime StartDate { get; set; }
+//    public DateTime EndDate { get; set; }
+//    public string? TenantId { get; set; }
+//    public List<string> Metrics { get; set; } = new();
+//}
 
-public class ExportAnalyticsRequest
-{
-    public DateTime StartDate { get; set; }
-    public DateTime EndDate { get; set; }
-    public string Format { get; set; } = "csv";
-}
+//public class CompareAnalyticsRequest
+//{
+//    public string DateFrom { get; set; } = string.Empty;
+//    public string DateTo { get; set; } = string.Empty;
+//    public string PreviousDateFrom { get; set; } = string.Empty;
+//    public string PreviousDateTo { get; set; } = string.Empty;
+//    public string Metric { get; set; } = string.Empty;
+//}
+
+//public class CreateGoalRequest
+//{
+//    public string Name { get; set; } = string.Empty;
+//    public double Target { get; set; }
+//    public string Metric { get; set; } = string.Empty;
+//    public string Deadline { get; set; } = string.Empty;
+//}
+
+//public class UpdateGoalRequest
+//{
+//    public string? Name { get; set; }
+//    public double? Target { get; set; }
+//    public string? Deadline { get; set; }
+//}
+
+//public class CreateReportRequest
+//{
+//    public string Name { get; set; } = string.Empty;
+//    public string Type { get; set; } = string.Empty;
+//    public List<string> Metrics { get; set; } = new();
+//}
+
+//public class UpdateReportRequest
+//{
+//    public string? Name { get; set; }
+//    public string? Type { get; set; }
+//    public List<string>? Metrics { get; set; }
+//}
+
+//public class AnalyticsRequest
+//{
+//    public DateTime StartDate { get; set; }
+//    public DateTime EndDate { get; set; }
+//}
+
+//public class ExportAnalyticsRequest
+//{
+//    public DateTime StartDate { get; set; }
+//    public DateTime EndDate { get; set; }
+//    public string Format { get; set; } = "csv";
+//}
+
+//public class CustomReportRequest
+//{
+//    public string ReportType { get; set; } = string.Empty;
+//    public DateTime StartDate { get; set; }
+//    public DateTime EndDate { get; set; }
+//    public List<string> Metrics { get; set; } = new();
+//}

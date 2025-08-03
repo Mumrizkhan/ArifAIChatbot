@@ -1,9 +1,9 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
+using TenantManagementService.Services;
+using TenantManagementService.Models;
+using Shared.Infrastructure.Services;
 using Shared.Application.Common.Interfaces;
-using Shared.Domain.Entities;
-using Shared.Domain.Enums;
 
 namespace TenantManagementService.Controllers;
 
@@ -12,16 +12,16 @@ namespace TenantManagementService.Controllers;
 [Authorize]
 public class TenantsController : ControllerBase
 {
-    private readonly IApplicationDbContext _context;
+    private readonly ITenantManagementService _tenantManagementService;
     private readonly ICurrentUserService _currentUserService;
     private readonly ILogger<TenantsController> _logger;
 
     public TenantsController(
-        IApplicationDbContext context,
+        ITenantManagementService tenantManagementService,
         ICurrentUserService currentUserService,
         ILogger<TenantsController> logger)
     {
-        _context = context;
+        _tenantManagementService = tenantManagementService;
         _currentUserService = currentUserService;
         _logger = logger;
     }
@@ -31,55 +31,12 @@ public class TenantsController : ControllerBase
     {
         try
         {
-            if (await _context.Tenants.AnyAsync(t => t.Subdomain == request.Subdomain))
-            {
-                return BadRequest(new { message = "Subdomain already exists" });
-            }
-
-            var tenant = new Tenant
-            {
-                Name = request.Name,
-                Subdomain = request.Subdomain,
-                CustomDomain = request.CustomDomain,
-                Status = TenantStatus.Trial,
-                DatabaseConnectionString = GenerateTenantConnectionString(request.Subdomain),
-                TrialEndsAt = DateTime.UtcNow.AddDays(14),
-                PrimaryColor = request.PrimaryColor ?? "#3B82F6",
-                SecondaryColor = request.SecondaryColor ?? "#64748B",
-                DefaultLanguage = request.DefaultLanguage ?? "en",
-                IsRtlEnabled = request.IsRtlEnabled
-            };
-
-            _context.Tenants.Add(tenant);
-
-            if (_currentUserService.UserId.HasValue)
-            {
-                var userTenant = new UserTenant
-                {
-                    UserId = _currentUserService.UserId.Value,
-                    TenantId = tenant.Id,
-                    Role = TenantRole.Owner,
-                    IsActive = true
-                };
-                _context.UserTenants.Add(userTenant);
-            }
-
-            await _context.SaveChangesAsync();
-
-            return Ok(new TenantDto
-            {
-                Id = tenant.Id,
-                Name = tenant.Name,
-                Subdomain = tenant.Subdomain,
-                CustomDomain = tenant.CustomDomain,
-                Status = tenant.Status.ToString(),
-                PrimaryColor = tenant.PrimaryColor,
-                SecondaryColor = tenant.SecondaryColor,
-                DefaultLanguage = tenant.DefaultLanguage,
-                IsRtlEnabled = tenant.IsRtlEnabled,
-                TrialEndsAt = tenant.TrialEndsAt,
-                CreatedAt = tenant.CreatedAt
-            });
+            var tenant = await _tenantManagementService.CreateTenantAsync(request, _currentUserService.UserId);
+            return Ok(tenant);
+        }
+        catch (InvalidOperationException ex)
+        {
+            return BadRequest(new { message = ex.Message });
         }
         catch (Exception ex)
         {
@@ -89,31 +46,18 @@ public class TenantsController : ControllerBase
     }
 
     [HttpGet]
-    public async Task<IActionResult> GetTenants()
+    public async Task<IActionResult> GetTenants([FromQuery] int page = 1, [FromQuery] int pageSize = 20, [FromQuery] string? search = null)
     {
         try
         {
-            var userTenants = await _context.UserTenants
-                .Include(ut => ut.Tenant)
-                .Where(ut => ut.UserId == _currentUserService.UserId)
-                .Select(ut => new TenantDto
-                {
-                    Id = ut.Tenant.Id,
-                    Name = ut.Tenant.Name,
-                    Subdomain = ut.Tenant.Subdomain,
-                    CustomDomain = ut.Tenant.CustomDomain,
-                    Status = ut.Tenant.Status.ToString(),
-                    PrimaryColor = ut.Tenant.PrimaryColor,
-                    SecondaryColor = ut.Tenant.SecondaryColor,
-                    DefaultLanguage = ut.Tenant.DefaultLanguage,
-                    IsRtlEnabled = ut.Tenant.IsRtlEnabled,
-                    TrialEndsAt = ut.Tenant.TrialEndsAt,
-                    CreatedAt = ut.Tenant.CreatedAt,
-                    Role = ut.Role.ToString()
-                })
-                .ToListAsync();
-
-            return Ok(userTenants);
+            var result = await _tenantManagementService.GetTenantsAsync(page, pageSize, search);
+            return Ok(new
+            {
+                data = result.Items,
+                totalCount = result.TotalCount,
+                currentPage = page,
+                pageSize
+            });
         }
         catch (Exception ex)
         {
@@ -127,30 +71,18 @@ public class TenantsController : ControllerBase
     {
         try
         {
-            var userTenant = await _context.UserTenants
-                .Include(ut => ut.Tenant)
-                .FirstOrDefaultAsync(ut => ut.TenantId == id && ut.UserId == _currentUserService.UserId);
+            if (!_currentUserService.UserId.HasValue)
+            {
+                return Unauthorized();
+            }
 
-            if (userTenant == null)
+            var tenant = await _tenantManagementService.GetTenantByUserAsync(id, _currentUserService.UserId.Value);
+            if (tenant == null)
             {
                 return NotFound(new { message = "Tenant not found" });
             }
 
-            return Ok(new TenantDto
-            {
-                Id = userTenant.Tenant.Id,
-                Name = userTenant.Tenant.Name,
-                Subdomain = userTenant.Tenant.Subdomain,
-                CustomDomain = userTenant.Tenant.CustomDomain,
-                Status = userTenant.Tenant.Status.ToString(),
-                PrimaryColor = userTenant.Tenant.PrimaryColor,
-                SecondaryColor = userTenant.Tenant.SecondaryColor,
-                DefaultLanguage = userTenant.Tenant.DefaultLanguage,
-                IsRtlEnabled = userTenant.Tenant.IsRtlEnabled,
-                TrialEndsAt = userTenant.Tenant.TrialEndsAt,
-                CreatedAt = userTenant.Tenant.CreatedAt,
-                Role = userTenant.Role.ToString()
-            });
+            return Ok(tenant);
         }
         catch (Exception ex)
         {
@@ -164,41 +96,18 @@ public class TenantsController : ControllerBase
     {
         try
         {
-            var userTenant = await _context.UserTenants
-                .Include(ut => ut.Tenant)
-                .FirstOrDefaultAsync(ut => ut.TenantId == id && ut.UserId == _currentUserService.UserId);
+            if (!_currentUserService.UserId.HasValue)
+            {
+                return Unauthorized();
+            }
 
-            if (userTenant == null || (userTenant.Role != TenantRole.Owner && userTenant.Role != TenantRole.Admin))
+            var tenant = await _tenantManagementService.UpdateTenantByUserAsync(id, request, _currentUserService.UserId.Value);
+            if (tenant == null)
             {
                 return Forbid();
             }
 
-            var tenant = userTenant.Tenant;
-            tenant.Name = request.Name ?? tenant.Name;
-            tenant.CustomDomain = request.CustomDomain;
-            tenant.PrimaryColor = request.PrimaryColor ?? tenant.PrimaryColor;
-            tenant.SecondaryColor = request.SecondaryColor ?? tenant.SecondaryColor;
-            tenant.DefaultLanguage = request.DefaultLanguage ?? tenant.DefaultLanguage;
-            tenant.IsRtlEnabled = request.IsRtlEnabled;
-            tenant.LogoUrl = request.LogoUrl;
-
-            await _context.SaveChangesAsync();
-
-            return Ok(new TenantDto
-            {
-                Id = tenant.Id,
-                Name = tenant.Name,
-                Subdomain = tenant.Subdomain,
-                CustomDomain = tenant.CustomDomain,
-                Status = tenant.Status.ToString(),
-                PrimaryColor = tenant.PrimaryColor,
-                SecondaryColor = tenant.SecondaryColor,
-                DefaultLanguage = tenant.DefaultLanguage,
-                IsRtlEnabled = tenant.IsRtlEnabled,
-                TrialEndsAt = tenant.TrialEndsAt,
-                CreatedAt = tenant.CreatedAt,
-                LogoUrl = tenant.LogoUrl
-            });
+            return Ok(tenant);
         }
         catch (Exception ex)
         {
@@ -217,52 +126,18 @@ public class TenantsController : ControllerBase
     {
         try
         {
-            var userTenant = await _context.UserTenants
-                .Include(ut => ut.Tenant)
-                .FirstOrDefaultAsync(ut => ut.TenantId == id && ut.UserId == _currentUserService.UserId);
+            if (!_currentUserService.UserId.HasValue)
+            {
+                return Unauthorized();
+            }
 
-            if (userTenant == null)
+            var settings = await _tenantManagementService.GetTenantSettingsAsync(id, _currentUserService.UserId.Value);
+            if (settings == null)
             {
                 return NotFound(new { message = "Tenant not found" });
             }
 
-            var tenant = userTenant.Tenant;
-            return Ok(new
-            {
-                tenant.Id,
-                tenant.Name,
-                tenant.Subdomain,
-                tenant.CustomDomain,
-                tenant.PrimaryColor,
-                tenant.SecondaryColor,
-                tenant.DefaultLanguage,
-                tenant.IsRtlEnabled,
-                tenant.LogoUrl,
-                Status = tenant.Status.ToString(),
-                tenant.TrialEndsAt,
-                Settings = new
-                {
-                    AllowFileUploads = true,
-                    MaxFileSize = 10485760,
-                    AllowedFileTypes = new[] { "image/*", ".pdf", ".doc", ".docx", ".txt" },
-                    EnableVoiceMessages = true,
-                    EnableTypingIndicators = true,
-                    EnableReadReceipts = true,
-                    AutoAssignAgents = true,
-                    BusinessHours = new
-                    {
-                        Enabled = false,
-                        Timezone = "UTC",
-                        Monday = new { Start = "09:00", End = "17:00", Enabled = true },
-                        Tuesday = new { Start = "09:00", End = "17:00", Enabled = true },
-                        Wednesday = new { Start = "09:00", End = "17:00", Enabled = true },
-                        Thursday = new { Start = "09:00", End = "17:00", Enabled = true },
-                        Friday = new { Start = "09:00", End = "17:00", Enabled = true },
-                        Saturday = new { Start = "09:00", End = "17:00", Enabled = false },
-                        Sunday = new { Start = "09:00", End = "17:00", Enabled = false }
-                    }
-                }
-            });
+            return Ok(settings);
         }
         catch (Exception ex)
         {
@@ -276,25 +151,16 @@ public class TenantsController : ControllerBase
     {
         try
         {
-            var userTenant = await _context.UserTenants
-                .Include(ut => ut.Tenant)
-                .FirstOrDefaultAsync(ut => ut.TenantId == id && ut.UserId == _currentUserService.UserId);
+            if (!_currentUserService.UserId.HasValue)
+            {
+                return Unauthorized();
+            }
 
-            if (userTenant == null || (userTenant.Role != TenantRole.Owner && userTenant.Role != TenantRole.Admin))
+            var updated = await _tenantManagementService.UpdateTenantSettingsAsync(id, request, _currentUserService.UserId.Value);
+            if (!updated)
             {
                 return Forbid();
             }
-
-            var tenant = userTenant.Tenant;
-            tenant.Name = request.Name ?? tenant.Name;
-            tenant.CustomDomain = request.CustomDomain;
-            tenant.PrimaryColor = request.PrimaryColor ?? tenant.PrimaryColor;
-            tenant.SecondaryColor = request.SecondaryColor ?? tenant.SecondaryColor;
-            tenant.DefaultLanguage = request.DefaultLanguage ?? tenant.DefaultLanguage;
-            tenant.IsRtlEnabled = request.IsRtlEnabled;
-            tenant.LogoUrl = request.LogoUrl;
-
-            await _context.SaveChangesAsync();
 
             return Ok(new { message = "Tenant settings updated successfully" });
         }
@@ -304,54 +170,65 @@ public class TenantsController : ControllerBase
             return StatusCode(500, new { message = "Internal server error" });
         }
     }
-}
 
-public class CreateTenantRequest
-{
-    public string Name { get; set; } = string.Empty;
-    public string Subdomain { get; set; } = string.Empty;
-    public string? CustomDomain { get; set; }
-    public string? PrimaryColor { get; set; }
-    public string? SecondaryColor { get; set; }
-    public string? DefaultLanguage { get; set; }
-    public bool IsRtlEnabled { get; set; } = false;
-}
+    [HttpGet("{id}/stats")]
+    public async Task<IActionResult> GetTenantStats(Guid id)
+    {
+        try
+        {
+            var stats = await _tenantManagementService.GetTenantStatsAsync(id);
+            if (stats == null)
+            {
+                return NotFound(new { message = "Tenant not found" });
+            }
 
-public class UpdateTenantRequest
-{
-    public string? Name { get; set; }
-    public string? CustomDomain { get; set; }
-    public string? PrimaryColor { get; set; }
-    public string? SecondaryColor { get; set; }
-    public string? DefaultLanguage { get; set; }
-    public bool IsRtlEnabled { get; set; } = false;
-    public string? LogoUrl { get; set; }
-}
+            return Ok(stats);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error getting tenant stats for {TenantId}", id);
+            return StatusCode(500, new { message = "Internal server error" });
+        }
+    }
 
-public class TenantDto
-{
-    public Guid Id { get; set; }
-    public string Name { get; set; } = string.Empty;
-    public string Subdomain { get; set; } = string.Empty;
-    public string? CustomDomain { get; set; }
-    public string Status { get; set; } = string.Empty;
-    public string PrimaryColor { get; set; } = string.Empty;
-    public string SecondaryColor { get; set; } = string.Empty;
-    public string DefaultLanguage { get; set; } = string.Empty;
-    public bool IsRtlEnabled { get; set; }
-    public DateTime? TrialEndsAt { get; set; }
-    public DateTime CreatedAt { get; set; }
-    public string? LogoUrl { get; set; }
-    public string? Role { get; set; }
-}
+    [HttpDelete("{id}")]
+    public async Task<IActionResult> DeleteTenant(Guid id)
+    {
+        try
+        {
+            var deleted = await _tenantManagementService.DeleteTenantAsync(id);
+            if (!deleted)
+            {
+                return NotFound(new { message = "Tenant not found" });
+            }
 
-public class UpdateTenantSettingsRequest
-{
-    public string? Name { get; set; }
-    public string? CustomDomain { get; set; }
-    public string? PrimaryColor { get; set; }
-    public string? SecondaryColor { get; set; }
-    public string? DefaultLanguage { get; set; }
-    public bool IsRtlEnabled { get; set; }
-    public string? LogoUrl { get; set; }
+            return Ok(new { message = "Tenant deleted successfully" });
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error deleting tenant {TenantId}", id);
+            return StatusCode(500, new { message = "Internal server error" });
+        }
+    }
+
+    [HttpPost("logo")]
+    public async Task<IActionResult> UploadTenantLogo([FromForm] IFormFile logo)
+    {
+        try
+        {
+            var tenantId = _currentUserService.TenantId;
+            if (logo == null || logo.Length == 0)
+            {
+                return BadRequest(new { message = "No file provided" });
+            }
+
+            var logoUrl = await _tenantManagementService.UploadTenantLogoAsync(tenantId, logo);
+            return Ok(new { logo = logoUrl });
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error uploading tenant logo");
+            return StatusCode(500, new { message = "Internal server error" });
+        }
+    }
 }

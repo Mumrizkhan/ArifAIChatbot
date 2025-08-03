@@ -6,6 +6,7 @@ import teamReducer from "./slices/teamSlice";
 import analyticsReducer from "./slices/analyticsSlice";
 import themeReducer from "./slices/themeSlice";
 import subscriptionReducer from "./slices/subscriptionSlice";
+import workflowReducer from "./slices/workflowSlice";
 
 export const store = configureStore({
   reducer: {
@@ -16,6 +17,7 @@ export const store = configureStore({
     analytics: analyticsReducer,
     theme: themeReducer,
     subscription: subscriptionReducer,
+    workflow: workflowReducer,
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({

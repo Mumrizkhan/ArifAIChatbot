@@ -25,4 +25,5 @@ public class Tenant : AggregateRoot
     
     public ICollection<UserTenant> UserTenants { get; set; } = new List<UserTenant>();
     public ICollection<Conversation> Conversations { get; set; } = new List<Conversation>();
+    public bool IsActive { get; set; }
 }

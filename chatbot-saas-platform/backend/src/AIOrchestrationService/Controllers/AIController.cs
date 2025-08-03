@@ -193,8 +193,8 @@ public class AIController : ControllerBase
         }
     }
 
-    [HttpPost("extract-intents")]
-    [Authorize]
+    [HttpPost("intents")]
+    [AllowAnonymous]
     public async Task<IActionResult> ExtractIntents([FromBody] IntentRequest request)
     {
         try
@@ -210,6 +210,27 @@ public class AIController : ControllerBase
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error extracting intents");
+            return StatusCode(500, new { message = "Internal server error" });
+        }
+    }
+
+    [HttpPost("sentiment")]
+    [AllowAnonymous]
+    public async Task<IActionResult> AnalyzeSentiment([FromBody] SentimentRequest request)
+    {
+        try
+        {
+            var sentiment = await _aiService.AnalyzeSentimentAsync(request.Message);
+            
+            return Ok(new SentimentResponse
+            {
+                Message = request.Message,
+                Sentiment = sentiment
+            });
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error analyzing sentiment");
             return StatusCode(500, new { message = "Internal server error" });
         }
     }
@@ -234,65 +255,4 @@ public class AIController : ControllerBase
             return StatusCode(500, new { message = "Internal server error" });
         }
     }
-}
-
-public class ChatRequest
-{
-    public string Message { get; set; } = string.Empty;
-    public Guid ConversationId { get; set; }
-    public string? Language { get; set; }
-    public string? Model { get; set; }
-    public double? Temperature { get; set; }
-    public int? MaxTokens { get; set; }
-}
-
-public class ChatResponse
-{
-    public string Content { get; set; } = string.Empty;
-    public string Language { get; set; } = string.Empty;
-    public List<string> Intents { get; set; } = new();
-    public double Confidence { get; set; }
-    public List<string> SourceDocuments { get; set; } = new();
-    public int TokensUsed { get; set; }
-    public TimeSpan ProcessingTime { get; set; }
-    public bool IsSuccessful { get; set; }
-    public string? ErrorMessage { get; set; }
-}
-
-public class TranslateRequest
-{
-    public string Text { get; set; } = string.Empty;
-    public string? SourceLanguage { get; set; }
-    public string TargetLanguage { get; set; } = string.Empty;
-}
-
-public class TranslateResponse
-{
-    public string OriginalText { get; set; } = string.Empty;
-    public string TranslatedText { get; set; } = string.Empty;
-    public string SourceLanguage { get; set; } = string.Empty;
-    public string TargetLanguage { get; set; } = string.Empty;
-}
-
-public class SummarizeRequest
-{
-    public Guid ConversationId { get; set; }
-}
-
-public class SummarizeResponse
-{
-    public Guid ConversationId { get; set; }
-    public string Summary { get; set; } = string.Empty;
-    public int MessageCount { get; set; }
-}
-
-public class IntentRequest
-{
-    public string Message { get; set; } = string.Empty;
-}
-
-public class IntentResponse
-{
-    public string Message { get; set; } = string.Empty;
-    public List<string> Intents { get; set; } = new();
 }

@@ -108,4 +108,9 @@ public class CachedOpenAIService : IAIService
         var hash = sha256.ComputeHash(Encoding.UTF8.GetBytes(combined));
         return Convert.ToBase64String(hash)[..8];
     }
+
+    public Task<string> AnalyzeSentimentAsync(string message)
+    {
+        return _openAIService.AnalyzeSentimentAsync(message);
+    }
 }

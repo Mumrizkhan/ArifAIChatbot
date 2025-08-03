@@ -7,6 +7,7 @@ using Shared.Infrastructure.Persistence;
 using Shared.Infrastructure.Services;
 using Shared.Infrastructure.Extensions;
 using System.Text;
+using TenantManagementService.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -40,6 +41,9 @@ builder.Services.AddSwaggerGen(options =>
 });
 
 builder.Services.AddInfrastructure(builder.Configuration);
+builder.Services.AddScoped<ITenantManagementService, TenantManagementService.Services.TenantManagementService>();
+builder.Services.AddScoped<IChatbotConfigService, ChatbotConfigService>();
+builder.Services.AddScoped<ITeamService, TeamService>();
 builder.Services.AddHttpContextAccessor();
 
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)

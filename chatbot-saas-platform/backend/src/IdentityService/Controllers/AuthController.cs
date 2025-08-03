@@ -1,14 +1,9 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.IdentityModel.Tokens;
+using IdentityService.Services;
+using IdentityService.Models;
 using Shared.Application.Common.Interfaces;
-using Shared.Domain.Entities;
-using Shared.Domain.Enums;
-using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
-using System.Text;
-using BCrypt.Net;
 
 namespace IdentityService.Controllers;
 
@@ -16,17 +11,17 @@ namespace IdentityService.Controllers;
 [Route("api/[controller]")]
 public class AuthController : ControllerBase
 {
-    private readonly IApplicationDbContext _context;
-    private readonly IConfiguration _configuration;
+    private readonly IAuthService _authService;
+    private readonly ICurrentUserService _currentUserService;
     private readonly ILogger<AuthController> _logger;
 
     public AuthController(
-        IApplicationDbContext context,
-        IConfiguration configuration,
+        IAuthService authService,
+        ICurrentUserService currentUserService,
         ILogger<AuthController> logger)
     {
-        _context = context;
-        _configuration = configuration;
+        _authService = authService;
+        _currentUserService = currentUserService;
         _logger = logger;
     }
 
@@ -35,39 +30,12 @@ public class AuthController : ControllerBase
     {
         try
         {
-            if (await _context.Users.AnyAsync(u => u.Email == request.Email))
-            {
-                return BadRequest(new { message = "User with this email already exists" });
-            }
-
-            var user = new User
-            {
-                Email = request.Email,
-                FirstName = request.FirstName,
-                LastName = request.LastName,
-                PasswordHash = BCrypt.Net.BCrypt.HashPassword(request.Password),
-                Role = UserRole.User,
-                PreferredLanguage = request.PreferredLanguage ?? "en"
-            };
-
-            _context.Users.Add(user);
-            await _context.SaveChangesAsync();
-
-            var token = GenerateJwtToken(user);
-
-            return Ok(new AuthResponse
-            {
-                Token = token,
-                User = new UserDto
-                {
-                    Id = user.Id,
-                    Email = user.Email,
-                    FirstName = user.FirstName,
-                    LastName = user.LastName,
-                    Role = user.Role.ToString(),
-                    PreferredLanguage = user.PreferredLanguage
-                }
-            });
+            var response = await _authService.RegisterAsync(request);
+            return Ok(response);
+        }
+        catch (InvalidOperationException ex)
+        {
+            return BadRequest(new { message = ex.Message });
         }
         catch (Exception ex)
         {
@@ -81,48 +49,12 @@ public class AuthController : ControllerBase
     {
         try
         {
-            var user = await _context.Users
-                .Include(u => u.UserTenants)
-                .FirstOrDefaultAsync(u => u.Email == request.Email);
-
-            if (user != null && (user.UserTenants == null || !user.UserTenants.Any()))
-            {
-                // Ensure UserTenants is loaded if not already
-                await _context.Entry(user)
-                    .Collection(u => u.UserTenants)
-                    .Query()
-                    .Where(x => x.UserId == user.Id)
-                    .LoadAsync();
-            }
-            var tusers = _context.UserTenants.Where(x => x.UserId == user.Id).ToList();
-            if (user == null || !BCrypt.Net.BCrypt.Verify(request.Password, user.PasswordHash))
-            {
-                return Unauthorized(new { message = "Invalid email or password" });
-            }
-
-            if (!user.IsActive)
-            {
-                return Unauthorized(new { message = "Account is deactivated" });
-            }
-
-            user.LastLoginAt = DateTime.UtcNow;
-            await _context.SaveChangesAsync();
-
-            var token = GenerateJwtToken(user);
-
-            return Ok(new AuthResponse
-            {
-                Token = token,
-                User = new UserDto
-                {
-                    Id = user.Id,
-                    Email = user.Email,
-                    FirstName = user.FirstName,
-                    LastName = user.LastName,
-                    Role = user.Role.ToString(),
-                    PreferredLanguage = user.PreferredLanguage
-                }
-            });
+            var response = await _authService.LoginAsync(request);
+            return Ok(response);
+        }
+        catch (UnauthorizedAccessException ex)
+        {
+            return Unauthorized(new { message = ex.Message });
         }
         catch (Exception ex)
         {
@@ -137,33 +69,8 @@ public class AuthController : ControllerBase
     {
         try
         {
-            var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-            if (string.IsNullOrEmpty(userId) || !Guid.TryParse(userId, out var userGuid))
-            {
-                return Unauthorized();
-            }
-
-            var user = await _context.Users.FirstOrDefaultAsync(u => u.Id == userGuid);
-            if (user == null)
-            {
-                return NotFound(new { message = "User not found" });
-            }
-
-            var token = GenerateJwtToken(user);
-
-            return Ok(new AuthResponse
-            {
-                Token = token,
-                User = new UserDto
-                {
-                    Id = user.Id,
-                    Email = user.Email,
-                    FirstName = user.FirstName,
-                    LastName = user.LastName,
-                    Role = user.Role.ToString(),
-                    PreferredLanguage = user.PreferredLanguage
-                }
-            });
+            var response = await _authService.RefreshTokenAsync();
+            return Ok(response);
         }
         catch (Exception ex)
         {
@@ -181,40 +88,6 @@ public class AuthController : ControllerBase
         return Ok(new { message = "Logged out successfully" });
     }
 
-    private string GenerateJwtToken(User user)
-    {
-        var tokenHandler = new JwtSecurityTokenHandler();
-        var key = Encoding.UTF8.GetBytes(_configuration["Jwt:Key"]!);
-
-        var claims = new List<Claim>
-        {
-            new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
-            new Claim(ClaimTypes.Email, user.Email),
-            new Claim(ClaimTypes.Role, user.Role.ToString()),
-            new Claim("preferred_language", user.PreferredLanguage)
-        };
-
-        // Add tenant roles if user is a tenant user
-        if (user.UserTenants != null && user.UserTenants.Count > 0)
-        {
-            foreach (var userTenant in user.UserTenants)
-            {
-                claims.Add(new Claim("tenant_id", userTenant.TenantId.ToString()));
-                claims.Add(new Claim("tenant_role", userTenant.Role.ToString()));
-            }
-        }
-
-        var tokenDescriptor = new SecurityTokenDescriptor
-        {
-            Subject = new ClaimsIdentity(claims),
-            Expires = DateTime.UtcNow.AddDays(7),
-            Issuer = _configuration["Jwt:Issuer"],
-            Audience = _configuration["Jwt:Audience"],
-            SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature)
-        };
-        var token = tokenHandler.CreateToken(tokenDescriptor);
-        return tokenHandler.WriteToken(token);
-    }
 
     [HttpGet("me")]
     [Authorize]
@@ -222,13 +95,13 @@ public class AuthController : ControllerBase
     {
         try
         {
-            var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-            if (string.IsNullOrEmpty(userId) || !Guid.TryParse(userId, out var userGuid))
+            var userId = _currentUserService.UserId;
+            if (!userId.HasValue)
             {
                 return Unauthorized();
             }
 
-            var user = await _context.Users.FirstOrDefaultAsync(u => u.Id == userGuid);
+            var user = await _authService.GetCurrentUserAsync(userId.Value);
             if (user == null)
             {
                 return NotFound(new { message = "User not found" });
@@ -236,12 +109,14 @@ public class AuthController : ControllerBase
 
             return Ok(new
             {
-                Id = user.Id,
-                Email = user.Email,
-                FirstName = user.FirstName,
-                LastName = user.LastName,
-                Role = user.Role.ToString(),
-                PreferredLanguage = user.PreferredLanguage
+                user.Id,
+                user.Email,
+                user.FirstName,
+                user.LastName,
+                user.Role,
+                user.PreferredLanguage,
+                user.IsActive,
+                user.LastLoginAt
             });
         }
         catch (Exception ex)
@@ -250,35 +125,192 @@ public class AuthController : ControllerBase
             return StatusCode(500, new { message = "Internal server error" });
         }
     }
+
+    [HttpPost("refresh-token")]
+    public async Task<IActionResult> RefreshToken([FromBody] RefreshTokenRequest request)
+    {
+        try
+        {
+            var newToken = await _authService.RefreshTokenAsync(request.RefreshToken);
+            return Ok(new { token = newToken });
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error refreshing token");
+            return Unauthorized(new { message = "Invalid refresh token" });
+        }
+    }
+
+    [HttpPost("forgot-password")]
+    public async Task<IActionResult> ForgotPassword([FromBody] ForgotPasswordRequest request)
+    {
+        try
+        {
+            await _authService.SendPasswordResetEmailAsync(request.Email);
+            return Ok(new { message = "Password reset email sent" });
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error sending password reset email");
+            return StatusCode(500, new { message = "Internal server error" });
+        }
+    }
+
+    [HttpPost("reset-password")]
+    public async Task<IActionResult> ResetPassword([FromBody] ResetPasswordRequest request)
+    {
+        try
+        {
+            var result = await _authService.ResetPasswordAsync(request.Token, request.NewPassword);
+            if (result)
+            {
+                return Ok(new { message = "Password reset successfully" });
+            }
+            return BadRequest(new { message = "Invalid or expired reset token" });
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error resetting password");
+            return StatusCode(500, new { message = "Internal server error" });
+        }
+    }
+
+    [HttpPost("change-password")]
+    [Authorize]
+    public async Task<IActionResult> ChangePassword([FromBody] ChangePasswordRequest request)
+    {
+        try
+        {
+            var userId = _currentUserService.UserId;
+            if (!userId.HasValue)
+            {
+                return Unauthorized();
+            }
+
+            var result = await _authService.ChangePasswordAsync(userId.Value, request.CurrentPassword, request.NewPassword);
+            if (result)
+            {
+                return Ok(new { message = "Password changed successfully" });
+            }
+            return BadRequest(new { message = "Current password is incorrect" });
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error changing password");
+            return StatusCode(500, new { message = "Internal server error" });
+        }
+    }
+
+    [HttpPut("profile")]
+    [Authorize]
+    public async Task<IActionResult> UpdateProfile([FromBody] UpdateProfileRequest request)
+    {
+        try
+        {
+            var userId = _currentUserService.UserId;
+            if (!userId.HasValue)
+            {
+                return Unauthorized();
+            }
+
+            var result = await _authService.UpdateProfileAsync(userId.Value, request);
+            if (result)
+            {
+                return Ok(new { message = "Profile updated successfully" });
+            }
+            return NotFound(new { message = "User not found" });
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error updating profile");
+            return StatusCode(500, new { message = "Internal server error" });
+        }
+    }
+
+    [HttpPost("avatar")]
+    [Authorize]
+    public async Task<IActionResult> UploadAvatar([FromForm] IFormFile avatar)
+    {
+        try
+        {
+            var userId = _currentUserService.UserId;
+            if (!userId.HasValue)
+            {
+                return Unauthorized();
+            }
+
+            if (avatar == null || avatar.Length == 0)
+            {
+                return BadRequest(new { message = "No file provided" });
+            }
+
+            var avatarUrl = await _authService.UploadAvatarAsync(userId.Value, avatar);
+            return Ok(new { avatarUrl });
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error uploading avatar");
+            return StatusCode(500, new { message = "Internal server error" });
+        }
+    }
 }
 
-public class RegisterRequest
-{
-    public string Email { get; set; } = string.Empty;
-    public string FirstName { get; set; } = string.Empty;
-    public string LastName { get; set; } = string.Empty;
-    public string Password { get; set; } = string.Empty;
-    public string? PreferredLanguage { get; set; }
-}
+//public class RefreshTokenRequest
+//{
+//    public string RefreshToken { get; set; } = string.Empty;
+//}
 
-public class LoginRequest
-{
-    public string Email { get; set; } = string.Empty;
-    public string Password { get; set; } = string.Empty;
-}
+//public class ForgotPasswordRequest
+//{
+//    public string Email { get; set; } = string.Empty;
+//}
 
-public class AuthResponse
-{
-    public string Token { get; set; } = string.Empty;
-    public UserDto User { get; set; } = null!;
-}
+//public class ResetPasswordRequest
+//{
+//    public string Token { get; set; } = string.Empty;
+//    public string NewPassword { get; set; } = string.Empty;
+//}
 
-public class UserDto
-{
-    public Guid Id { get; set; }
-    public string Email { get; set; } = string.Empty;
-    public string FirstName { get; set; } = string.Empty;
-    public string LastName { get; set; } = string.Empty;
-    public string Role { get; set; } = string.Empty;
-    public string PreferredLanguage { get; set; } = string.Empty;
-}
+//public class ChangePasswordRequest
+//{
+//    public string CurrentPassword { get; set; } = string.Empty;
+//    public string NewPassword { get; set; } = string.Empty;
+//}
+
+//public class UpdateProfileRequest
+//{
+//    public string? FirstName { get; set; }
+//    public string? LastName { get; set; }
+//    public string? PreferredLanguage { get; set; }
+//}
+
+//public class RegisterRequest
+//{
+//    public string Email { get; set; } = string.Empty;
+//    public string FirstName { get; set; } = string.Empty;
+//    public string LastName { get; set; } = string.Empty;
+//    public string Password { get; set; } = string.Empty;
+//    public string? PreferredLanguage { get; set; }
+//}
+
+//public class LoginRequest
+//{
+//    public string Email { get; set; } = string.Empty;
+//    public string Password { get; set; } = string.Empty;
+//}
+
+//public class AuthResponse
+//{
+//    public string Token { get; set; } = string.Empty;
+//    public UserDto User { get; set; } = null!;
+//}
+
+//public class UserDto
+//{
+//    public Guid Id { get; set; }
+//    public string Email { get; set; } = string.Empty;
+//    public string FirstName { get; set; } = string.Empty;
+//    public string LastName { get; set; } = string.Empty;
+//    public string Role { get; set; } = string.Empty;
+//    public string PreferredLanguage { get; set; } = string.Empty;
+//}

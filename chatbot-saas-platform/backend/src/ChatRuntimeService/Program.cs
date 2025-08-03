@@ -8,6 +8,7 @@ using Shared.Infrastructure.Persistence;
 using Shared.Infrastructure.Services;
 using Shared.Infrastructure.Extensions;
 using System.Text;
+using ChatRuntimeService.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -42,6 +43,11 @@ builder.Services.AddSwaggerGen(options =>
 builder.Services.AddSignalR();
 
 builder.Services.AddInfrastructure(builder.Configuration);
+builder.Services.AddScoped<IAIIntegrationService, AIIntegrationService>();
+builder.Services.AddScoped<IMessageQueueService, MessageQueueService>();
+builder.Services.AddScoped<IFileUploadService, FileUploadService>();
+builder.Services.AddScoped<IChatRuntimeService, ChatRuntimeService.Services.ChatRuntimeService>();
+builder.Services.AddScoped<IChatService, ChatService>();
 builder.Services.AddHttpContextAccessor();
 
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)

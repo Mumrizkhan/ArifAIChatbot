@@ -35,6 +35,7 @@
     "chatbot": "الروبوت المحادث",
     "team": "الفريق",
     "analytics": "التحليلات",
+    "workflows": "سير العمل",
     "subscription": "الاشتراك",
     "settings": "الإعدادات"
   },
@@ -222,6 +223,28 @@
     "smsNotifications": "إشعارات الرسائل النصية",
     "pushNotifications": "الإشعارات المدفوعة",
     "updateSettings": "تحديث الإعدادات"
+  },
+  "workflows": {
+    "title": "سير العمل",
+    "description": "أتمتة عمليات عملك باستخدام سير عمل مخصص",
+    "createNew": "إنشاء سير عمل",
+    "createFirst": "إنشاء سير العمل الأول",
+    "noWorkflows": "لم يتم العثور على سير عمل",
+    "noWorkflowsDescription": "ابدأ بإنشاء سير العمل الآلي الأول",
+    "name": "الاسم",
+    "status": "الحالة",
+    "executions": "التنفيذات",
+    "lastExecuted": "آخر تنفيذ",
+    "actions": "الإجراءات",
+    "edit": "تحرير",
+    "execute": "تنفيذ",
+    "clone": "نسخ",
+    "delete": "حذف",
+    "never": "أبداً",
+    "confirmDelete": "هل أنت متأكد من حذف سير العمل هذا؟",
+    "create": "إنشاء",
+    "namePlaceholder": "أدخل اسم سير العمل",
+    "descriptionPlaceholder": "أدخل وصف سير العمل"
   },
   "errors": {
     "networkError": "حدث خطأ في الشبكة",

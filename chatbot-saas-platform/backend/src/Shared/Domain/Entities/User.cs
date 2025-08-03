@@ -17,6 +17,12 @@ public class User : AggregateRoot
     public DateTime? LastLoginAt { get; set; }
     public string PreferredLanguage { get; set; } = "en";
     public UserRole Role { get; set; } = UserRole.User;
-    
+    public ICollection<Conversation> AssignedConversations { get; set; } = new List<Conversation>();
     public ICollection<UserTenant> UserTenants { get; set; } = new List<UserTenant>();
+    public string? AvatarUrl { get; set; }
+    public string? PasswordResetToken { get; set; }
+    public DateTime? PasswordResetTokenExpiry { get; set; }
+    public bool IsOnline { get; set; }
+    public UserStatus? Status { get; set; }
+    
 }

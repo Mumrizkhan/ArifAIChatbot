@@ -44,6 +44,7 @@ builder.Services.AddInfrastructure(builder.Configuration);
 builder.Services.AddScoped<OpenAIService>();
 builder.Services.AddScoped<IAIService, CachedOpenAIService>();
 builder.Services.AddScoped<IVectorService, QdrantService>();
+builder.Services.AddScoped<IAIOrchestrationService, AIOrchestrationService.Services.AIOrchestrationService>();
 builder.Services.AddHttpContextAccessor();
 
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)

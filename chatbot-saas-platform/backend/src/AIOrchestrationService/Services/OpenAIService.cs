@@ -189,4 +189,38 @@ public class OpenAIService : IAIService
             return "Unable to generate conversation summary.";
         }
     }
+
+    public async Task<string> AnalyzeSentimentAsync(string message)
+    {
+        try
+        {
+            await Task.Delay(50);
+            
+            var lowerMessage = message.ToLower();
+            
+            if (lowerMessage.Contains("great") || lowerMessage.Contains("excellent") || 
+                lowerMessage.Contains("good") || lowerMessage.Contains("happy") ||
+                lowerMessage.Contains("love") || lowerMessage.Contains("amazing") ||
+                lowerMessage.Contains("wonderful") || lowerMessage.Contains("fantastic"))
+            {
+                return "positive";
+            }
+            else if (lowerMessage.Contains("bad") || lowerMessage.Contains("terrible") ||
+                     lowerMessage.Contains("hate") || lowerMessage.Contains("angry") ||
+                     lowerMessage.Contains("frustrated") || lowerMessage.Contains("awful") ||
+                     lowerMessage.Contains("horrible") || lowerMessage.Contains("disappointed"))
+            {
+                return "negative";
+            }
+            else
+            {
+                return "neutral";
+            }
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error analyzing sentiment");
+            return "neutral";
+        }
+    }
 }

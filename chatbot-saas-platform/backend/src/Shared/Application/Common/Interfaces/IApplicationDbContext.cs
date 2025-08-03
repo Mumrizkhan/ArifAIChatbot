@@ -35,6 +35,7 @@ public interface IApplicationDbContext
     // NotificationService entities
     DbSet<NotificationTemplate> NotificationTemplates { get; }
     DbSet<NotificationPreference> NotificationPreferences { get; }
+    DbSet<ChatbotConfig> ChatbotConfigs { get; }
 
     // Generic access
     DbSet<TEntity> Set<TEntity>() where TEntity : class;

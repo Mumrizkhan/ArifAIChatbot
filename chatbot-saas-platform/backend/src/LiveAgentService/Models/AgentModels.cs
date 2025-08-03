@@ -84,6 +84,10 @@ public class AgentPerformanceMetrics
     public int EscalationsMade { get; set; }
     public DateTime PeriodStart { get; set; }
     public DateTime PeriodEnd { get; set; }
+    public int TotalConversations { get; internal set; }
+    public int ResolvedConversations { get; internal set; }
+    public double CustomerSatisfactionScore { get; internal set; }
+    public int TotalMessages { get; internal set; }
 }
 
 public class ShiftSchedule
@@ -95,3 +99,112 @@ public class ShiftSchedule
     public string TimeZone { get; set; } = "UTC";
     public bool IsActive { get; set; } = true;
 }
+public class UpdateStatusRequest
+{
+    public string Status { get; set; } = string.Empty;
+}
+
+public class AssignConversationRequest
+{
+    public Guid ConversationId { get; set; }
+    public Guid AgentId { get; set; }
+}
+
+public class TransferConversationRequest
+{
+    public Guid ConversationId { get; set; }
+    public Guid ToAgentId { get; set; }
+    public string Reason { get; set; } = string.Empty;
+}
+
+public class NextInQueueRequest
+{
+    public string? Department { get; set; }
+}
+
+public class EscalateConversationRequest
+{
+    public Guid ConversationId { get; set; }
+    public string Reason { get; set; } = string.Empty;
+}
+
+public class UpdateAgentProfileRequest
+{
+    public string? Name { get; set; }
+    public string? Email { get; set; }
+    public string? Phone { get; set; }
+    public string? Bio { get; set; }
+    public string? Location { get; set; }
+    public string? Timezone { get; set; }
+    public string? Language { get; set; }
+    public string[]? Skills { get; set; }
+    public string[]? Specializations { get; set; }
+}
+
+
+
+public class AgentDto
+{
+    public Guid Id { get; set; }
+    public string Name { get; set; } = string.Empty;
+    public string Email { get; set; } = string.Empty;
+    public string Avatar { get; set; } = string.Empty;
+    public string Status { get; set; } = string.Empty;
+    public string[] Skills { get; set; } = Array.Empty<string>();
+    public string[] Specializations { get; set; } = Array.Empty<string>();
+}
+
+public class AgentProfileDto
+{
+    public Guid Id { get; set; }
+    public string Name { get; set; } = string.Empty;
+    public string Email { get; set; } = string.Empty;
+    public string Phone { get; set; } = string.Empty;
+    public string Avatar { get; set; } = string.Empty;
+    public string Bio { get; set; } = string.Empty;
+    public string Location { get; set; } = string.Empty;
+    public string Timezone { get; set; } = "UTC";
+    public string Language { get; set; } = "en";
+    public string[] Skills { get; set; } = Array.Empty<string>();
+    public string[] Specializations { get; set; } = Array.Empty<string>();
+    public string Status { get; set; } = string.Empty;
+}
+
+public class AgentStatsDto
+{
+    public Guid AgentId { get; set; }
+    public DateTime PeriodStart { get; set; }
+    public DateTime PeriodEnd { get; set; }
+    public int TotalConversations { get; set; }
+    public int ResolvedConversations { get; set; }
+    public double ResolutionRate { get; set; }
+    public double AverageResponseTimeMinutes { get; set; }
+    public double CustomerSatisfactionRating { get; set; }
+    public int ActiveConversations { get; set; }
+}
+
+//public class AgentPerformanceMetrics
+//{
+//    public Guid AgentId { get; set; }
+//    public DateTime PeriodStart { get; set; }
+//    public DateTime PeriodEnd { get; set; }
+//    public int TotalConversations { get; set; }
+//    public int ResolvedConversations { get; set; }
+//    public TimeSpan AverageResponseTime { get; set; }
+//    public TimeSpan AverageResolutionTime { get; set; }
+//    public double CustomerSatisfactionScore { get; set; }
+//    public int TotalMessages { get; set; }
+//}
+
+//public class UpdateAgentProfileRequest
+//{
+//    public string? Name { get; set; }
+//    public string? Email { get; set; }
+//    public string? Phone { get; set; }
+//    public string? Bio { get; set; }
+//    public string? Location { get; set; }
+//    public string? Timezone { get; set; }
+//    public string? Language { get; set; }
+//    public string[]? Skills { get; set; }
+//    public string[]? Specializations { get; set; }
+//}

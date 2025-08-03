@@ -1,9 +1,9 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
+using TenantManagementService.Services;
+using TenantManagementService.Models;
+using Shared.Infrastructure.Services;
 using Shared.Application.Common.Interfaces;
-using Shared.Domain.Entities;
-using Shared.Domain.Enums;
 
 namespace TenantManagementService.Controllers;
 
@@ -12,18 +12,18 @@ namespace TenantManagementService.Controllers;
 [Authorize]
 public class ChatbotConfigsController : ControllerBase
 {
-    private readonly IApplicationDbContext _context;
+    private readonly IChatbotConfigService _chatbotConfigService;
     private readonly ITenantService _tenantService;
     private readonly ICurrentUserService _currentUserService;
     private readonly ILogger<ChatbotConfigsController> _logger;
 
     public ChatbotConfigsController(
-        IApplicationDbContext context,
+        IChatbotConfigService chatbotConfigService,
         ITenantService tenantService,
         ICurrentUserService currentUserService,
         ILogger<ChatbotConfigsController> logger)
     {
-        _context = context;
+        _chatbotConfigService = chatbotConfigService;
         _tenantService = tenantService;
         _currentUserService = currentUserService;
         _logger = logger;
@@ -35,25 +35,8 @@ public class ChatbotConfigsController : ControllerBase
         try
         {
             var tenantId = _tenantService.GetCurrentTenantId();
-            var tenant = await _context.Tenants.FirstOrDefaultAsync(t => t.Id == tenantId);
-            
-            if (tenant == null)
-            {
-                return NotFound(new { message = "Tenant not found" });
-            }
-
-            return Ok(new
-            {
-                Id = tenant.Id,
-                Name = tenant.Name,
-                PrimaryColor = tenant.PrimaryColor,
-                SecondaryColor = tenant.SecondaryColor,
-                DefaultLanguage = tenant.DefaultLanguage,
-                IsRtlEnabled = tenant.IsRtlEnabled,
-                LogoUrl = tenant.LogoUrl,
-                WelcomeMessage = "Welcome! How can I help you today?",
-                IsActive = tenant.Status == TenantStatus.Active
-            });
+            var configs = await _chatbotConfigService.GetChatbotConfigsAsync(tenantId);
+            return Ok(configs);
         }
         catch (Exception ex)
         {
@@ -63,27 +46,13 @@ public class ChatbotConfigsController : ControllerBase
     }
 
     [HttpPost]
-    public async Task<IActionResult> CreateChatbotConfig([FromBody] ChatbotConfigRequest request)
+    public async Task<IActionResult> CreateChatbotConfig([FromBody] CreateChatbotConfigRequest request)
     {
         try
         {
             var tenantId = _tenantService.GetCurrentTenantId();
-            var tenant = await _context.Tenants.FirstOrDefaultAsync(t => t.Id == tenantId);
-            
-            if (tenant == null)
-            {
-                return NotFound(new { message = "Tenant not found" });
-            }
-
-            tenant.PrimaryColor = request.PrimaryColor ?? tenant.PrimaryColor;
-            tenant.SecondaryColor = request.SecondaryColor ?? tenant.SecondaryColor;
-            tenant.DefaultLanguage = request.DefaultLanguage ?? tenant.DefaultLanguage;
-            tenant.IsRtlEnabled = request.IsRtlEnabled;
-            tenant.LogoUrl = request.LogoUrl ?? tenant.LogoUrl;
-
-            await _context.SaveChangesAsync();
-
-            return Ok(new { message = "Chatbot configuration created successfully" });
+            var config = await _chatbotConfigService.CreateChatbotConfigAsync(request, tenantId);
+            return Ok(new { message = "Chatbot configuration created successfully", config });
         }
         catch (Exception ex)
         {
@@ -93,31 +62,19 @@ public class ChatbotConfigsController : ControllerBase
     }
 
     [HttpPut("{id}")]
-    public async Task<IActionResult> UpdateChatbotConfig(Guid id, [FromBody] ChatbotConfigRequest request)
+    public async Task<IActionResult> UpdateChatbotConfig(Guid id, [FromBody] UpdateChatbotConfigRequest request)
     {
         try
         {
             var tenantId = _tenantService.GetCurrentTenantId();
-            if (id != tenantId)
+            var config = await _chatbotConfigService.UpdateChatbotConfigAsync(id, request, tenantId);
+
+            if (config == null)
             {
-                return Forbid();
+                return NotFound(new { message = "Chatbot configuration not found" });
             }
 
-            var tenant = await _context.Tenants.FirstOrDefaultAsync(t => t.Id == tenantId);
-            if (tenant == null)
-            {
-                return NotFound(new { message = "Tenant not found" });
-            }
-
-            tenant.PrimaryColor = request.PrimaryColor ?? tenant.PrimaryColor;
-            tenant.SecondaryColor = request.SecondaryColor ?? tenant.SecondaryColor;
-            tenant.DefaultLanguage = request.DefaultLanguage ?? tenant.DefaultLanguage;
-            tenant.IsRtlEnabled = request.IsRtlEnabled;
-            tenant.LogoUrl = request.LogoUrl ?? tenant.LogoUrl;
-
-            await _context.SaveChangesAsync();
-
-            return Ok(new { message = "Chatbot configuration updated successfully" });
+            return Ok(new { message = "Chatbot configuration updated successfully", config });
         }
         catch (Exception ex)
         {
@@ -132,26 +89,14 @@ public class ChatbotConfigsController : ControllerBase
         try
         {
             var tenantId = _tenantService.GetCurrentTenantId();
-            if (id != tenantId)
+            var deleted = await _chatbotConfigService.DeleteChatbotConfigAsync(id, tenantId);
+
+            if (!deleted)
             {
-                return Forbid();
+                return NotFound(new { message = "Chatbot configuration not found" });
             }
 
-            var tenant = await _context.Tenants.FirstOrDefaultAsync(t => t.Id == tenantId);
-            if (tenant == null)
-            {
-                return NotFound(new { message = "Tenant not found" });
-            }
-
-            tenant.PrimaryColor = "#3B82F6";
-            tenant.SecondaryColor = "#64748B";
-            tenant.DefaultLanguage = "en";
-            tenant.IsRtlEnabled = false;
-            tenant.LogoUrl = null;
-
-            await _context.SaveChangesAsync();
-
-            return Ok(new { message = "Chatbot configuration reset to defaults" });
+            return Ok(new { message = "Chatbot configuration deleted successfully" });
         }
         catch (Exception ex)
         {
@@ -159,13 +104,151 @@ public class ChatbotConfigsController : ControllerBase
             return StatusCode(500, new { message = "Internal server error" });
         }
     }
-}
 
-public class ChatbotConfigRequest
-{
-    public string? PrimaryColor { get; set; }
-    public string? SecondaryColor { get; set; }
-    public string? DefaultLanguage { get; set; }
-    public bool IsRtlEnabled { get; set; }
-    public string? LogoUrl { get; set; }
+    [HttpPost("{configId}/avatar")]
+    public async Task<IActionResult> UploadChatbotAvatar(Guid configId, [FromForm] IFormFile avatar)
+    {
+        try
+        {
+            var tenantId = _tenantService.GetCurrentTenantId();
+            
+            if (avatar == null || avatar.Length == 0)
+            {
+                return BadRequest(new { message = "No file provided" });
+            }
+
+            var avatarUrl = await _chatbotConfigService.UploadAvatarAsync(configId, avatar, tenantId);
+            return Ok(new { avatarUrl });
+        }
+        catch (InvalidOperationException ex)
+        {
+            return NotFound(new { message = ex.Message });
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error uploading chatbot avatar");
+            return StatusCode(500, new { message = "Internal server error" });
+        }
+    }
+
+    [HttpGet("{configId}/knowledge-base")]
+    public async Task<IActionResult> GetKnowledgeBase(Guid configId)
+    {
+        try
+        {
+            var tenantId = _tenantService.GetCurrentTenantId();
+            var knowledgeBase = await _chatbotConfigService.GetKnowledgeBaseAsync(configId, tenantId);
+            return Ok(knowledgeBase);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error getting knowledge base");
+            return StatusCode(500, new { message = "Internal server error" });
+        }
+    }
+
+    [HttpPost("{configId}/knowledge-base/documents")]
+    public async Task<IActionResult> AddKnowledgeBaseDocument(Guid configId, [FromForm] IFormFile document)
+    {
+        try
+        {
+            var tenantId = _tenantService.GetCurrentTenantId();
+            
+            if (document == null || document.Length == 0)
+            {
+                return BadRequest(new { message = "No file provided" });
+            }
+
+            var success = await _chatbotConfigService.AddKnowledgeBaseDocumentAsync(configId, document, tenantId);
+            
+            if (!success)
+            {
+                return NotFound(new { message = "Chatbot configuration not found" });
+            }
+
+            return Ok(new { message = "Document added to knowledge base successfully" });
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error adding knowledge base document");
+            return StatusCode(500, new { message = "Internal server error" });
+        }
+    }
+
+    [HttpDelete("{configId}/knowledge-base/documents/{documentId}")]
+    public async Task<IActionResult> RemoveKnowledgeBaseDocument(Guid configId, Guid documentId)
+    {
+        try
+        {
+            var tenantId = _tenantService.GetCurrentTenantId();
+            var success = await _chatbotConfigService.RemoveKnowledgeBaseDocumentAsync(configId, documentId, tenantId);
+            
+            if (!success)
+            {
+                return NotFound(new { message = "Document not found" });
+            }
+
+            return Ok(new { message = "Document removed from knowledge base successfully" });
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error removing knowledge base document");
+            return StatusCode(500, new { message = "Internal server error" });
+        }
+    }
+
+    [HttpGet("{configId}/analytics")]
+    public async Task<IActionResult> GetChatbotAnalytics(Guid configId)
+    {
+        try
+        {
+            var tenantId = _tenantService.GetCurrentTenantId();
+            var analytics = await _chatbotConfigService.GetAnalyticsAsync(configId, tenantId);
+            return Ok(analytics);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error getting chatbot analytics");
+            return StatusCode(500, new { message = "Internal server error" });
+        }
+    }
+
+    [HttpGet("{configId}/training-data")]
+    public async Task<IActionResult> GetTrainingData(Guid configId)
+    {
+        try
+        {
+            var tenantId = _tenantService.GetCurrentTenantId();
+            var trainingData = await _chatbotConfigService.GetTrainingDataAsync(configId, tenantId);
+            return Ok(trainingData);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error getting training data");
+            return StatusCode(500, new { message = "Internal server error" });
+        }
+    }
+
+    [HttpPost("{configId}/train")]
+    public async Task<IActionResult> TrainChatbot(Guid configId)
+    {
+        try
+        {
+            var tenantId = _tenantService.GetCurrentTenantId();
+            var success = await _chatbotConfigService.TrainChatbotAsync(configId, tenantId);
+            
+            if (!success)
+            {
+                return NotFound(new { message = "Chatbot configuration not found" });
+            }
+            
+            return Ok(new { message = "Chatbot training started successfully" });
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error starting chatbot training");
+            return StatusCode(500, new { message = "Internal server error" });
+        }
+    }
+
 }

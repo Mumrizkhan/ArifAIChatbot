@@ -26,6 +26,8 @@ namespace Shared.Domain.Entities
         public int ChunkCount { get; set; }
         public bool IsEmbedded { get; set; }
         public string? VectorCollectionName { get; set; }
+        public Guid ChatbotConfigId { get; set; }
+     
     }
 
     public class DocumentChunk : AuditableEntity

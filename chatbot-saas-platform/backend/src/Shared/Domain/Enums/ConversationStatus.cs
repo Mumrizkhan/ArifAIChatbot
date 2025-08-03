@@ -7,5 +7,7 @@ public enum ConversationStatus
     Queued = 2,
     Resolved = 3,
     Closed = 4,
-    Escalated = 5
+    Escalated = 5,
+    Completed = 6,
+    WaitingForAgent = 7
 }

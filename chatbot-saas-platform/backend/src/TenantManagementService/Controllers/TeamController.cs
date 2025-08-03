@@ -1,9 +1,9 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
+using TenantManagementService.Services;
+using TenantManagementService.Models;
+using Shared.Infrastructure.Services;
 using Shared.Application.Common.Interfaces;
-using Shared.Domain.Entities;
-using Shared.Domain.Enums;
 
 namespace TenantManagementService.Controllers;
 
@@ -12,18 +12,18 @@ namespace TenantManagementService.Controllers;
 [Authorize]
 public class TeamController : ControllerBase
 {
-    private readonly IApplicationDbContext _context;
+    private readonly ITeamService _teamService;
     private readonly ITenantService _tenantService;
     private readonly ICurrentUserService _currentUserService;
     private readonly ILogger<TeamController> _logger;
 
     public TeamController(
-        IApplicationDbContext context,
+        ITeamService teamService,
         ITenantService tenantService,
         ICurrentUserService currentUserService,
         ILogger<TeamController> logger)
     {
-        _context = context;
+        _teamService = teamService;
         _tenantService = tenantService;
         _currentUserService = currentUserService;
         _logger = logger;
@@ -35,22 +35,7 @@ public class TeamController : ControllerBase
         try
         {
             var tenantId = _tenantService.GetCurrentTenantId();
-            var members = await _context.UserTenants
-                .Include(ut => ut.User)
-                .Where(ut => ut.TenantId == tenantId && ut.IsActive)
-                .Select(ut => new
-                {
-                    Id = ut.User.Id,
-                    Email = ut.User.Email,
-                    FirstName = ut.User.FirstName,
-                    LastName = ut.User.LastName,
-                    Role = ut.Role.ToString(),
-                    IsActive = ut.IsActive,
-                    JoinedAt = ut.CreatedAt,
-                    LastLoginAt = ut.User.LastLoginAt
-                })
-                .ToListAsync();
-
+            var members = await _teamService.GetTeamMembersAsync(tenantId);
             return Ok(members);
         }
         catch (Exception ex)
@@ -61,61 +46,17 @@ public class TeamController : ControllerBase
     }
 
     [HttpPost("invite")]
-    public async Task<IActionResult> InviteTeamMember([FromBody] InviteTeamMemberRequest request)
+    public async Task<IActionResult> InviteTeamMember([FromBody] AddTeamMemberRequest request)
     {
         try
         {
             var tenantId = _tenantService.GetCurrentTenantId();
-            
-            var existingUser = await _context.Users.FirstOrDefaultAsync(u => u.Email == request.Email);
-            
-            if (existingUser != null)
-            {
-                var existingMembership = await _context.UserTenants
-                    .FirstOrDefaultAsync(ut => ut.UserId == existingUser.Id && ut.TenantId == tenantId);
-                
-                if (existingMembership != null)
-                {
-                    return BadRequest(new { message = "User is already a member of this tenant" });
-                }
-
-                var userTenant = new UserTenant
-                {
-                    UserId = existingUser.Id,
-                    TenantId = tenantId,
-                    Role = Enum.Parse<TenantRole>(request.Role),
-                    IsActive = true
-                };
-                _context.UserTenants.Add(userTenant);
-            }
-            else
-            {
-                var newUser = new User
-                {
-                    Email = request.Email,
-                    FirstName = "",
-                    LastName = "",
-                    PasswordHash = "",
-                    Role = UserRole.User,
-                    PreferredLanguage = "en",
-                    IsActive = false
-                };
-                _context.Users.Add(newUser);
-                await _context.SaveChangesAsync();
-
-                var userTenant = new UserTenant
-                {
-                    UserId = newUser.Id,
-                    TenantId = tenantId,
-                    Role = Enum.Parse<TenantRole>(request.Role),
-                    IsActive = true
-                };
-                _context.UserTenants.Add(userTenant);
-            }
-
-            await _context.SaveChangesAsync();
-            
-            return Ok(new { message = "Team member invited successfully" });
+            var member = await _teamService.AddTeamMemberAsync(request, tenantId);
+            return Ok(new { message = "Team member invited successfully", member });
+        }
+        catch (InvalidOperationException ex)
+        {
+            return BadRequest(new { message = ex.Message });
         }
         catch (Exception ex)
         {
@@ -130,27 +71,14 @@ public class TeamController : ControllerBase
         try
         {
             var tenantId = _tenantService.GetCurrentTenantId();
-            var userTenant = await _context.UserTenants
-                .FirstOrDefaultAsync(ut => ut.UserId == id && ut.TenantId == tenantId);
+            var member = await _teamService.UpdateTeamMemberAsync(id, request, tenantId);
 
-            if (userTenant == null)
+            if (member == null)
             {
                 return NotFound(new { message = "Team member not found" });
             }
 
-            if (!string.IsNullOrEmpty(request.Role))
-            {
-                userTenant.Role = Enum.Parse<TenantRole>(request.Role);
-            }
-
-            if (request.IsActive.HasValue)
-            {
-                userTenant.IsActive = request.IsActive.Value;
-            }
-
-            await _context.SaveChangesAsync();
-
-            return Ok(new { message = "Team member updated successfully" });
+            return Ok(new { message = "Team member updated successfully", member });
         }
         catch (Exception ex)
         {
@@ -165,21 +93,12 @@ public class TeamController : ControllerBase
         try
         {
             var tenantId = _tenantService.GetCurrentTenantId();
-            var userTenant = await _context.UserTenants
-                .FirstOrDefaultAsync(ut => ut.UserId == id && ut.TenantId == tenantId);
+            var removed = await _teamService.RemoveTeamMemberAsync(id, tenantId);
 
-            if (userTenant == null)
+            if (!removed)
             {
                 return NotFound(new { message = "Team member not found" });
             }
-
-            if (userTenant.Role == TenantRole.Owner)
-            {
-                return BadRequest(new { message = "Cannot remove tenant owner" });
-            }
-
-            _context.UserTenants.Remove(userTenant);
-            await _context.SaveChangesAsync();
 
             return Ok(new { message = "Team member removed successfully" });
         }
@@ -189,16 +108,133 @@ public class TeamController : ControllerBase
             return StatusCode(500, new { message = "Internal server error" });
         }
     }
-}
 
-public class InviteTeamMemberRequest
-{
-    public string Email { get; set; } = string.Empty;
-    public string Role { get; set; } = string.Empty;
-}
+    [HttpGet("roles")]
+    public async Task<IActionResult> GetTeamRoles()
+    {
+        try
+        {
+            var roles = await _teamService.GetTeamRolesAsync();
+            return Ok(roles);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error getting team roles");
+            return StatusCode(500, new { message = "Internal server error" });
+        }
+    }
 
-public class UpdateTeamMemberRequest
-{
-    public string? Role { get; set; }
-    public bool? IsActive { get; set; }
+    [HttpGet("stats")]
+    public async Task<IActionResult> GetTeamStats()
+    {
+        try
+        {
+            var tenantId = _tenantService.GetCurrentTenantId();
+            var stats = await _teamService.GetTeamStatsAsync(tenantId);
+            return Ok(stats);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error getting team stats");
+            return StatusCode(500, new { message = "Internal server error" });
+        }
+    }
+
+    [HttpGet("permissions")]
+    public async Task<IActionResult> GetTeamPermissions()
+    {
+        try
+        {
+            var permissions = await _teamService.GetTeamPermissionsAsync();
+            return Ok(permissions);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error getting team permissions");
+            return StatusCode(500, new { message = "Internal server error" });
+        }
+    }
+
+    [HttpPost("members/{id}/resend-invite")]
+    public async Task<IActionResult> ResendInvitation(Guid id)
+    {
+        try
+        {
+            var tenantId = _tenantService.GetCurrentTenantId();
+            var success = await _teamService.ResendInvitationAsync(id, tenantId);
+
+            if (!success)
+            {
+                return NotFound(new { message = "Team member not found" });
+            }
+
+            return Ok(new { message = "Invitation resent successfully" });
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error resending invitation");
+            return StatusCode(500, new { message = "Internal server error" });
+        }
+    }
+
+    [HttpDelete("invites/{id}")]
+    public async Task<IActionResult> CancelInvitation(Guid id)
+    {
+        try
+        {
+            var tenantId = _tenantService.GetCurrentTenantId();
+            var success = await _teamService.CancelInvitationAsync(id, tenantId);
+
+            if (!success)
+            {
+                return NotFound(new { message = "Invitation not found" });
+            }
+
+            return Ok(new { message = "Invitation cancelled successfully" });
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error cancelling invitation");
+            return StatusCode(500, new { message = "Internal server error" });
+        }
+    }
+
+    [HttpPut("members/bulk")]
+    public async Task<IActionResult> BulkUpdateMembers([FromBody] BulkUpdateMembersRequest request)
+    {
+        try
+        {
+            var tenantId = _tenantService.GetCurrentTenantId();
+            var success = await _teamService.BulkUpdateMembersAsync(request, tenantId);
+
+            if (!success)
+            {
+                return BadRequest(new { message = "Failed to update members" });
+            }
+
+            return Ok(new { message = "Members updated successfully" });
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error bulk updating members");
+            return StatusCode(500, new { message = "Internal server error" });
+        }
+    }
+
+    [HttpGet("export")]
+    public async Task<IActionResult> ExportTeamData()
+    {
+        try
+        {
+            var tenantId = _tenantService.GetCurrentTenantId();
+            var data = await _teamService.ExportTeamDataAsync(tenantId);
+            return Ok(data);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error exporting team data");
+            return StatusCode(500, new { message = "Internal server error" });
+        }
+    }
+
 }

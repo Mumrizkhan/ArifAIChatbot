@@ -81,6 +81,52 @@ namespace IdentityService.Migrations
                     b.ToTable("BillingAddresses");
                 });
 
+            modelBuilder.Entity("Shared.Domain.Entities.ChatbotConfig", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Configuration")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("CreatedBy")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Description")
+                        .HasMaxLength(512)
+                        .HasColumnType("nvarchar(512)");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("Language")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(128)
+                        .HasColumnType("nvarchar(128)");
+
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("UpdatedBy")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("ChatbotConfigs");
+                });
+
             modelBuilder.Entity("Shared.Domain.Entities.Conversation", b =>
                 {
                     b.Property<Guid>("Id")
@@ -90,9 +136,15 @@ namespace IdentityService.Migrations
                     b.Property<Guid?>("AssignedAgentId")
                         .HasColumnType("uniqueidentifier");
 
+                    b.Property<int?>("AverageResponseTime")
+                        .HasColumnType("int");
+
                     b.Property<string>("Channel")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
+
+                    b.Property<Guid>("ChatbotConfigId")
+                        .HasColumnType("uniqueidentifier");
 
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime2");
@@ -123,6 +175,9 @@ namespace IdentityService.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<int>("MessageCount")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("Priority")
                         .HasColumnType("int");
 
                     b.Property<int?>("Rating")
@@ -184,6 +239,9 @@ namespace IdentityService.Migrations
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("ChatbotConfigId")
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<int>("ChunkCount")
@@ -493,6 +551,10 @@ namespace IdentityService.Migrations
 
                     b.Property<Guid?>("SenderId")
                         .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("SenderType")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<Guid?>("SenderUserId")
                         .HasColumnType("uniqueidentifier");
@@ -861,6 +923,9 @@ namespace IdentityService.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("bit");
+
                     b.Property<bool>("IsRtlEnabled")
                         .HasColumnType("bit");
 
@@ -989,6 +1054,10 @@ namespace IdentityService.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
+                    b.Property<string>("AvatarUrl")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime2");
 
@@ -1011,6 +1080,11 @@ namespace IdentityService.Migrations
                     b.Property<bool>("IsActive")
                         .HasColumnType("bit");
 
+                    b.Property<bool>("IsOnline")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bit")
+                        .HasDefaultValue(false);
+
                     b.Property<DateTime?>("LastLoginAt")
                         .HasColumnType("datetime2");
 
@@ -1022,6 +1096,13 @@ namespace IdentityService.Migrations
                     b.Property<string>("PasswordHash")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("PasswordResetToken")
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<DateTime?>("PasswordResetTokenExpiry")
+                        .HasColumnType("datetime2");
 
                     b.Property<string>("PhoneNumber")
                         .HasMaxLength(20)
@@ -1038,6 +1119,9 @@ namespace IdentityService.Migrations
                         .HasDefaultValue("en");
 
                     b.Property<int>("Role")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("Status")
                         .HasColumnType("int");
 
                     b.Property<Guid>("TenantId")
@@ -1317,8 +1401,9 @@ namespace IdentityService.Migrations
             modelBuilder.Entity("Shared.Domain.Entities.Conversation", b =>
                 {
                     b.HasOne("Shared.Domain.Entities.User", "AssignedAgent")
-                        .WithMany()
-                        .HasForeignKey("AssignedAgentId");
+                        .WithMany("AssignedConversations")
+                        .HasForeignKey("AssignedAgentId")
+                        .OnDelete(DeleteBehavior.SetNull);
 
                     b.HasOne("Shared.Domain.Entities.Tenant", "Tenant")
                         .WithMany()
@@ -1496,6 +1581,8 @@ namespace IdentityService.Migrations
 
             modelBuilder.Entity("Shared.Domain.Entities.User", b =>
                 {
+                    b.Navigation("AssignedConversations");
+
                     b.Navigation("UserTenants");
                 });
 
