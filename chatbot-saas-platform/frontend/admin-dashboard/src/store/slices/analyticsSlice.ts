@@ -36,6 +36,15 @@ interface AgentMetrics {
   }>;
 }
 
+interface SystemNotification {
+  id: string;
+  type: 'info' | 'warning' | 'error' | 'success';
+  title: string;
+  message: string;
+  timestamp: Date;
+  tenantId?: string;
+}
+
 interface AnalyticsState {
   dashboardStats: DashboardStats | null;
   conversationMetrics: ConversationMetrics | null;
@@ -46,6 +55,8 @@ interface AnalyticsState {
   error: string | null;
   selectedTimeRange: string;
   selectedTenant: string | null;
+  isSignalRConnected: boolean;
+  systemNotifications: SystemNotification[];
 }
 
 const initialState: AnalyticsState = {
@@ -58,6 +69,8 @@ const initialState: AnalyticsState = {
   error: null,
   selectedTimeRange: '7d',
   selectedTenant: null,
+  isSignalRConnected: false,
+  systemNotifications: [],
 };
 
 export const fetchDashboardStats = createAsyncThunk(
@@ -116,6 +129,32 @@ const analyticsSlice = createSlice({
     clearCustomReports: (state) => {
       state.customReports = [];
     },
+    setSignalRConnectionStatus: (state, action: PayloadAction<boolean>) => {
+      state.isSignalRConnected = action.payload;
+    },
+    updateDashboardStatsRealtime: (state, action: PayloadAction<DashboardStats>) => {
+      state.dashboardStats = action.payload;
+    },
+    updateConversationMetricsRealtime: (state, action: PayloadAction<ConversationMetrics>) => {
+      state.conversationMetrics = action.payload;
+    },
+    updateAgentMetricsRealtime: (state, action: PayloadAction<AgentMetrics>) => {
+      state.agentMetrics = action.payload;
+    },
+    addSystemNotification: (state, action: PayloadAction<SystemNotification>) => {
+      state.systemNotifications.unshift(action.payload);
+      if (state.systemNotifications.length > 50) {
+        state.systemNotifications = state.systemNotifications.slice(0, 50);
+      }
+    },
+    removeSystemNotification: (state, action: PayloadAction<string>) => {
+      state.systemNotifications = state.systemNotifications.filter(
+        notification => notification.id !== action.payload
+      );
+    },
+    clearSystemNotifications: (state) => {
+      state.systemNotifications = [];
+    },
   },
   extraReducers: (builder) => {
     builder
@@ -146,5 +185,17 @@ const analyticsSlice = createSlice({
   },
 });
 
-export const { clearError, setTimeRange, setSelectedTenant, clearCustomReports } = analyticsSlice.actions;
+export const { 
+  clearError, 
+  setTimeRange, 
+  setSelectedTenant, 
+  clearCustomReports,
+  setSignalRConnectionStatus,
+  updateDashboardStatsRealtime,
+  updateConversationMetricsRealtime,
+  updateAgentMetricsRealtime,
+  addSystemNotification,
+  removeSystemNotification,
+  clearSystemNotifications
+} = analyticsSlice.actions;
 export default analyticsSlice.reducer;

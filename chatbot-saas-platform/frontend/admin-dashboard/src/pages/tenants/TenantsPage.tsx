@@ -56,7 +56,7 @@ import {
 const TenantsPage: React.FC = () => {
   const { t } = useTranslation();
   const dispatch = useDispatch<AppDispatch>();
-  const { tenants, isLoading, totalCount, currentPage, pageSize } = useSelector(
+  const { tenants, isLoading, currentPage, pageSize } = useSelector(
     (state: RootState) => state.tenant
   );
 
@@ -66,7 +66,7 @@ const TenantsPage: React.FC = () => {
   const [newTenant, setNewTenant] = useState({
     name: '',
     domain: '',
-    status: 'Active',
+    status: 'Active' as 'Active' | 'Inactive' | 'Suspended',
     subscriptionPlan: 'Basic',
   });
 
@@ -78,7 +78,7 @@ const TenantsPage: React.FC = () => {
     try {
       await dispatch(createTenant(newTenant)).unwrap();
       setIsCreateDialogOpen(false);
-      setNewTenant({ name: '', domain: '', status: 'Active', subscriptionPlan: 'Basic' });
+      setNewTenant({ name: '', domain: '', status: 'Active' as 'Active' | 'Inactive' | 'Suspended', subscriptionPlan: 'Basic' });
     } catch (error) {
       console.error('Failed to create tenant:', error);
     }
@@ -189,7 +189,7 @@ const TenantsPage: React.FC = () => {
                 </Label>
                 <Select
                   value={newTenant.status}
-                  onValueChange={(value) => setNewTenant({ ...newTenant, status: value })}
+                  onValueChange={(value) => setNewTenant({ ...newTenant, status: value as 'Active' | 'Inactive' | 'Suspended' })}
                 >
                   <SelectTrigger className="col-span-3">
                     <SelectValue />
