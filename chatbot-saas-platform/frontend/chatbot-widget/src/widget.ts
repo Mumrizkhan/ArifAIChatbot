@@ -12,6 +12,7 @@ interface WidgetConfig {
   tenantId: string;
   apiUrl?: string;
   websocketUrl?: string;
+  authToken?: string;
   userId?: string;
   metadata?: Record<string, any>;
   theme?: {
@@ -89,7 +90,7 @@ class ChatbotWidget {
       tenantId: config.tenantId,
       config: {
         apiUrl: config.apiUrl || '/api',
-        websocketUrl: config.websocketUrl || '/ws',
+        websocketUrl: config.websocketUrl || '/chatHub',
         features: config.features,
         behavior: config.behavior,
       },
@@ -100,9 +101,23 @@ class ChatbotWidget {
     const { aiService } = await import('./services/aiService');
     const { fileService } = await import('./services/fileService');
     const { proactiveService } = await import('./services/proactiveService');
+    const { signalRService } = await import('./services/websocket');
 
     aiService.initialize(config.apiUrl || '/api');
     fileService.initialize(config.apiUrl || '/api');
+    
+    if (config.authToken) {
+      try {
+        const connected = await signalRService.connect(config.tenantId, config.authToken);
+        if (!connected) {
+          console.warn('Failed to establish SignalR connection');
+        }
+      } catch (error) {
+        console.error('SignalR connection error:', error);
+      }
+    } else {
+      console.warn('No authToken provided - SignalR connection will not be established');
+    }
     
     if (config.features?.proactiveMessages) {
       proactiveService.setupDefaultTriggers();
