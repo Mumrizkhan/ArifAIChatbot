@@ -49,6 +49,20 @@ export interface Conversation {
   unreadCount: number;
 }
 
+interface ConversationAssignment {
+  conversationId: string;
+  agentId: string;
+  timestamp: Date;
+}
+
+interface ConversationTransfer {
+  conversationId: string;
+  fromAgentId: string;
+  toAgentId: string;
+  reason: string;
+  timestamp: Date;
+}
+
 interface ConversationState {
   conversations: Conversation[];
   activeConversation: Conversation | null;
@@ -61,6 +75,7 @@ interface ConversationState {
   };
   searchQuery: string;
   typingUsers: Record<string, { userId: string; userName: string }>;
+  isSignalRConnected: boolean;
 }
 
 const initialState: ConversationState = {
@@ -75,6 +90,7 @@ const initialState: ConversationState = {
   },
   searchQuery: '',
   typingUsers: {},
+  isSignalRConnected: false,
 };
 
 export const fetchConversations = createAsyncThunk(
@@ -251,6 +267,22 @@ const conversationSlice = createSlice({
     clearError: (state) => {
       state.error = null;
     },
+    setConversationSignalRStatus: (state, action: PayloadAction<boolean>) => {
+      state.isSignalRConnected = action.payload;
+    },
+    assignConversationRealtime: (state, action: PayloadAction<ConversationAssignment>) => {
+      const conversation = state.conversations.find(c => c.id === action.payload.conversationId);
+      if (conversation) {
+        conversation.status = 'active';
+        conversation.assignedAgent = { id: action.payload.agentId, name: 'Agent' };
+      }
+    },
+    transferConversationRealtime: (state, action: PayloadAction<ConversationTransfer>) => {
+      const conversation = state.conversations.find(c => c.id === action.payload.conversationId);
+      if (conversation) {
+        conversation.assignedAgent = { id: action.payload.toAgentId, name: 'Agent' };
+      }
+    },
   },
   extraReducers: (builder) => {
     builder
@@ -281,7 +313,7 @@ const conversationSlice = createSlice({
           conversation.updatedAt = new Date();
         }
         if (state.activeConversation?.id === action.payload.conversationId) {
-          state.activeConversation.messages.push(action.payload);
+          state.activeConversation!.messages.push(action.payload);
         }
       })
       .addCase(updateConversationStatus.fulfilled, (state, action) => {
@@ -299,7 +331,7 @@ const conversationSlice = createSlice({
           conversation.assignedAgent = action.payload.assignedAgent;
         }
         if (state.activeConversation?.id === action.payload.id) {
-          state.activeConversation.assignedAgent = action.payload.assignedAgent;
+          state.activeConversation!.assignedAgent = action.payload.assignedAgent;
         }
       });
   },
@@ -315,6 +347,9 @@ export const {
   setSearchQuery,
   markConversationAsRead,
   clearError,
+  setConversationSignalRStatus,
+  assignConversationRealtime,
+  transferConversationRealtime,
 } = conversationSlice.actions;
 
 export default conversationSlice.reducer;

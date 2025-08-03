@@ -2,9 +2,17 @@ import { useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useTranslation } from 'react-i18next';
 import { AppDispatch, RootState } from '../../store/store';
-import { fetchAnalytics, fetchRealtimeAnalytics } from '../../store/slices/analyticsSlice';
+import { 
+  fetchAnalytics, 
+  fetchRealtimeAnalytics,
+  updateAnalyticsDataRealtime,
+  updateRealtimeData,
+  setSignalRConnectionStatus,
+  addTenantNotification
+} from '../../store/slices/analyticsSlice';
 import { fetchChatbotConfigs } from '../../store/slices/chatbotSlice';
 import { fetchTeamMembers } from '../../store/slices/teamSlice';
+import { tenantSignalRService } from '../../services/signalr';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../../components/ui/card';
 import { Button } from '../../components/ui/button';
 import { Skeleton } from '../../components/ui/skeleton';
@@ -37,9 +45,10 @@ import {
 const DashboardPage = () => {
   const { t } = useTranslation();
   const dispatch = useDispatch<AppDispatch>();
-  const { data: analytics, isLoading: analyticsLoading } = useSelector((state: RootState) => state.analytics);
+  const { data: analytics, isLoading: analyticsLoading, isSignalRConnected } = useSelector((state: RootState) => state.analytics);
   const { configs: chatbotConfigs } = useSelector((state: RootState) => state.chatbot);
   const { members: teamMembers } = useSelector((state: RootState) => state.team);
+  const { user } = useSelector((state: RootState) => state.auth);
 
   useEffect(() => {
     const startDate = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
@@ -50,12 +59,46 @@ const DashboardPage = () => {
     dispatch(fetchChatbotConfigs());
     dispatch(fetchTeamMembers());
 
+    const token = localStorage.getItem('token');
+    if (token && user?.tenantId) {
+      tenantSignalRService.connect(token, user.tenantId).then((connected) => {
+        dispatch(setSignalRConnectionStatus(connected));
+        
+        if (connected) {
+          tenantSignalRService.setOnAnalyticsUpdate((analytics) => {
+            dispatch(updateAnalyticsDataRealtime(analytics as any));
+          });
+
+          tenantSignalRService.setOnRealtimeUpdate((realtime) => {
+            dispatch(updateRealtimeData(realtime));
+          });
+
+          tenantSignalRService.setOnTenantNotification((notification) => {
+            dispatch(addTenantNotification(notification));
+          });
+
+          tenantSignalRService.setOnConnectionStatusChange((isConnected) => {
+            dispatch(setSignalRConnectionStatus(isConnected));
+          });
+
+          tenantSignalRService.requestTenantAnalyticsUpdate(startDate, endDate);
+        }
+      });
+    }
+
     const interval = setInterval(() => {
-      dispatch(fetchRealtimeAnalytics());
+      if (isSignalRConnected) {
+        tenantSignalRService.requestTenantRealtimeUpdate();
+      } else {
+        dispatch(fetchRealtimeAnalytics());
+      }
     }, 30000);
 
-    return () => clearInterval(interval);
-  }, [dispatch]);
+    return () => {
+      clearInterval(interval);
+      tenantSignalRService.disconnect();
+    };
+  }, [dispatch, user?.tenantId, isSignalRConnected]);
 
   const quickActions = [
     {

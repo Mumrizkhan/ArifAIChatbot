@@ -8,7 +8,10 @@ import {
   fetchBotMetrics,
   setTimeRange,
   setSelectedTenant,
+  updateConversationMetricsRealtime,
+  updateAgentMetricsRealtime,
 } from '../../store/slices/analyticsSlice';
+import { adminSignalRService } from '../../services/signalr';
 import { Button } from '../../components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../../components/ui/card';
 import {
@@ -57,10 +60,10 @@ const AnalyticsPage: React.FC = () => {
   const {
     conversationMetrics,
     agentMetrics,
-    botMetrics,
     isLoading,
     selectedTimeRange,
     selectedTenant,
+    isSignalRConnected,
   } = useSelector((state: RootState) => state.analytics);
 
   const [activeTab, setActiveTab] = useState('conversations');
@@ -69,14 +72,36 @@ const AnalyticsPage: React.FC = () => {
     dispatch(fetchConversationMetrics({ timeRange: selectedTimeRange, tenantId: selectedTenant || undefined }));
     dispatch(fetchAgentMetrics({ timeRange: selectedTimeRange, tenantId: selectedTenant || undefined }));
     dispatch(fetchBotMetrics({ timeRange: selectedTimeRange, tenantId: selectedTenant || undefined }));
-  }, [dispatch, selectedTimeRange, selectedTenant]);
+
+    if (isSignalRConnected) {
+      adminSignalRService.setOnConversationMetricsUpdate((metrics) => {
+        dispatch(updateConversationMetricsRealtime(metrics));
+      });
+
+      adminSignalRService.setOnAgentMetricsUpdate((metrics) => {
+        dispatch(updateAgentMetricsRealtime(metrics));
+      });
+
+      adminSignalRService.requestConversationMetricsUpdate(selectedTimeRange, selectedTenant || undefined);
+      adminSignalRService.requestAgentMetricsUpdate(selectedTimeRange, selectedTenant || undefined);
+    }
+  }, [dispatch, selectedTimeRange, selectedTenant, isSignalRConnected]);
 
   const handleTimeRangeChange = (timeRange: string) => {
     dispatch(setTimeRange(timeRange));
+    if (isSignalRConnected) {
+      adminSignalRService.requestConversationMetricsUpdate(timeRange, selectedTenant || undefined);
+      adminSignalRService.requestAgentMetricsUpdate(timeRange, selectedTenant || undefined);
+    }
   };
 
   const handleTenantChange = (tenantId: string) => {
-    dispatch(setSelectedTenant(tenantId === 'all' ? null : tenantId));
+    const newTenantId = tenantId === 'all' ? null : tenantId;
+    dispatch(setSelectedTenant(newTenantId));
+    if (isSignalRConnected) {
+      adminSignalRService.requestConversationMetricsUpdate(selectedTimeRange, newTenantId || undefined);
+      adminSignalRService.requestAgentMetricsUpdate(selectedTimeRange, newTenantId || undefined);
+    }
   };
 
   const conversationTrendData = [
@@ -162,6 +187,14 @@ const AnalyticsPage: React.FC = () => {
           </p>
         </div>
         <div className="flex items-center space-x-2">
+          <div className="flex items-center space-x-1">
+            <div 
+              className={`w-2 h-2 rounded-full ${isSignalRConnected ? 'bg-green-500' : 'bg-red-500'}`}
+            />
+            <span className="text-xs text-muted-foreground">
+              {isSignalRConnected ? 'Live Updates' : 'Static Data'}
+            </span>
+          </div>
           <Select value={selectedTimeRange} onValueChange={handleTimeRangeChange}>
             <SelectTrigger className="w-[140px]">
               <Calendar className="mr-2 h-4 w-4" />

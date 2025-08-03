@@ -1,5 +1,14 @@
 import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit';
 
+interface TenantNotification {
+  id: string;
+  type: 'info' | 'warning' | 'error' | 'success';
+  title: string;
+  message: string;
+  timestamp: Date;
+  tenantId: string;
+}
+
 export interface AnalyticsData {
   conversations: {
     total: number;
@@ -48,6 +57,8 @@ interface AnalyticsState {
     end: Date;
   };
   refreshInterval: number;
+  isSignalRConnected: boolean;
+  tenantNotifications: TenantNotification[];
 }
 
 const initialState: AnalyticsState = {
@@ -59,6 +70,8 @@ const initialState: AnalyticsState = {
     end: new Date(),
   },
   refreshInterval: 30000, // 30 seconds
+  isSignalRConnected: false,
+  tenantNotifications: [],
 };
 
 export const fetchAnalytics = createAsyncThunk(
@@ -153,6 +166,23 @@ const analyticsSlice = createSlice({
     clearError: (state) => {
       state.error = null;
     },
+    updateAnalyticsDataRealtime: (state, action: PayloadAction<AnalyticsData>) => {
+      state.data = action.payload;
+    },
+    setSignalRConnectionStatus: (state, action: PayloadAction<boolean>) => {
+      state.isSignalRConnected = action.payload;
+    },
+    addTenantNotification: (state, action: PayloadAction<TenantNotification>) => {
+      state.tenantNotifications.unshift(action.payload);
+      if (state.tenantNotifications.length > 50) {
+        state.tenantNotifications = state.tenantNotifications.slice(0, 50);
+      }
+    },
+    removeTenantNotification: (state, action: PayloadAction<string>) => {
+      state.tenantNotifications = state.tenantNotifications.filter(
+        notification => notification.id !== action.payload
+      );
+    },
   },
   extraReducers: (builder) => {
     builder
@@ -179,5 +209,14 @@ const analyticsSlice = createSlice({
   },
 });
 
-export const { setDateRange, updateRealtimeData, setRefreshInterval, clearError } = analyticsSlice.actions;
+export const { 
+  setDateRange, 
+  updateRealtimeData, 
+  setRefreshInterval, 
+  clearError,
+  updateAnalyticsDataRealtime,
+  setSignalRConnectionStatus,
+  addTenantNotification,
+  removeTenantNotification
+} = analyticsSlice.actions;
 export default analyticsSlice.reducer;
