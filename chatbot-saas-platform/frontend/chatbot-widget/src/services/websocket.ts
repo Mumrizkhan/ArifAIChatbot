@@ -1,190 +1,221 @@
+import { HubConnection, HubConnectionBuilder, HubConnectionState, LogLevel } from '@microsoft/signalr';
 import { store } from '../store/store';
 import { addMessage, setTyping, setConnectionStatus, assignAgent, updateConversationStatus } from '../store/slices/chatSlice';
 
-class WebSocketService {
-  private ws: WebSocket | null = null;
+class SignalRService {
+  private connection: HubConnection | null = null;
   private reconnectAttempts = 0;
   private maxReconnectAttempts = 5;
-  private reconnectDelay = 1000;
-  private heartbeatInterval: number | null = null;
+  private currentConversationId: string | null = null;
 
-  connect(tenantId: string, conversationId?: string) {
-    const state = store.getState();
-    const { websocketUrl } = state.config.widget;
-    const { sessionId, userId } = state.config;
-
-    const wsUrl = new URL(websocketUrl, window.location.origin);
-    wsUrl.searchParams.set('tenantId', tenantId);
-    wsUrl.searchParams.set('sessionId', sessionId);
-    if (conversationId) {
-      wsUrl.searchParams.set('conversationId', conversationId);
-    }
-    if (userId) {
-      wsUrl.searchParams.set('userId', userId);
-    }
-
+  async connect(tenantId: string, authToken: string, conversationId?: string): Promise<boolean> {
     try {
       store.dispatch(setConnectionStatus('connecting'));
-      this.ws = new WebSocket(wsUrl.toString());
-      this.setupEventListeners();
-    } catch (error) {
-      console.error('WebSocket connection failed:', error);
-      store.dispatch(setConnectionStatus('error'));
-      this.scheduleReconnect();
-    }
-  }
 
-  private setupEventListeners() {
-    if (!this.ws) return;
+      this.connection = new HubConnectionBuilder()
+        .withUrl('/chatHub', {
+          accessTokenFactory: () => authToken,
+          skipNegotiation: false,
+        })
+        .withAutomaticReconnect({
+          nextRetryDelayInMilliseconds: (retryContext) => {
+            if (retryContext.previousRetryCount < this.maxReconnectAttempts) {
+              return Math.min(1000 * Math.pow(2, retryContext.previousRetryCount), 30000);
+            }
+            return null; // Stop retrying
+          }
+        })
+        .configureLogging(LogLevel.Information)
+        .build();
 
-    this.ws.onopen = () => {
-      console.log('WebSocket connected');
+      this.setupEventHandlers();
+
+      await this.connection.start();
+      console.log('SignalR connected');
       store.dispatch(setConnectionStatus('connected'));
       this.reconnectAttempts = 0;
-      this.startHeartbeat();
-    };
 
-    this.ws.onmessage = (event) => {
-      try {
-        const data = JSON.parse(event.data);
-        this.handleMessage(data);
-      } catch (error) {
-        console.error('Failed to parse WebSocket message:', error);
+      if (conversationId) {
+        await this.joinConversation(conversationId);
+        this.currentConversationId = conversationId;
       }
-    };
 
-    this.ws.onclose = (event) => {
-      console.log('WebSocket disconnected:', event.code, event.reason);
-      store.dispatch(setConnectionStatus('disconnected'));
-      this.stopHeartbeat();
-      
-      if (event.code !== 1000) { // Not a normal closure
-        this.scheduleReconnect();
-      }
-    };
-
-    this.ws.onerror = (error) => {
-      console.error('WebSocket error:', error);
+      return true;
+    } catch (error) {
+      console.error('SignalR connection failed:', error);
       store.dispatch(setConnectionStatus('error'));
-    };
-  }
-
-  private handleMessage(data: any) {
-    switch (data.type) {
-      case 'message':
-        store.dispatch(addMessage({
-          id: data.id,
-          content: data.content,
-          sender: data.sender,
-          timestamp: new Date(data.timestamp),
-          type: data.messageType || 'text',
-          metadata: data.metadata,
-        }));
-        break;
-
-      case 'typing':
-        store.dispatch(setTyping({
-          isTyping: data.isTyping,
-          user: data.user,
-        }));
-        break;
-
-      case 'agent_assigned':
-        store.dispatch(assignAgent({
-          id: data.agent.id,
-          name: data.agent.name,
-          avatar: data.agent.avatar,
-        }));
-        break;
-
-      case 'conversation_status':
-        store.dispatch(updateConversationStatus(data.status));
-        break;
-
-      case 'error':
-        console.error('WebSocket error message:', data.message);
-        break;
-
-      case 'pong':
-        break;
-
-      default:
-        console.log('Unknown message type:', data.type);
+      this.scheduleReconnect(tenantId, authToken, conversationId);
+      return false;
     }
   }
 
-  sendMessage(content: string, type: 'text' | 'file' = 'text', metadata?: any) {
-    if (this.ws && this.ws.readyState === WebSocket.OPEN) {
-      const message = {
-        type: 'message',
-        content,
-        messageType: type,
-        metadata,
-        timestamp: new Date().toISOString(),
-      };
-      this.ws.send(JSON.stringify(message));
-    } else {
-      console.error('WebSocket is not connected');
-    }
-  }
+  private setupEventHandlers() {
+    if (!this.connection) return;
 
-  sendTyping(isTyping: boolean) {
-    if (this.ws && this.ws.readyState === WebSocket.OPEN) {
-      this.ws.send(JSON.stringify({
-        type: 'typing',
-        isTyping,
-      }));
-    }
-  }
+    this.connection.onreconnecting(() => {
+      console.log('SignalR reconnecting...');
+      store.dispatch(setConnectionStatus('connecting'));
+    });
 
-  requestAgent() {
-    if (this.ws && this.ws.readyState === WebSocket.OPEN) {
-      this.ws.send(JSON.stringify({
-        type: 'request_agent',
-      }));
-    }
-  }
-
-  private startHeartbeat() {
-    this.heartbeatInterval = window.setInterval(() => {
-      if (this.ws && this.ws.readyState === WebSocket.OPEN) {
-        this.ws.send(JSON.stringify({ type: 'ping' }));
+    this.connection.onreconnected(async () => {
+      console.log('SignalR reconnected');
+      store.dispatch(setConnectionStatus('connected'));
+      
+      if (this.currentConversationId) {
+        await this.joinConversation(this.currentConversationId);
       }
-    }, 30000); // Send ping every 30 seconds
+    });
+
+    this.connection.onclose(() => {
+      console.log('SignalR connection closed');
+      store.dispatch(setConnectionStatus('disconnected'));
+    });
+
+    this.connection.on('ReceiveMessage', (messageDto) => {
+      store.dispatch(addMessage({
+        id: messageDto.Id,
+        content: messageDto.Content,
+        sender: messageDto.Sender.toLowerCase(),
+        timestamp: new Date(messageDto.CreatedAt),
+        type: messageDto.Type.toLowerCase(),
+        metadata: {
+          senderId: messageDto.SenderId?.toString(),
+          senderName: messageDto.SenderName
+        },
+      }));
+    });
+
+    this.connection.on('UserStartedTyping', (typingInfo) => {
+      store.dispatch(setTyping({
+        isTyping: true,
+        user: typingInfo.UserName || 'User',
+      }));
+    });
+
+    this.connection.on('UserStoppedTyping', (typingInfo) => {
+      store.dispatch(setTyping({
+        isTyping: false,
+        user: typingInfo.UserName || 'User',
+      }));
+    });
+
+    this.connection.on('AgentAssigned', (agentInfo) => {
+      store.dispatch(assignAgent({
+        id: agentInfo.id,
+        name: agentInfo.name,
+        avatar: agentInfo.avatar,
+      }));
+    });
+
+    this.connection.on('ConversationStatusChanged', (status) => {
+      store.dispatch(updateConversationStatus(status));
+    });
   }
 
-  private stopHeartbeat() {
-    if (this.heartbeatInterval) {
-      window.clearInterval(this.heartbeatInterval);
-      this.heartbeatInterval = null;
+  async sendMessage(conversationId: string, content: string, messageType: string = 'Text'): Promise<boolean> {
+    if (this.connection?.state === HubConnectionState.Connected) {
+      try {
+        await this.connection.invoke('SendMessage', conversationId, content, messageType);
+        return true;
+      } catch (error) {
+        console.error('Failed to send message:', error);
+        return false;
+      }
+    } else {
+      console.error('SignalR is not connected');
+      return false;
     }
   }
 
-  private scheduleReconnect() {
+  async sendTyping(conversationId: string, isTyping: boolean): Promise<void> {
+    if (this.connection?.state === HubConnectionState.Connected) {
+      try {
+        if (isTyping) {
+          await this.connection.invoke('StartTyping', conversationId);
+        } else {
+          await this.connection.invoke('StopTyping', conversationId);
+        }
+      } catch (error) {
+        console.error('Failed to send typing indicator:', error);
+      }
+    }
+  }
+
+  async joinConversation(conversationId: string): Promise<boolean> {
+    if (this.connection?.state === HubConnectionState.Connected) {
+      try {
+        await this.connection.invoke('JoinConversation', conversationId);
+        this.currentConversationId = conversationId;
+        console.log(`Joined conversation: ${conversationId}`);
+        return true;
+      } catch (error) {
+        console.error('Failed to join conversation:', error);
+        return false;
+      }
+    }
+    return false;
+  }
+
+  async leaveConversation(conversationId: string): Promise<boolean> {
+    if (this.connection?.state === HubConnectionState.Connected) {
+      try {
+        await this.connection.invoke('LeaveConversation', conversationId);
+        if (this.currentConversationId === conversationId) {
+          this.currentConversationId = null;
+        }
+        console.log(`Left conversation: ${conversationId}`);
+        return true;
+      } catch (error) {
+        console.error('Failed to leave conversation:', error);
+        return false;
+      }
+    }
+    return false;
+  }
+
+  async requestAgent(): Promise<void> {
+    console.log('Agent handoff requested');
+  }
+
+  private scheduleReconnect(tenantId: string, authToken: string, conversationId?: string) {
     if (this.reconnectAttempts < this.maxReconnectAttempts) {
       this.reconnectAttempts++;
-      const delay = this.reconnectDelay * Math.pow(2, this.reconnectAttempts - 1);
+      const delay = 1000 * Math.pow(2, this.reconnectAttempts - 1);
       
-      setTimeout(() => {
-        const state = store.getState();
-        const { tenantId } = state.config.widget;
-        const conversationId = state.chat.currentConversation?.id;
-        this.connect(tenantId, conversationId);
+      setTimeout(async () => {
+        console.log(`Attempting reconnect ${this.reconnectAttempts}/${this.maxReconnectAttempts}`);
+        await this.connect(tenantId, authToken, conversationId);
       }, delay);
+    } else {
+      console.error('Max reconnection attempts reached');
+      store.dispatch(setConnectionStatus('error'));
     }
   }
 
-  disconnect() {
-    this.stopHeartbeat();
-    if (this.ws) {
-      this.ws.close(1000, 'User disconnected');
-      this.ws = null;
+  async disconnect(): Promise<void> {
+    if (this.connection) {
+      try {
+        if (this.currentConversationId) {
+          await this.leaveConversation(this.currentConversationId);
+        }
+        await this.connection.stop();
+        console.log('SignalR disconnected');
+      } catch (error) {
+        console.error('Error during disconnect:', error);
+      } finally {
+        this.connection = null;
+        this.currentConversationId = null;
+      }
     }
   }
 
   isConnected(): boolean {
-    return this.ws?.readyState === WebSocket.OPEN;
+    return this.connection?.state === HubConnectionState.Connected;
+  }
+
+  getConnectionState(): string {
+    return this.connection?.state || 'Disconnected';
   }
 }
 
-export const websocketService = new WebSocketService();
+export const signalRService = new SignalRService();

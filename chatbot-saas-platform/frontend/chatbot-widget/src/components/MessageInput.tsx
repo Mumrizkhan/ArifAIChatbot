@@ -4,7 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { RootState, AppDispatch } from '../store/store';
 import { sendMessage, requestHumanAgent } from '../store/slices/chatSlice';
 import { trackEvent } from '../store/slices/configSlice';
-import { websocketService } from '../services/websocket';
+import { signalRService } from '../services/websocket';
 import { Send, Paperclip, Mic, MicOff, User } from 'lucide-react';
 
 export const MessageInput: React.FC = () => {
@@ -40,19 +40,27 @@ export const MessageInput: React.FC = () => {
       setMessage(value);
       
       if (value.length > 0) {
-        websocketService.sendTyping(true);
+        const conversationId = currentConversation?.id;
+        if (conversationId) {
+          signalRService.sendTyping(conversationId, true);
+        }
         
         if (typingTimeout) {
           clearTimeout(typingTimeout);
         }
         
         const timeout = setTimeout(() => {
-          websocketService.sendTyping(false);
+          if (conversationId) {
+            signalRService.sendTyping(conversationId, false);
+          }
         }, 1000);
         
         setTypingTimeout(timeout);
       } else {
-        websocketService.sendTyping(false);
+        const conversationId = currentConversation?.id;
+        if (conversationId) {
+          signalRService.sendTyping(conversationId, false);
+        }
         if (typingTimeout) {
           clearTimeout(typingTimeout);
           setTypingTimeout(null);
@@ -74,7 +82,10 @@ export const MessageInput: React.FC = () => {
     const messageContent = message.trim();
     setMessage('');
     
-    websocketService.sendTyping(false);
+    const conversationId = currentConversation?.id;
+    if (conversationId) {
+      signalRService.sendTyping(conversationId, false);
+    }
     if (typingTimeout) {
       clearTimeout(typingTimeout);
       setTypingTimeout(null);
