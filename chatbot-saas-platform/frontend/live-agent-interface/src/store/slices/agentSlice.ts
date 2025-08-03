@@ -53,12 +53,29 @@ export const updateAgentProfile = createAsyncThunk(
   }
 );
 
+interface AgentNotification {
+  id: string;
+  type: 'info' | 'warning' | 'error' | 'success';
+  title: string;
+  message: string;
+  timestamp: Date;
+  agentId: string;
+}
+
+interface AgentStatusUpdate {
+  agentId: string;
+  status: 'online' | 'away' | 'busy' | 'offline';
+  timestamp: Date;
+}
+
 interface AgentState {
   currentAgent: Agent | null;
   agents: Agent[];
   stats: AgentStats | null;
   isLoading: boolean;
   error: string | null;
+  isSignalRConnected: boolean;
+  agentNotifications: AgentNotification[];
 }
 
 const initialState: AgentState = {
@@ -67,6 +84,8 @@ const initialState: AgentState = {
   stats: null,
   isLoading: false,
   error: null,
+  isSignalRConnected: false,
+  agentNotifications: [],
 };
 
 export const fetchAgentProfile = createAsyncThunk("agent/fetchProfile", async (agentId: string) => {
@@ -165,6 +184,27 @@ const agentSlice = createSlice({
     clearError: (state) => {
       state.error = null;
     },
+    setSignalRConnectionStatus: (state, action: PayloadAction<boolean>) => {
+      state.isSignalRConnected = action.payload;
+    },
+    updateAgentStatusRealtime: (state, action: PayloadAction<AgentStatusUpdate>) => {
+      if (state.currentAgent && state.currentAgent.id === action.payload.agentId) {
+        state.currentAgent.status = action.payload.status;
+      }
+      const agent = state.agents.find(a => a.id === action.payload.agentId);
+      if (agent) {
+        agent.status = action.payload.status;
+      }
+    },
+    addAgentNotification: (state, action: PayloadAction<AgentNotification>) => {
+      state.agentNotifications.unshift(action.payload);
+      if (state.agentNotifications.length > 50) {
+        state.agentNotifications = state.agentNotifications.slice(0, 50);
+      }
+    },
+    clearAgentNotifications: (state) => {
+      state.agentNotifications = [];
+    },
   },
   extraReducers: (builder) => {
     builder
@@ -198,6 +238,16 @@ const agentSlice = createSlice({
   },
 });
 
-export const { setCurrentAgent, updateAgentStatusLocal, incrementConversationCount, decrementConversationCount, clearError } = agentSlice.actions;
+export const { 
+  setCurrentAgent, 
+  updateAgentStatusLocal, 
+  incrementConversationCount, 
+  decrementConversationCount, 
+  clearError,
+  setSignalRConnectionStatus,
+  updateAgentStatusRealtime,
+  addAgentNotification,
+  clearAgentNotifications
+} = agentSlice.actions;
 
 export default agentSlice.reducer;
