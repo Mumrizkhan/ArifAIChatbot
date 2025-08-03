@@ -59,6 +59,10 @@ bld/
 
 # Specific to your project
 /chatbot-saas-platform/backend/.vs/
+# Ignore all bin and obj folders inside backend/src
+/chatbot-saas-platform/backend/src/**/bin/
+/chatbot-saas-platform/backend/src/**/obj/
+
 
 # Visual Studio files
 *.vcxproj.filters
