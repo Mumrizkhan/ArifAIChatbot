@@ -1,6 +1,6 @@
-// using OpenAI;
-// using OpenAI.Chat;
-// using OpenAI.Embeddings;
+using OpenAI;
+using OpenAI.Chat;
+using OpenAI.Embeddings;
 using AIOrchestrationService.Services;
 using AIOrchestrationService.Models;
 using System.Diagnostics;
@@ -9,16 +9,23 @@ namespace AIOrchestrationService.Services;
 
 public class OpenAIService : IAIService
 {
-    // private readonly OpenAIClient _openAIClient;
+    private readonly ChatClient _chatClient;
+    private readonly EmbeddingClient _embeddingClient;
     private readonly ILogger<OpenAIService> _logger;
     private readonly IConfiguration _configuration;
+    private readonly string _defaultModel;
+    private readonly string _embeddingModel;
 
     public OpenAIService(ILogger<OpenAIService> logger, IConfiguration configuration)
     {
         _logger = logger;
         _configuration = configuration;
         var apiKey = _configuration["OpenAI:ApiKey"] ?? throw new InvalidOperationException("OpenAI API key not configured");
-        // _openAIClient = new OpenAIClient(apiKey);
+        _defaultModel = _configuration["OpenAI:Model"] ?? "gpt-3.5-turbo";
+        _embeddingModel = _configuration["OpenAI:EmbeddingModel"] ?? "text-embedding-ada-002";
+        
+        _chatClient = new ChatClient(_defaultModel, apiKey);
+        _embeddingClient = new EmbeddingClient(_embeddingModel, apiKey);
     }
 
     public async Task<AIResponse> GenerateResponseAsync(AIRequest request)
@@ -27,16 +34,31 @@ public class OpenAIService : IAIService
         
         try
         {
-            await Task.Delay(100); // Simulate processing time
+            var messages = new List<ChatMessage>();
+            
+            foreach (var historyMessage in request.ConversationHistory)
+            {
+                messages.Add(new UserChatMessage(historyMessage.Content));
+            }
+            
+            messages.Add(new UserChatMessage(request.Message));
+
+            var chatCompletionOptions = new ChatCompletionOptions
+            {
+                Temperature = (float)request.Temperature,
+                MaxTokens = request.MaxTokens
+            };
+
+            var completion = await _chatClient.CompleteChatAsync(messages, chatCompletionOptions);
             
             stopwatch.Stop();
 
             return new AIResponse
             {
-                Content = "This is a placeholder response. OpenAI integration is not configured.",
+                Content = completion.Value.Content[0].Text,
                 Language = request.Language,
-                Confidence = 0.5,
-                TokensUsed = 0,
+                Confidence = 0.9,
+                TokensUsed = completion.Value.Usage?.TotalTokens ?? 0,
                 ProcessingTime = stopwatch.Elapsed,
                 IsSuccessful = true
             };
@@ -63,17 +85,42 @@ public class OpenAIService : IAIService
         
         try
         {
-            await Task.Delay(150); // Simulate processing time
+            var messages = new List<ChatMessage>();
+            
+            if (contextDocuments.Any())
+            {
+                var contextText = string.Join("\n\n", contextDocuments);
+                var systemPrompt = $"Use the following context to answer the user's question:\n\n{contextText}\n\nIf the context doesn't contain relevant information, provide a helpful response based on your general knowledge.";
+                messages.Add(new SystemChatMessage(systemPrompt));
+            }
+            
+            foreach (var historyMessage in request.ConversationHistory)
+            {
+                if (historyMessage.Role == "user")
+                    messages.Add(new UserChatMessage(historyMessage.Content));
+                else if (historyMessage.Role == "assistant")
+                    messages.Add(new AssistantChatMessage(historyMessage.Content));
+            }
+            
+            messages.Add(new UserChatMessage(request.Message));
+
+            var chatCompletionOptions = new ChatCompletionOptions
+            {
+                Temperature = (float)request.Temperature,
+                MaxTokens = request.MaxTokens
+            };
+
+            var completion = await _chatClient.CompleteChatAsync(messages, chatCompletionOptions);
             
             stopwatch.Stop();
 
             return new AIResponse
             {
-                Content = "This is a placeholder response with context. OpenAI integration is not configured.",
+                Content = completion.Value.Content[0].Text,
                 Language = request.Language,
-                Confidence = 0.5,
+                Confidence = 0.9,
                 SourceDocuments = contextDocuments.Take(3).ToList(),
-                TokensUsed = 0,
+                TokensUsed = completion.Value.Usage?.TotalTokens ?? 0,
                 ProcessingTime = stopwatch.Elapsed,
                 IsSuccessful = true
             };
@@ -98,16 +145,10 @@ public class OpenAIService : IAIService
     {
         try
         {
-            await Task.Delay(50);
+            var embedding = await _embeddingClient.GenerateEmbeddingAsync(text);
+            var embeddingVector = embedding.Value.Vector.ToArray();
             
-            var random = new Random(text.GetHashCode());
-            var embedding = new float[1536];
-            for (int i = 0; i < embedding.Length; i++)
-            {
-                embedding[i] = (float)(random.NextDouble() * 2 - 1); // Random values between -1 and 1
-            }
-            
-            return string.Join(",", embedding);
+            return string.Join(",", embeddingVector);
         }
         catch (Exception ex)
         {
@@ -120,25 +161,31 @@ public class OpenAIService : IAIService
     {
         try
         {
-            await Task.Delay(30);
+            var systemPrompt = @"Extract the intent(s) from the user message. Return only the intent names as a comma-separated list. 
+Possible intents: greeting, goodbye, pricing, request_support, question, general_inquiry, complaint, compliment, booking, cancellation.
+If multiple intents are present, list them all. If no specific intent is clear, return 'general_inquiry'.";
+
+            var messages = new List<ChatMessage>
+            {
+                new SystemChatMessage(systemPrompt),
+                new UserChatMessage(message)
+            };
+
+            var chatCompletionOptions = new ChatCompletionOptions
+            {
+                Temperature = 0.1f,
+                MaxTokens = 50
+            };
+
+            var completion = await _chatClient.CompleteChatAsync(messages, chatCompletionOptions);
+            var response = completion.Value.Content[0].Text.Trim();
             
-            var lowerMessage = message.ToLower();
-            var intents = new List<string>();
-            
-            if (lowerMessage.Contains("hello") || lowerMessage.Contains("hi") || lowerMessage.Contains("hey"))
-                intents.Add("greeting");
-            else if (lowerMessage.Contains("bye") || lowerMessage.Contains("goodbye"))
-                intents.Add("goodbye");
-            else if (lowerMessage.Contains("price") || lowerMessage.Contains("cost") || lowerMessage.Contains("billing"))
-                intents.Add("pricing");
-            else if (lowerMessage.Contains("help") || lowerMessage.Contains("support"))
-                intents.Add("request_support");
-            else if (lowerMessage.Contains("?"))
-                intents.Add("question");
-            else
-                intents.Add("general_inquiry");
+            var intents = response.Split(',')
+                .Select(i => i.Trim().ToLower())
+                .Where(i => !string.IsNullOrEmpty(i))
+                .ToList();
                 
-            return intents;
+            return intents.Any() ? intents : new List<string> { "general_inquiry" };
         }
         catch (Exception ex)
         {
@@ -151,23 +198,27 @@ public class OpenAIService : IAIService
     {
         try
         {
-            await Task.Delay(100);
-            
-            if (targetLanguage.ToLower().Contains("arabic") || targetLanguage.ToLower().Contains("ar"))
+            var systemPrompt = $"Translate the following text to {targetLanguage}. Return only the translated text without any additional explanation.";
+
+            var messages = new List<ChatMessage>
             {
-                return $"[Arabic translation of: {text}]";
-            }
-            else if (targetLanguage.ToLower().Contains("english") || targetLanguage.ToLower().Contains("en"))
+                new SystemChatMessage(systemPrompt),
+                new UserChatMessage(text)
+            };
+
+            var chatCompletionOptions = new ChatCompletionOptions
             {
-                return $"[English translation of: {text}]";
-            }
-            
-            return text; // Return original text if translation not supported
+                Temperature = 0.1f,
+                MaxTokens = 1000
+            };
+
+            var completion = await _chatClient.CompleteChatAsync(messages, chatCompletionOptions);
+            return completion.Value.Content[0].Text.Trim();
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error translating text");
-            return text; // Return original text if translation fails
+            return text;
         }
     }
 
@@ -175,13 +226,23 @@ public class OpenAIService : IAIService
     {
         try
         {
-            await Task.Delay(80);
-            
-            var messageCount = messages.Count;
-            var totalLength = messages.Sum(m => m.Length);
-            var avgLength = messageCount > 0 ? totalLength / messageCount : 0;
-            
-            return $"Conversation summary: {messageCount} messages exchanged with an average length of {avgLength} characters. This is a placeholder summary as OpenAI integration is not configured.";
+            var conversationText = string.Join("\n", messages);
+            var systemPrompt = "Summarize the following conversation in 2-3 sentences, highlighting the main topics discussed and any key outcomes or decisions.";
+
+            var chatMessages = new List<ChatMessage>
+            {
+                new SystemChatMessage(systemPrompt),
+                new UserChatMessage(conversationText)
+            };
+
+            var chatCompletionOptions = new ChatCompletionOptions
+            {
+                Temperature = 0.3f,
+                MaxTokens = 200
+            };
+
+            var completion = await _chatClient.CompleteChatAsync(chatMessages, chatCompletionOptions);
+            return completion.Value.Content[0].Text.Trim();
         }
         catch (Exception ex)
         {
@@ -194,28 +255,27 @@ public class OpenAIService : IAIService
     {
         try
         {
-            await Task.Delay(50);
-            
-            var lowerMessage = message.ToLower();
-            
-            if (lowerMessage.Contains("great") || lowerMessage.Contains("excellent") || 
-                lowerMessage.Contains("good") || lowerMessage.Contains("happy") ||
-                lowerMessage.Contains("love") || lowerMessage.Contains("amazing") ||
-                lowerMessage.Contains("wonderful") || lowerMessage.Contains("fantastic"))
+            var systemPrompt = "Analyze the sentiment of the following message. Respond with only one word: 'positive', 'negative', or 'neutral'.";
+
+            var messages = new List<ChatMessage>
             {
-                return "positive";
-            }
-            else if (lowerMessage.Contains("bad") || lowerMessage.Contains("terrible") ||
-                     lowerMessage.Contains("hate") || lowerMessage.Contains("angry") ||
-                     lowerMessage.Contains("frustrated") || lowerMessage.Contains("awful") ||
-                     lowerMessage.Contains("horrible") || lowerMessage.Contains("disappointed"))
+                new SystemChatMessage(systemPrompt),
+                new UserChatMessage(message)
+            };
+
+            var chatCompletionOptions = new ChatCompletionOptions
             {
-                return "negative";
-            }
+                Temperature = 0.1f,
+                MaxTokens = 10
+            };
+
+            var completion = await _chatClient.CompleteChatAsync(messages, chatCompletionOptions);
+            var sentiment = completion.Value.Content[0].Text.Trim().ToLower();
+            
+            if (sentiment == "positive" || sentiment == "negative" || sentiment == "neutral")
+                return sentiment;
             else
-            {
                 return "neutral";
-            }
         }
         catch (Exception ex)
         {
