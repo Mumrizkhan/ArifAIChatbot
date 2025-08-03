@@ -2,7 +2,13 @@ import React, { useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useTranslation } from 'react-i18next';
 import { AppDispatch, RootState } from '../../store/store';
-import { fetchDashboardStats } from '../../store/slices/analyticsSlice';
+import { 
+  fetchDashboardStats, 
+  setSignalRConnectionStatus,
+  updateDashboardStatsRealtime,
+  addSystemNotification
+} from '../../store/slices/analyticsSlice';
+import { adminSignalRService } from '../../services/signalr';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../../components/ui/card';
 import { Badge } from '../../components/ui/badge';
 import { Button } from '../../components/ui/button';
@@ -27,16 +33,53 @@ import {
   TrendingUp,
   Activity,
   AlertCircle,
+  RefreshCw,
 } from 'lucide-react';
+import NotificationCenter from '../../components/notifications/NotificationCenter';
 
 const DashboardPage: React.FC = () => {
   const { t } = useTranslation();
   const dispatch = useDispatch<AppDispatch>();
-  const { dashboardStats, isLoading } = useSelector((state: RootState) => state.analytics);
+  const { dashboardStats, isLoading, isSignalRConnected } = useSelector((state: RootState) => state.analytics);
 
   useEffect(() => {
     dispatch(fetchDashboardStats());
+    
+    const initializeSignalR = async () => {
+      const authToken = localStorage.getItem('authToken') || 'demo-admin-token';
+      
+      adminSignalRService.setOnConnectionStatusChange((isConnected) => {
+        dispatch(setSignalRConnectionStatus(isConnected));
+      });
+
+      adminSignalRService.setOnDashboardStatsUpdate((stats) => {
+        dispatch(updateDashboardStatsRealtime(stats));
+      });
+
+      adminSignalRService.setOnSystemNotification((notification) => {
+        dispatch(addSystemNotification(notification));
+      });
+
+      try {
+        await adminSignalRService.connect(authToken);
+      } catch (error) {
+        console.error('Failed to initialize SignalR:', error);
+      }
+    };
+
+    initializeSignalR();
+
+    return () => {
+      adminSignalRService.disconnect();
+    };
   }, [dispatch]);
+
+  const handleRefresh = async () => {
+    dispatch(fetchDashboardStats());
+    if (isSignalRConnected) {
+      await adminSignalRService.requestDashboardStatsUpdate();
+    }
+  };
 
   const mockChartData = [
     { name: 'Jan', conversations: 400, resolved: 350 },
@@ -106,7 +149,20 @@ const DashboardPage: React.FC = () => {
           <h1 className="text-3xl font-bold">{t('dashboard.title')}</h1>
           <p className="text-muted-foreground">{t('dashboard.overview')}</p>
         </div>
-        <Button>{t('common.refresh')}</Button>
+        <div className="flex items-center space-x-2">
+          <div className="flex items-center space-x-1">
+            <div 
+              className={`w-2 h-2 rounded-full ${isSignalRConnected ? 'bg-green-500' : 'bg-red-500'}`}
+            />
+            <span className="text-xs text-muted-foreground">
+              {isSignalRConnected ? 'Live' : 'Offline'}
+            </span>
+          </div>
+          <Button onClick={handleRefresh} className="flex items-center">
+            <RefreshCw className="mr-1 h-3 w-3" />
+            {t('common.refresh')}
+          </Button>
+        </div>
       </div>
 
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
@@ -201,7 +257,7 @@ const DashboardPage: React.FC = () => {
         </Card>
       </div>
 
-      <div className="grid gap-4 md:grid-cols-2">
+      <div className="grid gap-4 md:grid-cols-3">
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center">
@@ -223,8 +279,10 @@ const DashboardPage: React.FC = () => {
               <Badge variant="default">Healthy</Badge>
             </div>
             <div className="flex items-center justify-between">
-              <span>Message Queue</span>
-              <Badge variant="secondary">Warning</Badge>
+              <span>SignalR Hub</span>
+              <Badge variant={isSignalRConnected ? "default" : "destructive"}>
+                {isSignalRConnected ? "Connected" : "Disconnected"}
+              </Badge>
             </div>
           </CardContent>
         </Card>
@@ -251,6 +309,8 @@ const DashboardPage: React.FC = () => {
             </div>
           </CardContent>
         </Card>
+
+        <NotificationCenter />
       </div>
     </div>
   );
