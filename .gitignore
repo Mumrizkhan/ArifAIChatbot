@@ -2,6 +2,8 @@
 # This .gitignore file was automatically created by Microsoft(R) Visual Studio.
 ################################################################################
 
+
+
 /.vs/ArifAIChatbot/copilot-chat/b03e0c47/sessions
 /.vs/ArifAIChatbot/CopilotIndices/17.14.698.11175
 /.vs/ArifAIChatbot/FileContentIndex
@@ -28,3 +30,272 @@
 /chatbot-saas-platform/backend/.vs/ArifPlatformV2/copilot-chat/b03e0c47/sessions/2fc28066-4e59-46d8-aaed-2790d04f1e0f
 /chatbot-saas-platform/backend/.vs/ArifPlatformV2/CopilotIndices/17.14.698.11175/CodeChunks.db
 /chatbot-saas-platform/backend/.vs/ArifPlatformV2/CopilotIndices/17.14.698.11175/SemanticSymbols.db
+
+
+# Build results
+[Dd]ebug/
+[Dd]ebugPublic/
+[Rr]elease/
+[Rr]eleases/
+x64/
+x86/
+[Ww][Ii][Nn]32/
+[Aa][Rr][Mm]/
+[Aa][Rr][Mm]64/
+bld/
+[Bb]in/
+[Oo]bj/
+[Ll]og/
+[Ll]ogs/
+
+# Visual Studio Code files
+.vscode/
+.vs/
+*.code-workspace
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+
+# Specific to your project
+/chatbot-saas-platform/backend/.vs/
+
+# Visual Studio files
+*.vcxproj.filters
+*.vcxproj.user
+*.vsprops
+*.vspx
+*.sap
+
+# User-specific files
+*.rsuser
+*.userprefs
+**/launchSettings.json
+
+# Build Results
+*.dll
+*.exe
+*.pdb
+*.cache
+*.lib
+*.exp
+
+# NuGet Packages
+packages/
+!packages/build/
+*.nupkg
+*.snupkg
+.nuget/
+**/[Pp]ackages/*
+!**/[Pp]ackages/build/
+project.lock.json
+project.fragment.lock.json
+artifacts/
+
+# Configuration files with secrets (CRITICAL for your project)
+**/appsettings.Development.json
+**/appsettings.Production.json
+**/appsettings.Local.json
+**/appsettings.Staging.json
+**/*.secrets.json
+.env
+.env.local
+.env.development
+.env.production
+.env.staging
+
+# JWT Keys and Certificates
+*.pfx
+*.p12
+*.key
+*.crt
+*.pem
+jwt-*.json
+secrets/
+
+# Database files
+*.db
+*.sqlite
+*.sqlite3
+*.mdf
+*.ldf
+
+# AI/ML specific files
+Models/
+*.model
+*.bin
+*.onnx
+*.pkl
+vector_embeddings/
+training_data/
+*.weights
+
+# Vector Database data
+qdrant_data/
+qdrant_storage/
+vector_storage/
+embeddings_cache/
+
+# Cache and temporary files
+.cache/
+cache/
+temp/
+tmp/
+*.tmp
+*.temp
+~$*
+
+# Logs
+*.log
+logs/
+audit_logs/
+security_logs/
+application_logs/
+
+# Test Results
+[Tt]est[Rr]esult*/
+[Bb]uild[Ll]og.*
+*.VisualState.xml
+TestResult.xml
+nunit-*.xml
+*.coverage
+*.coveragexml
+coverage/
+.coverage
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+desktop.ini
+
+# IDE files
+.idea/
+*.swp
+*.swo
+*~
+
+# Docker
+Dockerfile*
+.dockerignore
+docker-compose*.yml
+.docker/
+
+# Redis dump files
+dump.rdb
+
+# RabbitMQ data
+rabbitmq_data/
+
+# Monitoring and metrics
+prometheus_data/
+grafana_data/
+metrics/
+
+# Documentation builds
+_site/
+.sass-cache/
+.jekyll-cache/
+.jekyll-metadata
+
+# Backup files
+*.bak
+*.backup
+
+# API Documentation
+api_docs/
+swagger.json
+openapi.json
+
+# Performance and profiling
+*.psess
+*.vsp
+*.vspx
+*.sap
+dotTrace.*
+
+# Entity Framework
+migrations/
+*.edmx.diagram
+
+# ASP.NET Scaffolding
+ScaffoldingReadMe.txt
+
+# Stylecop
+StyleCopReport.xml
+
+# Files built by Visual Studio
+*_i.c
+*_p.c
+*_h.h
+*.ilk
+*.meta
+*.obj
+*.iobj
+*.pch
+*.pdb
+*.ipdb
+*.pgc
+*.pgd
+*.rsp
+*.sbr
+*.tlb
+*.tli
+*.tlh
+*.tmp_proj
+*_wpftmp.csproj
+*.log
+*.tlog
+*.vspscc
+*.vssscc
+.builds
+*.pidb
+*.svclog
+*.scc
+
+# Chutzpah Test files
+_Chutzpah*
+
+# Web workbench (sass)
+.sass-cache/
+
+# Installshield output folder
+[Ee]xpress/
+
+# DocProject is a documentation generator add-in
+DocProject/buildhelp/
+DocProject/Help/*.HxT
+DocProject/Help/*.HxC
+DocProject/Help/*.hhc
+DocProject/Help/*.hhk
+DocProject/Help/*.hhp
+DocProject/Help/Html2
+DocProject/Help/html
+
+# Click-Once directory
+publish/
+
+# Publish Web Output
+*.[Pp]ublish.xml
+*.azurePubxml
+*.pubxml
+*.publishproj
+
+# Microsoft Azure Web App publish settings
+PublishProfiles/
+
+# NuGet Packages
+project.lock.json
+project.fragment.lock.json
+artifacts/
+
+# StyleCop
+StyleCopReport.xml
+
+# Files built by Visual Studio
+*_i.c
+*_p.c
