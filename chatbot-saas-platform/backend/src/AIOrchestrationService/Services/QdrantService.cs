@@ -171,6 +171,10 @@ public class QdrantService : IVectorService
     {
         try
         {
+            if (string.IsNullOrWhiteSpace(embeddingString) || !embeddingString.All(c => char.IsDigit(c) || c == ',' || char.IsWhiteSpace(c)))
+            {
+                throw new FormatException("Input string is not in the correct format for parsing.");
+            }
             return embeddingString.Split(',').Select(float.Parse).ToArray();
         }
         catch

@@ -20,7 +20,7 @@ public class OpenAIService : IAIService
     {
         _logger = logger;
         _configuration = configuration;
-        var apiKey = _configuration["OpenAI:ApiKey"] ?? throw new InvalidOperationException("OpenAI API key not configured");
+        var apiKey = System.Environment.GetEnvironmentVariable("OPENAI_Key") ?? throw new InvalidOperationException("OpenAI API key not configured");
         _defaultModel = _configuration["OpenAI:Model"] ?? "gpt-3.5-turbo";
         _embeddingModel = _configuration["OpenAI:EmbeddingModel"] ?? "text-embedding-ada-002";
         
@@ -36,9 +36,12 @@ public class OpenAIService : IAIService
         {
             var messages = new List<ChatMessage>();
             
-            foreach (var historyMessage in request.ConversationHistory)
+            if (request.ConversationHistory != null)
             {
-                messages.Add(new UserChatMessage(historyMessage.Content));
+                foreach (var historyMessage in request.ConversationHistory)
+                {
+                    messages.Add(new UserChatMessage(historyMessage.Content));
+                }
             }
             
             messages.Add(new UserChatMessage(request.Message));
@@ -46,7 +49,8 @@ public class OpenAIService : IAIService
             var chatCompletionOptions = new ChatCompletionOptions
             {
                 Temperature = (float)request.Temperature,
-                MaxTokens = request.MaxTokens
+                MaxOutputTokenCount= request.MaxTokens,
+
             };
 
             var completion = await _chatClient.CompleteChatAsync(messages, chatCompletionOptions);
@@ -58,7 +62,7 @@ public class OpenAIService : IAIService
                 Content = completion.Value.Content[0].Text,
                 Language = request.Language,
                 Confidence = 0.9,
-                TokensUsed = completion.Value.Usage?.TotalTokens ?? 0,
+                TokensUsed = completion.Value.Usage?.OutputTokenCount ?? 0,
                 ProcessingTime = stopwatch.Elapsed,
                 IsSuccessful = true
             };
@@ -107,7 +111,7 @@ public class OpenAIService : IAIService
             var chatCompletionOptions = new ChatCompletionOptions
             {
                 Temperature = (float)request.Temperature,
-                MaxTokens = request.MaxTokens
+                MaxOutputTokenCount = request.MaxTokens
             };
 
             var completion = await _chatClient.CompleteChatAsync(messages, chatCompletionOptions);
@@ -120,7 +124,7 @@ public class OpenAIService : IAIService
                 Language = request.Language,
                 Confidence = 0.9,
                 SourceDocuments = contextDocuments.Take(3).ToList(),
-                TokensUsed = completion.Value.Usage?.TotalTokens ?? 0,
+                TokensUsed = completion.Value.Usage?.OutputTokenCount ?? 0,
                 ProcessingTime = stopwatch.Elapsed,
                 IsSuccessful = true
             };
@@ -146,7 +150,7 @@ public class OpenAIService : IAIService
         try
         {
             var embedding = await _embeddingClient.GenerateEmbeddingAsync(text);
-            var embeddingVector = embedding.Value.Vector.ToArray();
+            var embeddingVector = embedding.Value;
             
             return string.Join(",", embeddingVector);
         }
@@ -174,7 +178,7 @@ If multiple intents are present, list them all. If no specific intent is clear, 
             var chatCompletionOptions = new ChatCompletionOptions
             {
                 Temperature = 0.1f,
-                MaxTokens = 50
+                MaxOutputTokenCount = 50
             };
 
             var completion = await _chatClient.CompleteChatAsync(messages, chatCompletionOptions);
@@ -209,7 +213,7 @@ If multiple intents are present, list them all. If no specific intent is clear, 
             var chatCompletionOptions = new ChatCompletionOptions
             {
                 Temperature = 0.1f,
-                MaxTokens = 1000
+                MaxOutputTokenCount = 1000
             };
 
             var completion = await _chatClient.CompleteChatAsync(messages, chatCompletionOptions);
@@ -238,7 +242,7 @@ If multiple intents are present, list them all. If no specific intent is clear, 
             var chatCompletionOptions = new ChatCompletionOptions
             {
                 Temperature = 0.3f,
-                MaxTokens = 200
+                MaxOutputTokenCount = 200
             };
 
             var completion = await _chatClient.CompleteChatAsync(chatMessages, chatCompletionOptions);
@@ -266,7 +270,7 @@ If multiple intents are present, list them all. If no specific intent is clear, 
             var chatCompletionOptions = new ChatCompletionOptions
             {
                 Temperature = 0.1f,
-                MaxTokens = 10
+                MaxOutputTokenCount = 10
             };
 
             var completion = await _chatClient.CompleteChatAsync(messages, chatCompletionOptions);

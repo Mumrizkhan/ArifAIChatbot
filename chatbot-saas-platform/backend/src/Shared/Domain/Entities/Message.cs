@@ -5,6 +5,8 @@ namespace Shared.Domain.Entities;
 
 public class Message : AuditableEntity
 {
+    
+
     public Guid ConversationId { get; set; }
     public Guid TenantId { get; set; }
     public Conversation Conversation { get; set; } = null!;

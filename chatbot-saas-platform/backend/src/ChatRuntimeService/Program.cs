@@ -43,6 +43,7 @@ builder.Services.AddSwaggerGen(options =>
 builder.Services.AddSignalR();
 
 builder.Services.AddInfrastructure(builder.Configuration);
+builder.Services.AddHttpClient<IAIIntegrationService, AIIntegrationService>();
 builder.Services.AddScoped<IAIIntegrationService, AIIntegrationService>();
 builder.Services.AddScoped<IMessageQueueService, MessageQueueService>();
 builder.Services.AddScoped<IFileUploadService, FileUploadService>();
