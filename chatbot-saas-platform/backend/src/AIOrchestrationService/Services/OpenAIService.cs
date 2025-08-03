@@ -21,7 +21,7 @@ public class OpenAIService : IAIService
         _logger = logger;
         _configuration = configuration;
         var apiKey = System.Environment.GetEnvironmentVariable("OPENAI_Key") ?? throw new InvalidOperationException("OpenAI API key not configured");
-        _defaultModel = _configuration["OpenAI:Model"] ?? "gpt-3.5-turbo";
+        _defaultModel = _configuration["OpenAI:Model"] ?? "gpt-4.1";
         _embeddingModel = _configuration["OpenAI:EmbeddingModel"] ?? "text-embedding-ada-002";
         
         _chatClient = new ChatClient(_defaultModel, apiKey);
