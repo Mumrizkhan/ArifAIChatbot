@@ -1,22 +1,23 @@
-import React, { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useTranslation } from "react-i18next";
 import { AppDispatch, RootState } from "../../store/store";
 import { fetchConversations } from "../../store/slices/conversationSlice";
-import { fetchAgentProfile, fetchAgentStats } from "../../store/slices/agentSlice";
+import { fetchAgentProfile, fetchAgentStats, updateAgentStatusRealtime } from "../../store/slices/agentSlice";
+import { agentSignalRService } from "../../services/signalr";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../../components/ui/card";
 import { Button } from "../../components/ui/button";
 import { Badge } from "../../components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "../../components/ui/avatar";
 import { Skeleton } from "../../components/ui/skeleton";
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, LineChart, Line, PieChart, Pie, Cell } from "recharts";
-import { MessageSquare, Users, Clock, Star, TrendingUp, Activity, CheckCircle, AlertCircle, Phone, Mail, Calendar, BarChart3 } from "lucide-react";
+import { Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, LineChart, Line, PieChart, Pie, Cell } from "recharts";
+import { MessageSquare, Users, Clock, Star, TrendingUp, Activity, Phone, Mail, BarChart3 } from "lucide-react";
 
 const DashboardPage = () => {
   const { t } = useTranslation();
   const dispatch = useDispatch<AppDispatch>();
   const { conversations, isLoading: conversationsLoading } = useSelector((state: RootState) => state.conversations);
-  const { currentAgent, stats: agentStats, isLoading: agentLoading } = useSelector((state: RootState) => state.agent);
+  const { currentAgent, stats: agentStats, isSignalRConnected } = useSelector((state: RootState) => state.agent);
 
   useEffect(() => {
     dispatch(fetchConversations());
@@ -24,13 +25,21 @@ const DashboardPage = () => {
       dispatch(fetchAgentProfile(currentAgent.id));
       dispatch(fetchAgentStats(currentAgent.id));
 
+      if (isSignalRConnected) {
+        agentSignalRService.setOnAgentStatusChanged((statusUpdate: any) => {
+          dispatch(updateAgentStatusRealtime(statusUpdate));
+        });
+      }
+
       const interval = setInterval(() => {
-        dispatch(fetchAgentStats(currentAgent.id));
+        if (!isSignalRConnected) {
+          dispatch(fetchAgentStats(currentAgent.id));
+        }
       }, 30000);
 
       return () => clearInterval(interval);
     }
-  }, [dispatch, currentAgent?.id]);
+  }, [dispatch, currentAgent?.id, isSignalRConnected]);
 
   const getStatusBadge = (status: string) => {
     const variants: Record<string, "default" | "secondary" | "destructive"> = {
@@ -94,12 +103,22 @@ const DashboardPage = () => {
           <h1 className="text-3xl font-bold">{t("dashboard.title")}</h1>
           <p className="text-muted-foreground">{t("dashboard.subtitle")}</p>
         </div>
-        <div className="flex items-center space-x-2">
-          <Badge variant={currentAgent?.status === "online" ? "default" : "secondary"}>
-            <Activity className="mr-1 h-3 w-3" />
-            {t(`agent.status.${currentAgent?.status || "offline"}`)}
-          </Badge>
-          <Button variant="outline">{t("dashboard.takeBreak")}</Button>
+        <div className="flex items-center space-x-4">
+          <div className="flex items-center space-x-1">
+            <div 
+              className={`w-2 h-2 rounded-full ${isSignalRConnected ? 'bg-green-500' : 'bg-red-500'}`}
+            />
+            <span className="text-xs text-muted-foreground">
+              {isSignalRConnected ? 'Live Updates' : 'Static Data'}
+            </span>
+          </div>
+          <div className="flex items-center space-x-2">
+            <Badge variant={currentAgent?.status === "online" ? "default" : "secondary"}>
+              <Activity className="mr-1 h-3 w-3" />
+              {t(`agent.status.${currentAgent?.status || "offline"}`)}
+            </Badge>
+            <Button variant="outline">{t("dashboard.takeBreak")}</Button>
+          </div>
         </div>
       </div>
 

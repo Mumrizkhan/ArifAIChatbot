@@ -1,10 +1,11 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useTranslation } from "react-i18next";
 import { AppDispatch, RootState } from "../../store/store";
-import { fetchConversations, assignConversation, sendMessage, updateConversationStatus } from "../../store/slices/conversationSlice";
+import { fetchConversations, sendMessage, updateConversationStatus, setConversationSignalRStatus, assignConversationRealtime, transferConversationRealtime } from "../../store/slices/conversationSlice";
 import { setSelectedConversation } from "../../store/slices/selectedConversationSlice";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../../components/ui/card";
+import { agentSignalRService } from "../../services/signalr";
+import { Card, CardContent, CardHeader, CardTitle } from "../../components/ui/card";
 import { Button } from "../../components/ui/button";
 import { Input } from "../../components/ui/input";
 import { Badge } from "../../components/ui/badge";
@@ -19,14 +20,8 @@ import {
   Phone,
   Video,
   MoreHorizontal,
-  Clock,
-  User,
   Search,
   Filter,
-  CheckCircle,
-  AlertCircle,
-  Archive,
-  Star,
   Paperclip,
   Smile,
 } from "lucide-react";
@@ -34,8 +29,9 @@ import {
 const ConversationsPage = () => {
   const { t } = useTranslation();
   const dispatch = useDispatch<AppDispatch>();
-  const { conversations, isLoading } = useSelector((state: RootState) => state.conversations);
+  const { conversations, isLoading, isSignalRConnected } = useSelector((state: RootState) => state.conversations);
   const { conversationId } = useSelector((state: RootState) => state.selectedConversation);
+  const { currentAgent } = useSelector((state: RootState) => state.agent);
 
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
@@ -47,6 +43,19 @@ const ConversationsPage = () => {
 
   useEffect(() => {
     dispatch(fetchConversations());
+    
+    const signalRConnected = agentSignalRService.getConnectionStatus();
+    dispatch(setConversationSignalRStatus(signalRConnected));
+    
+    if (signalRConnected) {
+      agentSignalRService.setOnConversationAssigned((assignment: any) => {
+        dispatch(assignConversationRealtime(assignment));
+      });
+      
+      agentSignalRService.setOnConversationTransferred((transfer: any) => {
+        dispatch(transferConversationRealtime(transfer));
+      });
+    }
   }, [dispatch]);
 
   const filteredConversations =
@@ -74,6 +83,18 @@ const ConversationsPage = () => {
 
   const handleStatusChange = (conversationId: string, status: "waiting" | "active" | "resolved" | "closed") => {
     dispatch(updateConversationStatus({ conversationId, status }));
+  };
+
+  const handleAcceptConversation = (conversationId: string) => {
+    if (isSignalRConnected && currentAgent?.id) {
+      agentSignalRService.acceptConversation(conversationId);
+    }
+  };
+
+  const handleTransferConversation = (conversationId: string, targetAgentId: string, reason: string) => {
+    if (isSignalRConnected) {
+      agentSignalRService.transferConversation(conversationId, targetAgentId, reason);
+    }
   };
 
   const getStatusBadge = (status: string) => {
@@ -123,14 +144,24 @@ const ConversationsPage = () => {
           <h1 className="text-3xl font-bold">{t("conversations.title")}</h1>
           <p className="text-muted-foreground">{t("conversations.subtitle")}</p>
         </div>
-        <div className="flex items-center space-x-2">
-          <Badge variant="outline">
-            {filteredConversations.length} {t("conversations.total")}
-          </Badge>
-          <Button variant="outline">
-            <Filter className="mr-2 h-4 w-4" />
-            {t("conversations.filters")}
-          </Button>
+        <div className="flex items-center space-x-4">
+          <div className="flex items-center space-x-1">
+            <div 
+              className={`w-2 h-2 rounded-full ${isSignalRConnected ? 'bg-green-500' : 'bg-red-500'}`}
+            />
+            <span className="text-xs text-muted-foreground">
+              {isSignalRConnected ? 'Live Updates' : 'Static Data'}
+            </span>
+          </div>
+          <div className="flex items-center space-x-2">
+            <Badge variant="outline">
+              {filteredConversations.length} {t("conversations.total")}
+            </Badge>
+            <Button variant="outline">
+              <Filter className="mr-2 h-4 w-4" />
+              {t("conversations.filters")}
+            </Button>
+          </div>
         </div>
       </div>
 

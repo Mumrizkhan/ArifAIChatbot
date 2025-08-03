@@ -1,11 +1,20 @@
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useTranslation } from 'react-i18next';
 import { AppDispatch, RootState } from '../../store/store';
-import { fetchAnalytics, fetchRealtimeAnalytics, exportAnalytics, setDateRange } from '../../store/slices/analyticsSlice';
+import { 
+  fetchAnalytics, 
+  fetchRealtimeAnalytics, 
+  exportAnalytics, 
+  setDateRange,
+  updateAnalyticsDataRealtime,
+  updateRealtimeData,
+  setSignalRConnectionStatus,
+  addTenantNotification
+} from '../../store/slices/analyticsSlice';
+import { tenantSignalRService } from '../../services/signalr';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../../components/ui/card';
 import { Button } from '../../components/ui/button';
-import { Badge } from '../../components/ui/badge';
 import { Skeleton } from '../../components/ui/skeleton';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../../components/ui/tabs';
 import {
@@ -32,7 +41,6 @@ import {
   Area,
 } from 'recharts';
 import {
-  BarChart3,
   TrendingUp,
   Users,
   MessageSquare,
@@ -48,23 +56,52 @@ import {
 const AnalyticsPage = () => {
   const { t } = useTranslation();
   const dispatch = useDispatch<AppDispatch>();
-  const { data: analytics, isLoading, dateRange } = useSelector((state: RootState) => state.analytics);
+  const { data: analytics, isLoading, dateRange, isSignalRConnected } = useSelector((state: RootState) => state.analytics);
+  const { user } = useSelector((state: RootState) => state.auth);
   const [activeTab, setActiveTab] = useState('overview');
   const [selectedTimeRange, setSelectedTimeRange] = useState('7d');
 
   useEffect(() => {
-    const startDate = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
-    const endDate = new Date();
-    
-    dispatch(fetchAnalytics({ startDate, endDate }));
+    dispatch(fetchAnalytics({ startDate: dateRange.start, endDate: dateRange.end }));
     dispatch(fetchRealtimeAnalytics());
 
+    const token = localStorage.getItem('token');
+    if (token && user?.tenantId) {
+      tenantSignalRService.connect(token, user.tenantId).then((connected) => {
+        dispatch(setSignalRConnectionStatus(connected));
+        
+        if (connected) {
+          tenantSignalRService.setOnAnalyticsUpdate((analytics) => {
+            dispatch(updateAnalyticsDataRealtime(analytics as any));
+          });
+
+          tenantSignalRService.setOnRealtimeUpdate((realtime) => {
+            dispatch(updateRealtimeData(realtime));
+          });
+
+          tenantSignalRService.setOnTenantNotification((notification) => {
+            dispatch(addTenantNotification(notification));
+          });
+
+          tenantSignalRService.setOnConnectionStatusChange((isConnected) => {
+            dispatch(setSignalRConnectionStatus(isConnected));
+          });
+
+          tenantSignalRService.requestTenantAnalyticsUpdate(dateRange.start, dateRange.end);
+        }
+      });
+    }
+
     const interval = setInterval(() => {
-      dispatch(fetchRealtimeAnalytics());
+      if (isSignalRConnected) {
+        tenantSignalRService.requestTenantRealtimeUpdate();
+      } else {
+        dispatch(fetchRealtimeAnalytics());
+      }
     }, 30000);
 
     return () => clearInterval(interval);
-  }, [dispatch]);
+  }, [dispatch, dateRange, user?.tenantId, isSignalRConnected]);
 
   const handleTimeRangeChange = (timeRange: string) => {
     setSelectedTimeRange(timeRange);
@@ -74,6 +111,10 @@ const AnalyticsPage = () => {
     
     dispatch(setDateRange({ start: startDate, end: endDate }));
     dispatch(fetchAnalytics({ startDate, endDate }));
+    
+    if (isSignalRConnected) {
+      tenantSignalRService.requestTenantAnalyticsUpdate(startDate, endDate);
+    }
   };
 
   const handleExport = (format: 'csv' | 'pdf' | 'excel') => {
@@ -164,30 +205,45 @@ const AnalyticsPage = () => {
             {t('analytics.subtitle')}
           </p>
         </div>
-        <div className="flex items-center space-x-2">
+        <div className="flex items-center space-x-4">
+          <div className="flex items-center space-x-1">
+            <div 
+              className={`w-2 h-2 rounded-full ${isSignalRConnected ? 'bg-green-500' : 'bg-red-500'}`}
+            />
+            <span className="text-xs text-muted-foreground">
+              {isSignalRConnected ? 'Live Updates' : 'Static Data'}
+            </span>
+          </div>
           <Select value={selectedTimeRange} onValueChange={handleTimeRangeChange}>
             <SelectTrigger className="w-[140px]">
               <Calendar className="mr-2 h-4 w-4" />
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="7d">{t('analytics.last7Days')}</SelectItem>
-              <SelectItem value="30d">{t('analytics.last30Days')}</SelectItem>
-              <SelectItem value="90d">{t('analytics.last90Days')}</SelectItem>
-              <SelectItem value="1y">{t('analytics.thisYear')}</SelectItem>
+              <SelectItem value="7d">Last 7 days</SelectItem>
+              <SelectItem value="30d">Last 30 days</SelectItem>
+              <SelectItem value="90d">Last 90 days</SelectItem>
+              <SelectItem value="1y">Last year</SelectItem>
             </SelectContent>
           </Select>
-          <Select onValueChange={handleExport}>
-            <SelectTrigger className="w-[120px]">
+          <div className="flex items-center space-x-2">
+            <Button
+              variant="outline"
+              onClick={() => handleExport('csv')}
+              disabled={isLoading}
+            >
               <Download className="mr-2 h-4 w-4" />
-              <SelectValue placeholder={t('common.export')} />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="csv">CSV</SelectItem>
-              <SelectItem value="excel">Excel</SelectItem>
-              <SelectItem value="pdf">PDF</SelectItem>
-            </SelectContent>
-          </Select>
+              {t('analytics.exportCSV')}
+            </Button>
+            <Button
+              variant="outline"
+              onClick={() => handleExport('pdf')}
+              disabled={isLoading}
+            >
+              <Download className="mr-2 h-4 w-4" />
+              {t('analytics.exportPDF')}
+            </Button>
+          </div>
         </div>
       </div>
 
@@ -351,7 +407,7 @@ const AnalyticsPage = () => {
           <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
             <MetricCard
               title="Total Agents"
-              value={analytics?.agents?.online + analytics?.agents?.busy || 24}
+              value={(analytics?.agents?.online || 0) + (analytics?.agents?.busy || 0) || 24}
               change="+2 from last month"
               icon={Users}
               description="Registered agents"
