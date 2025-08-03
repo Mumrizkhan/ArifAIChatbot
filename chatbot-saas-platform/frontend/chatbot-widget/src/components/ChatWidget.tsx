@@ -9,7 +9,7 @@ import { MessageList } from './MessageList';
 import { MessageInput } from './MessageInput';
 import { ChatButton } from './ChatButton';
 import { ConnectionStatus } from './ConnectionStatus';
-import { websocketService } from '../services/websocket';
+import { signalRService } from '../services/websocket';
 import '../styles/widget.css';
 
 export const ChatWidget: React.FC = () => {
@@ -25,12 +25,11 @@ export const ChatWidget: React.FC = () => {
 
   useEffect(() => {
     if (isInitialized && widget.tenantId) {
-      websocketService.connect(widget.tenantId);
       dispatch(trackEvent({ event: 'widget_initialized' }));
     }
 
     return () => {
-      websocketService.disconnect();
+      signalRService.disconnect();
     };
   }, [isInitialized, widget.tenantId, dispatch]);
 

@@ -11,6 +11,8 @@ export interface Message {
     fileSize?: number;
     fileType?: string;
     imageUrl?: string;
+    senderId?: string;
+    senderName?: string;
   };
 }
 
