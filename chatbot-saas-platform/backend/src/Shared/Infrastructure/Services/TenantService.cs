@@ -38,7 +38,7 @@ public class TenantService : ITenantService
 
     public async Task<bool> TenantExistsAsync(Guid tenantId)
     {
-        return _tenantConnections.ContainsKey(tenantId);
+        return _tenantConnections.ContainsKey(tenantId);//Todo check in cache if not found, get from db
     }
 
     public async Task<string> GetTenantConnectionStringAsync(Guid tenantId)
