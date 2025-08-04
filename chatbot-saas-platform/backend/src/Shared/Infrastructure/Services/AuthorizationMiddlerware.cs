@@ -19,7 +19,14 @@ namespace Shared.Infrastructure.Services
 
         public async Task InvokeAsync(HttpContext context, ICurrentUserService currentUserService, ITenantService tenantService)
         {
-            // Check if user is authenticated
+            var endpoint = context.GetEndpoint();
+            if (endpoint?.Metadata?.GetMetadata<Microsoft.AspNetCore.Authorization.IAllowAnonymous>() != null)
+            {
+                // Skip auth check for endpoints marked [AllowAnonymous]
+                await _next(context);
+                return;
+            }
+
             if (!context.User.Identity?.IsAuthenticated ?? true)
             {
                 context.Response.StatusCode = StatusCodes.Status401Unauthorized;
@@ -48,9 +55,17 @@ namespace Shared.Infrastructure.Services
                     return;
                 }
             }
+            var tenantId = currentUserService.TenantId;
+            if (!tenantId.HasValue || !await tenantService.TenantExistsAsync(tenantId.Value))
+            {
+                context.Response.StatusCode = StatusCodes.Status403Forbidden;
+                await context.Response.WriteAsync("Forbidden: Invalid tenant");
+                return;
+            }
 
             await _next(context);
         }
+
     }
 }
 

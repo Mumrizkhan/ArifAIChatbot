@@ -229,7 +229,7 @@ public class AuthController : ControllerBase
 
     [HttpPost("avatar")]
     [Authorize]
-    public async Task<IActionResult> UploadAvatar([FromForm] IFormFile avatar)
+    public async Task<IActionResult> UploadAvatar(UploadAvatarRequest  uploadAvatarRequest)
     {
         try
         {
@@ -239,12 +239,12 @@ public class AuthController : ControllerBase
                 return Unauthorized();
             }
 
-            if (avatar == null || avatar.Length == 0)
+            if (uploadAvatarRequest.Avatar == null || uploadAvatarRequest.Avatar.Length == 0)
             {
                 return BadRequest(new { message = "No file provided" });
             }
 
-            var avatarUrl = await _authService.UploadAvatarAsync(userId.Value, avatar);
+            var avatarUrl = await _authService.UploadAvatarAsync(userId.Value, uploadAvatarRequest.Avatar);
             return Ok(new { avatarUrl });
         }
         catch (Exception ex)
