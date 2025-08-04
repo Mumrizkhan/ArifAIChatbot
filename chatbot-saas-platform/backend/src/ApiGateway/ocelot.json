@@ -93,6 +93,42 @@
         "Limit": 60
       }
     },
+    //for SignalR in live Agent servcie
+    //---------------------------------
+
+    {
+      "DownstreamPathTemplate": "/agenthub",
+      "UpstreamPathTemplate": "/agent/agenthub",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "localhost",
+          "Port": 5003
+        }
+      ],
+      "UpstreamHttpMethod": [ "GET", "POST" ],
+      "HttpHandlerOptions": {
+        "UseProxy": true,
+        "UseTracing": false
+      }
+    },
+    {
+      "DownstreamPathTemplate": "/agenthub/negotiate",
+      "UpstreamPathTemplate": "/agent/agenthub/negotiate",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "localhost",
+          "Port": 5003
+        }
+      ],
+      "UpstreamHttpMethod": [ "GET", "POST" ],
+      "HttpHandlerOptions": {
+        "UseProxy": true,
+        "UseTracing": false
+      }
+    },
+    //----------------------------------------------
     {
       "DownstreamPathTemplate": "/api/{everything}",
       "DownstreamScheme": "http",
@@ -112,6 +148,42 @@
         "Limit": 60
       }
     },
+    //for SignalR in Notification servcie
+    //---------------------------------
+
+    {
+      "DownstreamPathTemplate": "/notificationhub",
+      "UpstreamPathTemplate": "/notification/notificationhub",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "localhost",
+          "Port": 5004
+        }
+      ],
+      "UpstreamHttpMethod": [ "GET", "POST" ],
+      "HttpHandlerOptions": {
+        "UseProxy": true,
+        "UseTracing": false
+      }
+    },
+    {
+      "DownstreamPathTemplate": "/notificationhub/negotiate",
+      "UpstreamPathTemplate": "/notification/notificationhub/negotiate",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "localhost",
+          "Port": 5004
+        }
+      ],
+      "UpstreamHttpMethod": [ "GET", "POST" ],
+      "HttpHandlerOptions": {
+        "UseProxy": true,
+        "UseTracing": false
+      }
+    },
+    //----------------------------------------------
     {
       "DownstreamPathTemplate": "/api/{everything}",
       "DownstreamScheme": "http",
@@ -131,6 +203,42 @@
         "Limit": 60
       }
     },
+    //for SignalR in workflow servcie
+    //---------------------------------
+
+    {
+      "DownstreamPathTemplate": "/workflowhub",
+      "UpstreamPathTemplate": "/workflow/workflowhub",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "localhost",
+          "Port": 5004
+        }
+      ],
+      "UpstreamHttpMethod": [ "GET", "POST" ],
+      "HttpHandlerOptions": {
+        "UseProxy": true,
+        "UseTracing": false
+      }
+    },
+    {
+      "DownstreamPathTemplate": "/workflowhub/negotiate",
+      "UpstreamPathTemplate": "/workflow/workflowhub/negotiate",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "localhost",
+          "Port": 5004
+        }
+      ],
+      "UpstreamHttpMethod": [ "GET", "POST" ],
+      "HttpHandlerOptions": {
+        "UseProxy": true,
+        "UseTracing": false
+      }
+    },
+    //----------------------------------------------
     {
       "DownstreamPathTemplate": "/api/{everything}",
       "DownstreamScheme": "http",
