@@ -42,12 +42,12 @@ namespace Shared.Infrastructure.Services
                 await context.Response.WriteAsync("Forbidden: No role assigned");
                 return;
             }
-
+            Guid? tenantId;
             // If not SuperAdmin or Admin, validate tenant
             if (!userRole.Equals("SuperAdmin", StringComparison.OrdinalIgnoreCase) &&
                 !userRole.Equals("Admin", StringComparison.OrdinalIgnoreCase))
             {
-                var tenantId = currentUserService.TenantId;
+                 tenantId = currentUserService.TenantId;
                 if (!tenantId.HasValue /*|| !await tenantService.TenantExistsAsync(tenantId.Value)*/)
                 {
                     context.Response.StatusCode = StatusCodes.Status403Forbidden;
@@ -55,7 +55,7 @@ namespace Shared.Infrastructure.Services
                     return;
                 }
             }
-            var tenantId = currentUserService.TenantId;
+             tenantId = currentUserService.TenantId;
             if (!tenantId.HasValue || !await tenantService.TenantExistsAsync(tenantId.Value))
             {
                 context.Response.StatusCode = StatusCodes.Status403Forbidden;
