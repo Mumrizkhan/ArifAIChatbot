@@ -57,6 +57,8 @@ public class ApplicationDbContext : DbContext, IApplicationDbContext
 
     public DbSet<ChatbotConfig> ChatbotConfigs => Set<ChatbotConfig>();
 
+    public DbSet<Workflow> Workflows => Set<Workflow>();
+
     public new DbSet<TEntity> Set<TEntity>() where TEntity : class => base.Set<TEntity>();
     public EntityEntry<TEntity> Entry<TEntity>(TEntity entity) where TEntity : class
        => base.Entry(entity);
@@ -418,6 +420,36 @@ public class ApplicationDbContext : DbContext, IApplicationDbContext
             entity.Property(e => e.CreatedAt).IsRequired();
             entity.Property(e => e.UpdatedAt);
         });
+        builder.Entity<Workflow>(entity =>
+        {
+            entity.HasKey(e => e.Id);
+            entity.Property(e => e.Status).IsRequired();
+            entity.Property(e => e.Definition)
+                .HasColumnType("nvarchar(max)")
+                .HasConversion(
+                    v => System.Text.Json.JsonSerializer.Serialize(v, new System.Text.Json.JsonSerializerOptions()),
+                    v => System.Text.Json.JsonSerializer.Deserialize<WorkflowDefinition>(v, new System.Text.Json.JsonSerializerOptions())
+                );
+            entity.Property(e => e.Trigger)
+                .HasColumnType("nvarchar(max)")
+                .HasConversion(
+                    v => System.Text.Json.JsonSerializer.Serialize(v, new System.Text.Json.JsonSerializerOptions()),
+                    v => System.Text.Json.JsonSerializer.Deserialize<WorkflowTrigger>(v, new System.Text.Json.JsonSerializerOptions())
+                );
+            entity.Property(e => e.Settings)
+                .HasColumnType("nvarchar(max)")
+                .HasConversion(
+                    v => System.Text.Json.JsonSerializer.Serialize(v, new System.Text.Json.JsonSerializerOptions()),
+                    v => System.Text.Json.JsonSerializer.Deserialize<WorkflowSettings>(v, new System.Text.Json.JsonSerializerOptions())
+                );
+            entity.Property(e => e.Variables)
+                .HasColumnType("nvarchar(max)")
+                .HasConversion(
+                    v => System.Text.Json.JsonSerializer.Serialize(v, new System.Text.Json.JsonSerializerOptions()),
+                    v => System.Text.Json.JsonSerializer.Deserialize<Dictionary<string, object>>(v, new System.Text.Json.JsonSerializerOptions())
+                );
+          
+        });
         base.OnModelCreating(builder);
     }
 
@@ -436,6 +468,7 @@ public class ApplicationDbContext : DbContext, IApplicationDbContext
                 case EntityState.Modified:
                     entry.Entity.UpdatedBy = _currentUserService.UserId?.ToString();
                     entry.Entity.UpdatedAt = DateTime.UtcNow;
+                    
                     break;
             }
         }

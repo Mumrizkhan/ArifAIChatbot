@@ -75,6 +75,7 @@ builder.Services.AddAuthentication(options =>
             ClockSkew = TimeSpan.Zero,
             NameClaimType = ClaimTypes.NameIdentifier,
             RoleClaimType =ClaimTypes.Role
+            ClockSkew = TimeSpan.FromMinutes(60)
         };
     });
 

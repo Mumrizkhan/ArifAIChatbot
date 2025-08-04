@@ -205,7 +205,8 @@ public class AuthService : IAuthService
                 claims.Add(new Claim("tenant_id", userTenant.TenantId.ToString()));
                 claims.Add(new Claim("tenant_role", userTenant.Role.ToString()));
             }
-        }
+        }else
+            claims.Add(new Claim("tenant_id", user.TenantId.ToString()));
 
         var tokenHandler = new JwtSecurityTokenHandler();
         var key = Encoding.ASCII.GetBytes(_configuration["Jwt:Key"]!);

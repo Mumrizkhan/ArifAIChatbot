@@ -35,6 +35,7 @@ public class AIController : ControllerBase
 
     [HttpPost("chat")]
     [AllowAnonymous]
+    
     public async Task<IActionResult> Chat([FromBody] ChatRequest request)
     {
         try
@@ -79,7 +80,7 @@ public class AIController : ControllerBase
                 ConversationId = request.ConversationId,
                 TenantId = _tenantService.GetCurrentTenantId(),
                 ConversationHistory = conversationHistory,
-                Model = request.Model ?? "gpt-3.5-turbo",
+                Model = request.Model ?? "gpt-4.1",
                 Temperature = request.Temperature ?? 0.7,
                 MaxTokens = request.MaxTokens ?? 1000
             };

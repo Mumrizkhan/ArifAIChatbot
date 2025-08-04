@@ -8,15 +8,14 @@ using System.Threading.Tasks;
 
 namespace Shared.Infrastructure.Services
 {
-    
-        public class AuthorizationMiddleware
-        {
-            private readonly RequestDelegate _next;
+    public class AuthorizationMiddleware
+    {
+        private readonly RequestDelegate _next;
 
-            public AuthorizationMiddleware(RequestDelegate next)
-            {
-                _next = next;
-            }
+        public AuthorizationMiddleware(RequestDelegate next)
+        {
+            _next = next;
+        }
 
         public async Task InvokeAsync(HttpContext context, ICurrentUserService currentUserService, ITenantService tenantService)
         {
@@ -35,6 +34,27 @@ namespace Shared.Infrastructure.Services
                 return;
             }
 
+            // Check user role
+            var userRole = currentUserService.Role;
+            if (string.IsNullOrEmpty(userRole))
+            {
+                context.Response.StatusCode = StatusCodes.Status403Forbidden;
+                await context.Response.WriteAsync("Forbidden: No role assigned");
+                return;
+            }
+
+            // If not SuperAdmin or Admin, validate tenant
+            if (!userRole.Equals("SuperAdmin", StringComparison.OrdinalIgnoreCase) &&
+                !userRole.Equals("Admin", StringComparison.OrdinalIgnoreCase))
+            {
+                var tenantId = currentUserService.TenantId;
+                if (!tenantId.HasValue /*|| !await tenantService.TenantExistsAsync(tenantId.Value)*/)
+                {
+                    context.Response.StatusCode = StatusCodes.Status403Forbidden;
+                    await context.Response.WriteAsync("Forbidden: Invalid tenant");
+                    return;
+                }
+            }
             var tenantId = currentUserService.TenantId;
             if (!tenantId.HasValue || !await tenantService.TenantExistsAsync(tenantId.Value))
             {

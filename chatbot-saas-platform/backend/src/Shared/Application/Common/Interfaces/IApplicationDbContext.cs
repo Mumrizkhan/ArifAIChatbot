@@ -27,6 +27,7 @@ public interface IApplicationDbContext
     DbSet<DocumentChunk> DocumentChunks { get; }
 
     // WorkflowService entities
+    DbSet<Workflow> Workflows { get; }
     DbSet<WorkflowDefinition> WorkflowDefinitions { get; }
     DbSet<WorkflowStep> WorkflowSteps { get; }
     DbSet<WorkflowConnection> WorkflowConnections { get; }
