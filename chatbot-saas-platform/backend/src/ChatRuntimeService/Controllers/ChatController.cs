@@ -69,7 +69,58 @@ public class ChatController : ControllerBase
     {
         try
         {
-            return Ok(new { success = true });
+            if (string.IsNullOrWhiteSpace(request.Content))
+            {
+                return BadRequest(new { message = "Message content is required" });
+            }
+
+            if (!Guid.TryParse(request.ConversationId, out var conversationId))
+            {
+                return BadRequest(new { message = "Invalid conversation ID" });
+            }
+
+            var conversation = await _context.Conversations
+                .FirstOrDefaultAsync(c => c.Id == conversationId);
+
+            if (conversation == null)
+            {
+                return NotFound(new { message = "Conversation not found" });
+            }
+
+            if (!Enum.TryParse<MessageType>(request.Type, true, out var messageType))
+            {
+                messageType = MessageType.Text;
+            }
+
+            var message = new Message
+            {
+                Id = Guid.NewGuid(),
+                ConversationId = conversationId,
+                Content = request.Content,
+                Type = messageType,
+                Sender = MessageSender.Customer,
+                SenderId = null,
+                CreatedAt = DateTime.UtcNow,
+                TenantId = conversation.TenantId,
+                IsRead = false
+            };
+
+            _context.Messages.Add(message);
+            conversation.MessageCount++;
+            conversation.UpdatedAt = DateTime.UtcNow;
+            
+            await _context.SaveChangesAsync();
+
+            return Ok(new
+            {
+                id = message.Id,
+                conversationId = message.ConversationId,
+                content = message.Content,
+                type = message.Type.ToString(),
+                sender = message.Sender.ToString(),
+                createdAt = message.CreatedAt,
+                success = true
+            });
         }
         catch (Exception ex)
         {
@@ -123,6 +174,7 @@ public class CreateChatConversationRequest
 
 public class SendChatMessageRequest
 {
+    public string ConversationId { get; set; } = string.Empty;
     public string Content { get; set; } = string.Empty;
     public string Type { get; set; } = "text";
 }
