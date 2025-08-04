@@ -13,7 +13,7 @@ class SignalRService {
       store.dispatch(setConnectionStatus('connecting'));
 
       this.connection = new HubConnectionBuilder()
-        .withUrl('/chatHub', {
+        .withUrl('http://localhost:8000/chat/chatHub', {
           accessTokenFactory: () => authToken,
           skipNegotiation: false,
         })

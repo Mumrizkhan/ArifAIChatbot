@@ -25,10 +25,13 @@ builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowAll", policy =>
     {
+        
+        var allowedHosts = builder.Configuration.GetSection("Cors:AllowedOrigins").Get<string[]>();
         policy
-            .AllowAnyOrigin()    // For development; restrict in production!
+            .WithOrigins(allowedHosts)//.AllowAnyOrigin()    // For development; restrict in production!
             .AllowAnyMethod()
-            .AllowAnyHeader();
+            .AllowAnyHeader()
+            .AllowCredentials();
     });
 });
 
@@ -68,6 +71,7 @@ app.UseMiddleware<LoggingMiddleware>();
 app.MapHealthChecks("/health");
 
 app.UseEndpoints(endpoints => { });
+app.UseWebSockets();//For SignalR support in Chat Runtime Service
 await app.UseOcelot();
 
 app.Run();

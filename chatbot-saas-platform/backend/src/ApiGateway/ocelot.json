@@ -38,6 +38,42 @@
         "Limit": 60
       }
     },
+    //for SignalR in chatruntime servcie
+    //---------------------------------
+
+    {
+      "DownstreamPathTemplate": "/chathub",
+      "UpstreamPathTemplate": "/chat/chathub",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "localhost",
+          "Port": 5002
+        }
+      ],
+      "UpstreamHttpMethod": [ "GET", "POST" ],
+      "HttpHandlerOptions": {
+        "UseProxy": true,
+        "UseTracing": false
+      }
+    },
+    {
+      "DownstreamPathTemplate": "/chathub/negotiate",
+      "UpstreamPathTemplate": "/chat/chathub/negotiate",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "localhost",
+          "Port": 5002
+        }
+      ],
+      "UpstreamHttpMethod": [ "GET", "POST" ],
+      "HttpHandlerOptions": {
+        "UseProxy": true,
+        "UseTracing": false
+      }
+    },
+    //----------------------------------------------
     {
       "DownstreamPathTemplate": "/api/{everything}",
       "DownstreamScheme": "http",

@@ -16,29 +16,29 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(options =>
 {
-    options.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
-    {
-        Name = "Authorization",
-        Type = SecuritySchemeType.Http,
-        Scheme = "Bearer",
-        BearerFormat = "JWT",
-        In = ParameterLocation.Header,
-        Description = "Enter 'Bearer' [space] and then your valid token in the text input below.\nExample: \"Bearer eyJhbGciOiJIUzI1NiIs...\""
-    });
-    options.AddSecurityRequirement(new OpenApiSecurityRequirement
-    {
-        {
-            new OpenApiSecurityScheme
-            {
-                Reference = new OpenApiReference
-                {
-                    Type = ReferenceType.SecurityScheme,
-                    Id = "Bearer"
-                }
-            },
-            Array.Empty<string>()
-        }
-    });
+	options.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
+	{
+		Name = "Authorization",
+		Type = SecuritySchemeType.Http,
+		Scheme = "Bearer",
+		BearerFormat = "JWT",
+		In = ParameterLocation.Header,
+		Description = "Enter 'Bearer' [space] and then your valid token in the text input below.\nExample: \"Bearer eyJhbGciOiJIUzI1NiIs...\""
+	});
+	options.AddSecurityRequirement(new OpenApiSecurityRequirement
+	{
+		{
+			new OpenApiSecurityScheme
+			{
+				Reference = new OpenApiReference
+				{
+					Type = ReferenceType.SecurityScheme,
+					Id = "Bearer"
+				}
+			},
+			Array.Empty<string>()
+		}
+	});
 });
 builder.Services.AddSignalR();
 
@@ -91,10 +91,19 @@ builder.Services.AddCors(options =>
               .AllowAnyMethod()
               .AllowAnyHeader();
     });
+    //options.AddPolicy("FrontEnd", policy =>
+    //{
+    //	policy
+    //		.WithOrigins("http://localhost:5176;http://localhost:8000")    // For development; restrict in production!
+    //		.AllowAnyMethod()
+    //   .AllowAnyHeader()
+    //   .AllowCredentials();
+    //});
 });
 
 var app = builder.Build();
 app.UseCors("AllowAll");
+//app.UseCors("FrontEnd");
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
@@ -106,6 +115,6 @@ app.UseHttpsRedirection();
 app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();
-app.MapHub<ChatHub>("/chatHub");
+app.MapHub<ChatHub>("/chatHub").RequireCors("FrontEnd");
 
 app.Run();
