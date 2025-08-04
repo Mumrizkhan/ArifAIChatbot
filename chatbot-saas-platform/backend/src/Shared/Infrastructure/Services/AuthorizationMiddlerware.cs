@@ -20,7 +20,14 @@ namespace Shared.Infrastructure.Services
 
         public async Task InvokeAsync(HttpContext context, ICurrentUserService currentUserService, ITenantService tenantService)
         {
-            // Check if user is authenticated
+            var endpoint = context.GetEndpoint();
+            if (endpoint?.Metadata?.GetMetadata<Microsoft.AspNetCore.Authorization.IAllowAnonymous>() != null)
+            {
+                // Skip auth check for endpoints marked [AllowAnonymous]
+                await _next(context);
+                return;
+            }
+
             if (!context.User.Identity?.IsAuthenticated ?? true)
             {
                 context.Response.StatusCode = StatusCodes.Status401Unauthorized;
@@ -28,7 +35,6 @@ namespace Shared.Infrastructure.Services
                 return;
             }
 
-            // Check if user belongs to a valid tenant
             var tenantId = currentUserService.TenantId;
             if (!tenantId.HasValue || !await tenantService.TenantExistsAsync(tenantId.Value))
             {
@@ -39,8 +45,9 @@ namespace Shared.Infrastructure.Services
 
             await _next(context);
         }
-        }
+
     }
+}
 
 
 

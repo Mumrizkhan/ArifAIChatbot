@@ -1,4 +1,5 @@
 using IdentityService.Services;
+using System.ComponentModel.DataAnnotations;
 
 namespace IdentityService.Models;
 
@@ -70,4 +71,9 @@ public class ChangePasswordRequest
 public class AssignRoleRequest
 {
     public string Role { get; set; } = string.Empty;
+}
+public class UploadAvatarRequest
+{
+    [Required]
+    public IFormFile Avatar { get; set; }
 }

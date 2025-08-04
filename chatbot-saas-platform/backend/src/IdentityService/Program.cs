@@ -1,15 +1,16 @@
 using IdentityService.Controllers;
+using IdentityService.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using Shared.Application.Common.Interfaces;
 using Shared.Infrastructure.Data;
+using Shared.Infrastructure.Extensions;
 using Shared.Infrastructure.Persistence;
 using Shared.Infrastructure.Services;
-using Shared.Infrastructure.Extensions;
+using System.Security.Claims;
 using System.Text;
-using IdentityService.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -24,7 +25,7 @@ builder.Services.AddSwaggerGen(options =>
         Scheme = "Bearer",
         BearerFormat = "JWT",
         In = ParameterLocation.Header,
-        Description = "Enter 'Bearer' [space] and then your valid token in the text input below.\nExample: \"Bearer eyJhbGciOiJIUzI1NiIs...\""
+        Description = "Enter your valid token in the text input below.\nExample: \"eyJhbGciOiJIUzI1NiIs...\""
     });
     options.AddSecurityRequirement(new OpenApiSecurityRequirement
     {
@@ -43,10 +44,11 @@ builder.Services.AddSwaggerGen(options =>
 });
 
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
-    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"), 
-    sqlOptions => { 
-        sqlOptions.MigrationsAssembly(typeof(AuthController).Assembly.FullName); 
-    }) 
+    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"),
+    sqlOptions =>
+    {
+        sqlOptions.MigrationsAssembly(typeof(AuthController).Assembly.FullName);
+    })
     );
 
 builder.Services.AddInfrastructure(builder.Configuration);
@@ -54,7 +56,11 @@ builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<IUserManagementService, UserManagementService>();
 builder.Services.AddHttpContextAccessor();
 
-builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+builder.Services.AddAuthentication(options =>
+{
+    options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+    options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+})
     .AddJwtBearer(options =>
     {
         options.TokenValidationParameters = new TokenValidationParameters
@@ -66,7 +72,9 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
             ValidateAudience = true,
             ValidAudience = builder.Configuration["Jwt:Audience"],
             ValidateLifetime = true,
-            ClockSkew = TimeSpan.Zero
+            ClockSkew = TimeSpan.Zero,
+            NameClaimType = ClaimTypes.NameIdentifier,
+            RoleClaimType =ClaimTypes.Role
         };
     });
 
@@ -90,7 +98,7 @@ if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
     app.UseSwaggerUI();
-    
+
     using (var scope = app.Services.CreateScope())
     {
         try
@@ -108,6 +116,9 @@ if (app.Environment.IsDevelopment())
 app.UseHttpsRedirection();
 app.UseAuthentication();
 app.UseAuthorization();
+
+//app.UseMiddleware<AuthorizationMiddleware>();
 app.MapControllers();
+
 
 app.Run();
