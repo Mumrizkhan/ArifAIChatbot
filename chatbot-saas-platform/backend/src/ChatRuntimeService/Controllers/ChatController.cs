@@ -19,19 +19,22 @@ public class ChatController : ControllerBase
     private readonly ILogger<ChatController> _logger;
     private readonly IAIIntegrationService _aiIntegrationService;
     private readonly IHubContext<ChatHub> _hubContext;
+    private readonly ILiveAgentIntegrationService _liveAgentIntegrationService;
 
     public ChatController(
         IApplicationDbContext context,
         ITenantService tenantService,
         ILogger<ChatController> logger,
         IAIIntegrationService aiIntegrationService,
-        IHubContext<ChatHub> hubContext)
+        IHubContext<ChatHub> hubContext,
+        ILiveAgentIntegrationService liveAgentIntegrationService)
     {
         _context = context;
         _tenantService = tenantService;
         _logger = logger;
         _aiIntegrationService = aiIntegrationService;
         _hubContext = hubContext;
+        _liveAgentIntegrationService = liveAgentIntegrationService;
     }
 
     [HttpPost("conversations")]
@@ -134,6 +137,32 @@ public class ChatController : ControllerBase
             await _hubContext.Clients.Group($"conversation_{conversationId}")
                 .SendAsync("ReceiveMessage", userMessageDto);
 
+            if (conversation.Status == ConversationStatus.WaitingForAgent || 
+                conversation.Status == ConversationStatus.Queued ||
+                conversation.AssignedAgentId.HasValue)
+            {
+                if (conversation.AssignedAgentId.HasValue)
+                {
+                    await _hubContext.Clients.Group($"agent_{conversation.AssignedAgentId}")
+                        .SendAsync("ReceiveMessage", userMessageDto);
+                }
+                
+                return Ok(new
+                {
+                    userMessage = new
+                    {
+                        id = userMessage.Id,
+                        conversationId = userMessage.ConversationId,
+                        content = userMessage.Content,
+                        type = userMessage.Type.ToString(),
+                        sender = userMessage.Sender.ToString(),
+                        createdAt = userMessage.CreatedAt
+                    },
+                    routedToAgent = true,
+                    success = true
+                });
+            }
+
             var botResponse = await _aiIntegrationService.GetBotResponseAsync(
                 request.Content, 
                 conversationId.ToString(), 
@@ -225,7 +254,43 @@ public class ChatController : ControllerBase
             conversation.UpdatedAt = DateTime.UtcNow;
             await _context.SaveChangesAsync();
 
-            return Ok(new { success = true, message = "Conversation escalated to human agent" });
+            var availableAgentId = await _liveAgentIntegrationService.FindAvailableAgentAsync(
+                conversation.TenantId, conversation.Language);
+
+            if (availableAgentId.HasValue)
+            {
+                var assigned = await _liveAgentIntegrationService.AssignConversationToAgentAsync(
+                    id, availableAgentId.Value);
+
+                if (assigned)
+                {
+                    conversation.AssignedAgentId = availableAgentId.Value;
+                    conversation.Status = ConversationStatus.Active;
+                    await _context.SaveChangesAsync();
+
+                    await _hubContext.Clients.Group($"agent_{availableAgentId.Value}")
+                        .SendAsync("ConversationAssigned", new
+                        {
+                            ConversationId = id,
+                            CustomerName = conversation.CustomerName,
+                            Subject = conversation.Subject,
+                            Language = conversation.Language
+                        });
+
+                    return Ok(new { 
+                        success = true, 
+                        message = "Conversation assigned to human agent",
+                        assignedAgentId = availableAgentId.Value
+                    });
+                }
+            }
+
+            await _liveAgentIntegrationService.AddToQueueAsync(id);
+
+            return Ok(new { 
+                success = true, 
+                message = "Conversation escalated to human agent queue" 
+            });
         }
         catch (Exception ex)
         {
