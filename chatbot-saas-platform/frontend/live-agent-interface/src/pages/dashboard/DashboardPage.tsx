@@ -79,7 +79,7 @@ const DashboardPage = () => {
     );
   }
 
-  const recentConversations = conversations?.slice(0, 5) || [];
+  const recentConversations = Array.isArray(conversations) ? conversations.slice(0, 5) : [];
   const performanceData = [
     { date: "2024-01-01", conversations: 12, avgRating: 4.5 },
     { date: "2024-01-02", conversations: 15, avgRating: 4.7 },
@@ -125,7 +125,7 @@ const DashboardPage = () => {
             <MessageSquare className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{conversations?.filter((c: any) => c.status === "active").length || 3}</div>
+            <div className="text-2xl font-bold">{Array.isArray(conversations) ? conversations.filter((c: any) => c.status === "active").length : 3}</div>
             <div className="flex items-center text-xs text-muted-foreground">
               <TrendingUp className="mr-1 h-3 w-3" />
               {t("dashboard.currentlyHandling")}

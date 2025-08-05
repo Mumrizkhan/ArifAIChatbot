@@ -56,14 +56,14 @@ const ConversationsPage = () => {
   }, [dispatch]);
 
   const filteredConversations =
-    conversations?.filter((conversation) => {
+    Array.isArray(conversations) ? conversations.filter((conversation) => {
       const matchesSearch =
         conversation.customer?.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
         (conversation.messages?.length > 0 &&
           conversation.messages[conversation.messages.length - 1]?.content?.toLowerCase().includes(searchTerm.toLowerCase()));
       const matchesStatus = statusFilter === "all" || conversation.status === statusFilter;
       return matchesSearch && matchesStatus;
-    }) || [];
+    }) : [];
 
   const handleSendMessage = () => {
     if (messageText.trim() && selectedConversation) {
