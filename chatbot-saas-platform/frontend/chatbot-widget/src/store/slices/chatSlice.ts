@@ -65,7 +65,7 @@ export const sendMessage = createAsyncThunk(
       throw new Error('No active conversation found');
     }
 
-    const response = await fetch('http://localhost:8000/chat/messages', {
+    const response = await fetch('http://localhost:8000/chat/chat/messages', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
@@ -86,7 +86,7 @@ export const sendMessage = createAsyncThunk(
 export const startConversation = createAsyncThunk(
   'chat/startConversation',
   async (tenantId: string) => {
-    const response = await fetch('http://localhost:8000/chat/conversations', {
+    const response = await fetch('http://localhost:8000/chat/chat/conversations', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ 
@@ -114,7 +114,7 @@ export const startConversation = createAsyncThunk(
 export const requestHumanAgent = createAsyncThunk(
   'chat/requestHumanAgent',
   async (conversationId: string) => {
-    const response = await fetch(`http://localhost:8000/chat/conversations/${conversationId}/escalate`, {
+    const response = await fetch(`http://localhost:8000/chat/chat/conversations/${conversationId}/escalate`, {
       method: 'POST',
     });
     return response.json();

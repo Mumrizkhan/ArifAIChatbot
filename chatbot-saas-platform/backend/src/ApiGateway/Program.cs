@@ -2,8 +2,17 @@ using Ocelot.DependencyInjection;
 using Ocelot.Middleware;
 using Microsoft.OpenApi.Models; // Ensure this namespace is correct
 using Microsoft.OpenApi; // This might not be necessary, consider removing if unused
+using Serilog;
 
+
+Log.Logger = new LoggerConfiguration()
+    .WriteTo.Console()
+    .WriteTo.File("Logs/log-.txt", rollingInterval: RollingInterval.Day)
+    .CreateLogger();
 var builder = WebApplication.CreateBuilder(args);
+builder.Host.UseSerilog();
+
+
 
 // Add services to the container.
 builder.Services.AddOpenApi();

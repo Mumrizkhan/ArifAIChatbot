@@ -8,7 +8,12 @@ using Shared.Infrastructure.Persistence;
 using Shared.Infrastructure.Services;
 using Shared.Infrastructure.Extensions;
 using System.Text;
+using Serilog;
 
+Log.Logger = new LoggerConfiguration()
+    .WriteTo.Console()
+    .WriteTo.File("Logs/log-.txt", rollingInterval: RollingInterval.Day)
+    .CreateLogger();
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddControllers();
