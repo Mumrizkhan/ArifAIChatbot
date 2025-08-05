@@ -21,19 +21,19 @@ public class FilesController : ControllerBase
 
     [HttpPost("upload/{conversationId}")]
     [Authorize]
-    public async Task<IActionResult> UploadFile(string conversationId, IFormFile file)
+    public async Task<IActionResult> UploadFile([FromForm] UploadFileDto file)
     {
         try
         {
-            if (file == null || file.Length == 0)
+            if (file == null || file.File.Length == 0)
                 return BadRequest(new { message = "No file provided" });
 
-            var fileUrl = await _fileUploadService.UploadFileAsync(file, conversationId);
+            var fileUrl = await _fileUploadService.UploadFileAsync(file.File, file.ConversationId);
             
             return Ok(new { 
                 FileUrl = fileUrl,
-                FileName = file.FileName,
-                FileSize = file.Length
+                FileName = file.File.FileName,
+                FileSize = file.File.Length
             });
         }
         catch (ArgumentException ex)
@@ -42,7 +42,7 @@ public class FilesController : ControllerBase
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, $"Error uploading file for conversation {conversationId}");
+            _logger.LogError(ex, $"Error uploading file for conversation {file.ConversationId}");
             return StatusCode(500, new { message = "Internal server error" });
         }
     }
@@ -92,18 +92,18 @@ public class FilesController : ControllerBase
 
     [HttpPost("upload")]
     [AllowAnonymous]
-    public async Task<IActionResult> UploadFileForWidget([FromForm] IFormFile file, [FromForm] string conversationId)
+    public async Task<IActionResult> UploadFileForWidget([FromForm] UploadFileDto file)
     {
         try
         {
-            if (file == null || file.Length == 0)
+            if (file == null || file.File == null || file.File.Length == 0)
                 return BadRequest(new { message = "No file provided" });
 
-            if (!Guid.TryParse(conversationId, out var convId))
+            if (!Guid.TryParse(file.ConversationId, out var convId))
                 return BadRequest(new { message = "Invalid conversation ID" });
 
-            var fileUrl = await _fileUploadService.UploadFileAsync(file, conversationId);
-            
+            var fileUrl = await _fileUploadService.UploadFileAsync(file.File, file.ConversationId);
+
             return Ok(new { fileUrl });
         }
         catch (ArgumentException ex)
@@ -132,4 +132,14 @@ public class FilesController : ControllerBase
             _ => "application/octet-stream"
         };
     }
+}
+
+
+public class UploadFileDto
+{
+    [FromForm(Name = "file")]
+    public IFormFile File { get; set; }
+
+    [FromForm(Name = "conversationId")]
+    public string ConversationId { get; set; }
 }

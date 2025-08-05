@@ -108,7 +108,7 @@ public class ChatController : ControllerBase
             _context.Messages.Add(message);
             conversation.MessageCount++;
             conversation.UpdatedAt = DateTime.UtcNow;
-            
+
             await _context.SaveChangesAsync();
 
             return Ok(new

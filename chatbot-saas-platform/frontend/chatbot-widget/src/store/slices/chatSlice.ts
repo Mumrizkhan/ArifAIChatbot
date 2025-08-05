@@ -58,7 +58,7 @@ const initialState: ChatState = {
 export const sendMessage = createAsyncThunk(
   'chat/sendMessage',
   async (message: { content: string; type: 'text' | 'file' }) => {
-    const response = await fetch('/api/chat/messages', {
+    const response = await fetch('http://localhost:8000/chat/messages', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(message),
@@ -70,7 +70,7 @@ export const sendMessage = createAsyncThunk(
 export const startConversation = createAsyncThunk(
   'chat/startConversation',
   async (tenantId: string) => {
-    const response = await fetch('/api/chat/conversations', {
+    const response = await fetch('http://localhost:8000/chat/conversations', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ tenantId }),
@@ -82,7 +82,7 @@ export const startConversation = createAsyncThunk(
 export const requestHumanAgent = createAsyncThunk(
   'chat/requestHumanAgent',
   async (conversationId: string) => {
-    const response = await fetch(`/api/chat/conversations/${conversationId}/escalate`, {
+    const response = await fetch(`http://localhost:8000/chat/conversations/${conversationId}/escalate`, {
       method: 'POST',
     });
     return response.json();
