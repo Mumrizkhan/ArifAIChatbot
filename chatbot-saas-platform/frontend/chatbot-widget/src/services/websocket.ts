@@ -173,8 +173,20 @@ class SignalRService {
     return false;
   }
 
-  async requestAgent(): Promise<void> {
-    console.log('Agent handoff requested');
+  async requestAgent(conversationId: string): Promise<boolean> {
+    if (this.connection?.state === HubConnectionState.Connected) {
+      try {
+        await this.connection.invoke('RequestAgent', conversationId);
+        console.log('Agent handoff requested for conversation:', conversationId);
+        return true;
+      } catch (error) {
+        console.error('Failed to request agent:', error);
+        return false;
+      }
+    } else {
+      console.error('SignalR is not connected');
+      return false;
+    }
   }
 
   private scheduleReconnect(tenantId: string, authToken: string, conversationId?: string) {
