@@ -57,12 +57,28 @@ const initialState: ChatState = {
 
 export const sendMessage = createAsyncThunk(
   'chat/sendMessage',
-  async (message: { content: string; type: 'text' | 'file' }) => {
+  async (message: { content: string; type: 'text' | 'file' }, { getState }) => {
+    const state = getState() as any;
+    const conversationId = state.chat.currentConversation?.id;
+    
+    if (!conversationId) {
+      throw new Error('No active conversation found');
+    }
+
     const response = await fetch('http://localhost:8000/chat/messages', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(message),
+      body: JSON.stringify({
+        conversationId,
+        content: message.content,
+        type: message.type
+      }),
     });
+    
+    if (!response.ok) {
+      throw new Error('Failed to send message');
+    }
+    
     return response.json();
   }
 );
@@ -73,9 +89,25 @@ export const startConversation = createAsyncThunk(
     const response = await fetch('http://localhost:8000/chat/conversations', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ tenantId }),
+      body: JSON.stringify({ 
+        tenantId,
+        customerName: 'Anonymous User',
+        language: 'en'
+      }),
     });
-    return response.json();
+    
+    if (!response.ok) {
+      throw new Error('Failed to create conversation');
+    }
+    
+    const data = await response.json();
+    
+    return {
+      id: data.id,
+      messages: [],
+      status: 'active' as const,
+      startedAt: new Date(data.createdAt || new Date()),
+    } as Conversation;
   }
 );
 
@@ -166,6 +198,7 @@ const chatSlice = createSlice({
       .addCase(startConversation.fulfilled, (state, action) => {
         state.isLoading = false;
         state.currentConversation = action.payload;
+        state.error = null;
       })
       .addCase(startConversation.rejected, (state, action) => {
         state.isLoading = false;

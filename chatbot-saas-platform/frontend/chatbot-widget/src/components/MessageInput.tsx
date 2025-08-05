@@ -2,7 +2,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useTranslation } from 'react-i18next';
 import { RootState, AppDispatch } from '../store/store';
-import { sendMessage, requestHumanAgent } from '../store/slices/chatSlice';
+import { sendMessage, requestHumanAgent, startConversation } from '../store/slices/chatSlice';
 import { trackEvent } from '../store/slices/configSlice';
 import { signalRService } from '../services/websocket';
 import { Send, Paperclip, Mic, MicOff, User } from 'lucide-react';
@@ -92,6 +92,10 @@ export const MessageInput: React.FC = () => {
     }
 
     try {
+      if (!currentConversation && widget.tenantId) {
+        await dispatch(startConversation(widget.tenantId)).unwrap();
+      }
+
       await dispatch(sendMessage({ content: messageContent, type: 'text' })).unwrap();
       dispatch(trackEvent({ 
         event: 'message_sent', 
@@ -130,10 +134,21 @@ export const MessageInput: React.FC = () => {
     }));
   };
 
-  const handleRequestAgent = () => {
-    if (currentConversation) {
-      dispatch(requestHumanAgent(currentConversation.id));
-      dispatch(trackEvent({ event: 'agent_requested' }));
+  const handleRequestAgent = async () => {
+    try {
+      let conversation = currentConversation;
+      if (!conversation && widget.tenantId) {
+        conversation = await dispatch(startConversation(widget.tenantId)).unwrap();
+      }
+      
+      if (conversation) {
+        await dispatch(requestHumanAgent(conversation.id)).unwrap();
+        await signalRService.requestAgent(conversation.id);
+        
+        dispatch(trackEvent({ event: 'agent_requested' }));
+      }
+    } catch (error) {
+      console.error('Failed to request agent:', error);
     }
   };
 
