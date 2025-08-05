@@ -1,4 +1,5 @@
 import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit';
+import { apiClient } from '../../services/apiClient';
 
 export interface Message {
   id: string;
@@ -65,42 +66,22 @@ export const sendMessage = createAsyncThunk(
       throw new Error('No active conversation found');
     }
 
-    const response = await fetch('http://localhost:8000/chat/chat/messages', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        conversationId,
-        content: message.content,
-        type: message.type
-      }),
+    return await apiClient.post('/chat/chat/messages', {
+      conversationId,
+      content: message.content,
+      type: message.type
     });
-    
-    if (!response.ok) {
-      throw new Error('Failed to send message');
-    }
-    
-    return response.json();
   }
 );
 
 export const startConversation = createAsyncThunk(
   'chat/startConversation',
   async (tenantId: string) => {
-    const response = await fetch('http://localhost:8000/chat/chat/conversations', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ 
-        tenantId,
-        customerName: 'Anonymous User',
-        language: 'en'
-      }),
+    const data = await apiClient.post('/chat/chat/conversations', {
+      tenantId,
+      customerName: 'Anonymous User',
+      language: 'en'
     });
-    
-    if (!response.ok) {
-      throw new Error('Failed to create conversation');
-    }
-    
-    const data = await response.json();
     
     return {
       id: data.id,
@@ -114,10 +95,7 @@ export const startConversation = createAsyncThunk(
 export const requestHumanAgent = createAsyncThunk(
   'chat/requestHumanAgent',
   async (conversationId: string) => {
-    const response = await fetch(`http://localhost:8000/chat/chat/conversations/${conversationId}/escalate`, {
-      method: 'POST',
-    });
-    return response.json();
+    return await apiClient.post(`/chat/chat/conversations/${conversationId}/escalate`);
   }
 );
 

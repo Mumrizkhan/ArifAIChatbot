@@ -1,3 +1,5 @@
+import { apiClient } from './apiClient';
+
 class AIService {
   private hubUrl: string = import.meta.env.BASE_URL;
   initialize(hubUrl: string) {
@@ -6,12 +8,7 @@ class AIService {
 
   async getBotResponse(message: string, conversationId: string): Promise<string> {
     try {
-      const response = await fetch(`${this.hubUrl}/ai/chat`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ message, conversationId }),
-      });
-      const data = await response.json();
+      const data = await apiClient.post('/ai/chat', { message, conversationId });
       return data.response;
     } catch (error) {
       console.error("AI service error:", error);
@@ -26,12 +23,7 @@ class AIService {
 
   async analyzeSentiment(message: string): Promise<"positive" | "negative" | "neutral"> {
     try {
-      const response = await fetch(`${this.hubUrl}/ai/sentiment`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ message }),
-      });
-      const data = await response.json();
+      const data = await apiClient.post('/ai/sentiment', { message });
       return data.sentiment;
     } catch (error) {
       console.error("Sentiment analysis error:", error);
@@ -41,12 +33,7 @@ class AIService {
 
   async extractIntents(message: string): Promise<string[]> {
     try {
-      const response = await fetch(`${this.hubUrl}/ai/intents`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ message }),
-      });
-      const data = await response.json();
+      const data = await apiClient.post('/ai/intents', { message });
       return data.intents || [];
     } catch (error) {
       console.error("Intent extraction error:", error);
