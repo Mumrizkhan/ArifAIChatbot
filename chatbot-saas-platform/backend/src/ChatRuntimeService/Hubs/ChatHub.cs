@@ -336,4 +336,44 @@ public class ChatHub : Hub
             _logger.LogError(ex, "Error sending agent metrics update");
         }
     }
+
+    public async Task JoinAgentGroup(string agentId)
+    {
+        try
+        {
+            await Groups.AddToGroupAsync(Context.ConnectionId, $"agent_{agentId}");
+            _logger.LogInformation($"Agent {agentId} joined agent group");
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error joining agent group for {AgentId}", agentId);
+        }
+    }
+
+    public async Task LeaveAgentGroup(string agentId)
+    {
+        try
+        {
+            await Groups.RemoveFromGroupAsync(Context.ConnectionId, $"agent_{agentId}");
+            _logger.LogInformation($"Agent {agentId} left agent group");
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error leaving agent group for {AgentId}", agentId);
+        }
+    }
+
+    public async Task NotifyAgentAssignment(string conversationId, string agentId)
+    {
+        try
+        {
+            await Clients.Group($"agent_{agentId}")
+                .SendAsync("ConversationAssigned", new { ConversationId = conversationId });
+            _logger.LogInformation($"Notified agent {agentId} of conversation assignment {conversationId}");
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error notifying agent assignment");
+        }
+    }
 }
