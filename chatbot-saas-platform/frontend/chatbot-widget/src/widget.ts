@@ -5,6 +5,7 @@ import { store } from "./store/store";
 import { ChatWidget } from "./components/ChatWidget";
 import { initializeWidget } from "./store/slices/configSlice";
 import { applyTenantTheme } from "./store/slices/themeSlice";
+import { apiClient } from "./services/apiClient";
 import "./i18n";
 import "./styles/widget.css";
  
@@ -75,7 +76,9 @@ class ChatbotWidget {
     if (!config.tenantId) {
       throw new Error("tenantId is required to initialize the chatbot widget");
     }
- 
+
+    apiClient.setTenantId(config.tenantId);
+
     this.container = document.createElement("div");
     this.container.id = "chatbot-widget-container";
     document.body.appendChild(this.container);
@@ -209,5 +212,3 @@ document.addEventListener("DOMContentLoaded", () => {
  
 export { ChatbotWidget };
 export default chatbotWidget;
- 
- 
