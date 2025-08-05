@@ -1,9 +1,12 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
 using Shared.Application.Common.Interfaces;
 using Shared.Domain.Entities;
 using Shared.Domain.Enums;
+using ChatRuntimeService.Services;
+using ChatRuntimeService.Hubs;
 
 namespace ChatRuntimeService.Controllers;
 
@@ -14,15 +17,21 @@ public class ChatController : ControllerBase
     private readonly IApplicationDbContext _context;
     private readonly ITenantService _tenantService;
     private readonly ILogger<ChatController> _logger;
+    private readonly IAIIntegrationService _aiIntegrationService;
+    private readonly IHubContext<ChatHub> _hubContext;
 
     public ChatController(
         IApplicationDbContext context,
         ITenantService tenantService,
-        ILogger<ChatController> logger)
+        ILogger<ChatController> logger,
+        IAIIntegrationService aiIntegrationService,
+        IHubContext<ChatHub> hubContext)
     {
         _context = context;
         _tenantService = tenantService;
         _logger = logger;
+        _aiIntegrationService = aiIntegrationService;
+        _hubContext = hubContext;
     }
 
     [HttpPost("conversations")]
@@ -92,7 +101,7 @@ public class ChatController : ControllerBase
                 messageType = MessageType.Text;
             }
 
-            var message = new Message
+            var userMessage = new Message
             {
                 Id = Guid.NewGuid(),
                 ConversationId = conversationId,
@@ -105,26 +114,90 @@ public class ChatController : ControllerBase
                 IsRead = false
             };
 
-            _context.Messages.Add(message);
+            _context.Messages.Add(userMessage);
             conversation.MessageCount++;
             conversation.UpdatedAt = DateTime.UtcNow;
-
             await _context.SaveChangesAsync();
+
+            var userMessageDto = new
+            {
+                Id = userMessage.Id,
+                ConversationId = userMessage.ConversationId,
+                Content = userMessage.Content,
+                Type = userMessage.Type.ToString(),
+                Sender = userMessage.Sender.ToString(),
+                SenderId = userMessage.SenderId,
+                CreatedAt = userMessage.CreatedAt,
+                SenderName = conversation.CustomerName ?? "Customer"
+            };
+
+            await _hubContext.Clients.Group($"conversation_{conversationId}")
+                .SendAsync("ReceiveMessage", userMessageDto);
+
+            var botResponse = await _aiIntegrationService.GetBotResponseAsync(
+                request.Content, 
+                conversationId.ToString(), 
+                conversation.Language ?? "en");
+
+            var botMessage = new Message
+            {
+                Id = Guid.NewGuid(),
+                ConversationId = conversationId,
+                Content = botResponse,
+                Type = MessageType.Text,
+                Sender = MessageSender.Bot,
+                SenderId = null,
+                CreatedAt = DateTime.UtcNow,
+                TenantId = conversation.TenantId,
+                IsRead = false
+            };
+
+            _context.Messages.Add(botMessage);
+            conversation.MessageCount++;
+            conversation.UpdatedAt = DateTime.UtcNow;
+            await _context.SaveChangesAsync();
+
+            var botMessageDto = new
+            {
+                Id = botMessage.Id,
+                ConversationId = botMessage.ConversationId,
+                Content = botMessage.Content,
+                Type = botMessage.Type.ToString(),
+                Sender = botMessage.Sender.ToString(),
+                SenderId = botMessage.SenderId,
+                CreatedAt = botMessage.CreatedAt,
+                SenderName = "AI Assistant"
+            };
+
+            await _hubContext.Clients.Group($"conversation_{conversationId}")
+                .SendAsync("ReceiveMessage", botMessageDto);
 
             return Ok(new
             {
-                id = message.Id,
-                conversationId = message.ConversationId,
-                content = message.Content,
-                type = message.Type.ToString(),
-                sender = message.Sender.ToString(),
-                createdAt = message.CreatedAt,
+                userMessage = new
+                {
+                    id = userMessage.Id,
+                    conversationId = userMessage.ConversationId,
+                    content = userMessage.Content,
+                    type = userMessage.Type.ToString(),
+                    sender = userMessage.Sender.ToString(),
+                    createdAt = userMessage.CreatedAt
+                },
+                botMessage = new
+                {
+                    id = botMessage.Id,
+                    conversationId = botMessage.ConversationId,
+                    content = botMessage.Content,
+                    type = botMessage.Type.ToString(),
+                    sender = botMessage.Sender.ToString(),
+                    createdAt = botMessage.CreatedAt
+                },
                 success = true
             });
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error sending chat message");
+            _logger.LogError(ex, "Error processing chat message");
             return StatusCode(500, new { message = "Internal server error" });
         }
     }
