@@ -101,16 +101,17 @@ const ProfilePage = () => {
     }
   };
 
+  // Replace hardcoded timezone labels
   const timezones = [
-    { value: "UTC", label: "UTC" },
-    { value: "America/New_York", label: "Eastern Time" },
-    { value: "America/Chicago", label: "Central Time" },
-    { value: "America/Denver", label: "Mountain Time" },
-    { value: "America/Los_Angeles", label: "Pacific Time" },
-    { value: "Europe/London", label: "London" },
-    { value: "Europe/Paris", label: "Paris" },
-    { value: "Asia/Tokyo", label: "Tokyo" },
-    { value: "Asia/Dubai", label: "Dubai" },
+    { value: "UTC", label: t("profile.timezones.utc") },
+    { value: "America/New_York", label: t("profile.timezones.easternTime") },
+    { value: "America/Chicago", label: t("profile.timezones.centralTime") },
+    { value: "America/Denver", label: t("profile.timezones.mountainTime") },
+    { value: "America/Los_Angeles", label: t("profile.timezones.pacificTime") },
+    { value: "Europe/London", label: t("profile.timezones.london") },
+    { value: "Europe/Paris", label: t("profile.timezones.paris") },
+    { value: "Asia/Tokyo", label: t("profile.timezones.tokyo") },
+    { value: "Asia/Dubai", label: t("profile.timezones.dubai") },
   ];
 
   if (isLoading && !currentAgent) {
@@ -199,7 +200,11 @@ const ProfilePage = () => {
               <div className="grid gap-4 md:grid-cols-2">
                 <div className="space-y-2">
                   <Label htmlFor="name">{t("profile.fullName")}</Label>
-                  <Input id="name" {...register("name", { required: t("validation.required") })} placeholder={t("profile.fullNamePlaceholder")} />
+                  <Input
+                    id="name"
+                    {...register("name", { required: t("profile.validation.required") })}
+                    placeholder={t("profile.fullNamePlaceholder")}
+                  />
                   {errors.name && <p className="text-sm text-red-500">{errors.name.message}</p>}
                 </div>
 
@@ -208,7 +213,7 @@ const ProfilePage = () => {
                   <Input
                     id="email"
                     type="email"
-                    {...register("email", { required: t("validation.required") })}
+                    {...register("email", { required: t("profile.validation.required") })}
                     placeholder={t("profile.emailPlaceholder")}
                   />
                   {errors.email && <p className="text-sm text-red-500">{errors.email.message}</p>}
@@ -256,8 +261,8 @@ const ProfilePage = () => {
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="en">English</SelectItem>
-                      <SelectItem value="ar">العربية</SelectItem>
+                      <SelectItem value="en">{t("profile.languages.english")}</SelectItem>
+                      <SelectItem value="ar">{t("profile.languages.arabic")}</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
@@ -290,10 +295,10 @@ const ProfilePage = () => {
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="available">{t("profile.available")}</SelectItem>
-                    <SelectItem value="busy">{t("profile.busy")}</SelectItem>
-                    <SelectItem value="away">{t("profile.away")}</SelectItem>
-                    <SelectItem value="offline">{t("profile.offline")}</SelectItem>
+                    <SelectItem value="available">{t("profile.statuses.available")}</SelectItem>
+                    <SelectItem value="busy">{t("profile.statuses.busy")}</SelectItem>
+                    <SelectItem value="away">{t("profile.statuses.away")}</SelectItem>
+                    <SelectItem value="offline">{t("profile.statuses.offline")}</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
@@ -402,7 +407,7 @@ const ProfilePage = () => {
                   <span className="text-sm font-medium">{t("profile.thisMonth")}</span>
                   <Badge variant="outline">
                     <TrendingUp className="mr-1 h-3 w-3" />
-                    +12%
+                    {t("profile.performanceTrend")}
                   </Badge>
                 </div>
                 <div className="space-y-2">
@@ -437,7 +442,7 @@ const ProfilePage = () => {
                   <p className="font-medium">{t("profile.topPerformer")}</p>
                   <p className="text-sm text-muted-foreground">{t("profile.topPerformerDesc")}</p>
                 </div>
-                <Badge variant="secondary">New</Badge>
+                <Badge variant="secondary">{t("profile.badges.new")}</Badge>
               </div>
 
               <div className="flex items-center space-x-3 p-3 border rounded-lg">
@@ -448,7 +453,7 @@ const ProfilePage = () => {
                   <p className="font-medium">{t("profile.customerFavorite")}</p>
                   <p className="text-sm text-muted-foreground">{t("profile.customerFavoriteDesc")}</p>
                 </div>
-                <Badge variant="outline">This Week</Badge>
+                <Badge variant="outline">{t("profile.badges.thisWeek")}</Badge>
               </div>
 
               <div className="flex items-center space-x-3 p-3 border rounded-lg">
@@ -459,7 +464,7 @@ const ProfilePage = () => {
                   <p className="font-medium">{t("profile.quickResponder")}</p>
                   <p className="text-sm text-muted-foreground">{t("profile.quickResponderDesc")}</p>
                 </div>
-                <Badge variant="outline">Last Month</Badge>
+                <Badge variant="outline">{t("profile.badges.lastMonth")}</Badge>
               </div>
             </CardContent>
           </Card>
@@ -472,15 +477,15 @@ const ProfilePage = () => {
             <CardContent className="space-y-3">
               <div className="flex items-center space-x-3">
                 <Mail className="h-4 w-4 text-muted-foreground" />
-                <span className="text-sm">{watch("email") || "Not provided"}</span>
+                <span className="text-sm">{watch("email") || t("profile.notProvided")}</span>
               </div>
               <div className="flex items-center space-x-3">
                 <Phone className="h-4 w-4 text-muted-foreground" />
-                <span className="text-sm">{watch("phone") || "Not provided"}</span>
+                <span className="text-sm">{watch("phone") || t("profile.notProvided")}</span>
               </div>
               <div className="flex items-center space-x-3">
                 <MapPin className="h-4 w-4 text-muted-foreground" />
-                <span className="text-sm">{watch("location") || "Not provided"}</span>
+                <span className="text-sm">{watch("location") || t("profile.notProvided")}</span>
               </div>
               <div className="flex items-center space-x-3">
                 <Globe className="h-4 w-4 text-muted-foreground" />

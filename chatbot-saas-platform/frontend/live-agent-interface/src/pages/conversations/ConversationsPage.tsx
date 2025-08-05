@@ -2,7 +2,14 @@ import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useTranslation } from "react-i18next";
 import { AppDispatch, RootState } from "../../store/store";
-import { fetchConversations, sendMessage, updateConversationStatus, setConversationSignalRStatus, assignConversationRealtime, transferConversationRealtime } from "../../store/slices/conversationSlice";
+import {
+  fetchConversations,
+  sendMessage,
+  updateConversationStatus,
+  setConversationSignalRStatus,
+  assignConversationRealtime,
+  transferConversationRealtime,
+} from "../../store/slices/conversationSlice";
 import { setSelectedConversation } from "../../store/slices/selectedConversationSlice";
 import { agentSignalRService } from "../../services/signalr";
 import { Card, CardContent, CardHeader, CardTitle } from "../../components/ui/card";
@@ -14,17 +21,7 @@ import { Skeleton } from "../../components/ui/skeleton";
 import { Textarea } from "../../components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../../components/ui/select";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "../../components/ui/dialog";
-import {
-  MessageSquare,
-  Send,
-  Phone,
-  Video,
-  MoreHorizontal,
-  Search,
-  Filter,
-  Paperclip,
-  Smile,
-} from "lucide-react";
+import { MessageSquare, Send, Phone, Video, MoreHorizontal, Search, Filter, Paperclip, Smile } from "lucide-react";
 
 const ConversationsPage = () => {
   const { t } = useTranslation();
@@ -43,15 +40,15 @@ const ConversationsPage = () => {
 
   useEffect(() => {
     dispatch(fetchConversations());
-    
+
     const signalRConnected = agentSignalRService.getConnectionStatus();
     dispatch(setConversationSignalRStatus(signalRConnected));
-    
+
     if (signalRConnected) {
       agentSignalRService.setOnConversationAssigned((assignment: any) => {
         dispatch(assignConversationRealtime(assignment));
       });
-      
+
       agentSignalRService.setOnConversationTransferred((transfer: any) => {
         dispatch(transferConversationRealtime(transfer));
       });
@@ -146,11 +143,9 @@ const ConversationsPage = () => {
         </div>
         <div className="flex items-center space-x-4">
           <div className="flex items-center space-x-1">
-            <div 
-              className={`w-2 h-2 rounded-full ${isSignalRConnected ? 'bg-green-500' : 'bg-red-500'}`}
-            />
+            <div className={`w-2 h-2 rounded-full ${isSignalRConnected ? "bg-green-500" : "bg-red-500"}`} />
             <span className="text-xs text-muted-foreground">
-              {isSignalRConnected ? 'Live Updates' : 'Static Data'}
+              {isSignalRConnected ? t("conversations.liveUpdates") : t("conversations.staticData")}
             </span>
           </div>
           <div className="flex items-center space-x-2">
@@ -213,13 +208,17 @@ const ConversationsPage = () => {
                         </Avatar>
                         <div className="flex-1 min-w-0">
                           <div className="flex items-center space-x-2">
-                            <p className="font-medium truncate">{conversation.customer?.name || "Anonymous"}</p>
+                            <p className="font-medium truncate">{conversation.customer?.name || t("conversations.anonymous")}</p>
                             <div className={`w-2 h-2 rounded-full ${getPriorityColor(conversation.priority || "low")}`} />
                           </div>
                           <p className="text-sm text-muted-foreground truncate">
-                            {conversation.messages?.length > 0 ? conversation.messages[conversation.messages.length - 1]?.content : "No messages yet"}
+                            {conversation.messages?.length > 0
+                              ? conversation.messages[conversation.messages.length - 1]?.content
+                              : t("conversations.noMessagesYet")}
                           </p>
-                          <p className="text-sm text-muted-foreground truncate">{conversation.lastMessage?.content || "No messages yet"}</p>
+                          <p className="text-sm text-muted-foreground truncate">
+                            {conversation.lastMessage?.content || t("conversations.noMessagesYet")}
+                          </p>
                           <div className="flex items-center space-x-2 mt-1">
                             {getStatusBadge(conversation.status)}
                             <span className="text-xs text-muted-foreground">{new Date(conversation.updatedAt).toLocaleTimeString()}</span>
@@ -237,8 +236,8 @@ const ConversationsPage = () => {
               ) : (
                 <div className="text-center py-8">
                   <MessageSquare className="mx-auto h-12 w-12 text-muted-foreground" />
-                  <h3 className="mt-2 text-sm font-semibold">No conversations found</h3>
-                  <p className="mt-1 text-sm text-muted-foreground">Try adjusting your search or filters.</p>
+                  <h3 className="mt-2 text-sm font-semibold">{t("conversations.noConversationsFound")}</h3>
+                  <p className="mt-1 text-sm text-muted-foreground">{t("conversations.noConversationsFoundDesc")}</p>
                 </div>
               )}
             </div>
@@ -257,8 +256,8 @@ const ConversationsPage = () => {
                       <AvatarFallback>{selectedConversation.customer?.name?.charAt(0) || "U"}</AvatarFallback>
                     </Avatar>
                     <div>
-                      <h3 className="font-semibold">{selectedConversation.customer?.name || "Anonymous"}</h3>
-                      <p className="text-sm text-muted-foreground">{selectedConversation.customer?.email || "No email"}</p>
+                      <h3 className="font-semibold">{selectedConversation.customer?.name || t("conversations.anonymous")}</h3>
+                      <p className="text-sm text-muted-foreground">{selectedConversation.customer?.email || t("conversations.noEmail")}</p>
                     </div>
                     {getStatusBadge(selectedConversation.status)}
                   </div>
@@ -300,9 +299,9 @@ const ConversationsPage = () => {
                               <SelectValue placeholder={t("conversations.selectAgent")} />
                             </SelectTrigger>
                             <SelectContent>
-                              <SelectItem value="agent1">John Doe</SelectItem>
-                              <SelectItem value="agent2">Jane Smith</SelectItem>
-                              <SelectItem value="agent3">Mike Johnson</SelectItem>
+                              <SelectItem value="agent1">{t("conversations.agentJohnDoe")}</SelectItem>
+                              <SelectItem value="agent2">{t("conversations.agentJaneSmith")}</SelectItem>
+                              <SelectItem value="agent3">{t("conversations.agentMikeJohnson")}</SelectItem>
                             </SelectContent>
                           </Select>
                           <Textarea placeholder={t("conversations.transferNote")} rows={3} />
@@ -333,8 +332,8 @@ const ConversationsPage = () => {
                   )) || (
                     <div className="text-center py-8">
                       <MessageSquare className="mx-auto h-12 w-12 text-muted-foreground" />
-                      <h3 className="mt-2 text-sm font-semibold">No messages yet</h3>
-                      <p className="mt-1 text-sm text-muted-foreground">Start the conversation by sending a message.</p>
+                      <h3 className="mt-2 text-sm font-semibold">{t("conversations.noMessagesYet")}</h3>
+                      <p className="mt-1 text-sm text-muted-foreground">{t("conversations.startConversation")}</p>
                     </div>
                   )}
                 </div>
@@ -375,8 +374,8 @@ const ConversationsPage = () => {
             <Card className="h-full flex items-center justify-center">
               <div className="text-center">
                 <MessageSquare className="mx-auto h-12 w-12 text-muted-foreground" />
-                <h3 className="mt-2 text-lg font-semibold">Select a conversation</h3>
-                <p className="mt-1 text-sm text-muted-foreground">Choose a conversation from the list to start chatting.</p>
+                <h3 className="mt-2 text-lg font-semibold">{t("conversations.selectConversation")}</h3>
+                <p className="mt-1 text-sm text-muted-foreground">{t("conversations.selectConversationDesc")}</p>
               </div>
             </Card>
           )}

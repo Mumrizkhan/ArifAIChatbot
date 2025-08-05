@@ -1,5 +1,8 @@
 import { createSlice, createAsyncThunk, PayloadAction } from "@reduxjs/toolkit";
 
+// Add API base URL configuration
+const API_BASE_URL = import.meta.env.API_BASE_URL || "http://localhost:8000";
+
 export interface Agent {
   id: string;
   name: string;
@@ -29,33 +32,14 @@ export interface AgentStats {
   customerSatisfaction: number;
   resolutionRate: number;
   onlineTime: number;
-  averageRating: number; // Added property
+  averageRating: number;
   monthlySatisfaction?: number;
   monthlyResponseTime?: number;
 }
-export const updateAgentProfile = createAsyncThunk(
-  "agent/updateProfile",
-  async ({ id, profileData }: { id: string; profileData: Partial<Agent> }) => {
-    const response = await fetch(`/api/agents/${id}`, {
-      method: "PUT",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${localStorage.getItem("token")}`,
-      },
-      body: JSON.stringify(profileData),
-    });
-
-    if (!response.ok) {
-      throw new Error("Failed to update agent profile");
-    }
-
-    return response.json();
-  }
-);
 
 interface AgentNotification {
   id: string;
-  type: 'info' | 'warning' | 'error' | 'success';
+  type: "info" | "warning" | "error" | "success";
   title: string;
   message: string;
   timestamp: Date;
@@ -64,7 +48,7 @@ interface AgentNotification {
 
 interface AgentStatusUpdate {
   agentId: string;
-  status: 'online' | 'away' | 'busy' | 'offline';
+  status: "online" | "away" | "busy" | "offline";
   timestamp: Date;
 }
 
@@ -89,7 +73,7 @@ const initialState: AgentState = {
 };
 
 export const fetchAgentProfile = createAsyncThunk("agent/fetchProfile", async (agentId: string) => {
-  const response = await fetch(`/api/agents/${agentId}`, {
+  const response = await fetch(`${API_BASE_URL}/agent/agents/${agentId}`, {
     headers: {
       Authorization: `Bearer ${localStorage.getItem("token")}`,
     },
@@ -102,8 +86,28 @@ export const fetchAgentProfile = createAsyncThunk("agent/fetchProfile", async (a
   return response.json();
 });
 
+export const updateAgentProfile = createAsyncThunk(
+  "agent/updateProfile",
+  async ({ id, profileData }: { id: string; profileData: Partial<Agent> }) => {
+    const response = await fetch(`${API_BASE_URL}/agent/agents/${id}`, {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${localStorage.getItem("token")}`,
+      },
+      body: JSON.stringify(profileData),
+    });
+
+    if (!response.ok) {
+      throw new Error("Failed to update agent profile");
+    }
+
+    return response.json();
+  }
+);
+
 export const updateAgentStatus = createAsyncThunk("agent/updateStatus", async ({ agentId, status }: { agentId: string; status: Agent["status"] }) => {
-  const response = await fetch(`/api/agents/${agentId}/status`, {
+  const response = await fetch(`${API_BASE_URL}/agent/agents/${agentId}/status`, {
     method: "PUT",
     headers: {
       "Content-Type": "application/json",
@@ -120,7 +124,7 @@ export const updateAgentStatus = createAsyncThunk("agent/updateStatus", async ({
 });
 
 export const fetchAgentStats = createAsyncThunk("agent/fetchStats", async (agentId: string) => {
-  const response = await fetch(`/api/agents/${agentId}/stats`, {
+  const response = await fetch(`${API_BASE_URL}/agent/agents/${agentId}/stats`, {
     headers: {
       Authorization: `Bearer ${localStorage.getItem("token")}`,
     },
@@ -134,7 +138,7 @@ export const fetchAgentStats = createAsyncThunk("agent/fetchStats", async (agent
 });
 
 export const fetchAllAgents = createAsyncThunk("agent/fetchAll", async () => {
-  const response = await fetch("/api/agents", {
+  const response = await fetch(`${API_BASE_URL}/agent/agents`, {
     headers: {
       Authorization: `Bearer ${localStorage.getItem("token")}`,
     },
@@ -191,7 +195,7 @@ const agentSlice = createSlice({
       if (state.currentAgent && state.currentAgent.id === action.payload.agentId) {
         state.currentAgent.status = action.payload.status;
       }
-      const agent = state.agents.find(a => a.id === action.payload.agentId);
+      const agent = state.agents.find((a) => a.id === action.payload.agentId);
       if (agent) {
         agent.status = action.payload.status;
       }
@@ -220,6 +224,9 @@ const agentSlice = createSlice({
         state.isLoading = false;
         state.error = action.error.message || "Failed to fetch agent profile";
       })
+      .addCase(updateAgentProfile.fulfilled, (state, action) => {
+        state.currentAgent = action.payload;
+      })
       .addCase(updateAgentStatus.fulfilled, (state, action) => {
         if (state.currentAgent && state.currentAgent.id === action.payload.agentId) {
           state.currentAgent.status = action.payload.status;
@@ -238,16 +245,16 @@ const agentSlice = createSlice({
   },
 });
 
-export const { 
-  setCurrentAgent, 
-  updateAgentStatusLocal, 
-  incrementConversationCount, 
-  decrementConversationCount, 
+export const {
+  setCurrentAgent,
+  updateAgentStatusLocal,
+  incrementConversationCount,
+  decrementConversationCount,
   clearError,
   setSignalRConnectionStatus,
   updateAgentStatusRealtime,
   addAgentNotification,
-  clearAgentNotifications
+  clearAgentNotifications,
 } = agentSlice.actions;
 
 export default agentSlice.reducer;

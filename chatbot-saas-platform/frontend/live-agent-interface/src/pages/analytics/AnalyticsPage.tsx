@@ -1,19 +1,11 @@
-import React, { useEffect, useState } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
-import { useTranslation } from 'react-i18next';
-import { AppDispatch, RootState } from '../../store/store';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../../components/ui/card';
-import { Button } from '../../components/ui/button';
-import { Badge } from '../../components/ui/badge';
-import { Skeleton } from '../../components/ui/skeleton';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '../../components/ui/tabs';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '../../components/ui/select';
+import React, { useEffect, useState } from "react";
+import { useDispatch } from "react-redux";
+import { useTranslation } from "react-i18next";
+import { AppDispatch, RootState } from "../../store/store";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../../components/ui/card";
+import { Skeleton } from "../../components/ui/skeleton";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "../../components/ui/tabs";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../../components/ui/select";
 import {
   BarChart,
   Bar,
@@ -29,26 +21,14 @@ import {
   Cell,
   AreaChart,
   Area,
-} from 'recharts';
-import {
-  BarChart3,
-  TrendingUp,
-  Users,
-  MessageSquare,
-  Clock,
-  Star,
-  Download,
-  Calendar,
-  Activity,
-  Target,
-  Award,
-} from 'lucide-react';
+} from "recharts";
+import { BarChart3, TrendingUp, Users, MessageSquare, Clock, Star, Download, Calendar, Activity, Target, Award } from "lucide-react";
 
 const AnalyticsPage = () => {
   const { t } = useTranslation();
   const dispatch = useDispatch<AppDispatch>();
-  const [activeTab, setActiveTab] = useState('performance');
-  const [selectedTimeRange, setSelectedTimeRange] = useState('7d');
+  const [activeTab, setActiveTab] = useState("performance");
+  const [selectedTimeRange, setSelectedTimeRange] = useState("7d");
 
   const isLoading = false;
 
@@ -56,32 +36,32 @@ const AnalyticsPage = () => {
     setSelectedTimeRange(timeRange);
   };
 
-  const handleExport = (format: 'csv' | 'pdf' | 'excel') => {
+  const handleExport = (format: "csv" | "pdf" | "excel") => {
     console.log(`Exporting analytics as ${format}`);
   };
 
   const performanceData = [
-    { date: '2024-01-01', conversations: 12, avgRating: 4.5, responseTime: 2.3 },
-    { date: '2024-01-02', conversations: 15, avgRating: 4.7, responseTime: 2.1 },
-    { date: '2024-01-03', conversations: 8, avgRating: 4.2, responseTime: 2.8 },
-    { date: '2024-01-04', conversations: 18, avgRating: 4.8, responseTime: 1.9 },
-    { date: '2024-01-05', conversations: 14, avgRating: 4.6, responseTime: 2.2 },
-    { date: '2024-01-06', conversations: 16, avgRating: 4.9, responseTime: 1.8 },
-    { date: '2024-01-07', conversations: 11, avgRating: 4.4, responseTime: 2.5 },
+    { date: "2024-01-01", conversations: 12, avgRating: 4.5, responseTime: 2.3 },
+    { date: "2024-01-02", conversations: 15, avgRating: 4.7, responseTime: 2.1 },
+    { date: "2024-01-03", conversations: 8, avgRating: 4.2, responseTime: 2.8 },
+    { date: "2024-01-04", conversations: 18, avgRating: 4.8, responseTime: 1.9 },
+    { date: "2024-01-05", conversations: 14, avgRating: 4.6, responseTime: 2.2 },
+    { date: "2024-01-06", conversations: 16, avgRating: 4.9, responseTime: 1.8 },
+    { date: "2024-01-07", conversations: 11, avgRating: 4.4, responseTime: 2.5 },
   ];
 
   const satisfactionData = [
-    { rating: '5 Stars', count: 68, percentage: 68 },
-    { rating: '4 Stars', count: 22, percentage: 22 },
-    { rating: '3 Stars', count: 7, percentage: 7 },
-    { rating: '2 Stars', count: 2, percentage: 2 },
-    { rating: '1 Star', count: 1, percentage: 1 },
+    { rating: t("analytics.fiveStars"), count: 68, percentage: 68 },
+    { rating: t("analytics.fourStars"), count: 22, percentage: 22 },
+    { rating: t("analytics.threeStars"), count: 7, percentage: 7 },
+    { rating: t("analytics.twoStars"), count: 2, percentage: 2 },
+    { rating: t("analytics.oneStar"), count: 1, percentage: 1 },
   ];
 
   const channelData = [
-    { name: 'Website', value: 65, color: '#3b82f6' },
-    { name: 'Mobile App', value: 25, color: '#10b981' },
-    { name: 'Social Media', value: 10, color: '#f59e0b' },
+    { name: t("analytics.website"), value: 65, color: "#3b82f6" },
+    { name: t("analytics.mobileApp"), value: 25, color: "#10b981" },
+    { name: t("analytics.socialMedia"), value: 10, color: "#f59e0b" },
   ];
 
   const MetricCard = ({ title, value, change, icon: Icon, description }: any) => (
@@ -98,9 +78,7 @@ const AnalyticsPage = () => {
             {change}
           </div>
         )}
-        {description && (
-          <p className="text-xs text-muted-foreground mt-1">{description}</p>
-        )}
+        {description && <p className="text-xs text-muted-foreground mt-1">{description}</p>}
       </CardContent>
     </Card>
   );
@@ -136,10 +114,8 @@ const AnalyticsPage = () => {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold">{t('analytics.title')}</h1>
-          <p className="text-muted-foreground">
-            {t('analytics.subtitle')}
-          </p>
+          <h1 className="text-3xl font-bold">{t("analytics.title")}</h1>
+          <p className="text-muted-foreground">{t("analytics.subtitle")}</p>
         </div>
         <div className="flex items-center space-x-2">
           <Select value={selectedTimeRange} onValueChange={handleTimeRangeChange}>
@@ -148,16 +124,16 @@ const AnalyticsPage = () => {
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="7d">{t('analytics.last7Days')}</SelectItem>
-              <SelectItem value="30d">{t('analytics.last30Days')}</SelectItem>
-              <SelectItem value="90d">{t('analytics.last90Days')}</SelectItem>
-              <SelectItem value="1y">{t('analytics.thisYear')}</SelectItem>
+              <SelectItem value="7d">{t("analytics.last7Days")}</SelectItem>
+              <SelectItem value="30d">{t("analytics.last30Days")}</SelectItem>
+              <SelectItem value="90d">{t("analytics.last90Days")}</SelectItem>
+              <SelectItem value="1y">{t("analytics.thisYear")}</SelectItem>
             </SelectContent>
           </Select>
           <Select onValueChange={handleExport}>
             <SelectTrigger className="w-[120px]">
               <Download className="mr-2 h-4 w-4" />
-              <SelectValue placeholder={t('common.export')} />
+              <SelectValue placeholder={t("analytics.exportData")} />
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="csv">CSV</SelectItem>
@@ -170,51 +146,49 @@ const AnalyticsPage = () => {
 
       <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4">
         <TabsList>
-          <TabsTrigger value="performance">{t('analytics.performance')}</TabsTrigger>
-          <TabsTrigger value="satisfaction">{t('analytics.satisfaction')}</TabsTrigger>
-          <TabsTrigger value="productivity">{t('analytics.productivity')}</TabsTrigger>
-          <TabsTrigger value="goals">{t('analytics.goals')}</TabsTrigger>
+          <TabsTrigger value="performance">{t("analytics.performance")}</TabsTrigger>
+          <TabsTrigger value="satisfaction">{t("analytics.satisfaction")}</TabsTrigger>
+          <TabsTrigger value="productivity">{t("analytics.productivity")}</TabsTrigger>
+          <TabsTrigger value="goals">{t("analytics.goals")}</TabsTrigger>
         </TabsList>
 
         <TabsContent value="performance" className="space-y-4">
           <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
             <MetricCard
-              title={t('analytics.totalConversations')}
+              title={t("analytics.totalConversations")}
               value="94"
-              change="+12% from last period"
+              change={t("analytics.performanceChange1")}
               icon={MessageSquare}
-              description="This week"
+              description={t("analytics.thisWeek")}
             />
             <MetricCard
-              title={t('analytics.avgResponseTime')}
+              title={t("analytics.averageResponseTime")}
               value="2.1m"
-              change="-15% from last period"
+              change={t("analytics.performanceChange2")}
               icon={Clock}
-              description="First response time"
+              description={t("analytics.firstResponseTime")}
             />
             <MetricCard
-              title={t('analytics.satisfactionScore')}
+              title={t("analytics.satisfactionScore")}
               value="4.7"
-              change="+0.3 from last period"
+              change={t("analytics.performanceChange3")}
               icon={Star}
-              description="Average customer rating"
+              description={t("analytics.averageCustomerRating")}
             />
             <MetricCard
-              title={t('analytics.resolutionRate')}
+              title={t("analytics.resolutionRate")}
               value="94%"
-              change="+5% from last period"
+              change={t("analytics.performanceChange4")}
               icon={Target}
-              description="Successfully resolved"
+              description={t("analytics.successfullyResolved")}
             />
           </div>
 
           <div className="grid gap-4 md:grid-cols-2">
             <Card>
               <CardHeader>
-                <CardTitle>{t('analytics.conversationTrends')}</CardTitle>
-                <CardDescription>
-                  Daily conversation volume and performance
-                </CardDescription>
+                <CardTitle>{t("analytics.conversationTrends")}</CardTitle>
+                <CardDescription>{t("analytics.dailyConversationVolume")}</CardDescription>
               </CardHeader>
               <CardContent>
                 <ResponsiveContainer width="100%" height={300}>
@@ -231,10 +205,8 @@ const AnalyticsPage = () => {
 
             <Card>
               <CardHeader>
-                <CardTitle>{t('analytics.responseTimeAnalysis')}</CardTitle>
-                <CardDescription>
-                  Average response time trends
-                </CardDescription>
+                <CardTitle>{t("analytics.responseTimeAnalysis")}</CardTitle>
+                <CardDescription>{t("analytics.averageResponseTimeTrends")}</CardDescription>
               </CardHeader>
               <CardContent>
                 <ResponsiveContainer width="100%" height={300}>
@@ -253,43 +225,17 @@ const AnalyticsPage = () => {
 
         <TabsContent value="satisfaction" className="space-y-4">
           <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-            <MetricCard
-              title="Overall Rating"
-              value="4.7"
-              change="+0.3 from last period"
-              icon={Star}
-              description="Average customer rating"
-            />
-            <MetricCard
-              title="5-Star Ratings"
-              value="68%"
-              change="+8% from last period"
-              icon={Award}
-              description="Excellent ratings"
-            />
-            <MetricCard
-              title="Customer Retention"
-              value="92%"
-              change="+3% from last period"
-              icon={Users}
-              description="Return customers"
-            />
-            <MetricCard
-              title="Recommendation Score"
-              value="8.9"
-              change="+0.5 from last period"
-              icon={TrendingUp}
-              description="Net Promoter Score"
-            />
+            <MetricCard title="Overall Rating" value="4.7" change="+0.3 from last period" icon={Star} description="Average customer rating" />
+            <MetricCard title="5-Star Ratings" value="68%" change="+8% from last period" icon={Award} description="Excellent ratings" />
+            <MetricCard title="Customer Retention" value="92%" change="+3% from last period" icon={Users} description="Return customers" />
+            <MetricCard title="Recommendation Score" value="8.9" change="+0.5 from last period" icon={TrendingUp} description="Net Promoter Score" />
           </div>
 
           <div className="grid gap-4 md:grid-cols-2">
             <Card>
               <CardHeader>
-                <CardTitle>Rating Distribution</CardTitle>
-                <CardDescription>
-                  Customer satisfaction breakdown
-                </CardDescription>
+                <CardTitle>{t("analytics.ratingDistribution")}</CardTitle>
+                <CardDescription>{t("analytics.customerSatisfactionBreakdown")}</CardDescription>
               </CardHeader>
               <CardContent>
                 <ResponsiveContainer width="100%" height={300}>
@@ -306,10 +252,8 @@ const AnalyticsPage = () => {
 
             <Card>
               <CardHeader>
-                <CardTitle>Satisfaction Trends</CardTitle>
-                <CardDescription>
-                  Customer satisfaction over time
-                </CardDescription>
+                <CardTitle>{t("analytics.satisfactionTrends")}</CardTitle>
+                <CardDescription>{t("analytics.customerSatisfactionOverTime")}</CardDescription>
               </CardHeader>
               <CardContent>
                 <ResponsiveContainer width="100%" height={300}>
@@ -329,41 +273,39 @@ const AnalyticsPage = () => {
         <TabsContent value="productivity" className="space-y-4">
           <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
             <MetricCard
-              title="Conversations/Hour"
+              title={t("analytics.conversationsPerHour")}
               value="3.2"
-              change="+8% from last period"
+              change={t("analytics.productivityChange1")}
               icon={Activity}
-              description="Average productivity"
+              description={t("analytics.averageProductivity")}
             />
             <MetricCard
-              title="Active Hours"
+              title={t("analytics.activeHours")}
               value="7.5h"
-              change="+0.5h from yesterday"
+              change={t("analytics.productivityChange2")}
               icon={Clock}
-              description="Daily active time"
+              description={t("analytics.dailyActiveTime")}
             />
             <MetricCard
-              title="Multitasking Score"
+              title={t("analytics.multitaskingScore")}
               value="85%"
-              change="+5% from last period"
+              change={t("analytics.productivityChange3")}
               icon={Target}
-              description="Concurrent conversations"
+              description={t("analytics.concurrentConversations")}
             />
             <MetricCard
-              title="Efficiency Rating"
+              title={t("analytics.efficiencyRating")}
               value="A+"
-              change="Maintained from last period"
+              change={t("analytics.productivityChange4")}
               icon={Award}
-              description="Overall performance grade"
+              description={t("analytics.overallPerformanceGrade")}
             />
           </div>
 
           <Card>
             <CardHeader>
-              <CardTitle>Daily Productivity</CardTitle>
-              <CardDescription>
-                Conversations handled per day
-              </CardDescription>
+              <CardTitle>{t("analytics.dailyProductivity")}</CardTitle>
+              <CardDescription>{t("analytics.conversationsHandledPerDay")}</CardDescription>
             </CardHeader>
             <CardContent>
               <ResponsiveContainer width="100%" height={400}>
@@ -383,57 +325,57 @@ const AnalyticsPage = () => {
           <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
             <Card>
               <CardHeader>
-                <CardTitle>Daily Goal</CardTitle>
-                <CardDescription>Conversations target</CardDescription>
+                <CardTitle>{t("analytics.dailyGoal")}</CardTitle>
+                <CardDescription>{t("analytics.conversationsTarget")}</CardDescription>
               </CardHeader>
               <CardContent>
                 <div className="space-y-2">
                   <div className="flex justify-between">
-                    <span className="text-sm">Progress</span>
+                    <span className="text-sm">{t("analytics.progress")}</span>
                     <span className="text-sm font-medium">14/15</span>
                   </div>
                   <div className="w-full bg-gray-200 rounded-full h-2">
-                    <div className="bg-blue-600 h-2 rounded-full" style={{ width: '93%' }}></div>
+                    <div className="bg-blue-600 h-2 rounded-full" style={{ width: "93%" }}></div>
                   </div>
-                  <p className="text-xs text-muted-foreground">1 more to reach daily goal</p>
+                  <p className="text-xs text-muted-foreground">{t("analytics.oneMoreToReachGoal")}</p>
                 </div>
               </CardContent>
             </Card>
 
             <Card>
               <CardHeader>
-                <CardTitle>Weekly Goal</CardTitle>
-                <CardDescription>Response time target</CardDescription>
+                <CardTitle>{t("analytics.weeklyGoal")}</CardTitle>
+                <CardDescription>{t("analytics.responseTimeTarget")}</CardDescription>
               </CardHeader>
               <CardContent>
                 <div className="space-y-2">
                   <div className="flex justify-between">
-                    <span className="text-sm">Average</span>
+                    <span className="text-sm">{t("analytics.average")}</span>
                     <span className="text-sm font-medium">2.1m / 2.5m</span>
                   </div>
                   <div className="w-full bg-gray-200 rounded-full h-2">
-                    <div className="bg-green-600 h-2 rounded-full" style={{ width: '84%' }}></div>
+                    <div className="bg-green-600 h-2 rounded-full" style={{ width: "84%" }}></div>
                   </div>
-                  <p className="text-xs text-muted-foreground">Exceeding target by 16%</p>
+                  <p className="text-xs text-muted-foreground">{t("analytics.exceedingTarget")}</p>
                 </div>
               </CardContent>
             </Card>
 
             <Card>
               <CardHeader>
-                <CardTitle>Monthly Goal</CardTitle>
-                <CardDescription>Satisfaction target</CardDescription>
+                <CardTitle>{t("analytics.monthlyGoal")}</CardTitle>
+                <CardDescription>{t("analytics.satisfactionTarget")}</CardDescription>
               </CardHeader>
               <CardContent>
                 <div className="space-y-2">
                   <div className="flex justify-between">
-                    <span className="text-sm">Rating</span>
+                    <span className="text-sm">{t("analytics.rating")}</span>
                     <span className="text-sm font-medium">4.7 / 4.5</span>
                   </div>
                   <div className="w-full bg-gray-200 rounded-full h-2">
-                    <div className="bg-yellow-600 h-2 rounded-full" style={{ width: '100%' }}></div>
+                    <div className="bg-yellow-600 h-2 rounded-full" style={{ width: "100%" }}></div>
                   </div>
-                  <p className="text-xs text-muted-foreground">Goal achieved! 🎉</p>
+                  <p className="text-xs text-muted-foreground">{t("analytics.goalAchieved")}</p>
                 </div>
               </CardContent>
             </Card>
@@ -441,10 +383,8 @@ const AnalyticsPage = () => {
 
           <Card>
             <CardHeader>
-              <CardTitle>Goal Progress Over Time</CardTitle>
-              <CardDescription>
-                Track your progress towards monthly targets
-              </CardDescription>
+              <CardTitle>{t("analytics.goalProgressOverTime")}</CardTitle>
+              <CardDescription>{t("analytics.trackProgressTowardsTargets")}</CardDescription>
             </CardHeader>
             <CardContent>
               <ResponsiveContainer width="100%" height={300}>
@@ -453,8 +393,8 @@ const AnalyticsPage = () => {
                   <XAxis dataKey="date" tickFormatter={(value) => new Date(value).toLocaleDateString()} />
                   <YAxis />
                   <Tooltip />
-                  <Line type="monotone" dataKey="conversations" stroke="#3b82f6" strokeWidth={2} name="Conversations" />
-                  <Line type="monotone" dataKey="avgRating" stroke="#10b981" strokeWidth={2} name="Rating" />
+                  <Line type="monotone" dataKey="conversations" stroke="#3b82f6" strokeWidth={2} name={t("analytics.conversations")} />
+                  <Line type="monotone" dataKey="avgRating" stroke="#10b981" strokeWidth={2} name={t("analytics.rating")} />
                 </LineChart>
               </ResponsiveContainer>
             </CardContent>

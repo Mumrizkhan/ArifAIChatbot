@@ -54,7 +54,9 @@ builder.Services.AddSignalR();
 
 builder.Services.AddInfrastructure(builder.Configuration);
 builder.Services.AddHttpClient<IAIIntegrationService, AIIntegrationService>();
+builder.Services.AddHttpClient<ILiveAgentIntegrationService, LiveAgentIntegrationService>();
 builder.Services.AddScoped<IAIIntegrationService, AIIntegrationService>();
+builder.Services.AddScoped<ILiveAgentIntegrationService, LiveAgentIntegrationService>();
 builder.Services.AddScoped<IMessageQueueService, MessageQueueService>();
 builder.Services.AddScoped<IFileUploadService, FileUploadService>();
 builder.Services.AddScoped<IChatRuntimeService, ChatRuntimeService.Services.ChatRuntimeService>();

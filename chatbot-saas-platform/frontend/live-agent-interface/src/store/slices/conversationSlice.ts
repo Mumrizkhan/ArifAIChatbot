@@ -1,12 +1,15 @@
-import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit';
+import { createSlice, createAsyncThunk, PayloadAction } from "@reduxjs/toolkit";
+
+// Add API base URL configuration from environment variables
+const API_BASE_URL = import.meta.env.API_BASE_URL || "http://localhost:8000";
 
 export interface Message {
   id: string;
   conversationId: string;
   content: string;
-  sender: 'customer' | 'agent' | 'system';
+  sender: "customer" | "agent" | "system";
   timestamp: Date;
-  type: 'text' | 'file' | 'image' | 'system';
+  type: "text" | "file" | "image" | "system";
   metadata?: {
     fileName?: string;
     fileSize?: number;
@@ -34,9 +37,9 @@ export interface Conversation {
     name: string;
     avatar?: string;
   };
-  status: 'waiting' | 'active' | 'resolved' | 'closed';
-  priority: 'low' | 'medium' | 'high' | 'urgent';
-  channel: 'web' | 'mobile' | 'email' | 'phone';
+  status: "waiting" | "active" | "resolved" | "closed";
+  priority: "low" | "medium" | "high" | "urgent";
+  channel: "web" | "mobile" | "email" | "phone";
   subject?: string;
   tags: string[];
   messages: Message[];
@@ -88,69 +91,71 @@ const initialState: ConversationState = {
     priority: [],
     channel: [],
   },
-  searchQuery: '',
+  searchQuery: "",
   typingUsers: {},
   isSignalRConnected: false,
 };
 
 export const fetchConversations = createAsyncThunk(
-  'conversations/fetchAll',
+  "conversations/fetchAll",
   async (params?: { status?: string; priority?: string; limit?: number }) => {
     const queryParams = new URLSearchParams();
-    if (params?.status) queryParams.append('status', params.status);
-    if (params?.priority) queryParams.append('priority', params.priority);
-    if (params?.limit) queryParams.append('limit', params.limit.toString());
+    if (params?.status) queryParams.append("status", params.status);
+    if (params?.priority) queryParams.append("priority", params.priority);
+    if (params?.limit) queryParams.append("limit", params.limit.toString());
 
-    const response = await fetch(`/api/conversations?${queryParams}`, {
+    const response = await fetch(`${API_BASE_URL}/chat/conversations?${queryParams}`, {
       headers: {
-        Authorization: `Bearer ${localStorage.getItem('token')}`,
+        Authorization: `Bearer ${localStorage.getItem("token")}`,
       },
     });
 
     if (!response.ok) {
-      throw new Error('Failed to fetch conversations');
+      throw new Error("Failed to fetch conversations");
     }
 
     return response.json();
   }
 );
 
-export const fetchConversation = createAsyncThunk(
-  'conversations/fetchOne',
-  async (conversationId: string) => {
-    const response = await fetch(`/api/conversations/${conversationId}`, {
-      headers: {
-        Authorization: `Bearer ${localStorage.getItem('token')}`,
-      },
-    });
+export const fetchConversation = createAsyncThunk("conversations/fetchOne", async (conversationId: string) => {
+  const response = await fetch(`${API_BASE_URL}/chat/conversations/${conversationId}`, {
+    headers: {
+      Authorization: `Bearer ${localStorage.getItem("token")}`,
+    },
+  });
 
-    if (!response.ok) {
-      throw new Error('Failed to fetch conversation');
-    }
-
-    return response.json();
+  if (!response.ok) {
+    throw new Error("Failed to fetch conversation");
   }
-);
+
+  return response.json();
+});
 
 export const sendMessage = createAsyncThunk(
-  'conversations/sendMessage',
-  async ({ conversationId, content, type = 'text', metadata }: {
+  "conversations/sendMessage",
+  async ({
+    conversationId,
+    content,
+    type = "text",
+    metadata,
+  }: {
     conversationId: string;
     content: string;
-    type?: Message['type'];
-    metadata?: Message['metadata'];
+    type?: Message["type"];
+    metadata?: Message["metadata"];
   }) => {
-    const response = await fetch(`/api/conversations/${conversationId}/messages`, {
-      method: 'POST',
+    const response = await fetch(`${API_BASE_URL}/chat/conversations/${conversationId}/messages`, {
+      method: "POST",
       headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${localStorage.getItem('token')}`,
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${localStorage.getItem("token")}`,
       },
       body: JSON.stringify({ content, type, metadata }),
     });
 
     if (!response.ok) {
-      throw new Error('Failed to send message');
+      throw new Error("Failed to send message");
     }
 
     return response.json();
@@ -158,19 +163,19 @@ export const sendMessage = createAsyncThunk(
 );
 
 export const updateConversationStatus = createAsyncThunk(
-  'conversations/updateStatus',
-  async ({ conversationId, status }: { conversationId: string; status: Conversation['status'] }) => {
-    const response = await fetch(`/api/conversations/${conversationId}/status`, {
-      method: 'PUT',
+  "conversations/updateStatus",
+  async ({ conversationId, status }: { conversationId: string; status: Conversation["status"] }) => {
+    const response = await fetch(`${API_BASE_URL}/chat/conversations/${conversationId}/status`, {
+      method: "PUT",
       headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${localStorage.getItem('token')}`,
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${localStorage.getItem("token")}`,
       },
       body: JSON.stringify({ status }),
     });
 
     if (!response.ok) {
-      throw new Error('Failed to update conversation status');
+      throw new Error("Failed to update conversation status");
     }
 
     return { conversationId, status };
@@ -178,40 +183,80 @@ export const updateConversationStatus = createAsyncThunk(
 );
 
 export const assignConversation = createAsyncThunk(
-  'conversations/assign',
+  "conversations/assign",
   async ({ conversationId, agentId }: { conversationId: string; agentId: string }) => {
-    const response = await fetch(`/api/conversations/${conversationId}/assign`, {
-      method: 'PUT',
+    const response = await fetch(`${API_BASE_URL}/chat/conversations/${conversationId}/assign`, {
+      method: "PUT",
       headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${localStorage.getItem('token')}`,
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${localStorage.getItem("token")}`,
       },
       body: JSON.stringify({ agentId }),
     });
 
     if (!response.ok) {
-      throw new Error('Failed to assign conversation');
+      throw new Error("Failed to assign conversation");
     }
 
     return response.json();
   }
 );
 
+export const transferConversation = createAsyncThunk(
+  "conversations/transfer",
+  async ({ conversationId, toAgentId, reason }: { conversationId: string; toAgentId: string; reason: string }) => {
+    const response = await fetch(`${API_BASE_URL}/chat/conversations/${conversationId}/transfer`, {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${localStorage.getItem("token")}`,
+      },
+      body: JSON.stringify({ toAgentId, reason }),
+    });
+
+    if (!response.ok) {
+      throw new Error("Failed to transfer conversation");
+    }
+
+    return response.json();
+  }
+);
+
+export const rateConversation = createAsyncThunk(
+  "conversations/rate",
+  async ({ conversationId, rating, feedback }: { conversationId: string; rating: number; feedback?: string }) => {
+    const response = await fetch(`${API_BASE_URL}/chat/conversations/${conversationId}/rate`, {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${localStorage.getItem("token")}`,
+      },
+      body: JSON.stringify({ rating, feedback }),
+    });
+
+    if (!response.ok) {
+      throw new Error("Failed to rate conversation");
+    }
+
+    return { conversationId, rating, feedback };
+  }
+);
+
 const conversationSlice = createSlice({
-  name: 'conversations',
+  name: "conversations",
   initialState,
   reducers: {
     setActiveConversation: (state, action: PayloadAction<Conversation | null>) => {
       state.activeConversation = action.payload;
       if (action.payload) {
-        const conversation = state.conversations.find(c => c.id === action.payload!.id);
+        const conversation = state.conversations.find((c) => c.id === action.payload!.id);
         if (conversation) {
           conversation.unreadCount = 0;
         }
       }
     },
     addMessage: (state, action: PayloadAction<Message>) => {
-      const conversation = state.conversations.find(c => c.id === action.payload.conversationId);
+      const conversation = state.conversations.find((c) => c.id === action.payload.conversationId);
       if (conversation) {
         conversation.messages.push(action.payload);
         conversation.updatedAt = new Date();
@@ -224,15 +269,15 @@ const conversationSlice = createSlice({
       }
     },
     updateMessage: (state, action: PayloadAction<Message>) => {
-      const conversation = state.conversations.find(c => c.id === action.payload.conversationId);
+      const conversation = state.conversations.find((c) => c.id === action.payload.conversationId);
       if (conversation) {
-        const messageIndex = conversation.messages.findIndex(m => m.id === action.payload.id);
+        const messageIndex = conversation.messages.findIndex((m) => m.id === action.payload.id);
         if (messageIndex !== -1) {
           conversation.messages[messageIndex] = action.payload;
         }
       }
       if (state.activeConversation?.id === action.payload.conversationId) {
-        const messageIndex = state.activeConversation.messages.findIndex(m => m.id === action.payload.id);
+        const messageIndex = state.activeConversation.messages.findIndex((m) => m.id === action.payload.id);
         if (messageIndex !== -1) {
           state.activeConversation.messages[messageIndex] = action.payload;
         }
@@ -247,18 +292,18 @@ const conversationSlice = createSlice({
     removeTypingUser: (state, action: PayloadAction<string>) => {
       delete state.typingUsers[action.payload];
     },
-    updateFilters: (state, action: PayloadAction<Partial<ConversationState['filters']>>) => {
+    updateFilters: (state, action: PayloadAction<Partial<ConversationState["filters"]>>) => {
       state.filters = { ...state.filters, ...action.payload };
     },
     setSearchQuery: (state, action: PayloadAction<string>) => {
       state.searchQuery = action.payload;
     },
     markConversationAsRead: (state, action: PayloadAction<string>) => {
-      const conversation = state.conversations.find(c => c.id === action.payload);
+      const conversation = state.conversations.find((c) => c.id === action.payload);
       if (conversation) {
         conversation.unreadCount = 0;
-        conversation.messages.forEach(message => {
-          if (!message.isRead && message.sender === 'customer') {
+        conversation.messages.forEach((message) => {
+          if (!message.isRead && message.sender === "customer") {
             message.isRead = true;
           }
         });
@@ -271,16 +316,16 @@ const conversationSlice = createSlice({
       state.isSignalRConnected = action.payload;
     },
     assignConversationRealtime: (state, action: PayloadAction<ConversationAssignment>) => {
-      const conversation = state.conversations.find(c => c.id === action.payload.conversationId);
+      const conversation = state.conversations.find((c) => c.id === action.payload.conversationId);
       if (conversation) {
-        conversation.status = 'active';
-        conversation.assignedAgent = { id: action.payload.agentId, name: 'Agent' };
+        conversation.status = "active";
+        conversation.assignedAgent = { id: action.payload.agentId, name: "Agent" };
       }
     },
     transferConversationRealtime: (state, action: PayloadAction<ConversationTransfer>) => {
-      const conversation = state.conversations.find(c => c.id === action.payload.conversationId);
+      const conversation = state.conversations.find((c) => c.id === action.payload.conversationId);
       if (conversation) {
-        conversation.assignedAgent = { id: action.payload.toAgentId, name: 'Agent' };
+        conversation.assignedAgent = { id: action.payload.toAgentId, name: "Agent" };
       }
     },
   },
@@ -296,10 +341,10 @@ const conversationSlice = createSlice({
       })
       .addCase(fetchConversations.rejected, (state, action) => {
         state.isLoading = false;
-        state.error = action.error.message || 'Failed to fetch conversations';
+        state.error = action.error.message || "Failed to fetch conversations";
       })
       .addCase(fetchConversation.fulfilled, (state, action) => {
-        const existingIndex = state.conversations.findIndex(c => c.id === action.payload.id);
+        const existingIndex = state.conversations.findIndex((c) => c.id === action.payload.id);
         if (existingIndex !== -1) {
           state.conversations[existingIndex] = action.payload;
         } else {
@@ -307,7 +352,7 @@ const conversationSlice = createSlice({
         }
       })
       .addCase(sendMessage.fulfilled, (state, action) => {
-        const conversation = state.conversations.find(c => c.id === action.payload.conversationId);
+        const conversation = state.conversations.find((c) => c.id === action.payload.conversationId);
         if (conversation) {
           conversation.messages.push(action.payload);
           conversation.updatedAt = new Date();
@@ -317,7 +362,7 @@ const conversationSlice = createSlice({
         }
       })
       .addCase(updateConversationStatus.fulfilled, (state, action) => {
-        const conversation = state.conversations.find(c => c.id === action.payload.conversationId);
+        const conversation = state.conversations.find((c) => c.id === action.payload.conversationId);
         if (conversation) {
           conversation.status = action.payload.status;
         }
@@ -326,12 +371,32 @@ const conversationSlice = createSlice({
         }
       })
       .addCase(assignConversation.fulfilled, (state, action) => {
-        const conversation = state.conversations.find(c => c.id === action.payload.id);
+        const conversation = state.conversations.find((c) => c.id === action.payload.id);
         if (conversation) {
           conversation.assignedAgent = action.payload.assignedAgent;
         }
         if (state.activeConversation?.id === action.payload.id) {
           state.activeConversation!.assignedAgent = action.payload.assignedAgent;
+        }
+      })
+      .addCase(transferConversation.fulfilled, (state, action) => {
+        const conversation = state.conversations.find((c) => c.id === action.payload.id);
+        if (conversation) {
+          conversation.assignedAgent = action.payload.assignedAgent;
+        }
+        if (state.activeConversation?.id === action.payload.id) {
+          state.activeConversation!.assignedAgent = action.payload.assignedAgent;
+        }
+      })
+      .addCase(rateConversation.fulfilled, (state, action) => {
+        const conversation = state.conversations.find((c) => c.id === action.payload.conversationId);
+        if (conversation) {
+          conversation.rating = action.payload.rating;
+          conversation.feedback = action.payload.feedback;
+        }
+        if (state.activeConversation?.id === action.payload.conversationId) {
+          state.activeConversation.rating = action.payload.rating;
+          state.activeConversation.feedback = action.payload.feedback;
         }
       });
   },

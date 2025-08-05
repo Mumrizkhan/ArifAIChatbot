@@ -1,4 +1,7 @@
-import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit';
+import { createSlice, createAsyncThunk, PayloadAction } from "@reduxjs/toolkit";
+
+// Add base URL configuration
+const API_BASE_URL = import.meta.env.API_BASE_URL || "http://localhost:8000";
 
 interface User {
   id: string;
@@ -20,59 +23,56 @@ interface AuthState {
 
 const initialState: AuthState = {
   user: null,
-  token: localStorage.getItem('token'),
+  token: localStorage.getItem("token"),
   isAuthenticated: false,
   isLoading: false,
   error: null,
 };
 
-export const login = createAsyncThunk(
-  'auth/login',
-  async (credentials: { email: string; password: string }) => {
-    const response = await fetch('/api/auth/login', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(credentials),
-    });
+export const login = createAsyncThunk("auth/login", async (credentials: { email: string; password: string }) => {
+  const response = await fetch(`${API_BASE_URL}/identity/auth/login`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(credentials),
+  });
 
-    if (!response.ok) {
-      throw new Error('Login failed');
-    }
-
-    const data = await response.json();
-    localStorage.setItem('token', data.token);
-    return data;
+  if (!response.ok) {
+    throw new Error("Login failed");
   }
-);
 
-export const logout = createAsyncThunk('auth/logout', async () => {
-  localStorage.removeItem('token');
+  const data = await response.json();
+  localStorage.setItem("token", data.token);
+  return data;
+});
+
+export const logout = createAsyncThunk("auth/logout", async () => {
+  localStorage.removeItem("token");
   return null;
 });
 
-export const getCurrentUser = createAsyncThunk('auth/getCurrentUser', async () => {
-  const token = localStorage.getItem('token');
+export const getCurrentUser = createAsyncThunk("auth/getCurrentUser", async () => {
+  const token = localStorage.getItem("token");
   if (!token) {
-    throw new Error('No token found');
+    throw new Error("No token found");
   }
 
-  const response = await fetch('/api/auth/me', {
+  const response = await fetch(`${API_BASE_URL}/identity/auth/me`, {
     headers: {
       Authorization: `Bearer ${token}`,
     },
   });
 
   if (!response.ok) {
-    throw new Error('Failed to get user');
+    throw new Error("Failed to get user");
   }
 
   return response.json();
 });
 
 const authSlice = createSlice({
-  name: 'auth',
+  name: "auth",
   initialState,
   reducers: {
     clearError: (state) => {
@@ -98,7 +98,7 @@ const authSlice = createSlice({
       })
       .addCase(login.rejected, (state, action) => {
         state.isLoading = false;
-        state.error = action.error.message || 'Login failed';
+        state.error = action.error.message || "Login failed";
       })
       .addCase(logout.fulfilled, (state) => {
         state.user = null;

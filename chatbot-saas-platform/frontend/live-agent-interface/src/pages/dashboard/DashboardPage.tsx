@@ -91,9 +91,9 @@ const DashboardPage = () => {
   ];
 
   const channelData = [
-    { name: "Website", value: 65, color: "#3b82f6" },
-    { name: "Mobile App", value: 25, color: "#10b981" },
-    { name: "Social Media", value: 10, color: "#f59e0b" },
+    { name: t("dashboard.website"), value: 65, color: "#3b82f6" },
+    { name: t("dashboard.mobileApp"), value: 25, color: "#10b981" },
+    { name: t("dashboard.socialMedia"), value: 10, color: "#f59e0b" },
   ];
 
   return (
@@ -105,12 +105,8 @@ const DashboardPage = () => {
         </div>
         <div className="flex items-center space-x-4">
           <div className="flex items-center space-x-1">
-            <div 
-              className={`w-2 h-2 rounded-full ${isSignalRConnected ? 'bg-green-500' : 'bg-red-500'}`}
-            />
-            <span className="text-xs text-muted-foreground">
-              {isSignalRConnected ? 'Live Updates' : 'Static Data'}
-            </span>
+            <div className={`w-2 h-2 rounded-full ${isSignalRConnected ? "bg-green-500" : "bg-red-500"}`} />
+            <span className="text-xs text-muted-foreground">{isSignalRConnected ? t("dashboard.liveUpdates") : t("dashboard.staticData")}</span>
           </div>
           <div className="flex items-center space-x-2">
             <Badge variant={currentAgent?.status === "online" ? "default" : "secondary"}>
@@ -132,7 +128,7 @@ const DashboardPage = () => {
             <div className="text-2xl font-bold">{conversations?.filter((c: any) => c.status === "active").length || 3}</div>
             <div className="flex items-center text-xs text-muted-foreground">
               <TrendingUp className="mr-1 h-3 w-3" />
-              Currently handling
+              {t("dashboard.currentlyHandling")}
             </div>
           </CardContent>
         </Card>
@@ -146,7 +142,7 @@ const DashboardPage = () => {
             <div className="text-2xl font-bold">{agentStats?.totalConversations || 24}</div>
             <div className="flex items-center text-xs text-muted-foreground">
               <TrendingUp className="mr-1 h-3 w-3" />
-              +15% from yesterday
+              {t("dashboard.changeFromYesterday")}
             </div>
           </CardContent>
         </Card>
@@ -160,7 +156,7 @@ const DashboardPage = () => {
             <div className="text-2xl font-bold">{agentStats?.averageResponseTime || 2.3}m</div>
             <div className="flex items-center text-xs text-muted-foreground">
               <TrendingUp className="mr-1 h-3 w-3" />
-              -12% from last week
+              {t("dashboard.changeFromLastWeek")}
             </div>
           </CardContent>
         </Card>
@@ -174,7 +170,7 @@ const DashboardPage = () => {
             <div className="text-2xl font-bold">{agentStats?.averageRating || 4.8}</div>
             <div className="flex items-center text-xs text-muted-foreground">
               <TrendingUp className="mr-1 h-3 w-3" />
-              +0.3 from last week
+              {t("dashboard.ratingChangeFromLastWeek")}
             </div>
           </CardContent>
         </Card>
@@ -245,7 +241,7 @@ const DashboardPage = () => {
                       <AvatarFallback>{conversation.customer?.name?.charAt(0) || "U"}</AvatarFallback>
                     </Avatar>
                     <div>
-                      <p className="font-medium">{conversation.customer?.name || "Anonymous"}</p>
+                      <p className="font-medium">{conversation.customer?.name || t("dashboard.anonymous")}</p>
                       <p className="text-sm text-muted-foreground">{conversation.lastMessage?.content?.substring(0, 50)}...</p>
                     </div>
                   </div>
@@ -258,8 +254,8 @@ const DashboardPage = () => {
             ) : (
               <div className="text-center py-8">
                 <MessageSquare className="mx-auto h-12 w-12 text-muted-foreground" />
-                <h3 className="mt-2 text-sm font-semibold">No active conversations</h3>
-                <p className="mt-1 text-sm text-muted-foreground">New conversations will appear here when customers reach out.</p>
+                <h3 className="mt-2 text-sm font-semibold">{t("dashboard.noActiveConversations")}</h3>
+                <p className="mt-1 text-sm text-muted-foreground">{t("dashboard.noActiveConversationsDesc")}</p>
               </div>
             )}
           </CardContent>
@@ -329,8 +325,8 @@ const DashboardPage = () => {
             ) : (
               <div className="text-center py-8">
                 <Users className="mx-auto h-12 w-12 text-muted-foreground" />
-                <h3 className="mt-2 text-sm font-semibold">Profile not loaded</h3>
-                <p className="mt-1 text-sm text-muted-foreground">Unable to load agent profile information.</p>
+                <h3 className="mt-2 text-sm font-semibold">{t("dashboard.profileNotLoaded")}</h3>
+                <p className="mt-1 text-sm text-muted-foreground">{t("dashboard.profileNotLoadedDesc")}</p>
               </div>
             )}
           </CardContent>
