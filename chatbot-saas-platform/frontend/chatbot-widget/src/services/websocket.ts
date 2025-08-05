@@ -1,19 +1,19 @@
-import { HubConnection, HubConnectionBuilder, HubConnectionState, LogLevel } from '@microsoft/signalr';
-import { store } from '../store/store';
-import { addMessage, setTyping, setConnectionStatus, assignAgent, updateConversationStatus } from '../store/slices/chatSlice';
+import { HubConnection, HubConnectionBuilder, HubConnectionState, LogLevel } from "@microsoft/signalr";
+import { store } from "../store/store";
+import { addMessage, setTyping, setConnectionStatus, assignAgent, updateConversationStatus } from "../store/slices/chatSlice";
 
 class SignalRService {
   private connection: HubConnection | null = null;
   private reconnectAttempts = 0;
   private maxReconnectAttempts = 5;
   private currentConversationId: string | null = null;
-
+  private hubUrl: string = import.meta.env.VITE_WEBSOCKET_URL || "/chatHub"; // Add this line
   async connect(tenantId: string, authToken: string, conversationId?: string): Promise<boolean> {
     try {
-      store.dispatch(setConnectionStatus('connecting'));
+      store.dispatch(setConnectionStatus("connecting"));
 
       this.connection = new HubConnectionBuilder()
-        .withUrl('http://localhost:8000/chat/chatHub', {
+        .withUrl(this.hubUrl, {
           accessTokenFactory: () => authToken,
           skipNegotiation: false,
         })
@@ -23,7 +23,7 @@ class SignalRService {
               return Math.min(1000 * Math.pow(2, retryContext.previousRetryCount), 30000);
             }
             return null; // Stop retrying
-          }
+          },
         })
         .configureLogging(LogLevel.Information)
         .build();
@@ -31,8 +31,8 @@ class SignalRService {
       this.setupEventHandlers();
 
       await this.connection.start();
-      console.log('SignalR connected');
-      store.dispatch(setConnectionStatus('connected'));
+      console.log("SignalR connected");
+      store.dispatch(setConnectionStatus("connected"));
       this.reconnectAttempts = 0;
 
       if (conversationId) {
@@ -42,8 +42,8 @@ class SignalRService {
 
       return true;
     } catch (error) {
-      console.error('SignalR connection failed:', error);
-      store.dispatch(setConnectionStatus('error'));
+      console.error("SignalR connection failed:", error);
+      store.dispatch(setConnectionStatus("error"));
       this.scheduleReconnect(tenantId, authToken, conversationId);
       return false;
     }
@@ -53,76 +53,84 @@ class SignalRService {
     if (!this.connection) return;
 
     this.connection.onreconnecting(() => {
-      console.log('SignalR reconnecting...');
-      store.dispatch(setConnectionStatus('connecting'));
+      console.log("SignalR reconnecting...");
+      store.dispatch(setConnectionStatus("connecting"));
     });
 
     this.connection.onreconnected(async () => {
-      console.log('SignalR reconnected');
-      store.dispatch(setConnectionStatus('connected'));
-      
+      console.log("SignalR reconnected");
+      store.dispatch(setConnectionStatus("connected"));
+
       if (this.currentConversationId) {
         await this.joinConversation(this.currentConversationId);
       }
     });
 
     this.connection.onclose(() => {
-      console.log('SignalR connection closed');
-      store.dispatch(setConnectionStatus('disconnected'));
+      console.log("SignalR connection closed");
+      store.dispatch(setConnectionStatus("disconnected"));
     });
 
-    this.connection.on('ReceiveMessage', (messageDto) => {
-      store.dispatch(addMessage({
-        id: messageDto.Id,
-        content: messageDto.Content,
-        sender: messageDto.Sender.toLowerCase(),
-        timestamp: new Date(messageDto.CreatedAt),
-        type: messageDto.Type.toLowerCase(),
-        metadata: {
-          senderId: messageDto.SenderId?.toString(),
-          senderName: messageDto.SenderName
-        },
-      }));
+    this.connection.on("ReceiveMessage", (messageDto) => {
+      store.dispatch(
+        addMessage({
+          id: messageDto.Id,
+          content: messageDto.Content,
+          sender: messageDto.Sender.toLowerCase(),
+          timestamp: new Date(messageDto.CreatedAt),
+          type: messageDto.Type.toLowerCase(),
+          metadata: {
+            senderId: messageDto.SenderId?.toString(),
+            senderName: messageDto.SenderName,
+          },
+        })
+      );
     });
 
-    this.connection.on('UserStartedTyping', (typingInfo) => {
-      store.dispatch(setTyping({
-        isTyping: true,
-        user: typingInfo.UserName || 'User',
-      }));
+    this.connection.on("UserStartedTyping", (typingInfo) => {
+      store.dispatch(
+        setTyping({
+          isTyping: true,
+          user: typingInfo.UserName || "User",
+        })
+      );
     });
 
-    this.connection.on('UserStoppedTyping', (typingInfo) => {
-      store.dispatch(setTyping({
-        isTyping: false,
-        user: typingInfo.UserName || 'User',
-      }));
+    this.connection.on("UserStoppedTyping", (typingInfo) => {
+      store.dispatch(
+        setTyping({
+          isTyping: false,
+          user: typingInfo.UserName || "User",
+        })
+      );
     });
 
-    this.connection.on('AgentAssigned', (agentInfo) => {
-      store.dispatch(assignAgent({
-        id: agentInfo.id,
-        name: agentInfo.name,
-        avatar: agentInfo.avatar,
-      }));
+    this.connection.on("AgentAssigned", (agentInfo) => {
+      store.dispatch(
+        assignAgent({
+          id: agentInfo.id,
+          name: agentInfo.name,
+          avatar: agentInfo.avatar,
+        })
+      );
     });
 
-    this.connection.on('ConversationStatusChanged', (status) => {
+    this.connection.on("ConversationStatusChanged", (status) => {
       store.dispatch(updateConversationStatus(status));
     });
   }
 
-  async sendMessage(conversationId: string, content: string, messageType: string = 'Text'): Promise<boolean> {
+  async sendMessage(conversationId: string, content: string, messageType: string = "Text"): Promise<boolean> {
     if (this.connection?.state === HubConnectionState.Connected) {
       try {
-        await this.connection.invoke('SendMessage', conversationId, content, messageType);
+        await this.connection.invoke("SendMessage", conversationId, content, messageType);
         return true;
       } catch (error) {
-        console.error('Failed to send message:', error);
+        console.error("Failed to send message:", error);
         return false;
       }
     } else {
-      console.error('SignalR is not connected');
+      console.error("SignalR is not connected");
       return false;
     }
   }
@@ -131,12 +139,12 @@ class SignalRService {
     if (this.connection?.state === HubConnectionState.Connected) {
       try {
         if (isTyping) {
-          await this.connection.invoke('StartTyping', conversationId);
+          await this.connection.invoke("StartTyping", conversationId);
         } else {
-          await this.connection.invoke('StopTyping', conversationId);
+          await this.connection.invoke("StopTyping", conversationId);
         }
       } catch (error) {
-        console.error('Failed to send typing indicator:', error);
+        console.error("Failed to send typing indicator:", error);
       }
     }
   }
@@ -144,12 +152,12 @@ class SignalRService {
   async joinConversation(conversationId: string): Promise<boolean> {
     if (this.connection?.state === HubConnectionState.Connected) {
       try {
-        await this.connection.invoke('JoinConversation', conversationId);
+        await this.connection.invoke("JoinConversation", conversationId);
         this.currentConversationId = conversationId;
         console.log(`Joined conversation: ${conversationId}`);
         return true;
       } catch (error) {
-        console.error('Failed to join conversation:', error);
+        console.error("Failed to join conversation:", error);
         return false;
       }
     }
@@ -159,48 +167,36 @@ class SignalRService {
   async leaveConversation(conversationId: string): Promise<boolean> {
     if (this.connection?.state === HubConnectionState.Connected) {
       try {
-        await this.connection.invoke('LeaveConversation', conversationId);
+        await this.connection.invoke("LeaveConversation", conversationId);
         if (this.currentConversationId === conversationId) {
           this.currentConversationId = null;
         }
         console.log(`Left conversation: ${conversationId}`);
         return true;
       } catch (error) {
-        console.error('Failed to leave conversation:', error);
+        console.error("Failed to leave conversation:", error);
         return false;
       }
     }
     return false;
   }
 
-  async requestAgent(conversationId: string): Promise<boolean> {
-    if (this.connection?.state === HubConnectionState.Connected) {
-      try {
-        await this.connection.invoke('RequestAgent', conversationId);
-        console.log('Agent handoff requested for conversation:', conversationId);
-        return true;
-      } catch (error) {
-        console.error('Failed to request agent:', error);
-        return false;
-      }
-    } else {
-      console.error('SignalR is not connected');
-      return false;
-    }
+  async requestAgent(): Promise<void> {
+    console.log("Agent handoff requested");
   }
 
   private scheduleReconnect(tenantId: string, authToken: string, conversationId?: string) {
     if (this.reconnectAttempts < this.maxReconnectAttempts) {
       this.reconnectAttempts++;
       const delay = 1000 * Math.pow(2, this.reconnectAttempts - 1);
-      
+
       setTimeout(async () => {
         console.log(`Attempting reconnect ${this.reconnectAttempts}/${this.maxReconnectAttempts}`);
         await this.connect(tenantId, authToken, conversationId);
       }, delay);
     } else {
-      console.error('Max reconnection attempts reached');
-      store.dispatch(setConnectionStatus('error'));
+      console.error("Max reconnection attempts reached");
+      store.dispatch(setConnectionStatus("error"));
     }
   }
 
@@ -211,9 +207,9 @@ class SignalRService {
           await this.leaveConversation(this.currentConversationId);
         }
         await this.connection.stop();
-        console.log('SignalR disconnected');
+        console.log("SignalR disconnected");
       } catch (error) {
-        console.error('Error during disconnect:', error);
+        console.error("Error during disconnect:", error);
       } finally {
         this.connection = null;
         this.currentConversationId = null;
@@ -226,7 +222,7 @@ class SignalRService {
   }
 
   getConnectionState(): string {
-    return this.connection?.state || 'Disconnected';
+    return this.connection?.state || "Disconnected";
   }
 }
 
