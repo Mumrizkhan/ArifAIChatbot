@@ -7,7 +7,7 @@ using Shared.Domain.Enums;
 
 namespace ChatRuntimeService.Hubs;
 
-[Authorize]
+//[Authorize]
 public class ChatHub : Hub
 {
     private readonly IApplicationDbContext _context;

@@ -1,5 +1,5 @@
 class AIService {
-  private hubUrl: string = import.meta.env.VITE_WEBSOCKET_URL;
+  private hubUrl: string = import.meta.env.BASE_URL;
   initialize(hubUrl: string) {
     this.hubUrl = this.hubUrl || hubUrl;
   }
