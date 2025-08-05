@@ -337,7 +337,7 @@ const conversationSlice = createSlice({
       })
       .addCase(fetchConversations.fulfilled, (state, action) => {
         state.isLoading = false;
-        state.conversations = action.payload;
+        state.conversations = Array.isArray(action.payload) ? action.payload : [];
       })
       .addCase(fetchConversations.rejected, (state, action) => {
         state.isLoading = false;
