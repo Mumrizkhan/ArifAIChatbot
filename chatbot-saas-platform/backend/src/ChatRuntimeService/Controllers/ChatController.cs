@@ -1,3 +1,5 @@
+using ChatRuntimeService.Hubs;
+using ChatRuntimeService.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.SignalR;
@@ -5,8 +7,7 @@ using Microsoft.EntityFrameworkCore;
 using Shared.Application.Common.Interfaces;
 using Shared.Domain.Entities;
 using Shared.Domain.Enums;
-using ChatRuntimeService.Services;
-using ChatRuntimeService.Hubs;
+using Shared.Infrastructure.Services;
 
 namespace ChatRuntimeService.Controllers;
 
@@ -133,10 +134,11 @@ public class ChatController : ControllerBase
 
             await _hubContext.Clients.Group($"conversation_{conversationId}")
                 .SendAsync("ReceiveMessage", userMessageDto);
-
+         
             var botResponse = await _aiIntegrationService.GetBotResponseAsync(
                 request.Content, 
-                conversationId.ToString(), 
+                conversationId.ToString(),
+                _tenantService.GetCurrentTenantId().ToString(),
                 conversation.Language ?? "en");
 
             var botMessage = new Message

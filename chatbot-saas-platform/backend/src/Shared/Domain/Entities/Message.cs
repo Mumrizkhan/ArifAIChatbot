@@ -23,5 +23,5 @@ public class Message : AuditableEntity
     public string? Metadata { get; set; }
     public string? AttachmentUrl { get; set; }
     public string? AttachmentType { get; set; }
-    public string SenderType { get; set; }
+    public string? SenderType { get; set; }
 }

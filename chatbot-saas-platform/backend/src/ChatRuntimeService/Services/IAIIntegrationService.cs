@@ -4,9 +4,9 @@ namespace ChatRuntimeService.Services;
 
 public interface IAIIntegrationService
 {
-    Task<string> GetBotResponseAsync(string message, string conversationId, string language = "en");
-    Task<bool> ShouldTransferToAgentAsync(string message, string conversationId);
-    Task<string> AnalyzeSentimentAsync(string message);
-    Task<string[]> ExtractIntentsAsync(string message);
-    Task<bool> IsSpamAsync(string message);
+    Task<string> GetBotResponseAsync(string message, string conversationId,string tenantId, string language = "en");
+    Task<bool> ShouldTransferToAgentAsync(string message, string conversationId, string tenantId);
+    Task<string> AnalyzeSentimentAsync(string message, string tenantId);
+    Task<string[]> ExtractIntentsAsync(string message, string tenantId);
+    Task<bool> IsSpamAsync(string message, string tenantId);
 }

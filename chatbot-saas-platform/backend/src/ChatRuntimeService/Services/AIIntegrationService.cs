@@ -18,10 +18,10 @@ public class AIIntegrationService : IAIIntegrationService
         _httpClient = httpClient;
         _configuration = configuration;
         _logger = logger;
-        _aiServiceUrl = _configuration["Services:AIOrchestration"] ?? "http://localhost:5002";
+        _aiServiceUrl = _configuration["Services:AIOrchestration"] ?? "http://localhost:5001";
     }
 
-    public async Task<string> GetBotResponseAsync(string message, string conversationId, string language = "en")
+    public async Task<string> GetBotResponseAsync(string message, string conversationId,string tenantId, string language = "en")
     {
         try
         {
@@ -31,16 +31,16 @@ public class AIIntegrationService : IAIIntegrationService
                 ConversationId = conversationId,
                 Language = language
             };
-
+            SetTenantId(tenantId);
             var response = await _httpClient.PostAsJsonAsync($"{_aiServiceUrl}/api/ai/chat", request);
-            
+
             if (response.IsSuccessStatusCode)
             {
                 var result = await response.Content.ReadAsStringAsync();
                 var aiResponse = JsonSerializer.Deserialize<AIResponse>(result);
-                return aiResponse?.Response ?? "I'm sorry, I couldn't process your request.";
+                return aiResponse?.Content ?? "I'm sorry, I couldn't process your request.";
             }
-            
+
             _logger.LogWarning($"AI service returned {response.StatusCode} for conversation {conversationId}");
             return "I'm sorry, I'm having trouble understanding. Let me connect you with a human agent.";
         }
@@ -51,7 +51,13 @@ public class AIIntegrationService : IAIIntegrationService
         }
     }
 
-    public async Task<bool> ShouldTransferToAgentAsync(string message, string conversationId)
+    private void SetTenantId(string tenantId)
+    {
+        _httpClient.DefaultRequestHeaders.Remove("X-Tenant-ID");
+        _httpClient.DefaultRequestHeaders.Add("X-Tenant-ID", tenantId);
+    }
+
+    public async Task<bool> ShouldTransferToAgentAsync(string message, string conversationId,string tenantId)
     {
         try
         {
@@ -60,7 +66,7 @@ public class AIIntegrationService : IAIIntegrationService
                 Message = message,
                 ConversationId = conversationId
             };
-
+            SetTenantId(tenantId);
             var response = await _httpClient.PostAsJsonAsync($"{_aiServiceUrl}/api/ai/should-transfer", request);
             
             if (response.IsSuccessStatusCode)
@@ -79,11 +85,12 @@ public class AIIntegrationService : IAIIntegrationService
         }
     }
 
-    public async Task<string> AnalyzeSentimentAsync(string message)
+    public async Task<string> AnalyzeSentimentAsync(string message,string tenantId)
     {
         try
         {
             var request = new { Message = message };
+            SetTenantId(tenantId);
             var response = await _httpClient.PostAsJsonAsync($"{_aiServiceUrl}/api/ai/sentiment", request);
             
             if (response.IsSuccessStatusCode)
@@ -102,11 +109,12 @@ public class AIIntegrationService : IAIIntegrationService
         }
     }
 
-    public async Task<string[]> ExtractIntentsAsync(string message)
+    public async Task<string[]> ExtractIntentsAsync(string message,string tenantId)
     {
         try
         {
             var request = new { Message = message };
+            SetTenantId(tenantId);
             var response = await _httpClient.PostAsJsonAsync($"{_aiServiceUrl}/api/ai/intents", request);
             
             if (response.IsSuccessStatusCode)
@@ -125,11 +133,12 @@ public class AIIntegrationService : IAIIntegrationService
         }
     }
 
-    public async Task<bool> IsSpamAsync(string message)
+    public async Task<bool> IsSpamAsync(string message,string tenantid)
     {
         try
         {
             var request = new { Message = message };
+            SetTenantId(tenantid);
             var response = await _httpClient.PostAsJsonAsync($"{_aiServiceUrl}/api/ai/spam-detection", request);
             
             if (response.IsSuccessStatusCode)

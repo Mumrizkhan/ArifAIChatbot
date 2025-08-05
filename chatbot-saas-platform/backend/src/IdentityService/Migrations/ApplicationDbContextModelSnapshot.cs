@@ -553,7 +553,6 @@ namespace IdentityService.Migrations
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<string>("SenderType")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<Guid?>("SenderUserId")
