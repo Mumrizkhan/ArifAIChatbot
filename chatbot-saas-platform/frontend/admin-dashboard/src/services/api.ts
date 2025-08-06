@@ -159,29 +159,29 @@ export const userApi = {
 
 export const analyticsApi = {
   getDashboardStats: async () => {
-    return apiClient.get<any>("/analytics/dashboard");
+    return apiClient.get<any>("/analytics/analytics/dashboard");
   },
 
   getConversationMetrics: async (timeRange: string, tenantId?: string) => {
     const params = new URLSearchParams({ timeRange });
     if (tenantId) params.append("tenantId", tenantId);
-    return apiClient.get<any>(`/analytics/conversations?${params}`);
+    return apiClient.get<any>(`/analytics/analytics/conversations?${params}`);
   },
 
   getAgentMetrics: async (timeRange: string, tenantId?: string) => {
     const params = new URLSearchParams({ timeRange });
     if (tenantId) params.append("tenantId", tenantId);
-    return apiClient.get<any>(`/analytics/agents?${params}`);
+    return apiClient.get<any>(`/analytics/analytics/agents?${params}`);
   },
 
   getBotMetrics: async (timeRange: string, tenantId?: string) => {
     const params = new URLSearchParams({ timeRange });
     if (tenantId) params.append("tenantId", tenantId);
-    return apiClient.get<any>(`/analytics/bot?${params}`);
+    return apiClient.get<any>(`/analytics/analytics/bot?${params}`);
   },
 
   getCustomReport: async (reportConfig: any) => {
-    return apiClient.post<any>("/analytics/reports/custom", reportConfig);
+    return apiClient.post<any>("/analytics/analytics/reports/custom", reportConfig);
   },
 };
 
