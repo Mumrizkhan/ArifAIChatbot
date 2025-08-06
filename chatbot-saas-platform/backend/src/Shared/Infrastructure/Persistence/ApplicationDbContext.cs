@@ -72,8 +72,8 @@ public class ApplicationDbContext : DbContext, IApplicationDbContext
 
         var tenantId = _tenantService.GetCurrentTenantId();
 
-        builder.Entity<Conversation>().HasQueryFilter(c => c.TenantId == tenantId);
-        builder.Entity<Message>().HasQueryFilter(m => m.TenantId == tenantId);
+        //builder.Entity<Conversation>().HasQueryFilter(c => c.TenantId == tenantId);
+        //builder.Entity<Message>().HasQueryFilter(m => m.TenantId == tenantId);
         //builder.Entity<UserTenant>().HasQueryFilter(ut => ut.TenantId == tenantId);
 
         // Example: Use nvarchar(max) for SQL Server instead of jsonb

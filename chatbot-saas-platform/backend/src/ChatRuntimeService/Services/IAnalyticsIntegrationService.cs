@@ -1,4 +1,5 @@
-using AnalyticsService.Models;
+
+using ChatRuntimeService.Models;
 
 namespace ChatRuntimeService.Services;
 

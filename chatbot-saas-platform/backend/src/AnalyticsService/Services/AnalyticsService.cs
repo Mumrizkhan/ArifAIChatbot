@@ -119,20 +119,33 @@ public class AnalyticsService : IAnalyticsService
 
     public async Task<DashboardStatsDto> GetDashboardStatsAsync()
     {
-        var totalUsers = await _context.Users.CountAsync();
-        var totalConversations = await _context.Conversations.CountAsync();
-        var totalMessages = await _context.Messages.CountAsync();
-        var avgResponseTime = await _context.Conversations
-            .Where(c => c.AverageResponseTime.HasValue)
-            .AverageAsync(c => c.AverageResponseTime.Value);
-
-        return new DashboardStatsDto
+        try
         {
-            TotalUsers = totalUsers,
-            TotalConversations = totalConversations,
-            TotalMessages = totalMessages,
-            AverageResponseTime = avgResponseTime
-        };
+            var totalUsers = await _context.Users.CountAsync();
+            var totalConversations = await _context.Conversations.CountAsync();
+            var totalMessages = await _context.Messages.CountAsync();
+            //var avgResponseTime = await _context.Conversations
+            //    .Where(c => c.AverageResponseTime.HasValue)
+            //    .Select(c => c.AverageResponseTime.Value)
+            //    .DefaultIfEmpty(0) // Provide a default value for empty sequences
+            //    .AverageAsync();
+            var avgResponseTime = await _context.Conversations
+           .Where(c => c.AverageResponseTime.HasValue)
+           .Select(c => c.AverageResponseTime.Value)
+           .ToListAsync();            
+
+            return new DashboardStatsDto
+            {
+                TotalUsers = totalUsers,
+                TotalConversations = totalConversations,
+                TotalMessages = totalMessages,
+                AverageResponseTime = avgResponseTime.Any() ? avgResponseTime.Average() : 0
+            };
+        }
+        catch (Exception ex)
+        {
+            throw;
+        }
     }
 
     public async Task<ConversationMetricsDto> GetConversationMetricsAsync(string timeRange, string? tenantId)
@@ -270,7 +283,9 @@ public class AnalyticsService : IAnalyticsService
     {
         var avgResponseTime = await _context.Conversations
             .Where(c => c.AverageResponseTime.HasValue)
-            .AverageAsync(c => c.AverageResponseTime.Value);
+            .Select(c => c.AverageResponseTime.Value)
+            .DefaultIfEmpty(0) // Provide a default value for empty sequences
+            .AverageAsync();
 
         return new PerformanceMetricsDto
         {
