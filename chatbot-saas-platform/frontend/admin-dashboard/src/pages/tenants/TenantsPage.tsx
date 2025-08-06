@@ -1,36 +1,15 @@
-import React, { useEffect, useState } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
-import { useTranslation } from 'react-i18next';
-import { AppDispatch, RootState } from '../../store/store';
-import { fetchTenants, createTenant, updateTenant, deleteTenant } from '../../store/slices/tenantSlice';
-import { Button } from '../../components/ui/button';
-import { Input } from '../../components/ui/input';
-import { Badge } from '../../components/ui/badge';
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from '../../components/ui/table';
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from '../../components/ui/dialog';
-import { Label } from '../../components/ui/label';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '../../components/ui/select';
+import React, { useEffect, useState } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import { useTranslation } from "react-i18next";
+import { AppDispatch, RootState } from "../../store/store";
+import { fetchTenants, createTenant, updateTenant, deleteTenant } from "../../store/slices/tenantSlice";
+import { Button } from "../../components/ui/button";
+import { Input } from "../../components/ui/input";
+import { Badge } from "../../components/ui/badge";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "../../components/ui/table";
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "../../components/ui/dialog";
+import { Label } from "../../components/ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../../components/ui/select";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -38,36 +17,24 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from '../../components/ui/dropdown-menu';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../../components/ui/card';
-import { Skeleton } from '../../components/ui/skeleton';
-import {
-  Plus,
-  Search,
-  MoreHorizontal,
-  Edit,
-  Trash2,
-  Building2,
-  Users,
-  MessageSquare,
-  Calendar,
-} from 'lucide-react';
+} from "../../components/ui/dropdown-menu";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../../components/ui/card";
+import { Skeleton } from "../../components/ui/skeleton";
+import { Plus, Search, MoreHorizontal, Edit, Trash2, Building2, Users, MessageSquare, Calendar } from "lucide-react";
 
 const TenantsPage: React.FC = () => {
   const { t } = useTranslation();
   const dispatch = useDispatch<AppDispatch>();
-  const { tenants, isLoading, currentPage, pageSize } = useSelector(
-    (state: RootState) => state.tenant
-  );
+  const { tenants, isLoading, currentPage, pageSize } = useSelector((state: RootState) => state.tenant);
 
-  const [searchTerm, setSearchTerm] = useState('');
+  const [searchTerm, setSearchTerm] = useState("");
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
   const [editingTenant, setEditingTenant] = useState<any>(null);
   const [newTenant, setNewTenant] = useState({
-    name: '',
-    domain: '',
-    status: 'Active' as 'Active' | 'Inactive' | 'Suspended',
-    subscriptionPlan: 'Basic',
+    name: "",
+    domain: "",
+    status: "Active" as "Active" | "Inactive" | "Suspended",
+    subscriptionPlan: "Basic",
   });
 
   useEffect(() => {
@@ -78,9 +45,9 @@ const TenantsPage: React.FC = () => {
     try {
       await dispatch(createTenant(newTenant)).unwrap();
       setIsCreateDialogOpen(false);
-      setNewTenant({ name: '', domain: '', status: 'Active' as 'Active' | 'Inactive' | 'Suspended', subscriptionPlan: 'Basic' });
+      setNewTenant({ name: "", domain: "", status: "Active" as "Active" | "Inactive" | "Suspended", subscriptionPlan: "Basic" });
     } catch (error) {
-      console.error('Failed to create tenant:', error);
+      console.error("Failed to create tenant:", error);
     }
   };
 
@@ -90,27 +57,32 @@ const TenantsPage: React.FC = () => {
       await dispatch(updateTenant({ id: editingTenant.id, data: editingTenant })).unwrap();
       setEditingTenant(null);
     } catch (error) {
-      console.error('Failed to update tenant:', error);
+      console.error("Failed to update tenant:", error);
     }
   };
 
   const handleDeleteTenant = async (id: string) => {
-    if (window.confirm('Are you sure you want to delete this tenant?')) {
+    if (window.confirm(t("tenants.deleteConfirmation"))) {
       try {
         await dispatch(deleteTenant(id)).unwrap();
       } catch (error) {
-        console.error('Failed to delete tenant:', error);
+        console.error("Failed to delete tenant:", error);
       }
     }
   };
 
   const getStatusBadge = (status: string) => {
-    const variants: Record<string, 'default' | 'secondary' | 'destructive'> = {
-      Active: 'default',
-      Inactive: 'secondary',
-      Suspended: 'destructive',
+    const variants: Record<string, "default" | "secondary" | "destructive"> = {
+      Active: "default",
+      Inactive: "secondary",
+      Suspended: "destructive",
     };
-    return <Badge variant={variants[status] || 'secondary'}>{status}</Badge>;
+    const statusTranslations: Record<string, string> = {
+      Active: t("tenants.status.active"),
+      Inactive: t("tenants.status.inactive"),
+      Suspended: t("tenants.status.suspended"),
+    };
+    return <Badge variant={variants[status] || "secondary"}>{statusTranslations[status] || status}</Badge>;
   };
 
   if (isLoading && tenants.length === 0) {
@@ -141,29 +113,25 @@ const TenantsPage: React.FC = () => {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold">{t('tenants.title')}</h1>
-          <p className="text-muted-foreground">
-            Manage tenant accounts and subscriptions
-          </p>
+          <h1 className="text-3xl font-bold">{t("tenants.title")}</h1>
+          <p className="text-muted-foreground">{t("tenants.description")}</p>
         </div>
         <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
           <DialogTrigger asChild>
             <Button>
               <Plus className="mr-2 h-4 w-4" />
-              {t('tenants.createTenant')}
+              {t("tenants.createTenant")}
             </Button>
           </DialogTrigger>
           <DialogContent>
             <DialogHeader>
-              <DialogTitle>{t('tenants.createTenant')}</DialogTitle>
-              <DialogDescription>
-                Create a new tenant account with subscription details.
-              </DialogDescription>
+              <DialogTitle>{t("tenants.createTenant")}</DialogTitle>
+              <DialogDescription>{t("tenants.createDescription")}</DialogDescription>
             </DialogHeader>
             <div className="grid gap-4 py-4">
               <div className="grid grid-cols-4 items-center gap-4">
                 <Label htmlFor="name" className="text-right">
-                  {t('tenants.tenantName')}
+                  {t("tenants.tenantName")}
                 </Label>
                 <Input
                   id="name"
@@ -174,7 +142,7 @@ const TenantsPage: React.FC = () => {
               </div>
               <div className="grid grid-cols-4 items-center gap-4">
                 <Label htmlFor="domain" className="text-right">
-                  {t('tenants.domain')}
+                  {t("tenants.domain")}
                 </Label>
                 <Input
                   id="domain"
@@ -185,43 +153,40 @@ const TenantsPage: React.FC = () => {
               </div>
               <div className="grid grid-cols-4 items-center gap-4">
                 <Label htmlFor="status" className="text-right">
-                  {t('tenants.status')}
+                  {t("tenants.status.label")}
                 </Label>
                 <Select
                   value={newTenant.status}
-                  onValueChange={(value) => setNewTenant({ ...newTenant, status: value as 'Active' | 'Inactive' | 'Suspended' })}
+                  onValueChange={(value) => setNewTenant({ ...newTenant, status: value as "Active" | "Inactive" | "Suspended" })}
                 >
                   <SelectTrigger className="col-span-3">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="Active">Active</SelectItem>
-                    <SelectItem value="Inactive">Inactive</SelectItem>
-                    <SelectItem value="Suspended">Suspended</SelectItem>
+                    <SelectItem value="Active">{t("tenants.status.active")}</SelectItem>
+                    <SelectItem value="Inactive">{t("tenants.status.inactive")}</SelectItem>
+                    <SelectItem value="Suspended">{t("tenants.status.suspended")}</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
               <div className="grid grid-cols-4 items-center gap-4">
                 <Label htmlFor="plan" className="text-right">
-                  {t('tenants.subscriptionPlan')}
+                  {t("tenants.subscriptionPlan")}
                 </Label>
-                <Select
-                  value={newTenant.subscriptionPlan}
-                  onValueChange={(value) => setNewTenant({ ...newTenant, subscriptionPlan: value })}
-                >
+                <Select value={newTenant.subscriptionPlan} onValueChange={(value) => setNewTenant({ ...newTenant, subscriptionPlan: value })}>
                   <SelectTrigger className="col-span-3">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="Basic">Basic</SelectItem>
-                    <SelectItem value="Pro">Pro</SelectItem>
-                    <SelectItem value="Enterprise">Enterprise</SelectItem>
+                    <SelectItem value="Basic">{t("tenants.plans.basic")}</SelectItem>
+                    <SelectItem value="Pro">{t("tenants.plans.pro")}</SelectItem>
+                    <SelectItem value="Enterprise">{t("tenants.plans.enterprise")}</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
             </div>
             <DialogFooter>
-              <Button onClick={handleCreateTenant}>{t('common.create')}</Button>
+              <Button onClick={handleCreateTenant}>{t("common.create")}</Button>
             </DialogFooter>
           </DialogContent>
         </Dialog>
@@ -231,18 +196,16 @@ const TenantsPage: React.FC = () => {
         <CardHeader>
           <CardTitle className="flex items-center">
             <Building2 className="mr-2 h-5 w-5" />
-            Tenant Management
+            {t("tenants.management.title")}
           </CardTitle>
-          <CardDescription>
-            View and manage all tenant accounts in the system
-          </CardDescription>
+          <CardDescription>{t("tenants.management.description")}</CardDescription>
         </CardHeader>
         <CardContent>
           <div className="flex items-center space-x-2 mb-4">
             <div className="relative flex-1">
               <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
               <Input
-                placeholder={t('common.search')}
+                placeholder={t("tenants.searchPlaceholder")}
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 className="pl-8"
@@ -253,14 +216,14 @@ const TenantsPage: React.FC = () => {
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>{t('tenants.tenantName')}</TableHead>
-                <TableHead>{t('tenants.domain')}</TableHead>
-                <TableHead>{t('tenants.status')}</TableHead>
-                <TableHead>{t('tenants.subscriptionPlan')}</TableHead>
-                <TableHead>{t('tenants.userCount')}</TableHead>
-                <TableHead>{t('tenants.conversationCount')}</TableHead>
-                <TableHead>{t('tenants.createdAt')}</TableHead>
-                <TableHead>{t('tenants.actions')}</TableHead>
+                <TableHead>{t("tenants.tenantName")}</TableHead>
+                <TableHead>{t("tenants.domain")}</TableHead>
+                <TableHead>{t("tenants.status.label")}</TableHead>
+                <TableHead>{t("tenants.subscriptionPlan")}</TableHead>
+                <TableHead>{t("tenants.userCount")}</TableHead>
+                <TableHead>{t("tenants.conversationCount")}</TableHead>
+                <TableHead>{t("tenants.createdAt")}</TableHead>
+                <TableHead>{t("tenants.actions")}</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -269,7 +232,7 @@ const TenantsPage: React.FC = () => {
                   <TableCell className="font-medium">{tenant.name}</TableCell>
                   <TableCell>{tenant.domain}</TableCell>
                   <TableCell>{getStatusBadge(tenant.status)}</TableCell>
-                  <TableCell>{tenant.subscriptionPlan}</TableCell>
+                  <TableCell>{t(`tenants.plans.${tenant.subscriptionPlan.toLowerCase()}`)}</TableCell>
                   <TableCell>
                     <div className="flex items-center">
                       <Users className="mr-1 h-4 w-4" />
@@ -296,18 +259,15 @@ const TenantsPage: React.FC = () => {
                         </Button>
                       </DropdownMenuTrigger>
                       <DropdownMenuContent align="end">
-                        <DropdownMenuLabel>{t('tenants.actions')}</DropdownMenuLabel>
+                        <DropdownMenuLabel>{t("tenants.actions")}</DropdownMenuLabel>
                         <DropdownMenuSeparator />
                         <DropdownMenuItem onClick={() => setEditingTenant(tenant)}>
                           <Edit className="mr-2 h-4 w-4" />
-                          {t('common.edit')}
+                          {t("common.edit")}
                         </DropdownMenuItem>
-                        <DropdownMenuItem
-                          onClick={() => handleDeleteTenant(tenant.id)}
-                          className="text-red-600"
-                        >
+                        <DropdownMenuItem onClick={() => handleDeleteTenant(tenant.id)} className="text-red-600">
                           <Trash2 className="mr-2 h-4 w-4" />
-                          {t('common.delete')}
+                          {t("common.delete")}
                         </DropdownMenuItem>
                       </DropdownMenuContent>
                     </DropdownMenu>
@@ -320,10 +280,8 @@ const TenantsPage: React.FC = () => {
           {tenants.length === 0 && !isLoading && (
             <div className="text-center py-8">
               <Building2 className="mx-auto h-12 w-12 text-muted-foreground" />
-              <h3 className="mt-2 text-sm font-semibold">No tenants found</h3>
-              <p className="mt-1 text-sm text-muted-foreground">
-                Get started by creating a new tenant account.
-              </p>
+              <h3 className="mt-2 text-sm font-semibold">{t("tenants.noTenants.title")}</h3>
+              <p className="mt-1 text-sm text-muted-foreground">{t("tenants.noTenants.description")}</p>
             </div>
           )}
         </CardContent>
@@ -333,16 +291,14 @@ const TenantsPage: React.FC = () => {
       <Dialog open={!!editingTenant} onOpenChange={() => setEditingTenant(null)}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>{t('tenants.editTenant')}</DialogTitle>
-            <DialogDescription>
-              Update tenant account information and settings.
-            </DialogDescription>
+            <DialogTitle>{t("tenants.editTenant")}</DialogTitle>
+            <DialogDescription>{t("tenants.editDescription")}</DialogDescription>
           </DialogHeader>
           {editingTenant && (
             <div className="grid gap-4 py-4">
               <div className="grid grid-cols-4 items-center gap-4">
                 <Label htmlFor="edit-name" className="text-right">
-                  {t('tenants.tenantName')}
+                  {t("tenants.tenantName")}
                 </Label>
                 <Input
                   id="edit-name"
@@ -353,7 +309,7 @@ const TenantsPage: React.FC = () => {
               </div>
               <div className="grid grid-cols-4 items-center gap-4">
                 <Label htmlFor="edit-domain" className="text-right">
-                  {t('tenants.domain')}
+                  {t("tenants.domain")}
                 </Label>
                 <Input
                   id="edit-domain"
@@ -364,26 +320,23 @@ const TenantsPage: React.FC = () => {
               </div>
               <div className="grid grid-cols-4 items-center gap-4">
                 <Label htmlFor="edit-status" className="text-right">
-                  {t('tenants.status')}
+                  {t("tenants.status.label")}
                 </Label>
-                <Select
-                  value={editingTenant.status}
-                  onValueChange={(value) => setEditingTenant({ ...editingTenant, status: value })}
-                >
+                <Select value={editingTenant.status} onValueChange={(value) => setEditingTenant({ ...editingTenant, status: value })}>
                   <SelectTrigger className="col-span-3">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="Active">Active</SelectItem>
-                    <SelectItem value="Inactive">Inactive</SelectItem>
-                    <SelectItem value="Suspended">Suspended</SelectItem>
+                    <SelectItem value="Active">{t("tenants.status.active")}</SelectItem>
+                    <SelectItem value="Inactive">{t("tenants.status.inactive")}</SelectItem>
+                    <SelectItem value="Suspended">{t("tenants.status.suspended")}</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
             </div>
           )}
           <DialogFooter>
-            <Button onClick={handleUpdateTenant}>{t('common.save')}</Button>
+            <Button onClick={handleUpdateTenant}>{t("common.save")}</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>

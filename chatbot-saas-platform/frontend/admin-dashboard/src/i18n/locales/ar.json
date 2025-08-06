@@ -20,7 +20,9 @@
     "reset": "إعادة تعيين",
     "confirm": "تأكيد",
     "yes": "نعم",
-    "no": "لا"
+    "no": "لا",
+    "unknown": "غير معروف",
+    "retry": "إعادة المحاولة"
   },
   "navigation": {
     "dashboard": "لوحة التحكم",
@@ -42,77 +44,469 @@
     "welcomeBack": "مرحباً بعودتك!"
   },
   "dashboard": {
-    "title": "لوحة تحكم المدير",
-    "overview": "نظرة عامة",
-    "totalTenants": "إجمالي المستأجرين",
-    "totalUsers": "إجمالي المستخدمين",
-    "totalConversations": "إجمالي المحادثات",
-    "activeAgents": "الوكلاء النشطين",
-    "monthlyRevenue": "الإيرادات الشهرية",
-    "growthRate": "معدل النمو",
-    "recentActivity": "النشاط الأخير",
-    "systemHealth": "صحة النظام"
+    "title": "لوحة التحكم",
+    "overview": "نظرة عامة على منصة الشات بوت الخاصة بك",
+    "status": {
+      "live": "مباشر",
+      "offline": "غير متصل"
+    },
+    "months": {
+      "jan": "يناير",
+      "feb": "فبراير",
+      "mar": "مارس",
+      "apr": "أبريل",
+      "may": "مايو",
+      "jun": "يونيو"
+    },
+    "tenantStatus": {
+      "active": "نشط",
+      "inactive": "غير نشط",
+      "suspended": "معلق"
+    },
+    "stats": {
+      "totalTenants": "إجمالي المستأجرين",
+      "totalUsers": "إجمالي المستخدمين",
+      "totalConversations": "إجمالي المحادثات",
+      "activeAgents": "الوكلاء النشطون"
+    },
+    "trends": {
+      "tenants": "+12% من الشهر الماضي",
+      "users": "+8% من الشهر الماضي",
+      "conversations": "+23% من الشهر الماضي",
+      "agents": "+5% من الشهر الماضي"
+    },
+    "descriptions": {
+      "activeTenants": "حسابات المستأجرين النشطة",
+      "registeredUsers": "المستخدمون المسجلون",
+      "totalConversations": "إجمالي المحادثات",
+      "currentlyOnline": "متصل حالياً"
+    },
+    "charts": {
+      "conversationTrends": "اتجاهات المحادثات",
+      "conversationTrendsDescription": "حجم المحادثات الشهرية ومعدلات الحل",
+      "tenantStatus": "حالة المستأجرين",
+      "tenantStatusDescription": "توزيع حالات المستأجرين"
+    },
+    "systemHealth": {
+      "title": "صحة النظام",
+      "apiGateway": "بوابة API",
+      "database": "قاعدة البيانات",
+      "redisCache": "ذاكرة التخزين المؤقت Redis",
+      "signalrHub": "مركز SignalR",
+      "healthy": "سليم",
+      "connected": "متصل",
+      "disconnected": "منقطع"
+    },
+    "recentActivity": {
+      "title": "النشاط الأخير",
+      "newTenant": "تم تسجيل مستأجر جديد",
+      "newTenantTime": "شركة أكمي - منذ دقيقتين",
+      "maintenance": "تم الانتهاء من صيانة النظام",
+      "maintenanceTime": "تحسين قاعدة البيانات - منذ ساعة واحدة",
+      "highVolume": "تم اكتشاف حجم محادثات عالي",
+      "highVolumeTime": "ذروة الحركة - منذ 3 ساعات"
+    }
   },
   "tenants": {
-    "title": "إدارة المستأجرين",
+    "title": "المستأجرين",
+    "description": "إدارة حسابات المستأجرين والاشتراكات",
     "createTenant": "إنشاء مستأجر",
-    "editTenant": "تعديل مستأجر",
-    "deleteTenant": "حذف مستأجر",
+    "editTenant": "تعديل المستأجر",
+    "createDescription": "إنشاء حساب مستأجر جديد مع تفاصيل الاشتراك.",
+    "editDescription": "تحديث معلومات حساب المستأجر والإعدادات.",
+    "deleteConfirmation": "هل أنت متأكد من أنك تريد حذف هذا المستأجر؟",
     "tenantName": "اسم المستأجر",
     "domain": "النطاق",
-    "status": "الحالة",
-    "subscriptionPlan": "خطة الاشتراك",
-    "userCount": "عدد المستخدمين",
-    "conversationCount": "عدد المحادثات",
+    "userCount": "المستخدمون",
+    "conversationCount": "المحادثات",
     "createdAt": "تاريخ الإنشاء",
-    "actions": "الإجراءات"
+    "actions": "الإجراءات",
+    "subscriptionPlan": "خطة الاشتراك",
+    "searchPlaceholder": "البحث عن المستأجرين...",
+    "status": {
+      "label": "الحالة",
+      "active": "نشط",
+      "inactive": "غير نشط",
+      "suspended": "معلق"
+    },
+    "plans": {
+      "basic": "أساسي",
+      "pro": "احترافي",
+      "enterprise": "مؤسسي"
+    },
+    "management": {
+      "title": "إدارة المستأجرين",
+      "description": "عرض وإدارة جميع حسابات المستأجرين في النظام"
+    },
+    "noTenants": {
+      "title": "لم يتم العثور على مستأجرين",
+      "description": "ابدأ بإنشاء حساب مستأجر جديد."
+    }
   },
   "users": {
-    "title": "إدارة المستخدمين",
+    "title": "المستخدمين",
+    "description": "إدارة حسابات المستخدمين والأدوار والصلاحيات",
     "createUser": "إنشاء مستخدم",
-    "editUser": "تعديل مستخدم",
-    "deleteUser": "حذف مستخدم",
+    "editUser": "تعديل المستخدم",
+    "createDescription": "إنشاء حساب مستخدم جديد مع الدور والصلاحيات.",
+    "editDescription": "تحديث معلومات حساب المستخدم والإعدادات.",
+    "deleteConfirmation": "هل أنت متأكد من أنك تريد حذف هذا المستخدم؟",
     "firstName": "الاسم الأول",
     "lastName": "اسم العائلة",
+    "name": "الاسم",
     "email": "البريد الإلكتروني",
     "role": "الدور",
-    "tenant": "المستأجر",
     "isActive": "نشط",
     "lastLoginAt": "آخر تسجيل دخول",
-    "assignRole": "تعيين دور"
+    "createdAt": "تاريخ الإنشاء",
+    "actions": "الإجراءات",
+    "assignRole": "تعيين دور",
+    "searchPlaceholder": "البحث عن المستخدمين...",
+    "never": "أبداً",
+    "roles": {
+      "admin": "مدير",
+      "manager": "مدير متوسط",
+      "agent": "وكيل",
+      "user": "مستخدم"
+    },
+    "status": {
+      "label": "الحالة",
+      "active": "نشط",
+      "inactive": "غير نشط"
+    },
+    "management": {
+      "title": "إدارة المستخدمين",
+      "description": "عرض وإدارة جميع حسابات المستخدمين في النظام"
+    },
+    "noUsers": {
+      "title": "لم يتم العثور على مستخدمين",
+      "description": "ابدأ بإنشاء حساب مستخدم جديد."
+    }
   },
   "analytics": {
-    "title": "التحليلات والتقارير",
-    "conversationMetrics": "مقاييس المحادثة",
-    "agentPerformance": "أداء الوكيل",
-    "botEffectiveness": "فعالية البوت",
-    "customReports": "التقارير المخصصة",
-    "timeRange": "النطاق الزمني",
-    "last7Days": "آخر 7 أيام",
-    "last30Days": "آخر 30 يوماً",
-    "last90Days": "آخر 90 يوماً",
-    "thisYear": "هذا العام",
-    "generateReport": "إنشاء تقرير"
+    "title": "التحليلات",
+    "description": "تحليلات شاملة ورؤى الأداء",
+    "liveUpdates": "تحديثات مباشرة",
+    "staticData": "بيانات ثابتة",
+    "allTenants": "جميع المستأجرين",
+    "timeRanges": {
+      "last7Days": "آخر 7 أيام",
+      "last30Days": "آخر 30 يوماً",
+      "last90Days": "آخر 90 يوماً",
+      "thisYear": "هذا العام"
+    },
+    "tabs": {
+      "conversations": "مقاييس المحادثات",
+      "agents": "أداء الوكلاء",
+      "bot": "فعالية البوت",
+      "custom": "تقارير مخصصة"
+    },
+    "metrics": {
+      "totalConversations": "إجمالي المحادثات",
+      "averageDuration": "متوسط المدة",
+      "resolutionRate": "معدل الحل",
+      "satisfactionScore": "نقاط الرضا",
+      "totalAgents": "إجمالي الوكلاء",
+      "activeAgents": "الوكلاء النشطون",
+      "avgResponseTime": "متوسط وقت الاستجابة",
+      "averageRating": "متوسط التقييم",
+      "botAccuracy": "دقة البوت",
+      "fallbackRate": "معدل التراجع",
+      "trainingSessions": "جلسات التدريب",
+      "knowledgeBase": "قاعدة المعرفة"
+    },
+    "units": {
+      "minutes": "دقيقة"
+    },
+    "changes": {
+      "conversationsIncrease": "+12% من الفترة الماضية",
+      "durationDecrease": "-3% من الفترة الماضية",
+      "resolutionIncrease": "+5% من الفترة الماضية",
+      "satisfactionIncrease": "+0.2 من الفترة الماضية",
+      "agentsIncrease": "+2 من الشهر الماضي",
+      "responseTimeDecrease": "-15% من الفترة الماضية",
+      "ratingIncrease": "+0.1 من الفترة الماضية",
+      "accuracyIncrease": "+3% من الفترة الماضية",
+      "fallbackDecrease": "-2% من الفترة الماضية",
+      "trainingIncrease": "+12 هذا الشهر",
+      "documentsIncrease": "+45 وثيقة"
+    },
+    "descriptions": {
+      "allChannels": "جميع قنوات المحادثة",
+      "timeToResolution": "وقت الحل",
+      "successfullyResolved": "تم حلها بنجاح",
+      "averageRating": "متوسط تقييم العملاء",
+      "registeredAgents": "الوكلاء المسجلون",
+      "currentlyOnline": "متصل حالياً",
+      "onlineNow": "متصل الآن",
+      "firstResponseTime": "وقت الاستجابة الأولى",
+      "customerSatisfaction": "رضا العملاء",
+      "correctResponses": "الردود الصحيحة",
+      "escalatedToHumans": "تم تصعيدها للبشر",
+      "modelImprovements": "تحسينات النموذج",
+      "totalDocuments": "إجمالي الوثائق"
+    },
+    "channels": {
+      "website": "الموقع الإلكتروني",
+      "mobileApp": "تطبيق الجوال",
+      "socialMedia": "وسائل التواصل الاجتماعي",
+      "email": "البريد الإلكتروني"
+    },
+    "charts": {
+      "conversationTrends": "اتجاهات المحادثات",
+      "conversationTrendsDescription": "حجم المحادثات اليومية ومعدلات الحل",
+      "channelDistribution": "توزيع القنوات",
+      "channelDistributionDescription": "حجم المحادثات حسب القناة",
+      "agentPerformance": "أداء الوكلاء",
+      "agentPerformanceDescription": "مقاييس وأداء الوكلاء الفرديين",
+      "botPerformance": "اتجاهات أداء البوت",
+      "botPerformanceDescription": "الدقة وجودة الاستجابة عبر الزمن",
+      "intentRecognition": "التعرف على النوايا",
+      "intentRecognitionDescription": "نوايا المستخدمين الأكثر شيوعاً"
+    },
+    "intents": {
+      "productInfo": "معلومات المنتج",
+      "techSupport": "الدعم التقني",
+      "billing": "أسئلة الفواتير",
+      "accountManagement": "إدارة الحساب",
+      "other": "أخرى"
+    },
+    "customReports": {
+      "title": "تقارير مخصصة",
+      "description": "إنشاء وإدارة تقارير التحليلات المخصصة",
+      "buildDescription": "بناء تقارير مخصصة بواجهة السحب والإفلات.",
+      "generateReport": "إنشاء تقرير"
+    }
   },
   "subscriptions": {
-    "title": "إدارة الاشتراكات",
-    "plans": "الخطط",
-    "billing": "الفوترة",
-    "usage": "الاستخدام",
-    "invoices": "الفواتير",
-    "payments": "المدفوعات"
+    "title": "الاشتراكات",
+    "description": "إدارة خطط الاشتراك والفواتير والإيرادات",
+    "createPlan": "إنشاء خطة",
+    "editPlan": "تعديل الخطة",
+    "manage": "إدارة",
+    "subscribers": "مشترك",
+    "month": "شهر",
+    "tenant": "المستأجر",
+    "plan": "الخطة",
+    "mrr": "الإيراد الشهري المتكرر",
+    "users": "المستخدمون",
+    "nextBilling": "الفوترة التالية",
+    "actions": "الإجراءات",
+    "activeSubscriptions": "الاشتراكات النشطة",
+    "manageSubscriptions": "إدارة جميع اشتراكات العملاء",
+    "searchPlaceholder": "البحث في الاشتراكات...",
+    "planTypes": {
+      "basic": "أساسي",
+      "pro": "احترافي",
+      "enterprise": "مؤسسي"
+    },
+    "status": {
+      "label": "الحالة",
+      "active": "نشط",
+      "pastDue": "متأخر",
+      "cancelled": "ملغى",
+      "trialing": "تجريبي"
+    },
+    "features": {
+      "upTo5Users": "حتى 5 مستخدمين",
+      "thousandConversations": "1,000 محادثة/شهر",
+      "basicAnalytics": "تحليلات أساسية",
+      "upTo50Users": "حتى 50 مستخدم",
+      "tenThousandConversations": "10,000 محادثة/شهر",
+      "advancedAnalytics": "تحليلات متقدمة",
+      "customBranding": "علامة تجارية مخصصة",
+      "unlimitedUsers": "مستخدمون غير محدودون",
+      "unlimitedConversations": "محادثات غير محدودة",
+      "fullAnalytics": "مجموعة تحليلات كاملة",
+      "whiteLabelSolution": "حل العلامة البيضاء"
+    },
+    "metrics": {
+      "monthlyRevenue": "الإيرادات الشهرية",
+      "activeSubscriptions": "الاشتراكات النشطة",
+      "churnRate": "معدل الانسحاب",
+      "averageRevenue": "متوسط الإيرادات"
+    },
+    "changes": {
+      "revenueIncrease": "+14% من الشهر الماضي",
+      "subscriptionsIncrease": "+12% من الشهر الماضي",
+      "churnDecrease": "-0.5% من الشهر الماضي",
+      "arpuIncrease": "+$8 من الشهر الماضي"
+    },
+    "descriptions": {
+      "recurringRevenue": "الإيرادات المتكررة",
+      "payingCustomers": "العملاء الدافعون",
+      "monthlyChurn": "الانسحاب الشهري",
+      "perUserPerMonth": "لكل مستخدم شهرياً"
+    },
+    "tabs": {
+      "overview": "نظرة عامة",
+      "plans": "الخطط",
+      "subscriptions": "الاشتراكات",
+      "billing": "الفواتير"
+    },
+    "charts": {
+      "revenueTrends": "اتجاهات الإيرادات",
+      "revenueTrendsDescription": "الإيرادات الشهرية المتكررة ونمو الاشتراكات",
+      "planDistribution": "توزيع الخطط",
+      "planDistributionDescription": "توزيع الاشتراكات حسب نوع الخطة"
+    },
+    "billing": {
+      "overview": "نظرة عامة على الفواتير",
+      "description": "معالجة المدفوعات وإدارة الفواتير",
+      "successfulPayments": "المدفوعات الناجحة",
+      "failedPayments": "المدفوعات الفاشلة",
+      "pendingInvoices": "الفواتير المعلقة",
+      "overdueInvoices": "الفواتير المتأخرة",
+      "paymentMethods": "طرق الدفع",
+      "paymentMethodsDescription": "توزيع طرق دفع العملاء",
+      "creditCard": "بطاقة ائتمان",
+      "bankTransfer": "تحويل بنكي",
+      "paypal": "PayPal"
+    },
+    "months": {
+      "jan": "يناير",
+      "feb": "فبراير",
+      "mar": "مارس",
+      "apr": "أبريل",
+      "may": "مايو",
+      "jun": "يونيو"
+    },
+    "errors": {
+      "loadingError": "خطأ في تحميل الاشتراكات"
+    }
   },
   "settings": {
     "title": "الإعدادات",
-    "general": "عام",
-    "security": "الأمان",
-    "notifications": "الإشعارات",
-    "integrations": "التكاملات",
-    "appearance": "المظهر",
-    "language": "اللغة",
-    "theme": "السمة",
-    "darkMode": "الوضع المظلم",
-    "lightMode": "الوضع الفاتح",
-    "systemMode": "وضع النظام"
+    "description": "إدارة إعدادات التطبيق وتفضيلاتك",
+    "loadingSettings": "جارٍ تحميل الإعدادات...",
+    "tabs": {
+      "general": "عام",
+      "appearance": "المظهر",
+      "security": "الأمان",
+      "notifications": "الإشعارات",
+      "integrations": "التكاملات",
+      "system": "النظام"
+    },
+    "general": {
+      "title": "الإعدادات العامة",
+      "description": "تكوين إعدادات التطبيق الأساسية والتفضيلات",
+      "companyName": "اسم الشركة",
+      "adminEmail": "بريد المدير الإلكتروني",
+      "timezone": "المنطقة الزمنية",
+      "language": "اللغة",
+      "maintenanceMode": "وضع الصيانة",
+      "maintenanceModeDescription": "تفعيل وضع الصيانة لمنع وصول المستخدمين",
+      "userRegistration": "تسجيل المستخدمين",
+      "userRegistrationDescription": "السماح للمستخدمين الجدد بتسجيل حسابات",
+      "timezones": {
+        "utc": "التوقيت العالمي المنسق",
+        "est": "التوقيت الشرقي",
+        "pst": "توقيت المحيط الهادئ",
+        "gmt": "توقيت غرينتش"
+      },
+      "languages": {
+        "english": "English",
+        "arabic": "العربية"
+      }
+    },
+    "appearance": {
+      "title": "المظهر",
+      "description": "تخصيص مظهر وشكل التطبيق",
+      "theme": "المظهر",
+      "lightMode": "فاتح",
+      "darkMode": "داكن",
+      "systemMode": "النظام",
+      "primaryColor": "اللون الأساسي",
+      "customColor": "لون مخصص",
+      "compactMode": "الوضع المضغوط",
+      "compactModeDescription": "استخدام تخطيط أكثر إحكاماً لاحتواء المزيد من المحتوى",
+      "animations": "الرسوم المتحركة",
+      "animationsDescription": "تفعيل الرسوم المتحركة والانتقالات السلسة"
+    },
+    "security": {
+      "title": "الأمان",
+      "description": "إدارة إعدادات الأمان وضوابط الوصول",
+      "twoFactor": "المصادقة الثنائية",
+      "twoFactorDescription": "إضافة طبقة أمان إضافية لحسابك",
+      "sessionTimeout": "انتهاء مهلة الجلسة (بالدقائق)",
+      "passwordExpiry": "انتهاء صلاحية كلمة المرور (بالأيام)",
+      "apiKeys": "مفاتيح API",
+      "productionApiKey": "مفتاح API الإنتاج",
+      "developmentApiKey": "مفتاح API التطوير",
+      "lastUsed": "آخر استخدام",
+      "generateNewKey": "إنشاء مفتاح جديد",
+      "timeAgo": {
+        "twoHours": "منذ ساعتين",
+        "oneDay": "منذ يوم واحد"
+      },
+      "status": {
+        "active": "نشط"
+      }
+    },
+    "notifications": {
+      "title": "الإشعارات",
+      "description": "تكوين كيفية استلام الإشعارات",
+      "email": "إشعارات البريد الإلكتروني",
+      "emailDescription": "استلام الإشعارات عبر البريد الإلكتروني",
+      "push": "الإشعارات المنبثقة",
+      "pushDescription": "استلام الإشعارات المنبثقة في متصفحك",
+      "sms": "إشعارات الرسائل النصية",
+      "smsDescription": "استلام الإشعارات عبر الرسائل النصية",
+      "inApp": "الإشعارات داخل التطبيق",
+      "inAppDescription": "عرض الإشعارات داخل التطبيق"
+    },
+    "integrations": {
+      "title": "التكاملات",
+      "description": "إدارة تكاملات الطرف الثالث والاتصالات",
+      "sendgrid": {
+        "name": "SendGrid",
+        "description": "خدمة تسليم البريد الإلكتروني"
+      },
+      "twilio": {
+        "name": "Twilio",
+        "description": "خدمات الرسائل النصية والصوت"
+      },
+      "stripe": {
+        "name": "Stripe",
+        "description": "معالجة المدفوعات"
+      },
+      "slack": {
+        "name": "Slack",
+        "description": "التواصل الجماعي"
+      },
+      "status": {
+        "connected": "متصل",
+        "disconnected": "منقطع"
+      }
+    },
+    "system": {
+      "title": "معلومات النظام",
+      "description": "عرض حالة النظام وتفاصيل التكوين",
+      "appVersion": "إصدار التطبيق",
+      "databaseVersion": "إصدار قاعدة البيانات",
+      "cacheStatus": "حالة التخزين المؤقت",
+      "messageQueue": "قائمة انتظار الرسائل",
+      "redisConnected": "Redis متصل",
+      "rabbitMqActive": "RabbitMQ نشط",
+      "health": {
+        "title": "صحة النظام",
+        "apiGateway": "بوابة API",
+        "database": "قاعدة البيانات",
+        "vectorDatabase": "قاعدة البيانات المتجهة",
+        "backgroundJobs": "المهام الخلفية",
+        "status": {
+          "healthy": "سليم",
+          "warning": "تحذير"
+        }
+      }
+    },
+    "colors": {
+      "blue": "أزرق",
+      "green": "أخضر",
+      "purple": "بنفسجي",
+      "red": "أحمر",
+      "orange": "برتقالي",
+      "pink": "وردي"
+    }
   }
 }

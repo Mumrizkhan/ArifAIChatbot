@@ -1,37 +1,16 @@
-import React, { useEffect, useState } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
-import { useTranslation } from 'react-i18next';
-import { AppDispatch, RootState } from '../../store/store';
-import { fetchUsers, createUser, updateUser, deleteUser } from '../../store/slices/userSlice';
-import { Button } from '../../components/ui/button';
-import { Input } from '../../components/ui/input';
-import { Badge } from '../../components/ui/badge';
-import { Switch } from '../../components/ui/switch';
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from '../../components/ui/table';
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from '../../components/ui/dialog';
-import { Label } from '../../components/ui/label';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '../../components/ui/select';
+import React, { useEffect, useState } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import { useTranslation } from "react-i18next";
+import { AppDispatch, RootState } from "../../store/store";
+import { fetchUsers, createUser, updateUser, deleteUser } from "../../store/slices/userSlice";
+import { Button } from "../../components/ui/button";
+import { Input } from "../../components/ui/input";
+import { Badge } from "../../components/ui/badge";
+import { Switch } from "../../components/ui/switch";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "../../components/ui/table";
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "../../components/ui/dialog";
+import { Label } from "../../components/ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../../components/ui/select";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -39,37 +18,24 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from '../../components/ui/dropdown-menu';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../../components/ui/card';
-import { Skeleton } from '../../components/ui/skeleton';
-import {
-  Plus,
-  Search,
-  MoreHorizontal,
-  Edit,
-  Trash2,
-  Users,
-  UserCheck,
-  UserX,
-  Shield,
-  Calendar,
-} from 'lucide-react';
+} from "../../components/ui/dropdown-menu";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../../components/ui/card";
+import { Skeleton } from "../../components/ui/skeleton";
+import { Plus, Search, MoreHorizontal, Edit, Trash2, Users, UserCheck, UserX, Shield, Calendar } from "lucide-react";
 
 const UsersPage: React.FC = () => {
   const { t } = useTranslation();
   const dispatch = useDispatch<AppDispatch>();
-  const { users, isLoading, currentPage, pageSize } = useSelector(
-    (state: RootState) => state.user
-  );
+  const { users, isLoading, currentPage, pageSize } = useSelector((state: RootState) => state.user);
 
-  const [searchTerm, setSearchTerm] = useState('');
+  const [searchTerm, setSearchTerm] = useState("");
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
   const [editingUser, setEditingUser] = useState<any>(null);
   const [newUser, setNewUser] = useState({
-    firstName: '',
-    lastName: '',
-    email: '',
-    role: 'User',
+    firstName: "",
+    lastName: "",
+    email: "",
+    role: "User",
     isActive: true,
   });
 
@@ -81,9 +47,9 @@ const UsersPage: React.FC = () => {
     try {
       await dispatch(createUser(newUser)).unwrap();
       setIsCreateDialogOpen(false);
-      setNewUser({ firstName: '', lastName: '', email: '', role: 'User', isActive: true });
+      setNewUser({ firstName: "", lastName: "", email: "", role: "User", isActive: true });
     } catch (error) {
-      console.error('Failed to create user:', error);
+      console.error("Failed to create user:", error);
     }
   };
 
@@ -93,40 +59,46 @@ const UsersPage: React.FC = () => {
       await dispatch(updateUser({ id: editingUser.id, data: editingUser })).unwrap();
       setEditingUser(null);
     } catch (error) {
-      console.error('Failed to update user:', error);
+      console.error("Failed to update user:", error);
     }
   };
 
   const handleDeleteUser = async (id: string) => {
-    if (window.confirm('Are you sure you want to delete this user?')) {
+    if (window.confirm(t("users.deleteConfirmation"))) {
       try {
         await dispatch(deleteUser(id)).unwrap();
       } catch (error) {
-        console.error('Failed to delete user:', error);
+        console.error("Failed to delete user:", error);
       }
     }
   };
 
   const getRoleBadge = (role: string) => {
-    const variants: Record<string, 'default' | 'secondary' | 'destructive'> = {
-      Admin: 'destructive',
-      Manager: 'default',
-      Agent: 'secondary',
-      User: 'secondary',
+    const variants: Record<string, "default" | "secondary" | "destructive"> = {
+      Admin: "destructive",
+      Manager: "default",
+      Agent: "secondary",
+      User: "secondary",
     };
-    return <Badge variant={variants[role] || 'secondary'}>{role}</Badge>;
+    const roleTranslations: Record<string, string> = {
+      Admin: t("users.roles.admin"),
+      Manager: t("users.roles.manager"),
+      Agent: t("users.roles.agent"),
+      User: t("users.roles.user"),
+    };
+    return <Badge variant={variants[role] || "secondary"}>{roleTranslations[role] || role}</Badge>;
   };
 
   const getStatusBadge = (isActive: boolean) => {
     return isActive ? (
       <Badge variant="default">
         <UserCheck className="mr-1 h-3 w-3" />
-        Active
+        {t("users.status.active")}
       </Badge>
     ) : (
       <Badge variant="secondary">
         <UserX className="mr-1 h-3 w-3" />
-        Inactive
+        {t("users.status.inactive")}
       </Badge>
     );
   };
@@ -159,29 +131,25 @@ const UsersPage: React.FC = () => {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold">{t('users.title')}</h1>
-          <p className="text-muted-foreground">
-            Manage user accounts, roles, and permissions
-          </p>
+          <h1 className="text-3xl font-bold">{t("users.title")}</h1>
+          <p className="text-muted-foreground">{t("users.description")}</p>
         </div>
         <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
           <DialogTrigger asChild>
             <Button>
               <Plus className="mr-2 h-4 w-4" />
-              {t('users.createUser')}
+              {t("users.createUser")}
             </Button>
           </DialogTrigger>
           <DialogContent>
             <DialogHeader>
-              <DialogTitle>{t('users.createUser')}</DialogTitle>
-              <DialogDescription>
-                Create a new user account with role and permissions.
-              </DialogDescription>
+              <DialogTitle>{t("users.createUser")}</DialogTitle>
+              <DialogDescription>{t("users.createDescription")}</DialogDescription>
             </DialogHeader>
             <div className="grid gap-4 py-4">
               <div className="grid grid-cols-4 items-center gap-4">
                 <Label htmlFor="firstName" className="text-right">
-                  {t('users.firstName')}
+                  {t("users.firstName")}
                 </Label>
                 <Input
                   id="firstName"
@@ -192,7 +160,7 @@ const UsersPage: React.FC = () => {
               </div>
               <div className="grid grid-cols-4 items-center gap-4">
                 <Label htmlFor="lastName" className="text-right">
-                  {t('users.lastName')}
+                  {t("users.lastName")}
                 </Label>
                 <Input
                   id="lastName"
@@ -203,7 +171,7 @@ const UsersPage: React.FC = () => {
               </div>
               <div className="grid grid-cols-4 items-center gap-4">
                 <Label htmlFor="email" className="text-right">
-                  {t('users.email')}
+                  {t("users.email")}
                 </Label>
                 <Input
                   id="email"
@@ -215,36 +183,29 @@ const UsersPage: React.FC = () => {
               </div>
               <div className="grid grid-cols-4 items-center gap-4">
                 <Label htmlFor="role" className="text-right">
-                  {t('users.role')}
+                  {t("users.role")}
                 </Label>
-                <Select
-                  value={newUser.role}
-                  onValueChange={(value) => setNewUser({ ...newUser, role: value })}
-                >
+                <Select value={newUser.role} onValueChange={(value) => setNewUser({ ...newUser, role: value })}>
                   <SelectTrigger className="col-span-3">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="Admin">Admin</SelectItem>
-                    <SelectItem value="Manager">Manager</SelectItem>
-                    <SelectItem value="Agent">Agent</SelectItem>
-                    <SelectItem value="User">User</SelectItem>
+                    <SelectItem value="Admin">{t("users.roles.admin")}</SelectItem>
+                    <SelectItem value="Manager">{t("users.roles.manager")}</SelectItem>
+                    <SelectItem value="Agent">{t("users.roles.agent")}</SelectItem>
+                    <SelectItem value="User">{t("users.roles.user")}</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
               <div className="grid grid-cols-4 items-center gap-4">
                 <Label htmlFor="isActive" className="text-right">
-                  {t('users.isActive')}
+                  {t("users.isActive")}
                 </Label>
-                <Switch
-                  id="isActive"
-                  checked={newUser.isActive}
-                  onCheckedChange={(checked) => setNewUser({ ...newUser, isActive: checked })}
-                />
+                <Switch id="isActive" checked={newUser.isActive} onCheckedChange={(checked) => setNewUser({ ...newUser, isActive: checked })} />
               </div>
             </div>
             <DialogFooter>
-              <Button onClick={handleCreateUser}>{t('common.create')}</Button>
+              <Button onClick={handleCreateUser}>{t("common.create")}</Button>
             </DialogFooter>
           </DialogContent>
         </Dialog>
@@ -254,35 +215,28 @@ const UsersPage: React.FC = () => {
         <CardHeader>
           <CardTitle className="flex items-center">
             <Users className="mr-2 h-5 w-5" />
-            User Management
+            {t("users.management.title")}
           </CardTitle>
-          <CardDescription>
-            View and manage all user accounts in the system
-          </CardDescription>
+          <CardDescription>{t("users.management.description")}</CardDescription>
         </CardHeader>
         <CardContent>
           <div className="flex items-center space-x-2 mb-4">
             <div className="relative flex-1">
               <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
-              <Input
-                placeholder={t('common.search')}
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-8"
-              />
+              <Input placeholder={t("users.searchPlaceholder")} value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} className="pl-8" />
             </div>
           </div>
 
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>Name</TableHead>
-                <TableHead>{t('users.email')}</TableHead>
-                <TableHead>{t('users.role')}</TableHead>
-                <TableHead>Status</TableHead>
-                <TableHead>{t('users.lastLoginAt')}</TableHead>
-                <TableHead>Created</TableHead>
-                <TableHead>{t('users.actions')}</TableHead>
+                <TableHead>{t("users.name")}</TableHead>
+                <TableHead>{t("users.email")}</TableHead>
+                <TableHead>{t("users.role")}</TableHead>
+                <TableHead>{t("users.status.label")}</TableHead>
+                <TableHead>{t("users.lastLoginAt")}</TableHead>
+                <TableHead>{t("users.createdAt")}</TableHead>
+                <TableHead>{t("users.actions")}</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -301,7 +255,7 @@ const UsersPage: React.FC = () => {
                         {new Date(user.lastLoginAt).toLocaleDateString()}
                       </div>
                     ) : (
-                      <span className="text-muted-foreground">Never</span>
+                      <span className="text-muted-foreground">{t("users.never")}</span>
                     )}
                   </TableCell>
                   <TableCell>
@@ -318,22 +272,19 @@ const UsersPage: React.FC = () => {
                         </Button>
                       </DropdownMenuTrigger>
                       <DropdownMenuContent align="end">
-                        <DropdownMenuLabel>{t('users.actions')}</DropdownMenuLabel>
+                        <DropdownMenuLabel>{t("users.actions")}</DropdownMenuLabel>
                         <DropdownMenuSeparator />
                         <DropdownMenuItem onClick={() => setEditingUser(user)}>
                           <Edit className="mr-2 h-4 w-4" />
-                          {t('common.edit')}
+                          {t("common.edit")}
                         </DropdownMenuItem>
                         <DropdownMenuItem>
                           <Shield className="mr-2 h-4 w-4" />
-                          {t('users.assignRole')}
+                          {t("users.assignRole")}
                         </DropdownMenuItem>
-                        <DropdownMenuItem
-                          onClick={() => handleDeleteUser(user.id)}
-                          className="text-red-600"
-                        >
+                        <DropdownMenuItem onClick={() => handleDeleteUser(user.id)} className="text-red-600">
                           <Trash2 className="mr-2 h-4 w-4" />
-                          {t('common.delete')}
+                          {t("common.delete")}
                         </DropdownMenuItem>
                       </DropdownMenuContent>
                     </DropdownMenu>
@@ -346,10 +297,8 @@ const UsersPage: React.FC = () => {
           {users.length === 0 && !isLoading && (
             <div className="text-center py-8">
               <Users className="mx-auto h-12 w-12 text-muted-foreground" />
-              <h3 className="mt-2 text-sm font-semibold">No users found</h3>
-              <p className="mt-1 text-sm text-muted-foreground">
-                Get started by creating a new user account.
-              </p>
+              <h3 className="mt-2 text-sm font-semibold">{t("users.noUsers.title")}</h3>
+              <p className="mt-1 text-sm text-muted-foreground">{t("users.noUsers.description")}</p>
             </div>
           )}
         </CardContent>
@@ -359,16 +308,14 @@ const UsersPage: React.FC = () => {
       <Dialog open={!!editingUser} onOpenChange={() => setEditingUser(null)}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>{t('users.editUser')}</DialogTitle>
-            <DialogDescription>
-              Update user account information and settings.
-            </DialogDescription>
+            <DialogTitle>{t("users.editUser")}</DialogTitle>
+            <DialogDescription>{t("users.editDescription")}</DialogDescription>
           </DialogHeader>
           {editingUser && (
             <div className="grid gap-4 py-4">
               <div className="grid grid-cols-4 items-center gap-4">
                 <Label htmlFor="edit-firstName" className="text-right">
-                  {t('users.firstName')}
+                  {t("users.firstName")}
                 </Label>
                 <Input
                   id="edit-firstName"
@@ -379,7 +326,7 @@ const UsersPage: React.FC = () => {
               </div>
               <div className="grid grid-cols-4 items-center gap-4">
                 <Label htmlFor="edit-lastName" className="text-right">
-                  {t('users.lastName')}
+                  {t("users.lastName")}
                 </Label>
                 <Input
                   id="edit-lastName"
@@ -390,7 +337,7 @@ const UsersPage: React.FC = () => {
               </div>
               <div className="grid grid-cols-4 items-center gap-4">
                 <Label htmlFor="edit-email" className="text-right">
-                  {t('users.email')}
+                  {t("users.email")}
                 </Label>
                 <Input
                   id="edit-email"
@@ -401,26 +348,23 @@ const UsersPage: React.FC = () => {
               </div>
               <div className="grid grid-cols-4 items-center gap-4">
                 <Label htmlFor="edit-role" className="text-right">
-                  {t('users.role')}
+                  {t("users.role")}
                 </Label>
-                <Select
-                  value={editingUser.role}
-                  onValueChange={(value) => setEditingUser({ ...editingUser, role: value })}
-                >
+                <Select value={editingUser.role} onValueChange={(value) => setEditingUser({ ...editingUser, role: value })}>
                   <SelectTrigger className="col-span-3">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="Admin">Admin</SelectItem>
-                    <SelectItem value="Manager">Manager</SelectItem>
-                    <SelectItem value="Agent">Agent</SelectItem>
-                    <SelectItem value="User">User</SelectItem>
+                    <SelectItem value="Admin">{t("users.roles.admin")}</SelectItem>
+                    <SelectItem value="Manager">{t("users.roles.manager")}</SelectItem>
+                    <SelectItem value="Agent">{t("users.roles.agent")}</SelectItem>
+                    <SelectItem value="User">{t("users.roles.user")}</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
               <div className="grid grid-cols-4 items-center gap-4">
                 <Label htmlFor="edit-isActive" className="text-right">
-                  {t('users.isActive')}
+                  {t("users.isActive")}
                 </Label>
                 <Switch
                   id="edit-isActive"
@@ -431,7 +375,7 @@ const UsersPage: React.FC = () => {
             </div>
           )}
           <DialogFooter>
-            <Button onClick={handleUpdateUser}>{t('common.save')}</Button>
+            <Button onClick={handleUpdateUser}>{t("common.save")}</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
