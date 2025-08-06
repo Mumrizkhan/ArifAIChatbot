@@ -105,19 +105,11 @@ builder.Services.AddCors(options =>
               .AllowAnyMethod()
               .AllowAnyHeader();
     });
-    //options.AddPolicy("FrontEnd", policy =>
-    //{
-    //	policy
-    //		.WithOrigins("http://localhost:5176;http://localhost:8000")    // For development; restrict in production!
-    //		.AllowAnyMethod()
-    //   .AllowAnyHeader()
-    //   .AllowCredentials();
-    //});
+   
 });
 
 var app = builder.Build();
 app.UseCors("AllowAll");
-//app.UseCors("FrontEnd");
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();

@@ -164,80 +164,80 @@ export interface ExecuteWorkflowData {
 
 export class WorkflowService {
   static async getWorkflows(page = 1, pageSize = 20): Promise<ApiResponse<Workflow[]>> {
-    return apiClient.get(`/workflows?page=${page}&pageSize=${pageSize}`);
+    return apiClient.get(`/workflow/workflows?page=${page}&pageSize=${pageSize}`);
   }
 
   static async getWorkflow(id: string): Promise<ApiResponse<Workflow>> {
-    return apiClient.get(`/workflows/${id}`);
+    return apiClient.get(`/workflow/workflows/${id}`);
   }
 
   static async createWorkflow(data: CreateWorkflowData): Promise<ApiResponse<Workflow>> {
-    return apiClient.post('/workflows', data);
+    return apiClient.post('/workflow/workflows', data);
   }
 
   static async updateWorkflow(data: UpdateWorkflowData): Promise<ApiResponse<void>> {
-    return apiClient.put(`/workflows/${data.id}`, data);
+    return apiClient.put(`/workflow/workflows/${data.id}`, data);
   }
 
   static async deleteWorkflow(id: string): Promise<ApiResponse<void>> {
-    return apiClient.delete(`/workflows/${id}`);
+    return apiClient.delete(`/workflow/workflows/${id}`);
   }
 
   static async activateWorkflow(id: string): Promise<ApiResponse<void>> {
-    return apiClient.post(`/workflows/${id}/activate`);
+    return apiClient.post(`/workflow/workflows/${id}/activate`);
   }
 
   static async deactivateWorkflow(id: string): Promise<ApiResponse<void>> {
-    return apiClient.post(`/workflows/${id}/deactivate`);
+    return apiClient.post(`/workflow/workflows/${id}/deactivate`);
   }
 
   static async cloneWorkflow(id: string, newName: string): Promise<ApiResponse<Workflow>> {
-    return apiClient.post(`/workflows/${id}/clone`, { newName });
+    return apiClient.post(`/workflow/workflows/${id}/clone`, { newName });
   }
 
   static async executeWorkflow(id: string, data: ExecuteWorkflowData): Promise<ApiResponse<{ executionId: string }>> {
-    return apiClient.post(`/workflows/${id}/execute`, data);
+    return apiClient.post(`/workflow/workflows/${id}/execute`, data);
   }
 
   static async getWorkflowExecutions(workflowId: string, page = 1, pageSize = 20): Promise<ApiResponse<WorkflowExecution[]>> {
-    return apiClient.get(`/workflows/${workflowId}/executions?page=${page}&pageSize=${pageSize}`);
+    return apiClient.get(`/workflow/workflows/${workflowId}/executions?page=${page}&pageSize=${pageSize}`);
   }
 
   static async getWorkflowExecution(executionId: string): Promise<ApiResponse<WorkflowExecution>> {
-    return apiClient.get(`/workflows/executions/${executionId}`);
+    return apiClient.get(`/workflow/workflows/executions/${executionId}`);
   }
 
   static async cancelExecution(executionId: string): Promise<ApiResponse<void>> {
-    return apiClient.post(`/workflows/executions/${executionId}/cancel`);
+    return apiClient.post(`/workflow/workflows/executions/${executionId}/cancel`);
   }
 
   static async retryExecution(executionId: string): Promise<ApiResponse<void>> {
-    return apiClient.post(`/workflows/executions/${executionId}/retry`);
+    return apiClient.post(`/workflow/workflows/executions/${executionId}/retry`);
   }
 
   static async getStatistics(startDate?: string, endDate?: string): Promise<ApiResponse<WorkflowStatistics>> {
     const params = new URLSearchParams();
     if (startDate) params.append('startDate', startDate);
     if (endDate) params.append('endDate', endDate);
-    return apiClient.get(`/workflows/statistics?${params.toString()}`);
+    return apiClient.get(`/workflow/workflows/statistics?${params.toString()}`);
   }
 
   static async getAvailableStepTypes(): Promise<ApiResponse<WorkflowStepType[]>> {
-    return apiClient.get('/workflows/designer/step-types');
+    return apiClient.get('/workflow/workflows/designer/step-types');
   }
 
   static async validateWorkflowDefinition(definition: WorkflowDefinition): Promise<ApiResponse<{ isValid: boolean; definition: WorkflowDefinition; message: string }>> {
-    return apiClient.post('/workflows/designer/validate', definition);
+    return apiClient.post('/workflow/workflows/designer/validate', definition);
   }
 
   static async getTemplates(category?: string, publicOnly = true): Promise<ApiResponse<WorkflowTemplate[]>> {
     const params = new URLSearchParams();
     if (category) params.append('category', category);
     params.append('publicOnly', publicOnly.toString());
-    return apiClient.get(`/workflows/templates?${params.toString()}`);
+    return apiClient.get(`/workflow/workflows/templates?${params.toString()}`);
   }
 
   static async createWorkflowFromTemplate(templateId: string, workflowName: string): Promise<ApiResponse<Workflow>> {
-    return apiClient.post(`/workflows/templates/${templateId}/create-workflow`, { workflowName });
+    return apiClient.post(`/workflow/workflows/templates/${templateId}/create-workflow`, { workflowName });
   }
 }
