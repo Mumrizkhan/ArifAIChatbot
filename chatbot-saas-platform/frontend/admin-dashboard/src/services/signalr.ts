@@ -1,4 +1,5 @@
 import { HubConnection, HubConnectionBuilder, LogLevel } from '@microsoft/signalr';
+import { env } from 'process';
 
 interface DashboardStats {
   totalTenants: number;
@@ -63,7 +64,7 @@ class AdminSignalRService {
 
     try {
       this.connection = new HubConnectionBuilder()
-        .withUrl('/chatHub', {
+        .withUrl(`${env.VITE_API_BASE_URL}/chat/chatHub`, {
           accessTokenFactory: () => authToken,
         })
         .withAutomaticReconnect({
