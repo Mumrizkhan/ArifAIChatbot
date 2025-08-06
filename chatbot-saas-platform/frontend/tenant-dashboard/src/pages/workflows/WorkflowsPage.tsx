@@ -1,10 +1,10 @@
-import React, { useEffect, useState } from 'react';
-import { useTranslation } from 'react-i18next';
-import { useAppSelector, useAppDispatch } from '../../hooks/redux';
-import { fetchWorkflows, deleteWorkflow, createWorkflow, executeWorkflow, updateWorkflow } from '../../store/slices/workflowSlice';
-import { WorkflowService, Workflow, WorkflowDefinition } from '../../services/workflowService';
-import { WorkflowDesigner } from '../../components/workflow/WorkflowDesigner';
-import { Plus, Play, Copy, Trash2, Edit } from 'lucide-react';
+import React, { useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
+import { useAppSelector, useAppDispatch } from "../../hooks/redux";
+import { fetchWorkflows, deleteWorkflow, createWorkflow, executeWorkflow, updateWorkflow } from "../../store/slices/workflowSlice";
+import { WorkflowService, Workflow, WorkflowDefinition } from "../../services/workflowService";
+import { WorkflowDesigner } from "../../components/workflow/WorkflowDesigner";
+import { Plus, Play, Copy, Trash2, Edit } from "lucide-react";
 
 const WorkflowsPage: React.FC = () => {
   const { t } = useTranslation();
@@ -13,7 +13,7 @@ const WorkflowsPage: React.FC = () => {
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [showDesigner, setShowDesigner] = useState(false);
   const [editingWorkflow, setEditingWorkflow] = useState<Workflow | null>(null);
-  const [newWorkflow, setNewWorkflow] = useState({ name: '', description: '' });
+  const [newWorkflow, setNewWorkflow] = useState({ name: "", description: "" });
 
   useEffect(() => {
     dispatch(fetchWorkflows({}));
@@ -21,45 +21,68 @@ const WorkflowsPage: React.FC = () => {
 
   const handleCreateWorkflow = async () => {
     if (newWorkflow.name.trim()) {
-      await dispatch(createWorkflow({
-        name: newWorkflow.name,
-        description: newWorkflow.description,
-      }));
-      setNewWorkflow({ name: '', description: '' });
+      await dispatch(
+        createWorkflow({
+          name: newWorkflow.name,
+          description: newWorkflow.description,
+        })
+      );
+      setNewWorkflow({ name: "", description: "" });
       setShowCreateModal(false);
     }
   };
 
   const handleDeleteWorkflow = async (id: string) => {
-    if (window.confirm(t('workflows.confirmDelete'))) {
+    if (window.confirm(t("workflows.confirmDelete"))) {
       await dispatch(deleteWorkflow(id));
     }
   };
 
   const handleExecuteWorkflow = async (id: string) => {
     try {
-      await dispatch(executeWorkflow({ 
-        id, 
-        data: { 
-          inputData: {}, 
-          triggerSource: 'manual' 
-        } 
-      }));
+      await dispatch(
+        executeWorkflow({
+          id,
+          data: {
+            inputData: {},
+            triggerSource: "manual",
+          },
+        })
+      );
     } catch (error) {
-      console.error('Failed to execute workflow:', error);
+      console.error("Failed to execute workflow:", error);
     }
   };
 
   const handleCloneWorkflow = async (id: string, name: string) => {
     try {
-      const newName = prompt(t('workflows.enterCloneName'), `${name} (Copy)`);
+      const newName = prompt(t("workflows.enterCloneName"), `${name} (${t("workflows.clone")})`);
       if (newName && newName.trim()) {
         await WorkflowService.cloneWorkflow(id, newName.trim());
         dispatch(fetchWorkflows({}));
       }
     } catch (error) {
-      console.error('Failed to clone workflow:', error);
+      console.error("Failed to clone workflow:", error);
     }
+  };
+
+  const getStatusColor = (status: string) => {
+    switch (status) {
+      case "Active":
+        return "bg-green-100 text-green-800";
+      case "Draft":
+        return "bg-gray-100 text-gray-800";
+      case "Inactive":
+        return "bg-yellow-100 text-yellow-800";
+      case "Error":
+        return "bg-red-100 text-red-800";
+      default:
+        return "bg-gray-100 text-gray-800";
+    }
+  };
+
+  const getStatusText = (status: string) => {
+    return t(`workflows.statusValues.${status}`) || status;
   };
 
   const handleEditWorkflow = (workflow: Workflow) => {
@@ -67,21 +90,13 @@ const WorkflowsPage: React.FC = () => {
     setShowDesigner(true);
   };
 
-  const handleSaveWorkflowDefinition = async (definition: WorkflowDefinition) => {
+  // Handles saving the workflow definition from the designer
+  const handleSaveWorkflowDefinition = async (workflowDefinition: WorkflowDefinition) => {
     if (editingWorkflow) {
-      await dispatch(updateWorkflow({ id: editingWorkflow.id, definition }));
-    }
-    setShowDesigner(false);
-    setEditingWorkflow(null);
-  };
-
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case 'Active': return 'bg-green-100 text-green-800';
-      case 'Draft': return 'bg-gray-100 text-gray-800';
-      case 'Inactive': return 'bg-yellow-100 text-yellow-800';
-      case 'Error': return 'bg-red-100 text-red-800';
-      default: return 'bg-gray-100 text-gray-800';
+      await dispatch(updateWorkflow({ id: editingWorkflow.id, definition: workflowDefinition }));
+      setShowDesigner(false);
+      setEditingWorkflow(null);
+      dispatch(fetchWorkflows({}));
     }
   };
 
@@ -89,6 +104,7 @@ const WorkflowsPage: React.FC = () => {
     return (
       <div className="flex items-center justify-center h-64">
         <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-blue-600"></div>
+        <p className="ml-4 text-gray-600">{t("workflows.loading")}</p>
       </div>
     );
   }
@@ -97,19 +113,15 @@ const WorkflowsPage: React.FC = () => {
     <div className="space-y-6">
       <div className="flex justify-between items-center">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
-            {t('workflows.title')}
-          </h1>
-          <p className="text-gray-600 dark:text-gray-400">
-            {t('workflows.description')}
-          </p>
+          <h1 className="text-2xl font-bold text-gray-900 dark:text-white">{t("workflows.title")}</h1>
+          <p className="text-gray-600 dark:text-gray-400">{t("workflows.description")}</p>
         </div>
         <button
           onClick={() => setShowCreateModal(true)}
           className="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
         >
           <Plus className="h-4 w-4 mr-2" />
-          {t('workflows.createNew')}
+          {t("workflows.createNew")}
         </button>
       </div>
 
@@ -126,18 +138,14 @@ const WorkflowsPage: React.FC = () => {
               <div className="text-gray-400 mb-4">
                 <Play className="h-12 w-12 mx-auto" />
               </div>
-              <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">
-                {t('workflows.noWorkflows')}
-              </h3>
-              <p className="text-gray-600 dark:text-gray-400 mb-4">
-                {t('workflows.noWorkflowsDescription')}
-              </p>
+              <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">{t("workflows.noWorkflows")}</h3>
+              <p className="text-gray-600 dark:text-gray-400 mb-4">{t("workflows.noWorkflowsDescription")}</p>
               <button
                 onClick={() => setShowCreateModal(true)}
                 className="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700"
               >
                 <Plus className="h-4 w-4 mr-2" />
-                {t('workflows.createFirst')}
+                {t("workflows.createFirst")}
               </button>
             </div>
           ) : (
@@ -146,19 +154,19 @@ const WorkflowsPage: React.FC = () => {
                 <thead className="bg-gray-50 dark:bg-gray-700">
                   <tr>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
-                      {t('workflows.name')}
+                      {t("workflows.name")}
                     </th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
-                      {t('workflows.status')}
+                      {t("workflows.status")}
                     </th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
-                      {t('workflows.executions')}
+                      {t("workflows.executions")}
                     </th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
-                      {t('workflows.lastExecuted')}
+                      {t("workflows.lastExecuted")}
                     </th>
                     <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
-                      {t('workflows.actions')}
+                      {t("workflows.actions")}
                     </th>
                   </tr>
                 </thead>
@@ -167,52 +175,46 @@ const WorkflowsPage: React.FC = () => {
                     <tr key={workflow.id} className="hover:bg-gray-50 dark:hover:bg-gray-700">
                       <td className="px-6 py-4 whitespace-nowrap">
                         <div>
-                          <div className="text-sm font-medium text-gray-900 dark:text-white">
-                            {workflow.name}
-                          </div>
-                          <div className="text-sm text-gray-500 dark:text-gray-400">
-                            {workflow.description}
-                          </div>
+                          <div className="text-sm font-medium text-gray-900 dark:text-white">{workflow.name}</div>
+                          <div className="text-sm text-gray-500 dark:text-gray-400">{workflow.description}</div>
                         </div>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
                         <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getStatusColor(workflow.status)}`}>
-                          {workflow.status}
+                          {getStatusText(workflow.status)}
                         </span>
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-white">
-                        {workflow.executionCount}
-                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-white">{workflow.executionCount}</td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
-                        {workflow.lastExecutedAt ? new Date(workflow.lastExecutedAt).toLocaleDateString() : t('workflows.never')}
+                        {workflow.lastExecutedAt ? new Date(workflow.lastExecutedAt).toLocaleDateString() : t("workflows.never")}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                         <div className="flex items-center justify-end space-x-2">
                           <button
                             onClick={() => handleEditWorkflow(workflow)}
                             className="text-blue-600 hover:text-blue-900 dark:text-blue-400 dark:hover:text-blue-300"
-                            title={t('workflows.edit')}
+                            title={t("workflows.edit")}
                           >
                             <Edit className="h-4 w-4" />
                           </button>
                           <button
                             onClick={() => handleExecuteWorkflow(workflow.id)}
                             className="text-green-600 hover:text-green-900 dark:text-green-400 dark:hover:text-green-300"
-                            title={t('workflows.execute')}
+                            title={t("workflows.execute")}
                           >
                             <Play className="h-4 w-4" />
                           </button>
                           <button
                             onClick={() => handleCloneWorkflow(workflow.id, workflow.name)}
                             className="text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-300"
-                            title={t('workflows.clone')}
+                            title={t("workflows.clone")}
                           >
                             <Copy className="h-4 w-4" />
                           </button>
                           <button
                             onClick={() => handleDeleteWorkflow(workflow.id)}
                             className="text-red-600 hover:text-red-900 dark:text-red-400 dark:hover:text-red-300"
-                            title={t('workflows.delete')}
+                            title={t("workflows.delete")}
                           >
                             <Trash2 className="h-4 w-4" />
                           </button>
@@ -231,32 +233,26 @@ const WorkflowsPage: React.FC = () => {
         <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
           <div className="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white dark:bg-gray-800">
             <div className="mt-3">
-              <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-4">
-                {t('workflows.createNew')}
-              </h3>
+              <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-4">{t("workflows.createNew")}</h3>
               <div className="space-y-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                    {t('workflows.name')}
-                  </label>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{t("workflows.name")}</label>
                   <input
                     type="text"
                     value={newWorkflow.name}
                     onChange={(e) => setNewWorkflow({ ...newWorkflow, name: e.target.value })}
                     className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
-                    placeholder={t('workflows.namePlaceholder')}
+                    placeholder={t("workflows.namePlaceholder")}
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                    {t('workflows.description')}
-                  </label>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{t("workflows.description")}</label>
                   <textarea
                     value={newWorkflow.description}
                     onChange={(e) => setNewWorkflow({ ...newWorkflow, description: e.target.value })}
                     rows={3}
                     className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
-                    placeholder={t('workflows.descriptionPlaceholder')}
+                    placeholder={t("workflows.descriptionPlaceholder")}
                   />
                 </div>
               </div>
@@ -265,14 +261,14 @@ const WorkflowsPage: React.FC = () => {
                   onClick={() => setShowCreateModal(false)}
                   className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 border border-gray-300 rounded-md hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 dark:bg-gray-600 dark:text-gray-300 dark:border-gray-500 dark:hover:bg-gray-700"
                 >
-                  {t('common.cancel')}
+                  {t("common.cancel")}
                 </button>
                 <button
                   onClick={handleCreateWorkflow}
                   disabled={!newWorkflow.name.trim()}
                   className="px-4 py-2 text-sm font-medium text-white bg-blue-600 border border-transparent rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  {t('workflows.create')}
+                  {t("workflows.create")}
                 </button>
               </div>
             </div>

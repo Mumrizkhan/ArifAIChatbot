@@ -1,46 +1,23 @@
-import { useEffect } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
-import { useTranslation } from 'react-i18next';
-import { AppDispatch, RootState } from '../../store/store';
-import { 
-  fetchAnalytics, 
+import { useEffect } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import { useTranslation } from "react-i18next";
+import { AppDispatch, RootState } from "../../store/store";
+import {
+  fetchAnalytics,
   fetchRealtimeAnalytics,
   updateAnalyticsDataRealtime,
   updateRealtimeData,
   setSignalRConnectionStatus,
-  addTenantNotification
-} from '../../store/slices/analyticsSlice';
-import { fetchChatbotConfigs } from '../../store/slices/chatbotSlice';
-import { fetchTeamMembers } from '../../store/slices/teamSlice';
-import { tenantSignalRService } from '../../services/signalr';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../../components/ui/card';
-import { Button } from '../../components/ui/button';
-import { Skeleton } from '../../components/ui/skeleton';
-import {
-  BarChart,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  Tooltip,
-  ResponsiveContainer,
-  LineChart,
-  Line,
-  PieChart,
-  Pie,
-  Cell,
-} from 'recharts';
-import {
-  MessageSquare,
-  Users,
-  TrendingUp,
-  Bot,
-  Clock,
-  Star,
-  Settings,
-  Plus,
-  Activity,
-  AlertCircle,
-} from 'lucide-react';
+  addTenantNotification,
+} from "../../store/slices/analyticsSlice";
+import { fetchChatbotConfigs } from "../../store/slices/chatbotSlice";
+import { fetchTeamMembers } from "../../store/slices/teamSlice";
+import { tenantSignalRService } from "../../services/signalr";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../../components/ui/card";
+import { Button } from "../../components/ui/button";
+import { Skeleton } from "../../components/ui/skeleton";
+import { BarChart, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, LineChart, Line, PieChart, Pie, Cell } from "recharts";
+import { MessageSquare, Users, TrendingUp, Bot, Clock, Star, Settings, Plus, Activity, AlertCircle } from "lucide-react";
 
 const DashboardPage = () => {
   const { t } = useTranslation();
@@ -53,17 +30,17 @@ const DashboardPage = () => {
   useEffect(() => {
     const startDate = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
     const endDate = new Date();
-    
+
     dispatch(fetchAnalytics({ startDate, endDate }));
     dispatch(fetchRealtimeAnalytics());
     dispatch(fetchChatbotConfigs());
     dispatch(fetchTeamMembers());
 
-    const token = localStorage.getItem('token');
+    const token = localStorage.getItem("token");
     if (token && user?.tenantId) {
       tenantSignalRService.connect(token, user.tenantId).then((connected) => {
         dispatch(setSignalRConnectionStatus(connected));
-        
+
         if (connected) {
           tenantSignalRService.setOnAnalyticsUpdate((analytics) => {
             dispatch(updateAnalyticsDataRealtime(analytics as any));
@@ -102,80 +79,80 @@ const DashboardPage = () => {
 
   const quickActions = [
     {
-      title: t('dashboard.configureChatbot'),
-      description: t('dashboard.configureChatbotDesc'),
+      title: t("dashboard.configureChatbot"),
+      description: t("dashboard.configureChatbotDesc"),
       icon: Bot,
-      href: '/chatbot',
-      color: 'bg-blue-500',
+      href: "/chatbot",
+      color: "bg-blue-500",
     },
     {
-      title: t('dashboard.manageTeam'),
-      description: t('dashboard.manageTeamDesc'),
+      title: t("dashboard.manageTeam"),
+      description: t("dashboard.manageTeamDesc"),
       icon: Users,
-      href: '/team',
-      color: 'bg-green-500',
+      href: "/team",
+      color: "bg-green-500",
     },
     {
-      title: t('dashboard.viewAnalytics'),
-      description: t('dashboard.viewAnalyticsDesc'),
+      title: t("dashboard.viewAnalytics"),
+      description: t("dashboard.viewAnalyticsDesc"),
       icon: BarChart,
-      href: '/analytics',
-      color: 'bg-purple-500',
+      href: "/analytics",
+      color: "bg-purple-500",
     },
     {
-      title: t('dashboard.customizeBranding'),
-      description: t('dashboard.customizeBrandingDesc'),
+      title: t("dashboard.customizeBranding"),
+      description: t("dashboard.customizeBrandingDesc"),
       icon: Settings,
-      href: '/branding',
-      color: 'bg-orange-500',
+      href: "/branding",
+      color: "bg-orange-500",
     },
   ];
 
   const recentActivity = [
     {
       id: 1,
-      type: 'conversation',
-      message: 'New conversation started with customer John Doe',
-      time: '2 minutes ago',
+      type: "conversation",
+      message: t("dashboard.activity.newConversation"),
+      time: t("dashboard.activity.timeAgo.twoMinutes"),
       icon: MessageSquare,
     },
     {
       id: 2,
-      type: 'team',
-      message: 'Agent Sarah Wilson joined the team',
-      time: '1 hour ago',
+      type: "team",
+      message: t("dashboard.activity.agentJoined"),
+      time: t("dashboard.activity.timeAgo.oneHour"),
       icon: Users,
     },
     {
       id: 3,
-      type: 'bot',
-      message: 'Chatbot configuration updated',
-      time: '3 hours ago',
+      type: "bot",
+      message: t("dashboard.activity.chatbotUpdated"),
+      time: t("dashboard.activity.timeAgo.threeHours"),
       icon: Bot,
     },
     {
       id: 4,
-      type: 'analytics',
-      message: 'Weekly analytics report generated',
-      time: '1 day ago',
+      type: "analytics",
+      message: t("dashboard.activity.reportGenerated"),
+      time: t("dashboard.activity.timeAgo.oneDay"),
       icon: TrendingUp,
     },
   ];
 
   const conversationTrendData = [
-    { date: '2024-01-01', conversations: 45, resolved: 42 },
-    { date: '2024-01-02', conversations: 52, resolved: 48 },
-    { date: '2024-01-03', conversations: 38, resolved: 35 },
-    { date: '2024-01-04', conversations: 61, resolved: 58 },
-    { date: '2024-01-05', conversations: 49, resolved: 46 },
-    { date: '2024-01-06', conversations: 55, resolved: 52 },
-    { date: '2024-01-07', conversations: 43, resolved: 41 },
+    { date: "2024-01-01", conversations: 45, resolved: 42 },
+    { date: "2024-01-02", conversations: 52, resolved: 48 },
+    { date: "2024-01-03", conversations: 38, resolved: 35 },
+    { date: "2024-01-04", conversations: 61, resolved: 58 },
+    { date: "2024-01-05", conversations: 49, resolved: 46 },
+    { date: "2024-01-06", conversations: 55, resolved: 52 },
+    { date: "2024-01-07", conversations: 43, resolved: 41 },
   ];
 
   const channelData = [
-    { name: 'Website', value: 65, color: '#3b82f6' },
-    { name: 'Mobile App', value: 25, color: '#10b981' },
-    { name: 'Social Media', value: 10, color: '#f59e0b' },
+    { name: t("dashboard.channels.website"), value: 65, color: "#3b82f6" },
+    { name: t("dashboard.channels.mobileApp"), value: 25, color: "#10b981" },
+    { name: t("dashboard.channels.socialMedia"), value: 10, color: "#f59e0b" },
   ];
 
   if (analyticsLoading && !analytics) {
@@ -206,86 +183,68 @@ const DashboardPage = () => {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold">{t('dashboard.title')}</h1>
-          <p className="text-muted-foreground">
-            {t('dashboard.subtitle')}
-          </p>
+          <h1 className="text-3xl font-bold">{t("dashboard.title")}</h1>
+          <p className="text-muted-foreground">{t("dashboard.subtitle")}</p>
         </div>
         <Button>
           <Plus className="mr-2 h-4 w-4" />
-          {t('dashboard.quickSetup')}
+          {t("dashboard.quickSetup")}
         </Button>
       </div>
 
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">
-              {t('dashboard.totalConversations')}
-            </CardTitle>
+            <CardTitle className="text-sm font-medium">{t("dashboard.totalConversations")}</CardTitle>
             <MessageSquare className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">
-              {analytics?.conversations?.total || 1247}
-            </div>
+            <div className="text-2xl font-bold">{analytics?.conversations?.total || 1247}</div>
             <div className="flex items-center text-xs text-muted-foreground">
               <TrendingUp className="mr-1 h-3 w-3" />
-              +12% from last week
+              {t("dashboard.metrics.changeFromLastWeek", { change: "+12%" })}
             </div>
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">
-              {t('dashboard.activeAgents')}
-            </CardTitle>
+            <CardTitle className="text-sm font-medium">{t("dashboard.activeAgents")}</CardTitle>
             <Users className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">
-              {analytics?.agents?.online || teamMembers?.filter(m => m.status === 'active').length || 8}
-            </div>
+            <div className="text-2xl font-bold">{analytics?.agents?.online || teamMembers?.filter((m) => m.status === "active").length || 8}</div>
             <div className="flex items-center text-xs text-muted-foreground">
               <Activity className="mr-1 h-3 w-3" />
-              Currently online
+              {t("dashboard.metrics.currentlyOnline")}
             </div>
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">
-              {t('dashboard.avgResponseTime')}
-            </CardTitle>
+            <CardTitle className="text-sm font-medium">{t("dashboard.avgResponseTime")}</CardTitle>
             <Clock className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">
-              {analytics?.agents?.averageResponseTime || 2.4}m
-            </div>
+            <div className="text-2xl font-bold">{analytics?.agents?.averageResponseTime || 2.4}m</div>
             <div className="flex items-center text-xs text-muted-foreground">
               <TrendingUp className="mr-1 h-3 w-3" />
-              -15% from last week
+              {t("dashboard.metrics.changeFromLastWeek", { change: "-15%" })}
             </div>
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">
-              {t('dashboard.satisfactionScore')}
-            </CardTitle>
+            <CardTitle className="text-sm font-medium">{t("dashboard.satisfactionScore")}</CardTitle>
             <Star className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">
-              {analytics?.conversations?.satisfactionScore || 4.6}
-            </div>
+            <div className="text-2xl font-bold">{analytics?.conversations?.satisfactionScore || 4.6}</div>
             <div className="flex items-center text-xs text-muted-foreground">
               <TrendingUp className="mr-1 h-3 w-3" />
-              +0.2 from last week
+              {t("dashboard.metrics.changeFromLastWeek", { change: "+0.2" })}
             </div>
           </CardContent>
         </Card>
@@ -294,10 +253,8 @@ const DashboardPage = () => {
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
         <Card className="col-span-2">
           <CardHeader>
-            <CardTitle>{t('dashboard.conversationTrends')}</CardTitle>
-            <CardDescription>
-              {t('dashboard.conversationTrendsDesc')}
-            </CardDescription>
+            <CardTitle>{t("dashboard.conversationTrends")}</CardTitle>
+            <CardDescription>{t("dashboard.conversationTrendsDesc")}</CardDescription>
           </CardHeader>
           <CardContent>
             <ResponsiveContainer width="100%" height={300}>
@@ -315,23 +272,13 @@ const DashboardPage = () => {
 
         <Card>
           <CardHeader>
-            <CardTitle>{t('dashboard.channelDistribution')}</CardTitle>
-            <CardDescription>
-              {t('dashboard.channelDistributionDesc')}
-            </CardDescription>
+            <CardTitle>{t("dashboard.channelDistribution")}</CardTitle>
+            <CardDescription>{t("dashboard.channelDistributionDesc")}</CardDescription>
           </CardHeader>
           <CardContent>
             <ResponsiveContainer width="100%" height={200}>
               <PieChart>
-                <Pie
-                  data={channelData}
-                  cx="50%"
-                  cy="50%"
-                  innerRadius={40}
-                  outerRadius={80}
-                  paddingAngle={5}
-                  dataKey="value"
-                >
+                <Pie data={channelData} cx="50%" cy="50%" innerRadius={40} outerRadius={80} paddingAngle={5} dataKey="value">
                   {channelData.map((entry, index) => (
                     <Cell key={`cell-${index}`} fill={entry.color} />
                   ))}
@@ -342,10 +289,7 @@ const DashboardPage = () => {
             <div className="flex justify-center space-x-4 mt-4">
               {channelData.map((entry, index) => (
                 <div key={index} className="flex items-center space-x-2">
-                  <div
-                    className="w-3 h-3 rounded-full"
-                    style={{ backgroundColor: entry.color }}
-                  />
+                  <div className="w-3 h-3 rounded-full" style={{ backgroundColor: entry.color }} />
                   <span className="text-sm">{entry.name}</span>
                 </div>
               ))}
@@ -357,10 +301,8 @@ const DashboardPage = () => {
       <div className="grid gap-4 md:grid-cols-2">
         <Card>
           <CardHeader>
-            <CardTitle>{t('dashboard.quickActions')}</CardTitle>
-            <CardDescription>
-              {t('dashboard.quickActionsDesc')}
-            </CardDescription>
+            <CardTitle>{t("dashboard.quickActions")}</CardTitle>
+            <CardDescription>{t("dashboard.quickActionsDesc")}</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
             {quickActions.map((action, index) => (
@@ -379,10 +321,8 @@ const DashboardPage = () => {
 
         <Card>
           <CardHeader>
-            <CardTitle>{t('dashboard.recentActivity')}</CardTitle>
-            <CardDescription>
-              {t('dashboard.recentActivityDesc')}
-            </CardDescription>
+            <CardTitle>{t("dashboard.recentActivity")}</CardTitle>
+            <CardDescription>{t("dashboard.recentActivityDesc")}</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
             {recentActivity.map((activity) => (
@@ -405,15 +345,13 @@ const DashboardPage = () => {
           <CardHeader>
             <CardTitle className="flex items-center text-orange-800">
               <AlertCircle className="mr-2 h-5 w-5" />
-              {t('dashboard.setupRequired')}
+              {t("dashboard.setupRequired")}
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <p className="text-orange-700 mb-4">
-              {t('dashboard.setupRequiredDesc')}
-            </p>
+            <p className="text-orange-700 mb-4">{t("dashboard.setupRequiredDesc")}</p>
             <Button variant="outline" className="border-orange-300 text-orange-800 hover:bg-orange-100">
-              {t('dashboard.startSetup')}
+              {t("dashboard.startSetup")}
             </Button>
           </CardContent>
         </Card>
