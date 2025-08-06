@@ -119,6 +119,14 @@ export const tenantApi = {
   getTenantStats: async (id: string) => {
     return apiClient.get<any>(`/tenant-management/tenants/${id}/stats`);
   },
+
+  getTenantSettings: async (id: string) => {
+    return apiClient.get<any>(`/tenant-management/tenants/${id}/settings`);
+  },
+
+  updateTenantSettings: async (id: string, settings: any) => {
+    return apiClient.put<any>(`/tenant-management/tenants/${id}/settings`, settings);
+  },
 };
 
 export const userApi = {

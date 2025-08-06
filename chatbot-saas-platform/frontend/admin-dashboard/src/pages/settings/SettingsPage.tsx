@@ -1,8 +1,15 @@
-import React, { useState } from 'react';
+import React, { useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useTranslation } from 'react-i18next';
 import { AppDispatch, RootState } from '../../store/store';
 import { setThemeMode, setLanguage, setPrimaryColor } from '../../store/slices/themeSlice';
+import { 
+  fetchSettings, 
+  updateSettings, 
+  updateSystemSettings, 
+  updateNotificationSettings, 
+  clearError
+} from '../../store/slices/settingsSlice';
 import { Button } from '../../components/ui/button';
 import { Input } from '../../components/ui/input';
 import { Label } from '../../components/ui/label';
@@ -40,19 +47,20 @@ const SettingsPage: React.FC = () => {
   const dispatch = useDispatch<AppDispatch>();
   const { mode, language, primaryColor } = useSelector((state: RootState) => state.theme);
   const { user } = useSelector((state: RootState) => state.auth);
+  const { 
+    systemSettings, 
+    notificationSettings, 
+    integrationSettings, 
+    isLoading, 
+    isSaving, 
+    error 
+  } = useSelector((state: RootState) => state.settings);
 
-  const [notifications, setNotifications] = useState({
-    email: true,
-    push: true,
-    sms: false,
-    inApp: true,
-  });
-
-  const [security, setSecurity] = useState({
-    twoFactor: false,
-    sessionTimeout: 30,
-    passwordExpiry: 90,
-  });
+  useEffect(() => {
+    if (user?.tenantId) {
+      dispatch(fetchSettings(user.tenantId));
+    }
+  }, [dispatch, user?.tenantId]);
 
   const handleThemeChange = (newMode: 'light' | 'dark' | 'system') => {
     dispatch(setThemeMode(newMode));
@@ -64,6 +72,27 @@ const SettingsPage: React.FC = () => {
 
   const handleColorChange = (color: string) => {
     dispatch(setPrimaryColor(color));
+  };
+
+  const handleNotificationChange = (key: string, value: boolean) => {
+    dispatch(updateNotificationSettings({ [key]: value }));
+  };
+
+  const handleSystemSettingChange = (key: string, value: any) => {
+    dispatch(updateSystemSettings({ [key]: value }));
+  };
+
+  const handleSaveSettings = async () => {
+    if (user?.tenantId) {
+      await dispatch(updateSettings({
+        tenantId: user.tenantId,
+        settings: {
+          system: systemSettings,
+          notifications: notificationSettings,
+          integrations: integrationSettings
+        }
+      }));
+    }
   };
 
   const predefinedColors = [
@@ -109,17 +138,29 @@ const SettingsPage: React.FC = () => {
               <div className="grid gap-4 md:grid-cols-2">
                 <div className="space-y-2">
                   <Label htmlFor="company-name">Company Name</Label>
-                  <Input id="company-name" defaultValue="Arif Platform" />
+                  <Input 
+                  id="company-name" 
+                  value={systemSettings.companyName}
+                  onChange={(e) => handleSystemSettingChange('companyName', e.target.value)}
+                />
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="admin-email">Admin Email</Label>
-                  <Input id="admin-email" type="email" defaultValue={user?.email || ''} />
+                  <Input 
+                    id="admin-email" 
+                    type="email" 
+                    value={systemSettings.adminEmail}
+                    onChange={(e) => handleSystemSettingChange('adminEmail', e.target.value)}
+                  />
                 </div>
               </div>
 
               <div className="space-y-2">
                 <Label htmlFor="timezone">Timezone</Label>
-                <Select defaultValue="utc">
+                <Select 
+                  value={systemSettings.timezone} 
+                  onValueChange={(value) => handleSystemSettingChange('timezone', value)}
+                >
                   <SelectTrigger>
                     <SelectValue />
                   </SelectTrigger>
@@ -293,10 +334,8 @@ const SettingsPage: React.FC = () => {
                   </p>
                 </div>
                 <Switch
-                  checked={security.twoFactor}
-                  onCheckedChange={(checked) =>
-                    setSecurity({ ...security, twoFactor: checked })
-                  }
+                  checked={systemSettings.twoFactor}
+                  onCheckedChange={(checked) => handleSystemSettingChange('twoFactor', checked)}
                 />
               </div>
 
@@ -305,10 +344,8 @@ const SettingsPage: React.FC = () => {
                 <Input
                   id="session-timeout"
                   type="number"
-                  value={security.sessionTimeout}
-                  onChange={(e) =>
-                    setSecurity({ ...security, sessionTimeout: parseInt(e.target.value) })
-                  }
+                  value={systemSettings.sessionTimeout}
+                  onChange={(e) => handleSystemSettingChange('sessionTimeout', parseInt(e.target.value))}
                 />
               </div>
 
@@ -317,10 +354,8 @@ const SettingsPage: React.FC = () => {
                 <Input
                   id="password-expiry"
                   type="number"
-                  value={security.passwordExpiry}
-                  onChange={(e) =>
-                    setSecurity({ ...security, passwordExpiry: parseInt(e.target.value) })
-                  }
+                  value={systemSettings.passwordExpiry}
+                  onChange={(e) => handleSystemSettingChange('passwordExpiry', parseInt(e.target.value))}
                 />
               </div>
 
@@ -380,10 +415,8 @@ const SettingsPage: React.FC = () => {
                   </div>
                 </div>
                 <Switch
-                  checked={notifications.email}
-                  onCheckedChange={(checked) =>
-                    setNotifications({ ...notifications, email: checked })
-                  }
+                  checked={notificationSettings.email}
+                  onCheckedChange={(checked) => handleNotificationChange('email', checked)}
                 />
               </div>
 
@@ -398,10 +431,8 @@ const SettingsPage: React.FC = () => {
                   </div>
                 </div>
                 <Switch
-                  checked={notifications.push}
-                  onCheckedChange={(checked) =>
-                    setNotifications({ ...notifications, push: checked })
-                  }
+                  checked={notificationSettings.push}
+                  onCheckedChange={(checked) => handleNotificationChange('push', checked)}
                 />
               </div>
 
@@ -416,10 +447,8 @@ const SettingsPage: React.FC = () => {
                   </div>
                 </div>
                 <Switch
-                  checked={notifications.sms}
-                  onCheckedChange={(checked) =>
-                    setNotifications({ ...notifications, sms: checked })
-                  }
+                  checked={notificationSettings.sms}
+                  onCheckedChange={(checked) => handleNotificationChange('sms', checked)}
                 />
               </div>
 
@@ -434,10 +463,8 @@ const SettingsPage: React.FC = () => {
                   </div>
                 </div>
                 <Switch
-                  checked={notifications.inApp}
-                  onCheckedChange={(checked) =>
-                    setNotifications({ ...notifications, inApp: checked })
-                  }
+                  checked={notificationSettings.inApp}
+                  onCheckedChange={(checked) => handleNotificationChange('inApp', checked)}
                 />
               </div>
             </CardContent>
@@ -506,7 +533,9 @@ const SettingsPage: React.FC = () => {
                       <p className="text-sm text-muted-foreground">Team communication</p>
                     </div>
                   </div>
-                  <Badge variant="secondary">Not Connected</Badge>
+                  <Badge variant="secondary" className={integrationSettings.slack.connected ? "bg-green-100 text-green-800" : "bg-red-100 text-red-800"}>
+                    {integrationSettings.slack.connected ? 'Connected' : 'Disconnected'}
+                  </Badge>
                 </div>
               </div>
             </CardContent>
@@ -574,8 +603,26 @@ const SettingsPage: React.FC = () => {
 
       <div className="flex justify-end space-x-2">
         <Button variant="outline">{t('common.reset')}</Button>
-        <Button>{t('common.save')}</Button>
+        <Button onClick={handleSaveSettings} disabled={isSaving}>
+          {isSaving ? 'Saving...' : t('common.save')}
+        </Button>
       </div>
+      {error && (
+        <div className="fixed bottom-4 right-4 bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded">
+          Error: {error}
+          <button 
+            onClick={() => dispatch(clearError())}
+            className="ml-2 text-red-500 hover:text-red-700"
+          >
+            ×
+          </button>
+        </div>
+      )}
+      {isLoading && (
+        <div className="fixed bottom-4 right-4 bg-blue-100 border border-blue-400 text-blue-700 px-4 py-3 rounded">
+          Loading settings...
+        </div>
+      )}
     </div>
   );
 };

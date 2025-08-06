@@ -4,6 +4,8 @@ import tenantSlice from './slices/tenantSlice';
 import userSlice from './slices/userSlice';
 import analyticsSlice from './slices/analyticsSlice';
 import themeSlice from './slices/themeSlice';
+import subscriptionSlice from './slices/subscriptionSlice';
+import settingsSlice from './slices/settingsSlice';
 
 export const store = configureStore({
   reducer: {
@@ -12,6 +14,8 @@ export const store = configureStore({
     user: userSlice,
     analytics: analyticsSlice,
     theme: themeSlice,
+    subscription: subscriptionSlice,
+    settings: settingsSlice,
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({
