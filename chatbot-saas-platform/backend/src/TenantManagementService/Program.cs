@@ -43,6 +43,8 @@ builder.Services.AddSwaggerGen(options =>
             Array.Empty<string>()
         }
     });
+    options.OperationFilter<FileUploadOperationFilter>();
+  
 });
 
 builder.Services.AddInfrastructure(builder.Configuration);

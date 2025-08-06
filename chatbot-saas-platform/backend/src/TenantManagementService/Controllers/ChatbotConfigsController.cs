@@ -105,19 +105,19 @@ public class ChatbotConfigsController : ControllerBase
         }
     }
 
-    [HttpPost("{configId}/avatar")]
-    public async Task<IActionResult> UploadChatbotAvatar(Guid configId, [FromForm] IFormFile avatar)
+    [HttpPost("avatar")]
+    public async Task<IActionResult> UploadChatbotAvatar([FromForm] UploadFileDto avatar)//[FromForm] UploadFileDto file
     {
         try
         {
             var tenantId = _tenantService.GetCurrentTenantId();
             
-            if (avatar == null || avatar.Length == 0)
+            if (avatar == null || avatar.File.Length == 0)
             {
                 return BadRequest(new { message = "No file provided" });
             }
 
-            var avatarUrl = await _chatbotConfigService.UploadAvatarAsync(configId, avatar, tenantId);
+            var avatarUrl = await _chatbotConfigService.UploadAvatarAsync(avatar.ConfigId, avatar.File, tenantId);
             return Ok(new { avatarUrl });
         }
         catch (InvalidOperationException ex)
@@ -251,4 +251,11 @@ public class ChatbotConfigsController : ControllerBase
         }
     }
 
+}
+public class UploadFileDto
+{
+    [FromForm(Name = "configId")]
+    public Guid ConfigId { get; set; }
+    [FromForm(Name ="file")]
+    public IFormFile File { get; set; }
 }

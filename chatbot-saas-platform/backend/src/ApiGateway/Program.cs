@@ -64,6 +64,8 @@ if (app.Environment.IsDevelopment())
         c.SwaggerEndpoint("http://localhost:5005/swagger/v1/swagger.json", "Workflow Service");
         c.SwaggerEndpoint("http://localhost:5006/swagger/v1/swagger.json", "Analytics Service");
         c.SwaggerEndpoint("http://localhost:5007/swagger/v1/swagger.json", "Tenant Management Service");
+        c.SwaggerEndpoint("http://localhost:5008/swagger/v1/swagger.json", "Subscription Service");
+        c.SwaggerEndpoint("http://localhost:5009/swagger/v1/swagger.json", "Knowledgebase Service");
 
         c.RoutePrefix = "swagger";
     });

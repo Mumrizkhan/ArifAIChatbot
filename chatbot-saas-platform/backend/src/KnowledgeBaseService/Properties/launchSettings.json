@@ -1,12 +1,14 @@
+
 {
   "profiles": {
     "KnowledgeBaseService": {
       "commandName": "Project",
+      "dotnetRunMessages": true,
       "launchBrowser": true,
+      "applicationUrl": "http://localhost:5009",
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development"
-      },
-      "applicationUrl": "https://localhost:50071;http://localhost:50072"
+      }
     }
   }
 }
