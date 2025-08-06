@@ -1,5 +1,4 @@
 import React, { useState } from 'react';
-import { useTranslation } from 'react-i18next';
 import { useAppSelector } from '../../hooks/redux';
 import { Sidebar } from './Sidebar';
 import { Header } from './Header';
@@ -9,7 +8,6 @@ interface LayoutProps {
 }
 
 export const Layout: React.FC<LayoutProps> = ({ children }) => {
-  const { t } = useTranslation();
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const { isRTL } = useAppSelector((state) => state.theme);
 

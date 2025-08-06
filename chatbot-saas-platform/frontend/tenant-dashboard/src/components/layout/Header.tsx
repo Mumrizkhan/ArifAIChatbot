@@ -24,7 +24,7 @@ export const Header: React.FC<HeaderProps> = ({ onToggleSidebar }) => {
   const [userMenuOpen, setUserMenuOpen] = useState(false);
   
   const { user } = useAppSelector((state) => state.auth);
-  const { isDarkMode, language, isRTL } = useAppSelector((state) => state.theme);
+  const { isDarkMode, language } = useAppSelector((state) => state.theme);
 
   const handleLogout = () => {
     dispatch(logout());

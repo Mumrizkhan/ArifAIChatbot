@@ -155,6 +155,11 @@ export class SubscriptionService {
     return apiClient.post<Subscription>('/subscription/cancel', { cancelAtPeriodEnd });
   }
 
+  // Reactivate subscription
+  static async reactivateSubscription(): Promise<ApiResponse<Subscription>> {
+    return apiClient.post<Subscription>('/subscription/reactivate');
+  }
+
   // Resume subscription
   static async resumeSubscription(): Promise<ApiResponse<Subscription>> {
     return apiClient.post<Subscription>('/subscription/resume');
