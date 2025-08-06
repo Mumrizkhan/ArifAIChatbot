@@ -4,6 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using Shared.Application.Common.Interfaces;
 using Shared.Domain.Entities;
 using Shared.Domain.Enums;
+using ChatRuntimeService.Services;
 
 namespace ChatRuntimeService.Hubs;
 
@@ -14,17 +15,20 @@ public class ChatHub : Hub
     private readonly ICurrentUserService _currentUserService;
     private readonly ITenantService _tenantService;
     private readonly ILogger<ChatHub> _logger;
+    private readonly IAnalyticsIntegrationService _analyticsIntegrationService;
 
     public ChatHub(
         IApplicationDbContext context,
         ICurrentUserService currentUserService,
         ITenantService tenantService,
-        ILogger<ChatHub> logger)
+        ILogger<ChatHub> logger,
+        IAnalyticsIntegrationService analyticsIntegrationService)
     {
         _context = context;
         _currentUserService = currentUserService;
         _tenantService = tenantService;
         _logger = logger;
+        _analyticsIntegrationService = analyticsIntegrationService;
     }
 
     public async Task JoinConversation(string conversationId)
@@ -182,13 +186,29 @@ public class ChatHub : Hub
     {
         try
         {
+            var analyticsData = await _analyticsIntegrationService.GetTenantAnalyticsAsync(tenantId, startDate, endDate);
+            var conversationMetrics = await _analyticsIntegrationService.GetConversationMetricsAsync("30d", tenantId);
+            var agentMetrics = await _analyticsIntegrationService.GetAgentMetricsAsync("30d", tenantId);
+            var realtimeData = await _analyticsIntegrationService.GetRealtimeAnalyticsAsync();
+
             var analytics = new
             {
-                conversations = new { total = 1247, active = 23, resolved = 1156, averageDuration = 15.2, satisfactionScore = 4.6 },
-                agents = new { online = 8, busy = 3, averageResponseTime = 2.4, utilization = 75 },
+                conversations = new { 
+                    total = conversationMetrics.Total, 
+                    active = conversationMetrics.Active, 
+                    resolved = conversationMetrics.Completed, 
+                    averageDuration = 15.2, 
+                    satisfactionScore = conversationMetrics.AverageRating 
+                },
+                agents = new { 
+                    online = agentMetrics.ActiveAgents, 
+                    busy = agentMetrics.TotalAgents - agentMetrics.ActiveAgents, 
+                    averageResponseTime = agentMetrics.AverageResponseTime, 
+                    utilization = 75 
+                },
                 customers = new { total = 892, returning = 401, newToday = 12, averageRating = 4.5 },
                 performance = new { resolutionRate = 92, firstResponseTime = 2.1, escalationRate = 8, botAccuracy = 87 },
-                trends = new
+                trends = analyticsData.Data.ContainsKey("trends") ? analyticsData.Data["trends"] : new
                 {
                     conversationVolume = new[]
                     {
@@ -211,10 +231,10 @@ public class ChatHub : Hub
                 },
                 realtime = new
                 {
-                    activeConversations = 23,
+                    activeConversations = realtimeData.OngoingConversations,
                     waitingCustomers = 5,
-                    onlineAgents = 8,
-                    currentLoad = 68
+                    onlineAgents = realtimeData.AvailableAgents,
+                    currentLoad = (int)(realtimeData.SystemLoad * 100)
                 }
             };
             
@@ -231,12 +251,14 @@ public class ChatHub : Hub
     {
         try
         {
+            var realtimeData = await _analyticsIntegrationService.GetRealtimeAnalyticsAsync();
+            
             var realtime = new
             {
-                activeConversations = 23,
+                activeConversations = realtimeData.OngoingConversations,
                 waitingCustomers = 5,
-                onlineAgents = 8,
-                currentLoad = 68
+                onlineAgents = realtimeData.AvailableAgents,
+                currentLoad = (int)(realtimeData.SystemLoad * 100)
             };
             
             await Clients.Group($"Tenant_{tenantId}").SendAsync("TenantRealtimeUpdated", realtime);
@@ -265,11 +287,13 @@ public class ChatHub : Hub
     {
         try
         {
+            var dashboardStats = await _analyticsIntegrationService.GetDashboardStatsAsync();
+            
             var stats = new
             {
                 totalTenants = 42,
-                totalUsers = 1247,
-                totalConversations = 8934,
+                totalUsers = dashboardStats.TotalUsers,
+                totalConversations = dashboardStats.TotalConversations,
                 activeAgents = 18,
                 monthlyRevenue = 125000,
                 growthRate = 12.5
@@ -288,12 +312,14 @@ public class ChatHub : Hub
     {
         try
         {
+            var conversationMetrics = await _analyticsIntegrationService.GetConversationMetricsAsync(timeRange, tenantId);
+            
             var metrics = new
             {
-                totalConversations = 1247,
+                totalConversations = conversationMetrics.Total,
                 averageDuration = 15.2,
-                resolutionRate = 92,
-                satisfactionScore = 4.6,
+                resolutionRate = conversationMetrics.Total > 0 ? (conversationMetrics.Completed * 100 / conversationMetrics.Total) : 0,
+                satisfactionScore = conversationMetrics.AverageRating,
                 dailyData = new[]
                 {
                     new { date = "2024-01-01", conversations = 120, resolved = 110, avgDuration = 15 },
@@ -315,12 +341,14 @@ public class ChatHub : Hub
     {
         try
         {
+            var agentMetrics = await _analyticsIntegrationService.GetAgentMetricsAsync(timeRange, tenantId);
+            
             var metrics = new
             {
-                totalAgents = 24,
-                activeAgents = 18,
-                averageResponseTime = 2.4,
-                averageRating = 4.7,
+                totalAgents = agentMetrics.TotalAgents,
+                activeAgents = agentMetrics.ActiveAgents,
+                averageResponseTime = agentMetrics.AverageResponseTime,
+                averageRating = agentMetrics.AverageRating,
                 topPerformers = new[]
                 {
                     new { id = "1", name = "John Doe", rating = 4.9, conversationsHandled = 156 },
