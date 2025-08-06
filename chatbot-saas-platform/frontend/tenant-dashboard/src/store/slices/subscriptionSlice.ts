@@ -1,4 +1,5 @@
 import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit';
+import { SubscriptionService } from '../../services/subscriptionService';
 
 export interface Plan {
   id: string;
@@ -71,126 +72,56 @@ const initialState: SubscriptionState = {
 export const fetchSubscription = createAsyncThunk(
   'subscription/fetchSubscription',
   async () => {
-    const response = await fetch('/api/subscription', {
-      headers: {
-        Authorization: `Bearer ${localStorage.getItem('token')}`,
-      },
-    });
-
-    if (!response.ok) {
-      throw new Error('Failed to fetch subscription');
-    }
-
-    return response.json();
+    const response = await SubscriptionService.getCurrentSubscription();
+    return response.data;
   }
 );
 
 export const fetchPlans = createAsyncThunk(
   'subscription/fetchPlans',
   async () => {
-    const response = await fetch('/api/subscription/plans', {
-      headers: {
-        Authorization: `Bearer ${localStorage.getItem('token')}`,
-      },
-    });
-
-    if (!response.ok) {
-      throw new Error('Failed to fetch plans');
-    }
-
-    return response.json();
+    const response = await SubscriptionService.getPlans();
+    return response.data;
   }
 );
 
 export const fetchUsage = createAsyncThunk(
   'subscription/fetchUsage',
   async () => {
-    const response = await fetch('/api/subscription/usage', {
-      headers: {
-        Authorization: `Bearer ${localStorage.getItem('token')}`,
-      },
-    });
-
-    if (!response.ok) {
-      throw new Error('Failed to fetch usage');
-    }
-
-    return response.json();
+    const response = await SubscriptionService.getUsageMetrics();
+    return response.data;
   }
 );
 
 export const fetchInvoices = createAsyncThunk(
   'subscription/fetchInvoices',
   async () => {
-    const response = await fetch('/api/payments/invoices', {
-      headers: {
-        Authorization: `Bearer ${localStorage.getItem('token')}`,
-      },
-    });
-
-    if (!response.ok) {
-      throw new Error('Failed to fetch invoices');
-    }
-
-    return response.json();
+    const response = await SubscriptionService.getInvoices();
+    return response.data.invoices || response.data;
   }
 );
 
 export const changePlan = createAsyncThunk(
   'subscription/changePlan',
-  async ({ planId, prorate }: { planId: string; prorate: boolean }) => {
-    const response = await fetch('/api/subscription/change-plan', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${localStorage.getItem('token')}`,
-      },
-      body: JSON.stringify({ planId, prorate }),
-    });
-
-    if (!response.ok) {
-      throw new Error('Failed to change plan');
-    }
-
-    return response.json();
+  async ({ planId }: { planId: string; prorate: boolean }) => {
+    const response = await SubscriptionService.updateSubscription({ planId });
+    return response.data;
   }
 );
 
 export const cancelSubscription = createAsyncThunk(
   'subscription/cancel',
   async ({ immediately }: { immediately: boolean }) => {
-    const response = await fetch('/api/subscription/cancel', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${localStorage.getItem('token')}`,
-      },
-      body: JSON.stringify({ immediately }),
-    });
-
-    if (!response.ok) {
-      throw new Error('Failed to cancel subscription');
-    }
-
-    return response.json();
+    const response = await SubscriptionService.cancelSubscription(!immediately);
+    return response.data;
   }
 );
 
 export const reactivateSubscription = createAsyncThunk(
   'subscription/reactivate',
   async () => {
-    const response = await fetch('/api/subscription/reactivate', {
-      method: 'POST',
-      headers: {
-        Authorization: `Bearer ${localStorage.getItem('token')}`,
-      },
-    });
-
-    if (!response.ok) {
-      throw new Error('Failed to reactivate subscription');
-    }
-
-    return response.json();
+    const response = await SubscriptionService.reactivateSubscription();
+    return response.data;
   }
 );
 
@@ -215,29 +146,29 @@ const subscriptionSlice = createSlice({
       })
       .addCase(fetchSubscription.fulfilled, (state, action) => {
         state.isLoading = false;
-        state.subscription = action.payload;
+        state.subscription = action.payload as any;
       })
       .addCase(fetchSubscription.rejected, (state, action) => {
         state.isLoading = false;
         state.error = action.error.message || 'Failed to fetch subscription';
       })
       .addCase(fetchPlans.fulfilled, (state, action) => {
-        state.plans = action.payload;
+        state.plans = action.payload as any;
       })
       .addCase(fetchUsage.fulfilled, (state, action) => {
-        state.usage = action.payload;
+        state.usage = action.payload as any;
       })
       .addCase(fetchInvoices.fulfilled, (state, action) => {
-        state.invoices = action.payload;
+        state.invoices = action.payload as any;
       })
       .addCase(changePlan.fulfilled, (state, action) => {
-        state.subscription = action.payload;
+        state.subscription = action.payload as any;
       })
       .addCase(cancelSubscription.fulfilled, (state, action) => {
-        state.subscription = action.payload;
+        state.subscription = action.payload as any;
       })
       .addCase(reactivateSubscription.fulfilled, (state, action) => {
-        state.subscription = action.payload;
+        state.subscription = action.payload as any;
       });
   },
 });

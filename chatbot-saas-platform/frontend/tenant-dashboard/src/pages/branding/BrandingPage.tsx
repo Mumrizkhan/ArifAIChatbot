@@ -1,8 +1,6 @@
-import React, { useEffect, useState } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
+import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useForm } from 'react-hook-form';
-import { AppDispatch, RootState } from '../../store/store';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../../components/ui/card';
 import { Button } from '../../components/ui/button';
 import { Input } from '../../components/ui/input';
@@ -10,7 +8,6 @@ import { Label } from '../../components/ui/label';
 import { Textarea } from '../../components/ui/textarea';
 import { Switch } from '../../components/ui/switch';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../../components/ui/tabs';
-import { Skeleton } from '../../components/ui/skeleton';
 import {
   Select,
   SelectContent,
@@ -28,16 +25,14 @@ import {
   Type,
   Image,
   Code,
-  Brush,
 } from 'lucide-react';
 
 const BrandingPage = () => {
   const { t } = useTranslation();
-  const dispatch = useDispatch<AppDispatch>();
   const [activeTab, setActiveTab] = useState('colors');
   const [previewMode, setPreviewMode] = useState('desktop');
 
-  const { register, handleSubmit, setValue, watch, formState: { errors } } = useForm({
+  const { register, handleSubmit, setValue, watch } = useForm({
     defaultValues: {
       primaryColor: '#3b82f6',
       secondaryColor: '#10b981',

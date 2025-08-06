@@ -1,8 +1,9 @@
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useTranslation } from 'react-i18next';
 import { useForm } from 'react-hook-form';
 import { AppDispatch, RootState } from '../../store/store';
+import { fetchSettings, updateSettings } from '../../store/slices/settingsSlice';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../../components/ui/card';
 import { Button } from '../../components/ui/button';
 import { Input } from '../../components/ui/input';
@@ -10,8 +11,6 @@ import { Label } from '../../components/ui/label';
 import { Textarea } from '../../components/ui/textarea';
 import { Switch } from '../../components/ui/switch';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../../components/ui/tabs';
-import { Badge } from '../../components/ui/badge';
-import { Avatar, AvatarFallback, AvatarImage } from '../../components/ui/avatar';
 import {
   Select,
   SelectContent,
@@ -35,11 +34,9 @@ import {
   User,
   Shield,
   Bell,
-  Globe,
   Trash2,
   Save,
   AlertTriangle,
-  Key,
   Database,
   Clock,
 } from 'lucide-react';
@@ -47,40 +44,33 @@ import {
 const SettingsPage = () => {
   const { t } = useTranslation();
   const dispatch = useDispatch<AppDispatch>();
+  const { settings, isLoading, isSaving, error } = useSelector((state: RootState) => state.settings);
   const [activeTab, setActiveTab] = useState('general');
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
 
-  const { register, handleSubmit, setValue, watch, formState: { errors } } = useForm({
-    defaultValues: {
-      tenantName: '',
-      tenantDescription: '',
-      contactEmail: '',
-      contactPhone: '',
-      timezone: 'UTC',
-      language: 'en',
-      dateFormat: 'MM/DD/YYYY',
-      currency: 'USD',
-      enableNotifications: true,
-      enableEmailNotifications: true,
-      enableSmsNotifications: false,
-      enablePushNotifications: true,
-      notificationFrequency: 'immediate',
-      dataRetentionDays: 365,
-      enableDataExport: true,
-      enableAuditLogs: true,
-      sessionTimeout: 30,
-      enableTwoFactor: false,
-      allowedDomains: '',
-      ipWhitelist: '',
-    },
+  const { register, handleSubmit, setValue, watch, formState: { errors }, reset } = useForm({
+    defaultValues: settings,
   });
 
-  const onSubmit = (data: any) => {
-    console.log('Settings data:', data);
+  useEffect(() => {
+    dispatch(fetchSettings());
+  }, [dispatch]);
+
+  useEffect(() => {
+    if (settings) {
+      reset(settings);
+    }
+  }, [settings, reset]);
+
+  const onSubmit = async (data: any) => {
+    try {
+      await dispatch(updateSettings(data));
+    } catch (error) {
+      console.error('Failed to save settings:', error);
+    }
   };
 
-  const handleDeleteTenant = () => {
-    console.log('Deleting tenant...');
+  const handleDeleteTenant = async () => {
     setIsDeleteDialogOpen(false);
   };
 
@@ -104,6 +94,27 @@ const SettingsPage = () => {
     { value: 'SAR', label: 'Saudi Riyal (ر.س)' },
   ];
 
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-blue-600"></div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <div className="text-center">
+          <p className="text-red-500 mb-2">Error loading settings: {error}</p>
+          <Button onClick={() => dispatch(fetchSettings())}>
+            Retry
+          </Button>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
@@ -113,9 +124,9 @@ const SettingsPage = () => {
             {t('settings.subtitle')}
           </p>
         </div>
-        <Button onClick={handleSubmit(onSubmit)}>
+        <Button onClick={handleSubmit(onSubmit)} disabled={isSaving}>
           <Save className="mr-2 h-4 w-4" />
-          {t('common.save')}
+          {isSaving ? 'Saving...' : t('common.save')}
         </Button>
       </div>
 
