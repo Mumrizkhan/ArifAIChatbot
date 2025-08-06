@@ -26,9 +26,9 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children }) => {
     );
   }
 
-  // if (!token || !isAuthenticated) {
-  //   return <Navigate to="/login" replace />;
-  // }
+  if (!token || !isAuthenticated) {
+    return <Navigate to="/login" replace />;
+  }
 
   return <>{children}</>;
 };
