@@ -57,9 +57,15 @@ export const createWorkflow = createAsyncThunk(
 
 export const updateWorkflow = createAsyncThunk(
   'workflow/updateWorkflow',
-  async (data: UpdateWorkflowData) => {
-    await WorkflowService.updateWorkflow(data);
-    return data;
+  async ({ id, definition, ...data }: { id: string; definition?: any } & Partial<UpdateWorkflowData>) => {
+    if (definition) {
+      const updateData = { id, definition, ...data };
+      await WorkflowService.updateWorkflow(updateData as UpdateWorkflowData);
+      return updateData;
+    }
+    const updateData = { id, ...data } as UpdateWorkflowData;
+    await WorkflowService.updateWorkflow(updateData);
+    return updateData;
   }
 );
 
