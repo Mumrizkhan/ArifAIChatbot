@@ -1,18 +1,22 @@
 import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useAppSelector, useAppDispatch } from '../../hooks/redux';
-import { fetchWorkflows, deleteWorkflow, createWorkflow } from '../../store/slices/workflowSlice';
-import { Plus, Play, Pause, Copy, Trash2, Edit, MoreHorizontal } from 'lucide-react';
+import { fetchWorkflows, deleteWorkflow, createWorkflow, executeWorkflow, updateWorkflow } from '../../store/slices/workflowSlice';
+import { WorkflowService, Workflow, WorkflowDefinition } from '../../services/workflowService';
+import { WorkflowDesigner } from '../../components/workflow/WorkflowDesigner';
+import { Plus, Play, Copy, Trash2, Edit } from 'lucide-react';
 
 const WorkflowsPage: React.FC = () => {
   const { t } = useTranslation();
   const dispatch = useAppDispatch();
   const { workflows, isLoading, error } = useAppSelector((state) => state.workflow);
   const [showCreateModal, setShowCreateModal] = useState(false);
+  const [showDesigner, setShowDesigner] = useState(false);
+  const [editingWorkflow, setEditingWorkflow] = useState<Workflow | null>(null);
   const [newWorkflow, setNewWorkflow] = useState({ name: '', description: '' });
 
   useEffect(() => {
-    dispatch(fetchWorkflows());
+    dispatch(fetchWorkflows({}));
   }, [dispatch]);
 
   const handleCreateWorkflow = async () => {
@@ -30,6 +34,45 @@ const WorkflowsPage: React.FC = () => {
     if (window.confirm(t('workflows.confirmDelete'))) {
       await dispatch(deleteWorkflow(id));
     }
+  };
+
+  const handleExecuteWorkflow = async (id: string) => {
+    try {
+      await dispatch(executeWorkflow({ 
+        id, 
+        data: { 
+          inputData: {}, 
+          triggerSource: 'manual' 
+        } 
+      }));
+    } catch (error) {
+      console.error('Failed to execute workflow:', error);
+    }
+  };
+
+  const handleCloneWorkflow = async (id: string, name: string) => {
+    try {
+      const newName = prompt(t('workflows.enterCloneName'), `${name} (Copy)`);
+      if (newName && newName.trim()) {
+        await WorkflowService.cloneWorkflow(id, newName.trim());
+        dispatch(fetchWorkflows({}));
+      }
+    } catch (error) {
+      console.error('Failed to clone workflow:', error);
+    }
+  };
+
+  const handleEditWorkflow = (workflow: Workflow) => {
+    setEditingWorkflow(workflow);
+    setShowDesigner(true);
+  };
+
+  const handleSaveWorkflowDefinition = async (definition: WorkflowDefinition) => {
+    if (editingWorkflow) {
+      await dispatch(updateWorkflow({ id: editingWorkflow.id, definition }));
+    }
+    setShowDesigner(false);
+    setEditingWorkflow(null);
   };
 
   const getStatusColor = (status: string) => {
@@ -146,18 +189,21 @@ const WorkflowsPage: React.FC = () => {
                       <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                         <div className="flex items-center justify-end space-x-2">
                           <button
+                            onClick={() => handleEditWorkflow(workflow)}
                             className="text-blue-600 hover:text-blue-900 dark:text-blue-400 dark:hover:text-blue-300"
                             title={t('workflows.edit')}
                           >
                             <Edit className="h-4 w-4" />
                           </button>
                           <button
+                            onClick={() => handleExecuteWorkflow(workflow.id)}
                             className="text-green-600 hover:text-green-900 dark:text-green-400 dark:hover:text-green-300"
                             title={t('workflows.execute')}
                           >
                             <Play className="h-4 w-4" />
                           </button>
                           <button
+                            onClick={() => handleCloneWorkflow(workflow.id, workflow.name)}
                             className="text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-300"
                             title={t('workflows.clone')}
                           >
@@ -232,6 +278,17 @@ const WorkflowsPage: React.FC = () => {
             </div>
           </div>
         </div>
+      )}
+
+      {showDesigner && (
+        <WorkflowDesigner
+          workflow={editingWorkflow}
+          onSave={handleSaveWorkflowDefinition}
+          onCancel={() => {
+            setShowDesigner(false);
+            setEditingWorkflow(null);
+          }}
+        />
       )}
     </div>
   );
