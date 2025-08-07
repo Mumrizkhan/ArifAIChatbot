@@ -1,4 +1,4 @@
-import { apiClient, ApiResponse } from './api';
+import { apiClient, ApiResponse } from "./api";
 
 // Auth related types
 export interface LoginCredentials {
@@ -46,55 +46,55 @@ export interface ChangePasswordData {
 export class AuthService {
   // Login user
   static async login(credentials: LoginCredentials): Promise<ApiResponse<AuthResponse>> {
-    return apiClient.post<AuthResponse>('/identity/auth/login', credentials);
+    return apiClient.post<AuthResponse>("/identity/auth/login", credentials);
   }
 
   // Register new user
   static async register(data: RegisterData): Promise<ApiResponse<AuthResponse>> {
-    return apiClient.post<AuthResponse>('/identity/auth/register', data);
+    return apiClient.post<AuthResponse>("/identity/auth/register", data);
   }
 
   // Get current user
   static async getCurrentUser(): Promise<ApiResponse<User>> {
-    return apiClient.get<User>('/identity/auth/me');
+    return apiClient.get<User>("/identity/auth/me");
   }
 
   // Refresh token
   static async refreshToken(): Promise<ApiResponse<{ token: string }>> {
-    const refreshToken = localStorage.getItem('refreshToken');
-    return apiClient.post<{ token: string }>('/identity/auth/refresh', { refreshToken });
+    const refreshToken = localStorage.getItem("refreshToken");
+    return apiClient.post<{ token: string }>("/identity/auth/refresh", { refreshToken });
   }
 
   // Logout
   static async logout(): Promise<ApiResponse<void>> {
-    const refreshToken = localStorage.getItem('refreshToken');
-    return apiClient.post<void>('/identity/auth/logout', { refreshToken });
+    const refreshToken = localStorage.getItem("refreshToken");
+    return apiClient.post<void>("/identity/auth/logout", { refreshToken });
   }
 
   // Forgot password
   static async forgotPassword(data: ForgotPasswordData): Promise<ApiResponse<void>> {
-    return apiClient.post<void>('/identity/auth/forgot-password', data);
+    return apiClient.post<void>("/identity/auth/forgot-password", data);
   }
 
   // Reset password
   static async resetPassword(data: ResetPasswordData): Promise<ApiResponse<void>> {
-    return apiClient.post<void>('/identity/auth/reset-password', data);
+    return apiClient.post<void>("/identity/auth/reset-password", data);
   }
 
   // Change password
   static async changePassword(data: ChangePasswordData): Promise<ApiResponse<void>> {
-    return apiClient.put<void>('/identity/auth/change-password', data);
+    return apiClient.put<void>("/identity/auth/change-password", data);
   }
 
   // Update profile
   static async updateProfile(data: Partial<User>): Promise<ApiResponse<User>> {
-    return apiClient.put<User>('/identity/auth/profile', data);
+    return apiClient.put<User>("/identity/auth/profile", data);
   }
 
   // Upload avatar
   static async uploadAvatar(file: File): Promise<ApiResponse<{ avatar: string }>> {
     const formData = new FormData();
-    formData.append('avatar', file);
-    return apiClient.upload<{ avatar: string }>('/identity/auth/avatar', formData);
+    formData.append("avatar", file);
+    return apiClient.upload<{ avatar: string }>("/identity/auth/avatar", formData);
   }
 }

@@ -1,13 +1,13 @@
-import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit';
-import { SubscriptionService } from '../../services/subscriptionService';
-
+import { createSlice, createAsyncThunk, PayloadAction } from "@reduxjs/toolkit";
+import { SubscriptionService } from "../../services/subscriptionService";
+export const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 export interface Plan {
   id: string;
   name: string;
   description: string;
   price: number;
   currency: string;
-  interval: 'month' | 'year';
+  interval: "month" | "year";
   features: string[];
   limits: {
     conversations: number;
@@ -22,7 +22,7 @@ export interface Subscription {
   id: string;
   planId: string;
   plan: Plan;
-  status: 'active' | 'canceled' | 'past_due' | 'unpaid';
+  status: "active" | "canceled" | "past_due" | "unpaid";
   currentPeriodStart: Date;
   currentPeriodEnd: Date;
   cancelAtPeriodEnd: boolean;
@@ -45,7 +45,7 @@ export interface Invoice {
   number: string;
   amount: number;
   currency: string;
-  status: 'paid' | 'pending' | 'failed';
+  status: "paid" | "pending" | "failed";
   dueDate: Date;
   paidAt?: Date;
   downloadUrl?: string;
@@ -69,64 +69,43 @@ const initialState: SubscriptionState = {
   error: null,
 };
 
-export const fetchSubscription = createAsyncThunk(
-  'subscription/fetchSubscription',
-  async () => {
-    const response = await SubscriptionService.getCurrentSubscription();
-    return response.data;
-  }
-);
+export const fetchSubscription = createAsyncThunk("subscription/fetchSubscription", async () => {
+  const response = await SubscriptionService.getCurrentSubscription();
+  return response.data;
+});
 
-export const fetchPlans = createAsyncThunk(
-  'subscription/fetchPlans',
-  async () => {
-    const response = await SubscriptionService.getPlans();
-    return response.data;
-  }
-);
+export const fetchPlans = createAsyncThunk("subscription/fetchPlans", async () => {
+  const response = await SubscriptionService.getPlans();
+  return response.data;
+});
 
-export const fetchUsage = createAsyncThunk(
-  'subscription/fetchUsage',
-  async () => {
-    const response = await SubscriptionService.getUsageMetrics();
-    return response.data;
-  }
-);
+export const fetchUsage = createAsyncThunk("subscription/fetchUsage", async () => {
+  const response = await SubscriptionService.getUsageMetrics();
+  return response.data;
+});
 
-export const fetchInvoices = createAsyncThunk(
-  'subscription/fetchInvoices',
-  async () => {
-    const response = await SubscriptionService.getInvoices();
-    return response.data.invoices || response.data;
-  }
-);
+export const fetchInvoices = createAsyncThunk("subscription/fetchInvoices", async () => {
+  const response = await SubscriptionService.getInvoices();
+  return response.data.invoices || response.data;
+});
 
-export const changePlan = createAsyncThunk(
-  'subscription/changePlan',
-  async ({ planId }: { planId: string; prorate: boolean }) => {
-    const response = await SubscriptionService.updateSubscription({ planId });
-    return response.data;
-  }
-);
+export const changePlan = createAsyncThunk("subscription/changePlan", async ({ planId }: { planId: string; prorate: boolean }) => {
+  const response = await SubscriptionService.updateSubscription({ planId });
+  return response.data;
+});
 
-export const cancelSubscription = createAsyncThunk(
-  'subscription/cancel',
-  async ({ immediately }: { immediately: boolean }) => {
-    const response = await SubscriptionService.cancelSubscription(!immediately);
-    return response.data;
-  }
-);
+export const cancelSubscription = createAsyncThunk("subscription/cancel", async ({ immediately }: { immediately: boolean }) => {
+  const response = await SubscriptionService.cancelSubscription(!immediately);
+  return response.data;
+});
 
-export const reactivateSubscription = createAsyncThunk(
-  'subscription/reactivate',
-  async () => {
-    const response = await SubscriptionService.reactivateSubscription();
-    return response.data;
-  }
-);
+export const reactivateSubscription = createAsyncThunk("subscription/reactivate", async () => {
+  const response = await SubscriptionService.reactivateSubscription();
+  return response.data;
+});
 
 const subscriptionSlice = createSlice({
-  name: 'subscription',
+  name: "subscription",
   initialState,
   reducers: {
     updateUsage: (state, action: PayloadAction<Partial<Usage>>) => {
@@ -150,7 +129,7 @@ const subscriptionSlice = createSlice({
       })
       .addCase(fetchSubscription.rejected, (state, action) => {
         state.isLoading = false;
-        state.error = action.error.message || 'Failed to fetch subscription';
+        state.error = action.error.message || "Failed to fetch subscription";
       })
       .addCase(fetchPlans.fulfilled, (state, action) => {
         state.plans = action.payload as any;

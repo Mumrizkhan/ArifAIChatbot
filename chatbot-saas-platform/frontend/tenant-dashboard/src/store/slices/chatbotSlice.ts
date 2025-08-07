@@ -1,17 +1,17 @@
-import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit';
-
+import { createSlice, createAsyncThunk, PayloadAction } from "@reduxjs/toolkit";
+export const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 export interface ChatbotConfig {
   id: string;
   name: string;
   description: string;
   isActive: boolean;
   appearance: {
-    position: 'bottom-right' | 'bottom-left' | 'top-right' | 'top-left';
-    size: 'small' | 'medium' | 'large';
+    position: "bottom-right" | "bottom-left" | "top-right" | "top-left";
+    size: "small" | "medium" | "large";
     primaryColor: string;
     secondaryColor: string;
     borderRadius: string;
-    animation: 'slide' | 'fade' | 'bounce' | 'none';
+    animation: "slide" | "fade" | "bounce" | "none";
   };
   behavior: {
     autoOpen: boolean;
@@ -59,83 +59,74 @@ const initialState: ChatbotState = {
   error: null,
 };
 
-export const fetchChatbotConfigs = createAsyncThunk(
-  'chatbot/fetchConfigs',
-  async () => {
-    const response = await fetch('/api/chatbot/configs', {
-      headers: {
-        Authorization: `Bearer ${localStorage.getItem('token')}`,
-      },
-    });
+export const fetchChatbotConfigs = createAsyncThunk("chatbot/fetchConfigs", async () => {
+  const response = await fetch(`${API_BASE_URL}/chat/chatbot/configs`, {
+    headers: {
+      Authorization: `Bearer ${localStorage.getItem("token")}`,
+    },
+  });
 
-    if (!response.ok) {
-      throw new Error('Failed to fetch chatbot configs');
-    }
-
-    return response.json();
+  if (!response.ok) {
+    throw new Error("Failed to fetch chatbot configs");
   }
-);
 
-export const createChatbotConfig = createAsyncThunk(
-  'chatbot/createConfig',
-  async (config: Omit<ChatbotConfig, 'id'>) => {
-    const response = await fetch('/api/chatbot/configs', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${localStorage.getItem('token')}`,
-      },
-      body: JSON.stringify(config),
-    });
+  return response.json();
+});
 
-    if (!response.ok) {
-      throw new Error('Failed to create chatbot config');
-    }
+export const createChatbotConfig = createAsyncThunk("chatbot/createConfig", async (config: Omit<ChatbotConfig, "id">) => {
+  const response = await fetch(`${API_BASE_URL}/chat/chatbot/configs`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${localStorage.getItem("token")}`,
+    },
+    body: JSON.stringify(config),
+  });
 
-    return response.json();
+  if (!response.ok) {
+    throw new Error("Failed to create chatbot config");
   }
-);
+
+  return response.json();
+});
 
 export const updateChatbotConfig = createAsyncThunk(
-  'chatbot/updateConfig',
+  "chatbot/updateConfig",
   async ({ id, config }: { id: string; config: Partial<ChatbotConfig> }) => {
-    const response = await fetch(`/api/chatbot/configs/${id}`, {
-      method: 'PUT',
+    const response = await fetch(`${API_BASE_URL}/chat/chatbot/configs/${id}`, {
+      method: "PUT",
       headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${localStorage.getItem('token')}`,
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${localStorage.getItem("token")}`,
       },
       body: JSON.stringify(config),
     });
 
     if (!response.ok) {
-      throw new Error('Failed to update chatbot config');
+      throw new Error("Failed to update chatbot config");
     }
 
     return response.json();
   }
 );
 
-export const deleteChatbotConfig = createAsyncThunk(
-  'chatbot/deleteConfig',
-  async (id: string) => {
-    const response = await fetch(`/api/chatbot/configs/${id}`, {
-      method: 'DELETE',
-      headers: {
-        Authorization: `Bearer ${localStorage.getItem('token')}`,
-      },
-    });
+export const deleteChatbotConfig = createAsyncThunk("chatbot/deleteConfig", async (id: string) => {
+  const response = await fetch(`${API_BASE_URL}/chat/chatbot/configs/${id}`, {
+    method: "DELETE",
+    headers: {
+      Authorization: `Bearer ${localStorage.getItem("token")}`,
+    },
+  });
 
-    if (!response.ok) {
-      throw new Error('Failed to delete chatbot config');
-    }
-
-    return id;
+  if (!response.ok) {
+    throw new Error("Failed to delete chatbot config");
   }
-);
+
+  return id;
+});
 
 const chatbotSlice = createSlice({
-  name: 'chatbot',
+  name: "chatbot",
   initialState,
   reducers: {
     setActiveConfig: (state, action: PayloadAction<ChatbotConfig>) => {
@@ -143,7 +134,7 @@ const chatbotSlice = createSlice({
     },
     updateConfigLocal: (state, action: PayloadAction<{ id: string; config: Partial<ChatbotConfig> }>) => {
       const { id, config } = action.payload;
-      const existingConfig = state.configs.find(c => c.id === id);
+      const existingConfig = state.configs.find((c) => c.id === id);
       if (existingConfig) {
         Object.assign(existingConfig, config);
       }
@@ -167,13 +158,13 @@ const chatbotSlice = createSlice({
       })
       .addCase(fetchChatbotConfigs.rejected, (state, action) => {
         state.isLoading = false;
-        state.error = action.error.message || 'Failed to fetch chatbot configs';
+        state.error = action.error.message || "Failed to fetch chatbot configs";
       })
       .addCase(createChatbotConfig.fulfilled, (state, action) => {
         state.configs.push(action.payload);
       })
       .addCase(updateChatbotConfig.fulfilled, (state, action) => {
-        const index = state.configs.findIndex(c => c.id === action.payload.id);
+        const index = state.configs.findIndex((c) => c.id === action.payload.id);
         if (index !== -1) {
           state.configs[index] = action.payload;
         }
@@ -182,7 +173,7 @@ const chatbotSlice = createSlice({
         }
       })
       .addCase(deleteChatbotConfig.fulfilled, (state, action) => {
-        state.configs = state.configs.filter(c => c.id !== action.payload);
+        state.configs = state.configs.filter((c) => c.id !== action.payload);
         if (state.activeConfig && state.activeConfig.id === action.payload) {
           state.activeConfig = null;
         }

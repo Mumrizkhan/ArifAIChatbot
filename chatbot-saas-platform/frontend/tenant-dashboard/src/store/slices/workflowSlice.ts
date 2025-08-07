@@ -1,5 +1,13 @@
-import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit';
-import { WorkflowService, Workflow, WorkflowExecution, WorkflowStatistics, CreateWorkflowData, UpdateWorkflowData, ExecuteWorkflowData } from '../../services/workflowService';
+import { createSlice, createAsyncThunk, PayloadAction } from "@reduxjs/toolkit";
+import {
+  WorkflowService,
+  Workflow,
+  WorkflowExecution,
+  WorkflowStatistics,
+  CreateWorkflowData,
+  UpdateWorkflowData,
+  ExecuteWorkflowData,
+} from "../../services/workflowService";
 
 interface WorkflowState {
   workflows: Workflow[];
@@ -32,31 +40,25 @@ const initialState: WorkflowState = {
 };
 
 export const fetchWorkflows = createAsyncThunk(
-  'workflow/fetchWorkflows',
+  "workflow/fetchWorkflows",
   async ({ page = 1, pageSize = 20 }: { page?: number; pageSize?: number } = {}) => {
     const response = await WorkflowService.getWorkflows(page, pageSize);
     return { workflows: response.data, page, pageSize };
   }
 );
 
-export const fetchWorkflow = createAsyncThunk(
-  'workflow/fetchWorkflow',
-  async (id: string) => {
-    const response = await WorkflowService.getWorkflow(id);
-    return response.data;
-  }
-);
+export const fetchWorkflow = createAsyncThunk("workflow/fetchWorkflow", async (id: string) => {
+  const response = await WorkflowService.getWorkflow(id);
+  return response.data;
+});
 
-export const createWorkflow = createAsyncThunk(
-  'workflow/createWorkflow',
-  async (data: CreateWorkflowData) => {
-    const response = await WorkflowService.createWorkflow(data);
-    return response.data;
-  }
-);
+export const createWorkflow = createAsyncThunk("workflow/createWorkflow", async (data: CreateWorkflowData) => {
+  const response = await WorkflowService.createWorkflow(data);
+  return response.data;
+});
 
 export const updateWorkflow = createAsyncThunk(
-  'workflow/updateWorkflow',
+  "workflow/updateWorkflow",
   async ({ id, definition, ...data }: { id: string; definition?: any } & Partial<UpdateWorkflowData>) => {
     if (definition) {
       const updateData = { id, definition, ...data };
@@ -69,24 +71,18 @@ export const updateWorkflow = createAsyncThunk(
   }
 );
 
-export const deleteWorkflow = createAsyncThunk(
-  'workflow/deleteWorkflow',
-  async (id: string) => {
-    await WorkflowService.deleteWorkflow(id);
-    return id;
-  }
-);
+export const deleteWorkflow = createAsyncThunk("workflow/deleteWorkflow", async (id: string) => {
+  await WorkflowService.deleteWorkflow(id);
+  return id;
+});
 
-export const executeWorkflow = createAsyncThunk(
-  'workflow/executeWorkflow',
-  async ({ id, data }: { id: string; data: ExecuteWorkflowData }) => {
-    const response = await WorkflowService.executeWorkflow(id, data);
-    return response.data;
-  }
-);
+export const executeWorkflow = createAsyncThunk("workflow/executeWorkflow", async ({ id, data }: { id: string; data: ExecuteWorkflowData }) => {
+  const response = await WorkflowService.executeWorkflow(id, data);
+  return response.data;
+});
 
 export const fetchWorkflowExecutions = createAsyncThunk(
-  'workflow/fetchWorkflowExecutions',
+  "workflow/fetchWorkflowExecutions",
   async ({ workflowId, page = 1, pageSize = 20 }: { workflowId: string; page?: number; pageSize?: number }) => {
     const response = await WorkflowService.getWorkflowExecutions(workflowId, page, pageSize);
     return response.data;
@@ -94,7 +90,7 @@ export const fetchWorkflowExecutions = createAsyncThunk(
 );
 
 export const fetchWorkflowStatistics = createAsyncThunk(
-  'workflow/fetchWorkflowStatistics',
+  "workflow/fetchWorkflowStatistics",
   async ({ startDate, endDate }: { startDate?: string; endDate?: string } = {}) => {
     const response = await WorkflowService.getStatistics(startDate, endDate);
     return response.data;
@@ -102,7 +98,7 @@ export const fetchWorkflowStatistics = createAsyncThunk(
 );
 
 const workflowSlice = createSlice({
-  name: 'workflow',
+  name: "workflow",
   initialState,
   reducers: {
     clearError: (state) => {
@@ -129,7 +125,7 @@ const workflowSlice = createSlice({
       })
       .addCase(fetchWorkflows.rejected, (state, action) => {
         state.isLoading = false;
-        state.error = action.error.message || 'Failed to fetch workflows';
+        state.error = action.error.message || "Failed to fetch workflows";
       })
       .addCase(fetchWorkflow.fulfilled, (state, action) => {
         state.currentWorkflow = action.payload;
@@ -138,7 +134,7 @@ const workflowSlice = createSlice({
         state.workflows.unshift(action.payload);
       })
       .addCase(updateWorkflow.fulfilled, (state, action) => {
-        const index = state.workflows.findIndex(w => w.id === action.payload.id);
+        const index = state.workflows.findIndex((w) => w.id === action.payload.id);
         if (index !== -1) {
           state.workflows[index] = { ...state.workflows[index], ...action.payload };
         }
@@ -147,7 +143,7 @@ const workflowSlice = createSlice({
         }
       })
       .addCase(deleteWorkflow.fulfilled, (state, action) => {
-        state.workflows = state.workflows.filter(w => w.id !== action.payload);
+        state.workflows = state.workflows.filter((w) => w.id !== action.payload);
         if (state.currentWorkflow?.id === action.payload) {
           state.currentWorkflow = null;
         }

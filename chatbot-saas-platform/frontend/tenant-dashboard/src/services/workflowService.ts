@@ -1,11 +1,11 @@
-import { apiClient } from './api';
-import type { ApiResponse } from './api';
+import { apiClient } from "./api";
+import type { ApiResponse } from "./api";
 
 export interface Workflow {
   id: string;
   name: string;
   description: string;
-  status: 'Draft' | 'Active' | 'Inactive' | 'Archived' | 'Error';
+  status: "Draft" | "Active" | "Inactive" | "Archived" | "Error";
   version: string;
   isActive: boolean;
   definition?: WorkflowDefinition;
@@ -66,7 +66,7 @@ export interface WorkflowSettings {
   timeout: number;
   enableLogging: boolean;
   enableNotifications: boolean;
-  errorHandling: 'Stop' | 'Continue' | 'Retry' | 'Escalate';
+  errorHandling: "Stop" | "Continue" | "Retry" | "Escalate";
   customSettings: Record<string, any>;
 }
 
@@ -80,14 +80,30 @@ export interface WorkflowConnectionCondition {
   variables: Record<string, any>;
 }
 
-export type WorkflowStepType = 'Start' | 'End' | 'Action' | 'Condition' | 'Loop' | 'Parallel' | 'Wait' | 'HttpRequest' | 'EmailSend' | 'DatabaseQuery' | 'ScriptExecution' | 'UserTask' | 'ServiceTask' | 'Timer' | 'Gateway' | 'SubWorkflow';
+export type WorkflowStepType =
+  | "Start"
+  | "End"
+  | "Action"
+  | "Condition"
+  | "Loop"
+  | "Parallel"
+  | "Wait"
+  | "HttpRequest"
+  | "EmailSend"
+  | "DatabaseQuery"
+  | "ScriptExecution"
+  | "UserTask"
+  | "ServiceTask"
+  | "Timer"
+  | "Gateway"
+  | "SubWorkflow";
 
-export type WorkflowTriggerType = 'Manual' | 'Scheduled' | 'Event' | 'Webhook' | 'FileUpload' | 'DatabaseChange' | 'MessageReceived';
+export type WorkflowTriggerType = "Manual" | "Scheduled" | "Event" | "Webhook" | "FileUpload" | "DatabaseChange" | "MessageReceived";
 
 export interface WorkflowExecution {
   id: string;
   workflowId: string;
-  status: 'Pending' | 'Running' | 'Completed' | 'Failed' | 'Cancelled' | 'Timeout';
+  status: "Pending" | "Running" | "Completed" | "Failed" | "Cancelled" | "Timeout";
   inputData: Record<string, any>;
   outputData: Record<string, any>;
   startedAt: string;
@@ -103,7 +119,7 @@ export interface WorkflowStepExecution {
   stepId: string;
   stepName: string;
   stepType: WorkflowStepType;
-  status: 'Pending' | 'Running' | 'Completed' | 'Failed' | 'Skipped' | 'Cancelled';
+  status: "Pending" | "Running" | "Completed" | "Failed" | "Skipped" | "Cancelled";
   inputData: Record<string, any>;
   outputData: Record<string, any>;
   startedAt: string;
@@ -172,7 +188,7 @@ export class WorkflowService {
   }
 
   static async createWorkflow(data: CreateWorkflowData): Promise<ApiResponse<Workflow>> {
-    return apiClient.post('/workflow/workflows', data);
+    return apiClient.post("/workflow/workflows", data);
   }
 
   static async updateWorkflow(data: UpdateWorkflowData): Promise<ApiResponse<void>> {
@@ -217,23 +233,25 @@ export class WorkflowService {
 
   static async getStatistics(startDate?: string, endDate?: string): Promise<ApiResponse<WorkflowStatistics>> {
     const params = new URLSearchParams();
-    if (startDate) params.append('startDate', startDate);
-    if (endDate) params.append('endDate', endDate);
+    if (startDate) params.append("startDate", startDate);
+    if (endDate) params.append("endDate", endDate);
     return apiClient.get(`/workflow/workflows/statistics?${params.toString()}`);
   }
 
   static async getAvailableStepTypes(): Promise<ApiResponse<WorkflowStepType[]>> {
-    return apiClient.get('/workflow/workflows/designer/step-types');
+    return apiClient.get("/workflow/workflows/designer/step-types");
   }
 
-  static async validateWorkflowDefinition(definition: WorkflowDefinition): Promise<ApiResponse<{ isValid: boolean; definition: WorkflowDefinition; message: string }>> {
-    return apiClient.post('/workflow/workflows/designer/validate', definition);
+  static async validateWorkflowDefinition(
+    definition: WorkflowDefinition
+  ): Promise<ApiResponse<{ isValid: boolean; definition: WorkflowDefinition; message: string }>> {
+    return apiClient.post("/workflow/workflows/designer/validate", definition);
   }
 
   static async getTemplates(category?: string, publicOnly = true): Promise<ApiResponse<WorkflowTemplate[]>> {
     const params = new URLSearchParams();
-    if (category) params.append('category', category);
-    params.append('publicOnly', publicOnly.toString());
+    if (category) params.append("category", category);
+    params.append("publicOnly", publicOnly.toString());
     return apiClient.get(`/workflow/workflows/templates?${params.toString()}`);
   }
 

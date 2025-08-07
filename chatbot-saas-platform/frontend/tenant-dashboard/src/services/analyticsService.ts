@@ -1,4 +1,4 @@
-import { apiClient, ApiResponse } from './api';
+import { apiClient, ApiResponse } from "./api";
 
 // Analytics related types
 export interface AnalyticsData {
@@ -62,7 +62,7 @@ export interface CustomReport {
   type: string;
   filters: Record<string, any>;
   schedule?: {
-    frequency: 'daily' | 'weekly' | 'monthly';
+    frequency: "daily" | "weekly" | "monthly";
     time: string;
     recipients: string[];
   };
@@ -76,15 +76,15 @@ export interface CreateReportData {
   type: string;
   filters: Record<string, any>;
   schedule?: {
-    frequency: 'daily' | 'weekly' | 'monthly';
+    frequency: "daily" | "weekly" | "monthly";
     time: string;
     recipients: string[];
   };
 }
 
 export interface ExportData {
-  format: 'csv' | 'xlsx' | 'pdf';
-  type: 'users' | 'conversations' | 'revenue' | 'custom';
+  format: "csv" | "xlsx" | "pdf";
+  type: "users" | "conversations" | "revenue" | "custom";
   dateRange: {
     from: string;
     to: string;
@@ -97,58 +97,55 @@ export class AnalyticsService {
   static async getOverview(params?: {
     dateFrom?: string;
     dateTo?: string;
-    granularity?: 'day' | 'week' | 'month';
+    granularity?: "day" | "week" | "month";
   }): Promise<ApiResponse<OverviewMetrics>> {
-    return apiClient.get<OverviewMetrics>('/analytics/analytics/overview', params);
+    return apiClient.get<OverviewMetrics>("/analytics/analytics/overview", params);
   }
 
   // Get user analytics
   static async getUserAnalytics(params?: {
     dateFrom?: string;
     dateTo?: string;
-    granularity?: 'day' | 'week' | 'month';
+    granularity?: "day" | "week" | "month";
   }): Promise<ApiResponse<UserMetrics>> {
-    return apiClient.get<UserMetrics>('/analytics/analytics/users', params);
+    return apiClient.get<UserMetrics>("/analytics/analytics/users", params);
   }
 
   // Get chatbot analytics
   static async getChatbotAnalytics(params?: {
     dateFrom?: string;
     dateTo?: string;
-    granularity?: 'day' | 'week' | 'month';
+    granularity?: "day" | "week" | "month";
   }): Promise<ApiResponse<ChatbotMetrics>> {
-    return apiClient.get<ChatbotMetrics>('/analytics/analytics/chatbot', params);
+    return apiClient.get<ChatbotMetrics>("/analytics/analytics/chatbot", params);
   }
 
   // Get subscription analytics
   static async getSubscriptionAnalytics(params?: {
     dateFrom?: string;
     dateTo?: string;
-    granularity?: 'day' | 'week' | 'month';
+    granularity?: "day" | "week" | "month";
   }): Promise<ApiResponse<SubscriptionMetrics>> {
-    return apiClient.get<SubscriptionMetrics>('/analytics/analytics/subscription', params);
+    return apiClient.get<SubscriptionMetrics>("/analytics/analytics/subscription", params);
   }
 
   // Get performance analytics
-  static async getPerformanceAnalytics(params?: {
-    dateFrom?: string;
-    dateTo?: string;
-  }): Promise<ApiResponse<PerformanceMetrics>> {
-    return apiClient.get<PerformanceMetrics>('/analytics/analytics/performance', params);
+  static async getPerformanceAnalytics(params?: { dateFrom?: string; dateTo?: string }): Promise<ApiResponse<PerformanceMetrics>> {
+    return apiClient.get<PerformanceMetrics>("/analytics/analytics/performance", params);
   }
 
   // Get all analytics data
   static async getAllAnalytics(params?: {
     dateFrom?: string;
     dateTo?: string;
-    granularity?: 'day' | 'week' | 'month';
+    granularity?: "day" | "week" | "month";
   }): Promise<ApiResponse<AnalyticsData>> {
-    return apiClient.get<AnalyticsData>('/analytics/analytics', params);
+    return apiClient.get<AnalyticsData>("/analytics/analytics", params);
   }
 
   // Custom Reports
   static async getReports(): Promise<ApiResponse<CustomReport[]>> {
-    return apiClient.get<CustomReport[]>('/analytics/analytics/reports');
+    return apiClient.get<CustomReport[]>("/analytics/analytics/reports");
   }
 
   static async getReport(id: string): Promise<ApiResponse<CustomReport>> {
@@ -156,7 +153,7 @@ export class AnalyticsService {
   }
 
   static async createReport(data: CreateReportData): Promise<ApiResponse<CustomReport>> {
-    return apiClient.post<CustomReport>('/analytics/analytics/reports', data);
+    return apiClient.post<CustomReport>("/analytics/analytics/reports", data);
   }
 
   static async updateReport(id: string, data: Partial<CreateReportData>): Promise<ApiResponse<CustomReport>> {
@@ -173,17 +170,19 @@ export class AnalyticsService {
 
   // Export functionality
   static async exportData(data: ExportData): Promise<ApiResponse<{ downloadUrl: string }>> {
-    return apiClient.post<{ downloadUrl: string }>('/analytics/analytics/export', data);
+    return apiClient.post<{ downloadUrl: string }>("/analytics/analytics/export", data);
   }
 
   // Real-time metrics
-  static async getRealTimeMetrics(): Promise<ApiResponse<{
-    activeUsers: number;
-    ongoingConversations: number;
-    systemLoad: number;
-    responseTime: number;
-  }>> {
-    return apiClient.get('/analytics/analytics/realtime');
+  static async getRealTimeMetrics(): Promise<
+    ApiResponse<{
+      activeUsers: number;
+      ongoingConversations: number;
+      systemLoad: number;
+      responseTime: number;
+    }>
+  > {
+    return apiClient.get("/analytics/analytics/realtime");
   }
 
   // Comparison analytics
@@ -191,41 +190,45 @@ export class AnalyticsService {
     metric: string;
     currentPeriod: { from: string; to: string };
     previousPeriod: { from: string; to: string };
-  }): Promise<ApiResponse<{
-    current: any;
-    previous: any;
-    change: number;
-    changePercent: number;
-  }>> {
-    return apiClient.post('/analytics/analytics/compare', params);
+  }): Promise<
+    ApiResponse<{
+      current: any;
+      previous: any;
+      change: number;
+      changePercent: number;
+    }>
+  > {
+    return apiClient.post("/analytics/analytics/compare", params);
   }
 
   // Goal tracking
-  static async getGoals(): Promise<ApiResponse<Array<{
-    id: string;
-    name: string;
-    target: number;
-    current: number;
-    progress: number;
-    deadline: string;
-  }>>> {
-    return apiClient.get('/analytics/analytics/goals');
+  static async getGoals(): Promise<
+    ApiResponse<
+      Array<{
+        id: string;
+        name: string;
+        target: number;
+        current: number;
+        progress: number;
+        deadline: string;
+      }>
+    >
+  > {
+    return apiClient.get("/analytics/analytics/goals");
   }
 
-  static async createGoal(data: {
-    name: string;
-    target: number;
-    metric: string;
-    deadline: string;
-  }): Promise<ApiResponse<any>> {
-    return apiClient.post('/analytics/analytics/goals', data);
+  static async createGoal(data: { name: string; target: number; metric: string; deadline: string }): Promise<ApiResponse<any>> {
+    return apiClient.post("/analytics/analytics/goals", data);
   }
 
-  static async updateGoal(id: string, data: {
-    name?: string;
-    target?: number;
-    deadline?: string;
-  }): Promise<ApiResponse<any>> {
+  static async updateGoal(
+    id: string,
+    data: {
+      name?: string;
+      target?: number;
+      deadline?: string;
+    }
+  ): Promise<ApiResponse<any>> {
     return apiClient.put(`/analytics/analytics/goals/${id}`, data);
   }
 

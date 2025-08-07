@@ -1,5 +1,5 @@
-import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit';
-import { apiClient } from '../../services/api';
+import { createSlice, createAsyncThunk, PayloadAction } from "@reduxjs/toolkit";
+import { apiClient } from "../../services/api";
 
 interface TenantSettings {
   tenantName: string;
@@ -33,50 +33,44 @@ interface SettingsState {
 
 const initialState: SettingsState = {
   settings: {
-    tenantName: '',
-    tenantDescription: '',
-    contactEmail: '',
-    contactPhone: '',
-    timezone: 'UTC',
-    language: 'en',
-    dateFormat: 'MM/DD/YYYY',
-    currency: 'USD',
+    tenantName: "",
+    tenantDescription: "",
+    contactEmail: "",
+    contactPhone: "",
+    timezone: "UTC",
+    language: "en",
+    dateFormat: "MM/DD/YYYY",
+    currency: "USD",
     enableNotifications: true,
     enableEmailNotifications: true,
     enableSmsNotifications: false,
     enablePushNotifications: true,
-    notificationFrequency: 'immediate',
+    notificationFrequency: "immediate",
     dataRetentionDays: 365,
     enableDataExport: true,
     enableAuditLogs: true,
     sessionTimeout: 30,
     enableTwoFactor: false,
-    allowedDomains: '',
-    ipWhitelist: '',
+    allowedDomains: "",
+    ipWhitelist: "",
   },
   isLoading: false,
   error: null,
   isSaving: false,
 };
 
-export const fetchSettings = createAsyncThunk(
-  'settings/fetchSettings',
-  async () => {
-    const response = await apiClient.get('/tenant-management/tenant/settings');
-    return response.data;
-  }
-);
+export const fetchSettings = createAsyncThunk("settings/fetchSettings", async () => {
+  const response = await apiClient.get("/tenant-management/tenant/settings");
+  return response.data;
+});
 
-export const updateSettings = createAsyncThunk(
-  'settings/updateSettings',
-  async (settings: Partial<TenantSettings>) => {
-    const response = await apiClient.put('/tenant-management/tenant/settings', settings);
-    return response.data;
-  }
-);
+export const updateSettings = createAsyncThunk("settings/updateSettings", async (settings: Partial<TenantSettings>) => {
+  const response = await apiClient.put("/tenant-management/tenant/settings", settings);
+  return response.data;
+});
 
 const settingsSlice = createSlice({
-  name: 'settings',
+  name: "settings",
   initialState,
   reducers: {
     clearError: (state) => {
@@ -98,7 +92,7 @@ const settingsSlice = createSlice({
       })
       .addCase(fetchSettings.rejected, (state, action) => {
         state.isLoading = false;
-        state.error = action.error.message || 'Failed to fetch settings';
+        state.error = action.error.message || "Failed to fetch settings";
       })
       .addCase(updateSettings.pending, (state) => {
         state.isSaving = true;
@@ -110,7 +104,7 @@ const settingsSlice = createSlice({
       })
       .addCase(updateSettings.rejected, (state, action) => {
         state.isSaving = false;
-        state.error = action.error.message || 'Failed to update settings';
+        state.error = action.error.message || "Failed to update settings";
       });
   },
 });

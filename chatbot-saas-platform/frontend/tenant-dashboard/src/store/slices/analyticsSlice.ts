@@ -1,8 +1,8 @@
-import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit';
-
+import { createSlice, createAsyncThunk, PayloadAction } from "@reduxjs/toolkit";
+export const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 interface TenantNotification {
   id: string;
-  type: 'info' | 'warning' | 'error' | 'success';
+  type: "info" | "warning" | "error" | "success";
   title: string;
   message: string;
   timestamp: Date;
@@ -74,54 +74,48 @@ const initialState: AnalyticsState = {
   tenantNotifications: [],
 };
 
-export const fetchAnalytics = createAsyncThunk(
-  'analytics/fetchData',
-  async (params: { startDate: Date; endDate: Date }) => {
-    const response = await fetch('/api/analytics', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${localStorage.getItem('token')}`,
-      },
-      body: JSON.stringify({
-        startDate: params.startDate.toISOString(),
-        endDate: params.endDate.toISOString(),
-      }),
-    });
+export const fetchAnalytics = createAsyncThunk("analytics/fetchData", async (params: { startDate: Date; endDate: Date }) => {
+  const response = await fetch(`${API_BASE_URL}/analytic/analytics`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${localStorage.getItem("token")}`,
+    },
+    body: JSON.stringify({
+      startDate: params.startDate.toISOString(),
+      endDate: params.endDate.toISOString(),
+    }),
+  });
 
-    if (!response.ok) {
-      throw new Error('Failed to fetch analytics data');
-    }
-
-    return response.json();
+  if (!response.ok) {
+    throw new Error("Failed to fetch analytics data");
   }
-);
 
-export const fetchRealtimeAnalytics = createAsyncThunk(
-  'analytics/fetchRealtime',
-  async () => {
-    const response = await fetch('/api/analytics/realtime', {
-      headers: {
-        Authorization: `Bearer ${localStorage.getItem('token')}`,
-      },
-    });
+  return response.json();
+});
 
-    if (!response.ok) {
-      throw new Error('Failed to fetch realtime analytics');
-    }
+export const fetchRealtimeAnalytics = createAsyncThunk("analytics/fetchRealtime", async () => {
+  const response = await fetch(`${API_BASE_URL}/analytic/analytics/realtime`, {
+    headers: {
+      Authorization: `Bearer ${localStorage.getItem("token")}`,
+    },
+  });
 
-    return response.json();
+  if (!response.ok) {
+    throw new Error("Failed to fetch realtime analytics");
   }
-);
+
+  return response.json();
+});
 
 export const exportAnalytics = createAsyncThunk(
-  'analytics/export',
-  async (params: { format: 'csv' | 'pdf' | 'excel'; startDate: Date; endDate: Date }) => {
-    const response = await fetch('/api/analytics/export', {
-      method: 'POST',
+  "analytics/export",
+  async (params: { format: "csv" | "pdf" | "excel"; startDate: Date; endDate: Date }) => {
+    const response = await fetch(`${API_BASE_URL}/analytic/analytics/export`, {
+      method: "POST",
       headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${localStorage.getItem('token')}`,
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${localStorage.getItem("token")}`,
       },
       body: JSON.stringify({
         format: params.format,
@@ -131,12 +125,12 @@ export const exportAnalytics = createAsyncThunk(
     });
 
     if (!response.ok) {
-      throw new Error('Failed to export analytics data');
+      throw new Error("Failed to export analytics data");
     }
 
     const blob = await response.blob();
     const url = window.URL.createObjectURL(blob);
-    const a = document.createElement('a');
+    const a = document.createElement("a");
     a.href = url;
     a.download = `analytics-${params.format}-${Date.now()}.${params.format}`;
     document.body.appendChild(a);
@@ -149,13 +143,13 @@ export const exportAnalytics = createAsyncThunk(
 );
 
 const analyticsSlice = createSlice({
-  name: 'analytics',
+  name: "analytics",
   initialState,
   reducers: {
     setDateRange: (state, action: PayloadAction<{ start: Date; end: Date }>) => {
       state.dateRange = action.payload;
     },
-    updateRealtimeData: (state, action: PayloadAction<AnalyticsData['realtime']>) => {
+    updateRealtimeData: (state, action: PayloadAction<AnalyticsData["realtime"]>) => {
       if (state.data) {
         state.data.realtime = action.payload;
       }
@@ -179,9 +173,7 @@ const analyticsSlice = createSlice({
       }
     },
     removeTenantNotification: (state, action: PayloadAction<string>) => {
-      state.tenantNotifications = state.tenantNotifications.filter(
-        notification => notification.id !== action.payload
-      );
+      state.tenantNotifications = state.tenantNotifications.filter((notification) => notification.id !== action.payload);
     },
   },
   extraReducers: (builder) => {
@@ -196,7 +188,7 @@ const analyticsSlice = createSlice({
       })
       .addCase(fetchAnalytics.rejected, (state, action) => {
         state.isLoading = false;
-        state.error = action.error.message || 'Failed to fetch analytics data';
+        state.error = action.error.message || "Failed to fetch analytics data";
       })
       .addCase(fetchRealtimeAnalytics.fulfilled, (state, action) => {
         if (state.data) {
@@ -204,19 +196,19 @@ const analyticsSlice = createSlice({
         }
       })
       .addCase(exportAnalytics.rejected, (state, action) => {
-        state.error = action.error.message || 'Failed to export analytics data';
+        state.error = action.error.message || "Failed to export analytics data";
       });
   },
 });
 
-export const { 
-  setDateRange, 
-  updateRealtimeData, 
-  setRefreshInterval, 
+export const {
+  setDateRange,
+  updateRealtimeData,
+  setRefreshInterval,
   clearError,
   updateAnalyticsDataRealtime,
   setSignalRConnectionStatus,
   addTenantNotification,
-  removeTenantNotification
+  removeTenantNotification,
 } = analyticsSlice.actions;
 export default analyticsSlice.reducer;

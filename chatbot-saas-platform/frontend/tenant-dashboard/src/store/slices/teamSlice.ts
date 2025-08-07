@@ -1,12 +1,12 @@
-import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit';
-
+import { createSlice, createAsyncThunk, PayloadAction } from "@reduxjs/toolkit";
+export const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 export interface TeamMember {
   id: string;
   name: string;
   email: string;
-  role: 'admin' | 'agent' | 'viewer';
+  role: "admin" | "agent" | "viewer";
   avatar?: string;
-  status: 'active' | 'inactive' | 'pending';
+  status: "active" | "inactive" | "pending";
   lastLogin?: Date;
   permissions: string[];
   skills: string[];
@@ -21,7 +21,7 @@ interface TeamState {
     id: string;
     email: string;
     role: string;
-    status: 'pending' | 'accepted' | 'expired';
+    status: "pending" | "accepted" | "expired";
     createdAt: Date;
   }[];
   isLoading: boolean;
@@ -35,87 +35,75 @@ const initialState: TeamState = {
   error: null,
 };
 
-export const fetchTeamMembers = createAsyncThunk(
-  'team/fetchMembers',
-  async () => {
-    const response = await fetch('/api/team/members', {
-      headers: {
-        Authorization: `Bearer ${localStorage.getItem('token')}`,
-      },
-    });
+export const fetchTeamMembers = createAsyncThunk("team/fetchMembers", async () => {
+  const response = await fetch(`${API_BASE_URL}/tenant-management/team/members`, {
+    headers: {
+      Authorization: `Bearer ${localStorage.getItem("token")}`,
+    },
+  });
 
-    if (!response.ok) {
-      throw new Error('Failed to fetch team members');
-    }
-
-    return response.json();
+  if (!response.ok) {
+    throw new Error("Failed to fetch team members");
   }
-);
 
-export const inviteTeamMember = createAsyncThunk(
-  'team/inviteMember',
-  async ({ email, role }: { email: string; role: string }) => {
-    const response = await fetch('/api/team/invite', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${localStorage.getItem('token')}`,
-      },
-      body: JSON.stringify({ email, role }),
-    });
+  return response.json();
+});
 
-    if (!response.ok) {
-      throw new Error('Failed to invite team member');
-    }
+export const inviteTeamMember = createAsyncThunk("team/inviteMember", async ({ email, role }: { email: string; role: string }) => {
+  const response = await fetch(`${API_BASE_URL}/tenant-management/team/invite`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${localStorage.getItem("token")}`,
+    },
+    body: JSON.stringify({ email, role }),
+  });
 
-    return response.json();
+  if (!response.ok) {
+    throw new Error("Failed to invite team member");
   }
-);
 
-export const updateTeamMember = createAsyncThunk(
-  'team/updateMember',
-  async ({ id, updates }: { id: string; updates: Partial<TeamMember> }) => {
-    const response = await fetch(`/api/team/members/${id}`, {
-      method: 'PUT',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${localStorage.getItem('token')}`,
-      },
-      body: JSON.stringify(updates),
-    });
+  return response.json();
+});
 
-    if (!response.ok) {
-      throw new Error('Failed to update team member');
-    }
+export const updateTeamMember = createAsyncThunk("team/updateMember", async ({ id, updates }: { id: string; updates: Partial<TeamMember> }) => {
+  const response = await fetch(`${API_BASE_URL}/tenant-management/team/members/${id}`, {
+    method: "PUT",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${localStorage.getItem("token")}`,
+    },
+    body: JSON.stringify(updates),
+  });
 
-    return response.json();
+  if (!response.ok) {
+    throw new Error("Failed to update team member");
   }
-);
 
-export const removeTeamMember = createAsyncThunk(
-  'team/removeMember',
-  async (id: string) => {
-    const response = await fetch(`/api/team/members/${id}`, {
-      method: 'DELETE',
-      headers: {
-        Authorization: `Bearer ${localStorage.getItem('token')}`,
-      },
-    });
+  return response.json();
+});
 
-    if (!response.ok) {
-      throw new Error('Failed to remove team member');
-    }
+export const removeTeamMember = createAsyncThunk("team/removeMember", async (id: string) => {
+  const response = await fetch(`${API_BASE_URL}/tenant-management/team/members/${id}`, {
+    method: "DELETE",
+    headers: {
+      Authorization: `Bearer ${localStorage.getItem("token")}`,
+    },
+  });
 
-    return id;
+  if (!response.ok) {
+    throw new Error("Failed to remove team member");
   }
-);
+
+  return id;
+});
 
 const teamSlice = createSlice({
-  name: 'team',
+  name: "team",
   initialState,
   reducers: {
     updateMemberStatus: (state, action: PayloadAction<{ id: string; isOnline: boolean }>) => {
-      const member = state.members.find(m => m.id === action.payload.id);
+      const member = state.members.find((m) => m.id === action.payload.id);
       if (member) {
         member.isOnline = action.payload.isOnline;
       }
@@ -137,19 +125,19 @@ const teamSlice = createSlice({
       })
       .addCase(fetchTeamMembers.rejected, (state, action) => {
         state.isLoading = false;
-        state.error = action.error.message || 'Failed to fetch team members';
+        state.error = action.error.message || "Failed to fetch team members";
       })
       .addCase(inviteTeamMember.fulfilled, (state, action) => {
         state.invitations.push(action.payload);
       })
       .addCase(updateTeamMember.fulfilled, (state, action) => {
-        const index = state.members.findIndex(m => m.id === action.payload.id);
+        const index = state.members.findIndex((m) => m.id === action.payload.id);
         if (index !== -1) {
           state.members[index] = action.payload;
         }
       })
       .addCase(removeTeamMember.fulfilled, (state, action) => {
-        state.members = state.members.filter(m => m.id !== action.payload);
+        state.members = state.members.filter((m) => m.id !== action.payload);
       });
   },
 });
