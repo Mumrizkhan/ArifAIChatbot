@@ -7,7 +7,7 @@ pool:
   name: ubuntu-22.04
 
 variables:
-  workingDirectory: 'frontend/admin-dashboard'
+  workingDirectory: 'chatbot-saas-platform/frontend/admin-dashboard'
   artifactName: 'admin-dashboard'
 
 steps:
