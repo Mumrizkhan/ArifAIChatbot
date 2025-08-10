@@ -1,5 +1,5 @@
-import { HubConnection, HubConnectionBuilder, LogLevel } from '@microsoft/signalr';
-
+import { HubConnection, HubConnectionBuilder, LogLevel } from "@microsoft/signalr";
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 interface DashboardStats {
   totalTenants: number;
   totalUsers: number;
@@ -11,7 +11,7 @@ interface DashboardStats {
 
 interface SystemNotification {
   id: string;
-  type: 'info' | 'warning' | 'error' | 'success';
+  type: "info" | "warning" | "error" | "success";
   title: string;
   message: string;
   timestamp: Date;
@@ -63,7 +63,7 @@ class AdminSignalRService {
 
     try {
       this.connection = new HubConnectionBuilder()
-        .withUrl(`${import.meta.env.VITE_API_BASE_URL}chat/chatHub`, {
+        .withUrl(`${API_BASE_URL}chat/chatHub`, {
           accessTokenFactory: () => authToken,
         })
         .withAutomaticReconnect({
@@ -78,18 +78,18 @@ class AdminSignalRService {
         .build();
 
       this.setupEventHandlers();
-      
+
       await this.connection.start();
       this.isConnected = true;
-      
-      console.log('Admin SignalR connection established');
+
+      console.log("Admin SignalR connection established");
       this.onConnectionStatusChange?.(true);
-      
-      await this.connection.invoke('JoinAdminGroup');
-      
+
+      await this.connection.invoke("JoinAdminGroup");
+
       return true;
     } catch (error) {
-      console.error('Failed to connect to SignalR hub:', error);
+      console.error("Failed to connect to SignalR hub:", error);
       this.isConnected = false;
       this.onConnectionStatusChange?.(false);
       return false;
@@ -99,39 +99,39 @@ class AdminSignalRService {
   private setupEventHandlers(): void {
     if (!this.connection) return;
 
-    this.connection.on('DashboardStatsUpdated', (stats: DashboardStats) => {
+    this.connection.on("DashboardStatsUpdated", (stats: DashboardStats) => {
       this.onDashboardStatsUpdate?.(stats);
     });
 
-    this.connection.on('ConversationMetricsUpdated', (metrics: ConversationMetrics) => {
+    this.connection.on("ConversationMetricsUpdated", (metrics: ConversationMetrics) => {
       this.onConversationMetricsUpdate?.(metrics);
     });
 
-    this.connection.on('AgentMetricsUpdated', (metrics: AgentMetrics) => {
+    this.connection.on("AgentMetricsUpdated", (metrics: AgentMetrics) => {
       this.onAgentMetricsUpdate?.(metrics);
     });
 
-    this.connection.on('SystemNotification', (notification: SystemNotification) => {
+    this.connection.on("SystemNotification", (notification: SystemNotification) => {
       this.onSystemNotification?.(notification);
     });
 
     this.connection.onclose(() => {
       this.isConnected = false;
       this.onConnectionStatusChange?.(false);
-      console.log('Admin SignalR connection closed');
+      console.log("Admin SignalR connection closed");
     });
 
     this.connection.onreconnecting(() => {
       this.isConnected = false;
       this.onConnectionStatusChange?.(false);
-      console.log('Admin SignalR reconnecting...');
+      console.log("Admin SignalR reconnecting...");
     });
 
     this.connection.onreconnected(() => {
       this.isConnected = true;
       this.onConnectionStatusChange?.(true);
-      console.log('Admin SignalR reconnected');
-      this.connection?.invoke('JoinAdminGroup');
+      console.log("Admin SignalR reconnected");
+      this.connection?.invoke("JoinAdminGroup");
     });
   }
 
@@ -157,40 +157,40 @@ class AdminSignalRService {
 
   async requestDashboardStatsUpdate(): Promise<void> {
     if (!this.isConnected || !this.connection) {
-      console.warn('SignalR not connected, cannot request dashboard stats update');
+      console.warn("SignalR not connected, cannot request dashboard stats update");
       return;
     }
 
     try {
-      await this.connection.invoke('RequestDashboardStatsUpdate');
+      await this.connection.invoke("RequestDashboardStatsUpdate");
     } catch (error) {
-      console.error('Failed to request dashboard stats update:', error);
+      console.error("Failed to request dashboard stats update:", error);
     }
   }
 
   async requestConversationMetricsUpdate(timeRange: string, tenantId?: string): Promise<void> {
     if (!this.isConnected || !this.connection) {
-      console.warn('SignalR not connected, cannot request conversation metrics update');
+      console.warn("SignalR not connected, cannot request conversation metrics update");
       return;
     }
 
     try {
-      await this.connection.invoke('RequestConversationMetricsUpdate', timeRange, tenantId);
+      await this.connection.invoke("RequestConversationMetricsUpdate", timeRange, tenantId);
     } catch (error) {
-      console.error('Failed to request conversation metrics update:', error);
+      console.error("Failed to request conversation metrics update:", error);
     }
   }
 
   async requestAgentMetricsUpdate(timeRange: string, tenantId?: string): Promise<void> {
     if (!this.isConnected || !this.connection) {
-      console.warn('SignalR not connected, cannot request agent metrics update');
+      console.warn("SignalR not connected, cannot request agent metrics update");
       return;
     }
 
     try {
-      await this.connection.invoke('RequestAgentMetricsUpdate', timeRange, tenantId);
+      await this.connection.invoke("RequestAgentMetricsUpdate", timeRange, tenantId);
     } catch (error) {
-      console.error('Failed to request agent metrics update:', error);
+      console.error("Failed to request agent metrics update:", error);
     }
   }
 
