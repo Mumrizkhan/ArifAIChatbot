@@ -30,7 +30,7 @@ steps:
 # Publish build artifacts
 - task: PublishBuildArtifacts@1
   inputs:
-    PathtoPublish: '$(workingDirectory)/build'
+    PathtoPublish: '$(workingDirectory)/dist'
     ArtifactName: $(artifactName)
     publishLocation: 'Container'
   displayName: 'Publish Build Artifacts'
