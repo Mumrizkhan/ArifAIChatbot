@@ -244,7 +244,8 @@
 
     // Test bundle size
     function testBundleSize() {
-      fetch('/dist/arif-chat-widget.js')
+      const VITE_API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
+      fetch(`${VITE_API_URL}/dist/arif-chat-widget.js`)
         .then(response => response.blob())
         .then(blob => {
           const sizeKB = (blob.size / 1024).toFixed(2);

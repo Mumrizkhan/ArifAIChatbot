@@ -1,14 +1,14 @@
-import { apiClient } from './apiClient';
+import { apiClient } from "./apiClient";
 
 class AIService {
-  private hubUrl: string = import.meta.env.BASE_URL;
+  private hubUrl: string = import.meta.env.VITE_WEBSOCKET_URL;
   initialize(hubUrl: string) {
     this.hubUrl = this.hubUrl || hubUrl;
   }
 
   async getBotResponse(message: string, conversationId: string): Promise<string> {
     try {
-      const data = await apiClient.post('/ai/chat', { message, conversationId });
+      const data = await apiClient.post(`${this.hubUrl}/ai/chat`, { message, conversationId });
       return data.response;
     } catch (error) {
       console.error("AI service error:", error);
@@ -23,7 +23,7 @@ class AIService {
 
   async analyzeSentiment(message: string): Promise<"positive" | "negative" | "neutral"> {
     try {
-      const data = await apiClient.post('/ai/sentiment', { message });
+      const data = await apiClient.post(`${this.hubUrl}/ai/sentiment`, { message });
       return data.sentiment;
     } catch (error) {
       console.error("Sentiment analysis error:", error);
@@ -33,7 +33,7 @@ class AIService {
 
   async extractIntents(message: string): Promise<string[]> {
     try {
-      const data = await apiClient.post('/ai/intents', { message });
+      const data = await apiClient.post(`${this.hubUrl}/ai/intents`, { message });
       return data.intents || [];
     } catch (error) {
       console.error("Intent extraction error:", error);

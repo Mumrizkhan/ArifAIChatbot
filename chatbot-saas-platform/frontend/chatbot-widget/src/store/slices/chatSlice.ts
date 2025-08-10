@@ -1,12 +1,12 @@
-import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit';
-import { apiClient } from '../../services/apiClient';
-
+import { createSlice, createAsyncThunk, PayloadAction } from "@reduxjs/toolkit";
+import { apiClient } from "../../services/apiClient";
+const VITE_API_URL = import.meta.env.VITE_API_URL || "http://localhost:8000";
 export interface Message {
   id: string;
   content: string;
-  sender: 'user' | 'bot' | 'agent';
+  sender: "user" | "bot" | "agent";
   timestamp: Date;
-  type: 'text' | 'file' | 'image' | 'typing';
+  type: "text" | "file" | "image" | "typing";
   metadata?: {
     fileName?: string;
     fileSize?: number;
@@ -20,7 +20,7 @@ export interface Message {
 export interface Conversation {
   id: string;
   messages: Message[];
-  status: 'active' | 'waiting' | 'ended';
+  status: "active" | "waiting" | "ended";
   assignedAgent?: {
     id: string;
     name: string;
@@ -40,7 +40,7 @@ interface ChatState {
   unreadCount: number;
   isLoading: boolean;
   error: string | null;
-  connectionStatus: 'connecting' | 'connected' | 'disconnected' | 'error';
+  connectionStatus: "connecting" | "connected" | "disconnected" | "error";
   lastSeen?: Date;
 }
 
@@ -53,54 +53,45 @@ const initialState: ChatState = {
   unreadCount: 0,
   isLoading: false,
   error: null,
-  connectionStatus: 'disconnected',
+  connectionStatus: "disconnected",
 };
 
-export const sendMessage = createAsyncThunk(
-  'chat/sendMessage',
-  async (message: { content: string; type: 'text' | 'file' }, { getState }) => {
-    const state = getState() as any;
-    const conversationId = state.chat.currentConversation?.id;
-    
-    if (!conversationId) {
-      throw new Error('No active conversation found');
-    }
+export const sendMessage = createAsyncThunk("chat/sendMessage", async (message: { content: string; type: "text" | "file" }, { getState }) => {
+  const state = getState() as any;
+  const conversationId = state.chat.currentConversation?.id;
 
-    return await apiClient.post('/chat/chat/messages', {
-      conversationId,
-      content: message.content,
-      type: message.type
-    });
+  if (!conversationId) {
+    throw new Error("No active conversation found");
   }
-);
 
-export const startConversation = createAsyncThunk(
-  'chat/startConversation',
-  async (tenantId: string) => {
-    const data = await apiClient.post('/chat/chat/conversations', {
-      tenantId,
-      customerName: 'Anonymous User',
-      language: 'en'
-    });
-    
-    return {
-      id: data.id,
-      messages: [],
-      status: 'active' as const,
-      startedAt: new Date(data.createdAt || new Date()),
-    } as Conversation;
-  }
-);
+  return await apiClient.post(`${VITE_API_URL}/chat/chat/messages`, {
+    conversationId,
+    content: message.content,
+    type: message.type,
+  });
+});
 
-export const requestHumanAgent = createAsyncThunk(
-  'chat/requestHumanAgent',
-  async (conversationId: string) => {
-    return await apiClient.post(`/chat/chat/conversations/${conversationId}/escalate`);
-  }
-);
+export const startConversation = createAsyncThunk("chat/startConversation", async (tenantId: string) => {
+  const data = await apiClient.post(`${VITE_API_URL}/chat/chat/conversations`, {
+    tenantId,
+    customerName: "Anonymous User",
+    language: "en",
+  });
+
+  return {
+    id: data.id,
+    messages: [],
+    status: "active" as const,
+    startedAt: new Date(data.createdAt || new Date()),
+  } as Conversation;
+});
+
+export const requestHumanAgent = createAsyncThunk("chat/requestHumanAgent", async (conversationId: string) => {
+  return await apiClient.post(`${VITE_API_URL}/chat/chat/conversations/${conversationId}/escalate`);
+});
 
 const chatSlice = createSlice({
-  name: 'chat',
+  name: "chat",
   initialState,
   reducers: {
     toggleChat: (state) => {
@@ -123,7 +114,7 @@ const chatSlice = createSlice({
     addMessage: (state, action: PayloadAction<Message>) => {
       if (state.currentConversation) {
         state.currentConversation.messages.push(action.payload);
-        if (!state.isOpen && action.payload.sender !== 'user') {
+        if (!state.isOpen && action.payload.sender !== "user") {
           state.unreadCount += 1;
         }
       }
@@ -132,11 +123,11 @@ const chatSlice = createSlice({
       state.isTyping = action.payload.isTyping;
       state.typingUser = action.payload.user;
     },
-    setConnectionStatus: (state, action: PayloadAction<ChatState['connectionStatus']>) => {
+    setConnectionStatus: (state, action: PayloadAction<ChatState["connectionStatus"]>) => {
       state.connectionStatus = action.payload;
-      state.isConnected = action.payload === 'connected';
+      state.isConnected = action.payload === "connected";
     },
-    updateConversationStatus: (state, action: PayloadAction<Conversation['status']>) => {
+    updateConversationStatus: (state, action: PayloadAction<Conversation["status"]>) => {
       if (state.currentConversation) {
         state.currentConversation.status = action.payload;
       }
@@ -167,7 +158,7 @@ const chatSlice = createSlice({
       })
       .addCase(sendMessage.rejected, (state, action) => {
         state.isLoading = false;
-        state.error = action.error.message || 'Failed to send message';
+        state.error = action.error.message || "Failed to send message";
       })
       .addCase(startConversation.pending, (state) => {
         state.isLoading = true;
@@ -180,7 +171,7 @@ const chatSlice = createSlice({
       })
       .addCase(startConversation.rejected, (state, action) => {
         state.isLoading = false;
-        state.error = action.error.message || 'Failed to start conversation';
+        state.error = action.error.message || "Failed to start conversation";
       })
       .addCase(requestHumanAgent.pending, (state) => {
         state.isLoading = true;
@@ -188,12 +179,12 @@ const chatSlice = createSlice({
       .addCase(requestHumanAgent.fulfilled, (state) => {
         state.isLoading = false;
         if (state.currentConversation) {
-          state.currentConversation.status = 'waiting';
+          state.currentConversation.status = "waiting";
         }
       })
       .addCase(requestHumanAgent.rejected, (state, action) => {
         state.isLoading = false;
-        state.error = action.error.message || 'Failed to request human agent';
+        state.error = action.error.message || "Failed to request human agent";
       });
   },
 });
