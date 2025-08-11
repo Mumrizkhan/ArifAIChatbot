@@ -9,6 +9,8 @@ pool:
 variables:
   workingDirectory: 'chatbot-saas-platform/backend/src/ApiGateway'
   artifactName: 'ApiGateway'
+  buildConfiguration: 'Release'
+  outputDir: '$(Build.ArtifactStagingDirectory)/arif-apigateway'  
 
 steps:
   - task: UseDotNet@2
