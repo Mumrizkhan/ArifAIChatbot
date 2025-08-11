@@ -44,5 +44,5 @@ steps:
     displayName: 'Publish build artifact'
     inputs:
       PathtoPublish: '$(outputDir)'
-      ArtifactName: 'ApiGateway'
+      ArtifactName: 'arif-apigateway'
       publishLocation: 'Container'
