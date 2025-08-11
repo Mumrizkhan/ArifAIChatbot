@@ -4,10 +4,10 @@ import path from "path";
 
 export default defineConfig(({ command, mode }) => {
   // Determine which env file to load based on mode
-  const envFile = getEnvFileName(mode);
+  //const envFile = getEnvFileName(mode);
 
   // Load env file based on mode
-  const env = loadEnv(mode, process.cwd(), "");
+  //const env = loadEnv(mode, process.cwd(), "");
 
   console.log(`🔧 Loading environment: ${mode} from ${envFile}`);
 
