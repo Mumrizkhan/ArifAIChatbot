@@ -2,11 +2,9 @@ trigger:
   branches:
     include:
       - dev  
-
   paths:
     include:
       - chatbot-saas-platform/frontend/live-agent-interface/**
-
 pool:
   name: ubuntu-22.04
 
