@@ -143,7 +143,7 @@ export const MessageInput: React.FC = () => {
       
       if (conversation) {
         await dispatch(requestHumanAgent(conversation.id)).unwrap();
-        await signalRService.requestAgent(conversation.id);
+        await signalRService.requestAgent();
         
         dispatch(trackEvent({ event: 'agent_requested' }));
       }
