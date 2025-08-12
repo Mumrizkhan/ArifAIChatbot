@@ -212,17 +212,17 @@ public class TenantsController : ControllerBase
     }
 
     [HttpPost("logo")]
-    public async Task<IActionResult> UploadTenantLogo([FromForm] IFormFile logo)
+    public async Task<IActionResult> UploadTenantLogo([FromForm] LogoUploadRequest logoUpload)
     {
         try
         {
             var tenantId = _currentUserService.TenantId;
-            if (logo == null || logo.Length == 0)
+            if (logoUpload.Logo == null || logoUpload.Logo.Length == 0)
             {
                 return BadRequest(new { message = "No file provided" });
             }
 
-            var logoUrl = await _tenantManagementService.UploadTenantLogoAsync(tenantId, logo);
+            var logoUrl = await _tenantManagementService.UploadTenantLogoAsync(tenantId, logoUpload.Logo);
             return Ok(new { logo = logoUrl });
         }
         catch (Exception ex)
@@ -231,4 +231,11 @@ public class TenantsController : ControllerBase
             return StatusCode(500, new { message = "Internal server error" });
         }
     }
+}
+
+public class LogoUploadRequest
+{
+    [FromForm(Name ="logo")]
+   
+    public IFormFile Logo { get; set; }
 }

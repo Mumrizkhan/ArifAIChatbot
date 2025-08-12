@@ -148,18 +148,18 @@ public class ChatbotConfigsController : ControllerBase
     }
 
     [HttpPost("{configId}/knowledge-base/documents")]
-    public async Task<IActionResult> AddKnowledgeBaseDocument(Guid configId, [FromForm] IFormFile document)
+    public async Task<IActionResult> AddKnowledgeBaseDocument([FromForm] UploadFileDto uploadFileDto )//Guid configId, [FromForm] IFormFile document)
     {
         try
         {
             var tenantId = _tenantService.GetCurrentTenantId();
             
-            if (document == null || document.Length == 0)
+            if (uploadFileDto.File == null || uploadFileDto.File.Length == 0)
             {
                 return BadRequest(new { message = "No file provided" });
             }
 
-            var success = await _chatbotConfigService.AddKnowledgeBaseDocumentAsync(configId, document, tenantId);
+            var success = await _chatbotConfigService.AddKnowledgeBaseDocumentAsync(uploadFileDto.ConfigId, uploadFileDto.File, tenantId);
             
             if (!success)
             {
