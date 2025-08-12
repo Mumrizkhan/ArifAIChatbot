@@ -4,13 +4,13 @@ trigger:
       - dev
   paths:
     include:
-      - chatbot-saas-platform/backend/src/KnowledgebaseService**
+      - chatbot-saas-platform/backend/src/KnowledgeBaseService**
 pool:
   name: ubuntu-22.04
 
 variables:
-  workingDirectory: 'chatbot-saas-platform/backend/src/KnowledgebaseService'
-  artifactName: 'KnowledgebaseService'
+  workingDirectory: 'chatbot-saas-platform/backend/src/KnowledgeBaseService'
+  artifactName: 'KnowledgeBaseService'
 
 steps:
   - task: UseDotNet@2
@@ -24,13 +24,13 @@ steps:
     displayName: 'Restore NuGet packages'
     inputs:
       command: 'restore'
-      projects: 'chatbot-saas-platform/backend/src/KnowledgebaseService/KnowledgebaseService.csproj'
+      projects: 'chatbot-saas-platform/backend/src/KnowledgeBaseService/KnowledgeBaseService.csproj'
 
   - task: DotNetCoreCLI@2
     displayName: 'Build project'
     inputs:
       command: 'build'
-      projects: 'chatbot-saas-platform/backend/src/KnowledgebaseService/KnowledgebaseService.csproj'
+      projects: 'chatbot-saas-platform/backend/src/KnowledgeBaseService/KnowledgeBaseService.csproj'
       arguments: '--configuration $(buildConfiguration)'
 
   - task: DotNetCoreCLI@2
@@ -38,7 +38,7 @@ steps:
     inputs:
       command: 'publish'
       publishWebProjects: false
-      projects: 'chatbot-saas-platform/backend/src/KnowledgebaseService/KnowledgebaseService.csproj'
+      projects: 'chatbot-saas-platform/backend/src/KnowledgeBaseService/KnowledgeBaseService.csproj'
       arguments: '--configuration $(buildConfiguration) --output $(outputDir)'
       zipAfterPublish: false
 
@@ -46,5 +46,5 @@ steps:
     displayName: 'Publish build artifact'
     inputs:
       PathtoPublish: '$(outputDir)'
-      ArtifactName: 'KnowledgebaseService'
+      ArtifactName: 'KnowledgeBaseService'
       publishLocation: 'Container'
