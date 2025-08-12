@@ -39,7 +39,10 @@ steps:
       command: 'publish'
       publishWebProjects: false
       projects: 'chatbot-saas-platform/backend/src/ApiGateway/ApiGateway.csproj'
-      arguments: '--configuration $(buildConfiguration) --output $(outputDir)'
+      arguments: >
+        --configuration $(buildConfiguration)
+        --output $(outputDir)
+        /p:PublishSingleFile=false
       zipAfterPublish: false
 
   - task: PublishBuildArtifacts@1
