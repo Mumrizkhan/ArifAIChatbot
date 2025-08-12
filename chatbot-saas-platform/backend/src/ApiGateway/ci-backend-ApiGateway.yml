@@ -7,8 +7,6 @@ pool:
   name: ubuntu-22.04
 
 variables:
-  workingDirectory: 'chatbot-saas-platform/backend/src/ApiGateway'
-  artifactName: 'ApiGateway'
   buildConfiguration: 'Release'
   outputDir: '$(Build.ArtifactStagingDirectory)/arif-apigateway'  
 
@@ -19,34 +17,14 @@ steps:
       packageType: 'sdk'
       version: '9.x'
       installationPath: $(Agent.ToolsDirectory)/dotnet
-
-  - task: DotNetCoreCLI@2
-    displayName: 'Restore NuGet packages'
-    inputs:
-      command: 'restore'
-      projects: 'chatbot-saas-platform/backend/src/ApiGateway/ApiGateway.csproj'
-
-  - task: DotNetCoreCLI@2
-    displayName: 'Build project'
-    inputs:
-      command: 'build'
-      projects: 'chatbot-saas-platform/backend/src/ApiGateway/ApiGateway.csproj'
-      arguments: '--configuration $(buildConfiguration)'
-
   - task: DotNetCoreCLI@2
     displayName: 'Publish project'
     inputs:
       command: 'publish'
       publishWebProjects: false
       projects: 'chatbot-saas-platform/backend/src/ApiGateway/ApiGateway.csproj'
-      arguments: >
-        --configuration $(buildConfiguration)
-        --output $(outputDir)
-        /p:PublishSingleFile=false
+      arguments: '--configuration $(buildConfiguration) --output $(outputDir)'
       zipAfterPublish: false
-  - script: |
-      dotnet publish src/ApiGateway/ApiGateway.csproj -c Release -o $(outputDir)
-    displayName: 'Publish .NET project'
   - task: PublishBuildArtifacts@1
     displayName: 'Publish build artifact'
     inputs:
