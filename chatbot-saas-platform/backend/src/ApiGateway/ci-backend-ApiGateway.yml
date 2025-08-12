@@ -48,6 +48,6 @@ steps:
   - task: PublishBuildArtifacts@1
     displayName: 'Publish build artifact'
     inputs:
-      PathtoPublish: '$(outputDir)'
+      PathtoPublish: '$(outputDir)/*'
       ArtifactName: 'arif-apigateway'
       publishLocation: 'Container'
