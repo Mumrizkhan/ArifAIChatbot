@@ -44,7 +44,9 @@ steps:
         --output $(outputDir)
         /p:PublishSingleFile=false
       zipAfterPublish: false
-
+  - script: |
+      dotnet publish src/ApiGateway/ApiGateway.csproj -c Release -o $(outputDir)
+    displayName: 'Publish .NET project'
   - task: PublishBuildArtifacts@1
     displayName: 'Publish build artifact'
     inputs:
