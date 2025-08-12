@@ -190,12 +190,16 @@ class ChatbotWidget {
 }
  
 const chatbotWidget = new ChatbotWidget();
- 
+
+// Global window access
 if (typeof window !== "undefined") {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   (window as any).ChatbotWidget = ChatbotWidget;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   (window as any).chatbotWidget = chatbotWidget;
 }
- 
+
+// Auto-initialization from script tag
 document.addEventListener("DOMContentLoaded", () => {
   const script = document.querySelector("script[data-chatbot-config]");
   if (script) {
@@ -209,6 +213,10 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   }
 });
- 
+
+// Named exports for ES modules
 export { ChatbotWidget };
-export default chatbotWidget;
+export { chatbotWidget };
+
+// Default export for backwards compatibility
+export default ChatbotWidget;

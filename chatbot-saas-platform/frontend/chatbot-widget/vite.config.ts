@@ -13,17 +13,36 @@ export default defineConfig({
     lib: {
       entry: './src/widget.ts',
       name: 'ArifChatWidget',
-      fileName: 'arif-chat-widget',
+      fileName: (format) => `arif-chat-widget.${format}.js`,
+      formats: ['es', 'umd', 'iife']
     },
     rollupOptions: {
-      external: ['react', 'react-dom'],
-      output: {
-        globals: {
-          'react': 'React',
-          'react-dom': 'ReactDOM',
+      external: [],
+      output: [
+        {
+          format: 'es',
+          entryFileNames: 'arif-chat-widget.es.js',
+          assetFileNames: 'arif-chat-widget.[ext]',
+          exports: 'named',
+          inlineDynamicImports: true,
         },
-        manualChunks: undefined,
-      },
+        {
+          format: 'umd',
+          name: 'ArifChatWidget',
+          entryFileNames: 'arif-chat-widget.umd.js',
+          assetFileNames: 'arif-chat-widget.[ext]',
+          exports: 'named',
+          inlineDynamicImports: true,
+        },
+        {
+          format: 'iife',
+          name: 'ArifChatWidget',
+          entryFileNames: 'arif-chat-widget.min.js',
+          assetFileNames: 'arif-chat-widget.[ext]',
+          exports: 'named',
+          inlineDynamicImports: true,
+        }
+      ],
     },
     minify: 'terser',
     terserOptions: {
@@ -39,6 +58,10 @@ export default defineConfig({
     },
     target: 'es2015',
     cssCodeSplit: false,
+    sourcemap: true,
+    outDir: 'dist',
+    emptyOutDir: true,
+    copyPublicDir: true,
   },
   resolve: {
     alias: {

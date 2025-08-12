@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Arif Chat Widget Demo</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .demo-container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .demo-section {
+            margin-bottom: 30px;
+        }
+        .demo-code {
+            background: #f8f9fa;
+            border: 1px solid #e9ecef;
+            border-radius: 4px;
+            padding: 15px;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            overflow-x: auto;
+        }
+        .init-button {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 10px 5px;
+        }
+        .init-button:hover {
+            background: #0056b3;
+        }
+    </style>
+</head>
+<body>
+    <div class="demo-container">
+        <h1>Arif Chat Widget Demo</h1>
+        
+        <div class="demo-section">
+            <h2>1. UMD Version (Global)</h2>
+            <p>Include the widget via script tag:</p>
+            <div class="demo-code">
+&lt;script src="./arif-chat-widget.umd.js">&lt;/script&gt;
+&lt;link rel="stylesheet" href="./arif-chat-widget.css"&gt;
+            </div>
+            <button class="init-button" onclick="initUMDWidget()">Initialize UMD Widget</button>
+        </div>
+
+        <div class="demo-section">
+            <h2>2. IIFE Version (Immediate)</h2>
+            <p>Self-executing version:</p>
+            <div class="demo-code">
+&lt;script src="./arif-chat-widget.min.js">&lt;/script&gt;
+&lt;link rel="stylesheet" href="./arif-chat-widget.css"&gt;
+            </div>
+            <button class="init-button" onclick="initIIFEWidget()">Initialize IIFE Widget</button>
+        </div>
+
+        <div class="demo-section">
+            <h2>3. ES Module Version</h2>
+            <p>For modern bundlers:</p>
+            <div class="demo-code">
+import { ChatbotWidget } from './arif-chat-widget.es.js';
+
+const widget = new ChatbotWidget();
+widget.init({
+    tenantId: 'demo-tenant',
+    apiUrl: 'http://localhost:8000',
+    websocketUrl: 'ws://localhost:8000/chatHub'
+});
+            </div>
+        </div>
+
+        <div class="demo-section">
+            <h2>4. Auto-initialization via Script Tag</h2>
+            <div class="demo-code">
+&lt;script 
+    src="./arif-chat-widget.umd.js" 
+    data-chatbot-config='{"tenantId":"demo-tenant","apiUrl":"http://localhost:8000"}'&gt;
+&lt;/script&gt;
+            </div>
+        </div>
+    </div>
+
+    <!-- Load the widget CSS -->
+    <link rel="stylesheet" href="./arif-chat-widget.css">
+    
+    <!-- Load the UMD version for demo -->
+    <script src="./arif-chat-widget.umd.js"></script>
+    
+    <script>
+        function initUMDWidget() {
+            if (window.ChatbotWidget) {
+                const widget = new window.ChatbotWidget();
+                widget.init({
+                    tenantId: 'demo-tenant-umd',
+                    apiUrl: 'http://localhost:8000',
+                    websocketUrl: 'ws://localhost:8000/chatHub',
+                    theme: {
+                        primaryColor: '#007bff',
+                        position: 'bottom-right'
+                    },
+                    branding: {
+                        companyName: 'Demo Company UMD',
+                        welcomeMessage: 'Hello! How can I help you today? (UMD Version)'
+                    }
+                });
+                console.log('UMD Widget initialized');
+            } else {
+                console.error('ChatbotWidget not found on window');
+            }
+        }
+
+        function initIIFEWidget() {
+            if (window.ArifChatWidget) {
+                const widget = new window.ArifChatWidget.ChatbotWidget();
+                widget.init({
+                    tenantId: 'demo-tenant-iife',
+                    apiUrl: 'http://localhost:8000',
+                    websocketUrl: 'ws://localhost:8000/chatHub',
+                    theme: {
+                        primaryColor: '#28a745',
+                        position: 'bottom-left'
+                    },
+                    branding: {
+                        companyName: 'Demo Company IIFE',
+                        welcomeMessage: 'Hello! How can I help you today? (IIFE Version)'
+                    }
+                });
+                console.log('IIFE Widget initialized');
+            } else {
+                console.error('ArifChatWidget not found on window');
+            }
+        }
+
+        // Show available globals
+        console.log('Available on window:', {
+            ChatbotWidget: typeof window.ChatbotWidget,
+            chatbotWidget: typeof window.chatbotWidget,
+            ArifChatWidget: typeof window.ArifChatWidget
+        });
+    </script>
+</body>
+</html>
