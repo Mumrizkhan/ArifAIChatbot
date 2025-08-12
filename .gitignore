@@ -303,3 +303,14 @@ StyleCopReport.xml
 # Files built by Visual Studio
 *_i.c
 *_p.c
+/chatbot-saas-platform/backend/src/AIOrchestrationService/ci-backend-AIOrchestrationService.yml
+/chatbot-saas-platform/backend/src/AnalyticsService/ci-backend-AnalyticsService.yml
+/chatbot-saas-platform/backend/src/ApiGateway/ci-backend-ApiGateway.yml
+/chatbot-saas-platform/backend/src/ChatRuntimeService/ci-backend-ChatRuntimeService.yml
+/chatbot-saas-platform/backend/src/IdentityService/ci-backend-IdentityService.yml
+/chatbot-saas-platform/backend/src/KnowledgeBaseService/ci-backend-KnowledgebaseService.yml
+/chatbot-saas-platform/backend/src/LiveAgentService/ci-backend-LiveAgentService.yml
+/chatbot-saas-platform/backend/src/NotificationService/ci-backend-NotificationService.yml
+/chatbot-saas-platform/backend/src/SubscriptionService/ci-backend-SubscriptionService.yml
+/chatbot-saas-platform/backend/src/TenantManagementService/ci-backend-TenantManagementService.yml
+/chatbot-saas-platform/backend/src/WorkflowService/ci-backend-WorkflowService.yml
