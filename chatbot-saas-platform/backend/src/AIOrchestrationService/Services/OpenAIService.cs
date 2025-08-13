@@ -20,7 +20,7 @@ public class OpenAIService : IAIService
     {
         _logger = logger;
         _configuration = configuration;
-        var apiKey = System.Environment.GetEnvironmentVariable("OPENAI_Key") ?? throw new InvalidOperationException("OpenAI API key not configured");
+        var apiKey = System.Environment.GetEnvironmentVariable("OPENAI_Key", EnvironmentVariableTarget.Machine) ?? throw new InvalidOperationException("OpenAI API key not configured");
         _defaultModel = _configuration["OpenAI:Model"] ?? "gpt-4.1";
         _embeddingModel = _configuration["OpenAI:EmbeddingModel"] ?? "text-embedding-ada-002";
         
