@@ -5,7 +5,7 @@ export interface Message {
   id: string;
   content: string;
   sender: "user" | "bot" | "agent";
-  timestamp: Date;
+  timestamp: string;
   type: "text" | "file" | "image" | "typing";
   metadata?: {
     fileName?: string;
