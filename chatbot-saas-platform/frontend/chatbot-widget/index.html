@@ -91,8 +91,15 @@
 
     async function initializeWidget() {
       try {
-        // Import the widget class
-        const widgetModule = await import('/src/widget.ts');
+        let widgetModule;
+        // Use the correct import path depending on environment
+        if (import.meta.env && import.meta.env.DEV) {
+          // Development: import from source
+          widgetModule = await import('/src/widget.ts');
+        } else {
+          // Production: import from built bundle (adjust the path as needed)
+          // widgetModule = await import('./widget.js');
+        }
         const { ChatbotWidget } = widgetModule;
 
         widget = new ChatbotWidget();
@@ -267,4 +274,3 @@
 </body>
 
 </html>
-</div>
