@@ -20,6 +20,7 @@ steps:
   displayName: 'Use Node.js 22'
 
 # Install dependencies
+- script: npm cache clean --force 
 - script: npm install
   workingDirectory: $(workingDirectory)
   displayName: 'Install NPM dependencies'
