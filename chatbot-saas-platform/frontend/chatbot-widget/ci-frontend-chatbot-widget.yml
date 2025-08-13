@@ -25,7 +25,7 @@ steps:
   displayName: 'Install NPM dependencies'
 
 # Build React app
-- script: npm run build:staging
+- script: npm run build
   workingDirectory: $(workingDirectory)
   displayName: 'Build React app'
 
