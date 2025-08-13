@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -11,17 +12,20 @@
             padding: 20px;
             background-color: #f5f5f5;
         }
+
         .demo-container {
             max-width: 800px;
             margin: 0 auto;
             background: white;
             padding: 20px;
             border-radius: 8px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
         }
+
         .demo-section {
             margin-bottom: 30px;
         }
+
         .demo-code {
             background: #f8f9fa;
             border: 1px solid #e9ecef;
@@ -31,6 +35,7 @@
             font-size: 14px;
             overflow-x: auto;
         }
+
         .init-button {
             background: #007bff;
             color: white;
@@ -40,21 +45,23 @@
             cursor: pointer;
             margin: 10px 5px;
         }
+
         .init-button:hover {
             background: #0056b3;
         }
     </style>
 </head>
+
 <body>
     <div class="demo-container">
         <h1>Arif Chat Widget Demo</h1>
-        
+
         <div class="demo-section">
             <h2>1. UMD Version (Global)</h2>
             <p>Include the widget via script tag:</p>
             <div class="demo-code">
-&lt;script src="./arif-chat-widget.umd.js">&lt;/script&gt;
-&lt;link rel="stylesheet" href="./arif-chat-widget.css"&gt;
+                &lt;script src="./arif-chat-widget.umd.js">&lt;/script&gt;
+                &lt;link rel="stylesheet" href="./arif-chat-widget.css"&gt;
             </div>
             <button class="init-button" onclick="initUMDWidget()">Initialize UMD Widget</button>
         </div>
@@ -63,8 +70,8 @@
             <h2>2. IIFE Version (Immediate)</h2>
             <p>Self-executing version:</p>
             <div class="demo-code">
-&lt;script src="./arif-chat-widget.min.js">&lt;/script&gt;
-&lt;link rel="stylesheet" href="./arif-chat-widget.css"&gt;
+                &lt;script src="./arif-chat-widget.min.js">&lt;/script&gt;
+                &lt;link rel="stylesheet" href="./arif-chat-widget.css"&gt;
             </div>
             <button class="init-button" onclick="initIIFEWidget()">Initialize IIFE Widget</button>
         </div>
@@ -73,34 +80,34 @@
             <h2>3. ES Module Version</h2>
             <p>For modern bundlers:</p>
             <div class="demo-code">
-import { ChatbotWidget } from './arif-chat-widget.es.js';
+                import { ChatbotWidget } from './arif-chat-widget.es.js';
 
-const widget = new ChatbotWidget();
-widget.init({
-    tenantId: 'demo-tenant',
-    apiUrl: 'http://localhost:8000',
-    websocketUrl: 'ws://localhost:8000/chatHub'
-});
+                const widget = new ChatbotWidget();
+                widget.init({
+                tenantId: 'demo-tenant',
+                apiUrl: 'http://localhost:8000',
+                websocketUrl: 'ws://localhost:8000/chatHub'
+                });
             </div>
         </div>
 
         <div class="demo-section">
             <h2>4. Auto-initialization via Script Tag</h2>
             <div class="demo-code">
-&lt;script 
-    src="./arif-chat-widget.umd.js" 
-    data-chatbot-config='{"tenantId":"demo-tenant","apiUrl":"http://localhost:8000"}'&gt;
-&lt;/script&gt;
+                &lt;script
+                src="./arif-chat-widget.umd.js"
+                data-chatbot-config='{"tenantId":"demo-tenant","apiUrl":"http://localhost:8000"}'&gt;
+                &lt;/script&gt;
             </div>
         </div>
     </div>
 
     <!-- Load the widget CSS -->
     <link rel="stylesheet" href="./arif-chat-widget.css">
-    
+
     <!-- Load the UMD version for demo -->
     <script src="./arif-chat-widget.umd.js"></script>
-    
+
     <script>
         function initUMDWidget() {
             if (window.ChatbotWidget) {
@@ -152,6 +159,8 @@ widget.init({
             chatbotWidget: typeof window.chatbotWidget,
             ArifChatWidget: typeof window.ArifChatWidget
         });
+        window.addEventListener('DOMContentLoaded', () => { initUMDWidget(); });
     </script>
 </body>
+
 </html>
