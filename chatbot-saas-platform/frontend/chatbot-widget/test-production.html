@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Production Widget Test</title>
+</head>
+<body>
+    <h1>Production Build Test</h1>
+    <p>Testing the chatbot widget with production build to verify API URLs are correctly resolved.</p>
+    
+    <!-- Load the production build -->
+    <script src="./dist/arif-chat-widget.umd.js"></script>
+    <link rel="stylesheet" href="./dist/arif-chat-widget.css">
+    
+    <script>
+        console.log("🧪 Starting production widget test...");
+        
+        // Test 1: Initialize widget without providing API URL (should use environment fallback)
+        console.log("Test 1: Widget without API URL");
+        const widget1 = new ChatbotWidget();
+        widget1.init({
+            tenantId: "test-tenant-123"
+        });
+        
+        // Test 2: Initialize widget with custom API URL
+        console.log("Test 2: Widget with custom API URL");
+        const widget2 = new ChatbotWidget();
+        widget2.init({
+            tenantId: "test-tenant-456",
+            apiUrl: "https://custom-api.example.com",
+            websocketUrl: "wss://custom-ws.example.com/hub"
+        });
+        
+        // Test 3: Check if API URLs are properly set and not undefined
+        setTimeout(() => {
+            console.log("🔍 Testing API URL resolution...");
+            
+            // Check Redux store state
+            if (typeof window.store !== 'undefined') {
+                const state = window.store.getState();
+                console.log("Widget state:", state.widget);
+            }
+            
+            console.log("✅ Production widget test completed. Check console for API URL values.");
+        }, 1000);
+    </script>
+</body>
+</html>

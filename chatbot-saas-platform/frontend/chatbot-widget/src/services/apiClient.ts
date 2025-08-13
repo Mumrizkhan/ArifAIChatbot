@@ -1,10 +1,15 @@
 import axios, { AxiosInstance } from "axios";
-const VITE_API_URL = import.meta.env.VITE_API_URL;
+
+// Get API URL from environment with fallback
+const VITE_API_URL = import.meta.env.VITE_API_URL || "https://api-stg.arif.sa";
+
 class ApiClient {
   private axiosInstance: AxiosInstance;
   private tenantId: string | null = null;
 
   constructor() {
+    console.log("🔧 ApiClient initialized with baseURL:", VITE_API_URL);
+    
     this.axiosInstance = axios.create({
       baseURL: VITE_API_URL,
       headers: {

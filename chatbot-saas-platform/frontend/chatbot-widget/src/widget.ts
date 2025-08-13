@@ -7,6 +7,7 @@ import { initializeWidget } from "./store/slices/configSlice";
 import { applyTenantTheme } from "./store/slices/themeSlice";
 import { addMessage } from "./store/slices/chatSlice"; // Add missing import
 import { apiClient } from "./services/apiClient";
+import envConfig from "./config/environment";
 import "./i18n";
 import "./styles/widget.css";
 
@@ -70,42 +71,52 @@ class ChatbotWidget {
   private connection: any = null;
   private config: WidgetConfig | null = null; // Add config property
 
-  async init(config: WidgetConfig) {
+  async init(widgetConfig: WidgetConfig) {
     if (this.isInitialized) {
       console.warn("Chatbot widget is already initialized");
       return;
     }
 
-    if (!config.tenantId) {
+    if (!widgetConfig.tenantId) {
       throw new Error("tenantId is required to initialize the chatbot widget");
     }
 
     // Store config for later use
-    this.config = config;
+    this.config = widgetConfig;
 
-    apiClient.setTenantId(config.tenantId);
+    // Get default values from environment variables with fallbacks
+    const defaultApiUrl = envConfig.apiUrl;
+    const defaultWebsocketUrl = envConfig.websocketUrl;
+    
+    console.log("🔧 Widget initializing with:", {
+      apiUrl: widgetConfig.apiUrl || defaultApiUrl,
+      websocketUrl: widgetConfig.websocketUrl || defaultWebsocketUrl,
+      tenantId: widgetConfig.tenantId
+    });
+
+    apiClient.setTenantId(widgetConfig.tenantId);
 
     this.container = document.createElement("div");
     this.container.id = "chatbot-widget-container";
     document.body.appendChild(this.container);
 
-    if (config.customCSS) {
+    if (widgetConfig.customCSS) {
       const style = document.createElement("style");
-      style.textContent = config.customCSS;
+      style.textContent = widgetConfig.customCSS;
       document.head.appendChild(style);
     }
 
     store.dispatch(
       initializeWidget({
-        tenantId: config.tenantId,
+        tenantId: widgetConfig.tenantId,
         config: {
-          apiUrl: config.apiUrl || "/api",
-          websocketUrl: config.websocketUrl || "/chatHub",
-          features: config.features,
-          behavior: config.behavior,
+          apiUrl: widgetConfig.apiUrl || defaultApiUrl,
+          websocketUrl: widgetConfig.websocketUrl || defaultWebsocketUrl,
+          features: widgetConfig.features,
+          behavior: widgetConfig.behavior,
         },
-        userId: config.userId,
-        metadata: config.metadata,
+        userId: widgetConfig.userId,
+        metadata: widgetConfig.metadata,
       })
     );
 
@@ -115,19 +126,19 @@ class ChatbotWidget {
       const { proactiveService } = await import("./services/proactiveService");
       const { signalRService } = await import("./services/websocket");
 
-      aiService.initialize(config.apiUrl || "/api");
-      fileService.initialize(config.apiUrl || "/api");
+      aiService.initialize(widgetConfig.apiUrl || defaultApiUrl);
+      fileService.initialize(widgetConfig.apiUrl || defaultApiUrl);
 
       // Use the provided authToken or fallback to environment variable
       const authToken =
-        config.authToken ||
-        "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJuYW1laWQiOiIxZDhmOGQ2MS0zNjRhLTQyMWUtYTllYS1jMWUxYTIyMWQ5N2YiLCJlbWFpbCI6InRlbmFudDFAZXhhbXBsZS5jb20iLCJyb2xlIjoiVGVuYW50QWRtaW4iLCJ0ZW5hbnRfaWQiOiI4Mzc4NGVhNi01MzYwLTRmM2MtODQzYS0xYWJkMThkNzJlNWQiLCJuYmYiOjE3NTUwNjgwNDMsImV4cCI6MTc1NTE1NDQ0MywiaWF0IjoxNzU1MDY4MDQzLCJpc3MiOiJBcmlmUGxhdGZvcm0iLCJhdWQiOiJBcmlmUGxhdGZvcm0ifQ.39sc2qra6_vCEORluMHVm8M1NL9C4BfjRuGgmsD75GI";
-      // if (config.authToken) {
+        widgetConfig.authToken ||
+        "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJuYW1laWQiOiIxZDhmOGQ2MS0zNjRhLTQyMWUtYTllYS1jMWUxYTIyMWQ5N2YiLCJlbWFpbCI6InRlbmFudDFAZXhhbXBsZS5jb20iLCJyb2xlIjoiVGVuYW50QWRtaW4iLCJ0ZW5hbnRfaWQiOiI4Mzc4NGVhNi01MzYwLTRmM2MtODQzYS0xYWJkMThkNzJlNWQiLCJuYmYiOjE3NTUwODM1MDYsImV4cCI6MTc1NTE2OTkwNiwiaWF0IjoxNzU1MDgzNTA2LCJpc3MiOiJBcmlmUGxhdGZvcm0iLCJhdWQiOiJBcmlmUGxhdGZvcm0ifQ.BVlKSkEeS9YsVh48VW0rWfl21zi-NZvHdS4u2p1eQsU";
+      // if (widgetConfig.authToken) {
 
       if (authToken) {
         console.log("Attempting to connect with authToken...");
-        console.log("Attempting to connect with Tenantid...", config.tenantId);
-        const connected = await signalRService.connect(config.tenantId, authToken);
+        console.log("Attempting to connect with Tenantid...", widgetConfig.tenantId);
+        const connected = await signalRService.connect(widgetConfig.tenantId, authToken);
         if (connected) {
           this.connection = signalRService;
           console.log("✅ SignalR connection established");
@@ -138,7 +149,7 @@ class ChatbotWidget {
         console.warn("⚠️ No authToken provided - SignalR connection will not be established");
       }
 
-      if (config.features?.proactiveMessages) {
+      if (widgetConfig.features?.proactiveMessages) {
         proactiveService.setupDefaultTriggers();
         proactiveService.startMonitoring();
       }
@@ -146,13 +157,13 @@ class ChatbotWidget {
       console.error("❌ Service initialization error:", error);
     }
 
-    if (config.theme || config.branding || config.language || config.customCSS) {
+    if (widgetConfig.theme || widgetConfig.branding || widgetConfig.language || widgetConfig.customCSS) {
       store.dispatch(
         applyTenantTheme({
-          theme: config.theme || {},
-          branding: config.branding || {},
-          language: config.language,
-          customCSS: config.customCSS,
+          theme: widgetConfig.theme || {},
+          branding: widgetConfig.branding || {},
+          language: widgetConfig.language,
+          customCSS: widgetConfig.customCSS,
         })
       );
     }
@@ -170,7 +181,7 @@ class ChatbotWidget {
     // Analytics tracking
     if (typeof window !== "undefined" && (window as any).gtag) {
       (window as any).gtag("event", "chatbot_widget_initialized", {
-        tenant_id: config.tenantId,
+        tenant_id: widgetConfig.tenantId,
       });
     }
 
