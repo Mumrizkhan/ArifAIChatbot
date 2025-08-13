@@ -355,5 +355,5 @@ document.addEventListener("DOMContentLoaded", () => {
 export { ChatbotWidget };
 export { chatbotWidget };
 
-// Default export for backwards compatibility
+// Default export for backwards compatibility added
 export default ChatbotWidget;

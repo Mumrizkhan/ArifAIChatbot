@@ -19,10 +19,12 @@ steps:
     versionSpec: '22.x'
   displayName: 'Use Node.js 22'
 
-# Install dependencies
-- script: npm install
+- script: |
+    rm -rf dist build .cache .vite .next node_modules package-lock.json
+    npm cache clean --force
+    npm install
   workingDirectory: $(workingDirectory)
-  displayName: 'Install NPM dependencies'
+  displayName: 'Clean workspace and install'
 
 # Build React app
 - script: npx vite build --mode staging
