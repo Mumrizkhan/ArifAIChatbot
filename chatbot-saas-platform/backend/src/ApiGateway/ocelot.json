@@ -267,7 +267,7 @@
           "Port": 5006
         }
       ],
-      "UpstreamPathTemplate": "/analytics/{everything}",
+      "UpstreamPathTemplate": "/analytic/{everything}",
       "UpstreamHttpMethod": [ "GET", "POST", "PUT", "DELETE" ],
       "RateLimitOptions": {
         "ClientWhitelist": [],

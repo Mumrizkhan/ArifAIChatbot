@@ -1,7 +1,7 @@
 import { createSlice, createAsyncThunk, PayloadAction } from "@reduxjs/toolkit";
 
-// Add base URL configuration
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
+// API Base URL with fallback
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "https://api-stg.arif.sa";
 
 interface User {
   id: string;

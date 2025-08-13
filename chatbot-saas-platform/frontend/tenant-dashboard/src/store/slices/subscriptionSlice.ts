@@ -1,6 +1,7 @@
 import { createSlice, createAsyncThunk, PayloadAction } from "@reduxjs/toolkit";
 import { SubscriptionService } from "../../services/subscriptionService";
-export const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
+
+export const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "https://api-stg.arif.sa";
 export interface Plan {
   id: string;
   name: string;
