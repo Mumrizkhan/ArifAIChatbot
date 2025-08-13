@@ -1,7 +1,7 @@
 import { createSlice, createAsyncThunk, PayloadAction } from "@reduxjs/toolkit";
 
 // Add API base URL configuration
-const API_BASE_URL = import.meta.env.API_BASE_URL || "http://localhost:8000";
+const API_BASE_URL = import.meta.env.API_BASE_URL 
 
 export interface Agent {
   id: string;

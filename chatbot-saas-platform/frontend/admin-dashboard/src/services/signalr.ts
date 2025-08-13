@@ -63,7 +63,7 @@ class AdminSignalRService {
 
     try {
       this.connection = new HubConnectionBuilder()
-        .withUrl(`${API_BASE_URL}chat/chatHub`, {
+        .withUrl(`${API_BASE_URL}/chat/chatHub`, {
           accessTokenFactory: () => authToken,
         })
         .withAutomaticReconnect({

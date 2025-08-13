@@ -20,7 +20,8 @@
     "reset": "Reset",
     "confirm": "Confirm",
     "yes": "Yes",
-    "no": "No"
+    "no": "No",
+    "retry": "Retry"
   },
   "navigation": {
     "dashboard": "Dashboard",
@@ -374,6 +375,7 @@
     }
   },
   "settings": {
+    "language": "Language",
     "title": "Settings",
     "description": "Manage your application settings and preferences",
     "loadingSettings": "Loading settings...",
