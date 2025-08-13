@@ -149,7 +149,7 @@ export const ChatWidget: React.FC = () => {
           {!isMinimized && (
             <>
               <ChatHeader onMinimize={handleMinimize} onClose={handleClose} connectionStatus={connectionStatus} />
-              <div className="chat-body">
+              <div className="chat-body ">
                 <ConnectionStatus status={connectionStatus} />
                 <MessageList />
                 <MessageInput />
