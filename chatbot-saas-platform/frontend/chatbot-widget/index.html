@@ -91,15 +91,8 @@
 
     async function initializeWidget() {
       try {
-        let widgetModule;
-        // Use the correct import path depending on environment
-        if ((import.meta.env.NODE_ENV === "Development" || import.meta.env.NODE_ENV === "Staging")) {
-          // Development: import from source
-          widgetModule = await import('/src/widget.ts');
-        } else {
-          // Production: import from built bundle (adjust the path as needed)
-          // widgetModule = await import('./widget.js');
-        }
+        // Import the widget class
+        const widgetModule = await import('/src/widget.ts');
         const { ChatbotWidget } = widgetModule;
 
         widget = new ChatbotWidget();
@@ -250,7 +243,7 @@
     window.testProactiveMessage = testProactiveMessage;
 
     // Test bundle size
-    //  function testBundleSize() {
+    // function testBundleSize() {
     //   const VITE_API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
     //   fetch(`${VITE_API_URL}/dist/arif-chat-widget.js`)
     //     .then(response => response.blob())
@@ -274,3 +267,4 @@
 </body>
 
 </html>
+</div>
