@@ -238,7 +238,7 @@ class ChatbotWidget {
           id: `proactive_${Date.now()}`,
           content: message.content,
           sender: "bot",
-          timestamp: new Date().toISOString(), // ✅ Already serialized as ISO string
+          timestamp: new Date(), // ✅ Already serialized as ISO string
           type: "text",
         })
       );
@@ -288,38 +288,38 @@ class ChatbotWidget {
     }
   }
 
-  private applyTheme(theme: NonNullable<WidgetConfig["theme"]>): void {
-    if (!this.container) return;
+  // private applyTheme(theme: NonNullable<WidgetConfig["theme"]>): void {
+  //   if (!this.container) return;
 
-    // Apply CSS custom properties for theme
-    const root = this.container;
-    if (theme.primaryColor) {
-      root.style.setProperty("--chatbot-primary-color", theme.primaryColor);
-    }
-    if (theme.backgroundColor) {
-      root.style.setProperty("--chatbot-bg-color", theme.backgroundColor);
-    }
-    if (theme.textColor) {
-      root.style.setProperty("--chatbot-text-color", theme.textColor);
-    }
+  //   // Apply CSS custom properties for theme
+  //   const root = this.container;
+  //   if (theme.primaryColor) {
+  //     root.style.setProperty("--chatbot-primary-color", theme.primaryColor);
+  //   }
+  //   if (theme.backgroundColor) {
+  //     root.style.setProperty("--chatbot-bg-color", theme.backgroundColor);
+  //   }
+  //   if (theme.textColor) {
+  //     root.style.setProperty("--chatbot-text-color", theme.textColor);
+  //   }
 
-    console.log("✅ Theme applied:", theme);
-  }
+  //   console.log("✅ Theme applied:", theme);
+  // }
 
-  private applyLanguage(language: string): void {
-    // Apply language changes through i18n
-    import("./i18n")
-      .then((i18nModule) => {
-        const i18n = i18nModule.default;
-        if (i18n && typeof i18n.changeLanguage === "function") {
-          i18n.changeLanguage(language);
-          console.log("✅ Language applied:", language);
-        }
-      })
-      .catch((error) => {
-        console.error("❌ Failed to change language:", error);
-      });
-  }
+  // private applyLanguage(language: string): void {
+  //   // Apply language changes through i18n
+  //   import("./i18n")
+  //     .then((i18nModule) => {
+  //       const i18n = i18nModule.default;
+  //       if (i18n && typeof i18n.changeLanguage === "function") {
+  //         i18n.changeLanguage(language);
+  //         console.log("✅ Language applied:", language);
+  //       }
+  //     })
+  //     .catch((error) => {
+  //       console.error("❌ Failed to change language:", error);
+  //     });
+  // }
 }
 
 // Create singleton instance
