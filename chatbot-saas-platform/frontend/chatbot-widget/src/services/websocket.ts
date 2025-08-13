@@ -77,7 +77,8 @@ class SignalRService {
           id: messageDto.Id,
           content: messageDto.Content,
           sender: messageDto.Sender.toLowerCase(),
-          timestamp: new Date(messageDto.CreatedAt),
+          // timestamp: new Date(messageDto.CreatedAt),
+          timestamp: new Date(messageDto.CreatedAt).toISOString(), // Returns a Date object
           type: messageDto.Type.toLowerCase(),
           metadata: {
             senderId: messageDto.SenderId?.toString(),

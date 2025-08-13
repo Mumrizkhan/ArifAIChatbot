@@ -5,10 +5,11 @@ import { store } from "./store/store";
 import { ChatWidget } from "./components/ChatWidget";
 import { initializeWidget } from "./store/slices/configSlice";
 import { applyTenantTheme } from "./store/slices/themeSlice";
+import { addMessage } from "./store/slices/chatSlice"; // Add missing import
 import { apiClient } from "./services/apiClient";
 import "./i18n";
 import "./styles/widget.css";
- 
+
 interface WidgetConfig {
   tenantId: string;
   apiUrl?: string;
@@ -61,34 +62,39 @@ interface WidgetConfig {
     maxMessageLength?: number;
   };
 }
- 
+
 class ChatbotWidget {
   private container: HTMLElement | null = null;
   private root: ReactDOM.Root | null = null;
   private isInitialized = false;
- 
+  private connection: any = null;
+  private config: WidgetConfig | null = null; // Add config property
+
   async init(config: WidgetConfig) {
     if (this.isInitialized) {
       console.warn("Chatbot widget is already initialized");
       return;
     }
- 
+
     if (!config.tenantId) {
       throw new Error("tenantId is required to initialize the chatbot widget");
     }
+
+    // Store config for later use
+    this.config = config;
 
     apiClient.setTenantId(config.tenantId);
 
     this.container = document.createElement("div");
     this.container.id = "chatbot-widget-container";
     document.body.appendChild(this.container);
- 
+
     if (config.customCSS) {
       const style = document.createElement("style");
       style.textContent = config.customCSS;
       document.head.appendChild(style);
     }
- 
+
     store.dispatch(
       initializeWidget({
         tenantId: config.tenantId,
@@ -102,33 +108,44 @@ class ChatbotWidget {
         metadata: config.metadata,
       })
     );
- 
-    const { aiService } = await import("./services/aiService");
-    const { fileService } = await import("./services/fileService");
-    const { proactiveService } = await import("./services/proactiveService");
-    const { signalRService } = await import("./services/websocket");
- 
-    aiService.initialize(config.apiUrl || "/api");
-    fileService.initialize(config.apiUrl || "/api");
-    const authToken = config.authToken || "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJuYW1laWQiOiIxZDhmOGQ2MS0zNjRhLTQyMWUtYTllYS1jMWUxYTIyMWQ5N2YiLCJlbWFpbCI6InRlbmFudDFAZXhhbXBsZS5jb20iLCJyb2xlIjoiVGVuYW50QWRtaW4iLCJ0ZW5hbnRfaWQiOiI4Mzc4NGVhNi01MzYwLTRmM2MtODQzYS0xYWJkMThkNzJlNWQiLCJuYmYiOjE3NTQyOTY3NjIsImV4cCI6MTc1NDM4MzE2MiwiaWF0IjoxNzU0Mjk2NzYyLCJpc3MiOiJBcmlmUGxhdGZvcm0iLCJhdWQiOiJBcmlmUGxhdGZvcm0ifQ.qjEItyJFbTBBa2bcD-1y_ztNqQmNhP9pNV6qQFqiPHU";
-    // if (config.authToken) {
+
     try {
-      const connected = await signalRService.connect(config.tenantId, authToken);
-      if (!connected) {
-        console.warn("Failed to establish SignalR connection");
+      const { aiService } = await import("./services/aiService");
+      const { fileService } = await import("./services/fileService");
+      const { proactiveService } = await import("./services/proactiveService");
+      const { signalRService } = await import("./services/websocket");
+
+      aiService.initialize(config.apiUrl || "/api");
+      fileService.initialize(config.apiUrl || "/api");
+
+      // Use the provided authToken or fallback to environment variable
+      const authToken =
+        config.authToken ||
+        "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJuYW1laWQiOiIxZDhmOGQ2MS0zNjRhLTQyMWUtYTllYS1jMWUxYTIyMWQ5N2YiLCJlbWFpbCI6InRlbmFudDFAZXhhbXBsZS5jb20iLCJyb2xlIjoiVGVuYW50QWRtaW4iLCJ0ZW5hbnRfaWQiOiI4Mzc4NGVhNi01MzYwLTRmM2MtODQzYS0xYWJkMThkNzJlNWQiLCJuYmYiOjE3NTUwNjgwNDMsImV4cCI6MTc1NTE1NDQ0MywiaWF0IjoxNzU1MDY4MDQzLCJpc3MiOiJBcmlmUGxhdGZvcm0iLCJhdWQiOiJBcmlmUGxhdGZvcm0ifQ.39sc2qra6_vCEORluMHVm8M1NL9C4BfjRuGgmsD75GI";
+      // if (config.authToken) {
+
+      if (authToken) {
+        console.log("Attempting to connect with authToken...");
+        console.log("Attempting to connect with Tenantid...", config.tenantId);
+        const connected = await signalRService.connect(config.tenantId, authToken);
+        if (connected) {
+          this.connection = signalRService;
+          console.log("✅ SignalR connection established");
+        } else {
+          console.warn("⚠️ Failed to establish SignalR connection");
+        }
+      } else {
+        console.warn("⚠️ No authToken provided - SignalR connection will not be established");
+      }
+
+      if (config.features?.proactiveMessages) {
+        proactiveService.setupDefaultTriggers();
+        proactiveService.startMonitoring();
       }
     } catch (error) {
-      console.error("SignalR connection error:", error);
+      console.error("❌ Service initialization error:", error);
     }
-    // } else {
-    //   console.warn("No authToken provided - SignalR connection will not be established");
-    // }
- 
-    if (config.features?.proactiveMessages) {
-      proactiveService.setupDefaultTriggers();
-      proactiveService.startMonitoring();
-    }
- 
+
     if (config.theme || config.branding || config.language || config.customCSS) {
       store.dispatch(
         applyTenantTheme({
@@ -139,63 +156,178 @@ class ChatbotWidget {
         })
       );
     }
- 
+
     this.root = ReactDOM.createRoot(this.container);
-    this.root.render(React.createElement(Provider, { store, children: React.createElement(ChatWidget) }));
- 
+    this.root.render(
+      React.createElement(Provider, {
+        store,
+        children: React.createElement(ChatWidget),
+      })
+    );
+
     this.isInitialized = true;
- 
+
+    // Analytics tracking
     if (typeof window !== "undefined" && (window as any).gtag) {
       (window as any).gtag("event", "chatbot_widget_initialized", {
         tenant_id: config.tenantId,
       });
     }
+
+    console.log("✅ Chatbot widget initialized successfully");
   }
- 
+
   destroy() {
-    if (this.root) {
-      this.root.unmount();
-      this.root = null;
+    try {
+      // Disconnect SignalR if connected
+      if (this.connection && typeof this.connection.disconnect === "function") {
+        this.connection.disconnect();
+        this.connection = null;
+      }
+
+      // Unmount React component
+      if (this.root) {
+        this.root.unmount();
+        this.root = null;
+      }
+
+      // Remove DOM element
+      if (this.container && this.container.parentNode) {
+        this.container.parentNode.removeChild(this.container);
+        this.container = null;
+      }
+
+      // Remove custom CSS if added
+      const customStyles = document.querySelectorAll("style[data-chatbot-custom]");
+      customStyles.forEach((style) => style.remove());
+
+      this.isInitialized = false;
+      this.config = null;
+
+      console.log("✅ Chatbot widget destroyed successfully");
+    } catch (error) {
+      console.error("❌ Error destroying widget:", error);
     }
- 
-    if (this.container && this.container.parentNode) {
-      this.container.parentNode.removeChild(this.container);
-      this.container = null;
-    }
- 
-    this.isInitialized = false;
   }
- 
-  updateConfig(config: Partial<WidgetConfig>) {
+
+  isReady(): boolean {
+    return this.isInitialized && (!this.connection || this.connection.isConnected?.() || this.connection.getConnectionState?.() === "Connected");
+  }
+
+  updateConfig(newConfig: Partial<WidgetConfig>): void {
     if (!this.isInitialized) {
-      console.warn("Widget must be initialized before updating config");
-      return;
+      throw new Error("Widget must be initialized before updating config");
     }
- 
-    if (config.theme || config.branding || config.language || config.customCSS) {
+
+    if (!this.config) {
+      throw new Error("No existing config found");
+    }
+
+    this.config = { ...this.config, ...newConfig };
+    this.applyConfiguration();
+  }
+
+  sendProactiveMessage(message: { content: string; delay?: number }): void {
+    if (!this.isInitialized) {
+      throw new Error("Widget must be initialized before sending proactive messages");
+    }
+
+    setTimeout(() => {
+      store.dispatch(
+        addMessage({
+          id: `proactive_${Date.now()}`,
+          content: message.content,
+          sender: "bot",
+          timestamp: new Date().toISOString(), // ✅ Already serialized as ISO string
+          type: "text",
+        })
+      );
+    }, message.delay || 0);
+  }
+
+  // Add method to get current config
+  getConfig(): WidgetConfig | null {
+    return this.config;
+  }
+
+  // Add method to check if widget has specific feature enabled
+  hasFeature(feature: keyof NonNullable<WidgetConfig["features"]>): boolean {
+    return this.config?.features?.[feature] ?? false;
+  }
+
+  private applyConfiguration(): void {
+    if (!this.config) return;
+
+    // Apply theme changes
+    if (this.config.theme || this.config.branding || this.config.language) {
       store.dispatch(
         applyTenantTheme({
-          theme: config.theme || {},
-          branding: config.branding || {},
-          language: config.language,
-          customCSS: config.customCSS,
+          theme: this.config.theme || {},
+          branding: this.config.branding || {},
+          language: this.config.language,
+          customCSS: this.config.customCSS,
+        })
+      );
+    }
+
+    // Update features
+    if (this.config.features) {
+      store.dispatch(
+        initializeWidget({
+          tenantId: this.config.tenantId,
+          config: {
+            apiUrl: this.config.apiUrl || "/api",
+            websocketUrl: this.config.websocketUrl || "/chatHub",
+            features: this.config.features,
+            behavior: this.config.behavior,
+          },
+          userId: this.config.userId,
+          metadata: this.config.metadata,
         })
       );
     }
   }
- 
-  isReady() {
-    return this.isInitialized;
+
+  private applyTheme(theme: NonNullable<WidgetConfig["theme"]>): void {
+    if (!this.container) return;
+
+    // Apply CSS custom properties for theme
+    const root = this.container;
+    if (theme.primaryColor) {
+      root.style.setProperty("--chatbot-primary-color", theme.primaryColor);
+    }
+    if (theme.backgroundColor) {
+      root.style.setProperty("--chatbot-bg-color", theme.backgroundColor);
+    }
+    if (theme.textColor) {
+      root.style.setProperty("--chatbot-text-color", theme.textColor);
+    }
+
+    console.log("✅ Theme applied:", theme);
+  }
+
+  private applyLanguage(language: string): void {
+    // Apply language changes through i18n
+    import("./i18n")
+      .then((i18nModule) => {
+        const i18n = i18nModule.default;
+        if (i18n && typeof i18n.changeLanguage === "function") {
+          i18n.changeLanguage(language);
+          console.log("✅ Language applied:", language);
+        }
+      })
+      .catch((error) => {
+        console.error("❌ Failed to change language:", error);
+      });
   }
 }
- 
+
+// Create singleton instance
 const chatbotWidget = new ChatbotWidget();
 
-// Global window access
+// Global window access for external integration
 if (typeof window !== "undefined") {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   (window as any).ChatbotWidget = ChatbotWidget;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   (window as any).chatbotWidget = chatbotWidget;
 }
 
@@ -204,12 +336,17 @@ document.addEventListener("DOMContentLoaded", () => {
   const script = document.querySelector("script[data-chatbot-config]");
   if (script) {
     try {
-      const config = JSON.parse(script.getAttribute("data-chatbot-config") || "{}");
-      if (config.tenantId) {
-        chatbotWidget.init(config);
+      const configString = script.getAttribute("data-chatbot-config");
+      if (configString) {
+        const config = JSON.parse(configString);
+        if (config.tenantId) {
+          chatbotWidget.init(config);
+        } else {
+          console.warn("⚠️ No tenantId found in chatbot config");
+        }
       }
     } catch (error) {
-      console.error("Failed to parse chatbot config from script tag:", error);
+      console.error("❌ Failed to parse chatbot config from script tag:", error);
     }
   }
 });
