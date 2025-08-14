@@ -66,6 +66,7 @@ if (app.Environment.IsDevelopment())
         c.SwaggerEndpoint("http://localhost:5007/swagger/v1/swagger.json", "Tenant Management Service");
         c.SwaggerEndpoint("http://localhost:5008/swagger/v1/swagger.json", "Subscription Service");
         c.SwaggerEndpoint("http://localhost:5009/swagger/v1/swagger.json", "Knowledgebase Service");
+
         //c.SwaggerEndpoint("https://api-stg.arif.sa/identity/swagger/v1/swagger.json", "Identity Service");
         //c.SwaggerEndpoint("https://api-stg.arif.sa/ai/swagger/v1/swagger.json", "AI Orchestration Service");
         //c.SwaggerEndpoint("https://api-stg.arif.sa/chat/swagger/v1/swagger.json", "Chat Runtime Service");
