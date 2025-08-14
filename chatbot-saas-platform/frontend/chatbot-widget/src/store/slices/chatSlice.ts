@@ -5,8 +5,8 @@ export interface Message {
   id: string;
   content: string;
   sender: "user" | "bot" | "agent";
-  timestamp: Date;
   type: "text" | "file" | "image" | "typing";
+  timestamp: Date;
   metadata?: {
     fileName?: string;
     fileSize?: number;
@@ -56,20 +56,28 @@ const initialState: ChatState = {
   connectionStatus: "disconnected",
 };
 
-export const sendMessage = createAsyncThunk("chat/sendMessage", async (message: { content: string; type: "text" | "file" }, { getState }) => {
-  const state = getState() as any;
-  const conversationId = state.chat.currentConversation?.id;
+export const sendMessage = createAsyncThunk(
+  "chat/sendMessage",
+  async (payload: { content: string; type: "text" | "file" }, { getState, rejectWithValue }) => {
+    try {
+      const { chat } = getState() as { chat: ChatState };
+      const conversationId = chat.currentConversation?.id;
+      if (!conversationId) throw new Error("No active conversation");
 
-  if (!conversationId) {
-    throw new Error("No active conversation found");
+      const res = await apiClient.post(`${import.meta.env.VITE_API_URL}/chat/chat/messages`, {
+        conversationId,
+        content: payload.content,
+        type: payload.type,
+      });
+
+      // Support both axios-like and body-returning clients
+      const body = res && typeof res === "object" && "data" in res ? (res as any).data : res;
+      return body; // { userMessage, botMessage, success }
+    } catch (e: any) {
+      return rejectWithValue(e?.response?.data ?? { message: e?.message || "Send failed" });
+    }
   }
-
-  return await apiClient.post(`${VITE_API_URL}/chat/chat/messages`, {
-    conversationId,
-    content: message.content,
-    type: message.type,
-  });
-});
+);
 
 export const startConversation = createAsyncThunk("chat/startConversation", async (tenantId: string) => {
   const data = await apiClient.post(`${VITE_API_URL}/chat/chat/conversations`, {
@@ -153,12 +161,28 @@ const chatSlice = createSlice({
       })
       .addCase(sendMessage.fulfilled, (state, action) => {
         state.isLoading = false;
-        if (action.payload.success) {
+
+        const body = action.payload as any;
+        if (!state.currentConversation || !body) return;
+
+        const toPush: Message[] = [];
+
+        if (body.userMessage) {
+          const userMsg = normalizeApiMessage(body.userMessage, "user");
+          toPush.push(userMsg);
+        }
+        if (body.botMessage) {
+          const botMsg = normalizeApiMessage(body.botMessage, "bot");
+          toPush.push(botMsg);
+        }
+
+        if (toPush.length) {
+          state.currentConversation.messages.push(...toPush);
         }
       })
       .addCase(sendMessage.rejected, (state, action) => {
         state.isLoading = false;
-        state.error = action.error.message || "Failed to send message";
+        state.error = (action.payload as any)?.message || action.error.message || "Failed to send message";
       })
       .addCase(startConversation.pending, (state) => {
         state.isLoading = true;
@@ -166,7 +190,11 @@ const chatSlice = createSlice({
       })
       .addCase(startConversation.fulfilled, (state, action) => {
         state.isLoading = false;
-        state.currentConversation = action.payload;
+        const conv = action.payload as any;
+        state.currentConversation = {
+          ...conv,
+          messages: Array.isArray(conv?.messages) ? conv.messages : [],
+        };
         state.error = null;
       })
       .addCase(startConversation.rejected, (state, action) => {
@@ -204,3 +232,20 @@ export const {
 } = chatSlice.actions;
 
 export default chatSlice.reducer;
+
+// Helper to normalize API messages into your Message shape
+const mapSender = (s: any, fallback: "user" | "bot" | "agent"): Message["sender"] => {
+  const v = String(s ?? "").toLowerCase();
+  if (v === "bot") return "bot";
+  if (v === "customer" || v === "user") return "user";
+  if (v === "agent" || v === "human" || v === "support") return "agent";
+  return fallback;
+};
+
+const normalizeApiMessage = (apiMsg: any, senderFallback: "user" | "bot" | "agent"): Message => ({
+  id: apiMsg.id,
+  content: apiMsg.content,
+  type: (apiMsg.type || "text").toString().toLowerCase(), // "Text" -> "text"
+  sender: mapSender(apiMsg.sender, senderFallback), // "Customer"/"Bot" -> "user"/"bot"
+  timestamp: new Date(apiMsg.createdAt ?? apiMsg.timestamp ?? Date.now()),
+});

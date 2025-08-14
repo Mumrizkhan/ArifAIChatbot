@@ -284,7 +284,7 @@
 }
 
 .conversation-start-line::before {
-  content: '';
+  content: "";
   position: absolute;
   top: 50%;
   left: -100px;
@@ -582,7 +582,9 @@
 }
 
 @keyframes typing-bounce {
-  0%, 80%, 100% {
+  0%,
+  80%,
+  100% {
     transform: scale(0.8);
     opacity: 0.5;
   }
@@ -675,7 +677,8 @@
 }
 
 @keyframes pulse {
-  0%, 100% {
+  0%,
+  100% {
     opacity: 1;
   }
   50% {
@@ -830,12 +833,12 @@
     bottom: 0 !important;
     border-radius: 0 !important;
   }
-  
+
   .chat-container {
     border-radius: 0;
     height: 100vh;
   }
-  
+
   .message-content {
     max-width: 90%;
   }
@@ -882,11 +885,11 @@
   .chat-widget {
     border: 2px solid currentColor;
   }
-  
+
   .message-bubble-content {
     border: 2px solid currentColor;
   }
-  
+
   .input-container {
     border: 2px solid currentColor;
   }
