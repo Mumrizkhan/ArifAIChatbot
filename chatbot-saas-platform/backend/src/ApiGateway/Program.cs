@@ -56,26 +56,26 @@ if (app.Environment.IsDevelopment())
         c.SwaggerEndpoint("/swagger/v1/swagger.json", "API Gateway v1");
 
         // Underlying service Swagger endpoints
-        //c.SwaggerEndpoint("http://localhost:5000/swagger/v1/swagger.json", "Identity Service");
-        //c.SwaggerEndpoint("http://localhost:5001/swagger/v1/swagger.json", "AI Orchestration Service");
-        //c.SwaggerEndpoint("http://localhost:5002/swagger/v1/swagger.json", "Chat Runtime Service");
-        //c.SwaggerEndpoint("http://localhost:5003/swagger/v1/swagger.json", "Live Agent Service");
-        //c.SwaggerEndpoint("http://localhost:5004/swagger/v1/swagger.json", "Notification Service");
-        //c.SwaggerEndpoint("http://localhost:5005/swagger/v1/swagger.json", "Workflow Service");
-        //c.SwaggerEndpoint("http://localhost:5006/swagger/v1/swagger.json", "Analytics Service");
-        //c.SwaggerEndpoint("http://localhost:5007/swagger/v1/swagger.json", "Tenant Management Service");
-        //c.SwaggerEndpoint("http://localhost:5008/swagger/v1/swagger.json", "Subscription Service");
-        //c.SwaggerEndpoint("http://localhost:5009/swagger/v1/swagger.json", "Knowledgebase Service");
-        c.SwaggerEndpoint("https://api-stg.arif.sa/identity/swagger/v1/swagger.json", "Identity Service");
-        c.SwaggerEndpoint("https://api-stg.arif.sa/ai/swagger/v1/swagger.json", "AI Orchestration Service");
-        c.SwaggerEndpoint("https://api-stg.arif.sa/cha/swagger/v1/swagger.json", "Chat Runtime Service");
-        c.SwaggerEndpoint("https://api-stg.arif.sa/agent/swagger/v1/swagger.json", "Live Agent Service");
-        c.SwaggerEndpoint("https://api-stg.arif.sa/notification/swagger/v1/swagger.json", "Notification Service");
-        c.SwaggerEndpoint("https://api-stg.arif.sa/workflow/swagger/v1/swagger.json", "Workflow Service");
-        c.SwaggerEndpoint("https://api-stg.arif.sa/analytics/swagger/v1/swagger.json", "Analytics Service");
-        c.SwaggerEndpoint("https://api-stg.arif.sa/tenant-management/swagger/v1/swagger.json", "Tenant Management Service");
-        c.SwaggerEndpoint("https://api-stg.arif.sa/subscription/swagger/v1/swagger.json", "Subscription Service");
-        c.SwaggerEndpoint("https://api-stg.arif.sa/knowledgebase/swagger/v1/swagger.json", "Knowledgebase Service");
+        c.SwaggerEndpoint("http://localhost:5000/swagger/v1/swagger.json", "Identity Service");
+        c.SwaggerEndpoint("http://localhost:5001/swagger/v1/swagger.json", "AI Orchestration Service");
+        c.SwaggerEndpoint("http://localhost:5002/swagger/v1/swagger.json", "Chat Runtime Service");
+        c.SwaggerEndpoint("http://localhost:5003/swagger/v1/swagger.json", "Live Agent Service");
+        c.SwaggerEndpoint("http://localhost:5004/swagger/v1/swagger.json", "Notification Service");
+        c.SwaggerEndpoint("http://localhost:5005/swagger/v1/swagger.json", "Workflow Service");
+        c.SwaggerEndpoint("http://localhost:5006/swagger/v1/swagger.json", "Analytics Service");
+        c.SwaggerEndpoint("http://localhost:5007/swagger/v1/swagger.json", "Tenant Management Service");
+        c.SwaggerEndpoint("http://localhost:5008/swagger/v1/swagger.json", "Subscription Service");
+        c.SwaggerEndpoint("http://localhost:5009/swagger/v1/swagger.json", "Knowledgebase Service");
+        //c.SwaggerEndpoint("https://api-stg.arif.sa/identity/swagger/v1/swagger.json", "Identity Service");
+        //c.SwaggerEndpoint("https://api-stg.arif.sa/ai/swagger/v1/swagger.json", "AI Orchestration Service");
+        //c.SwaggerEndpoint("https://api-stg.arif.sa/chat/swagger/v1/swagger.json", "Chat Runtime Service");
+        //c.SwaggerEndpoint("https://api-stg.arif.sa/agent/swagger/v1/swagger.json", "Live Agent Service");
+        //c.SwaggerEndpoint("https://api-stg.arif.sa/notification/swagger/v1/swagger.json", "Notification Service");
+        //c.SwaggerEndpoint("https://api-stg.arif.sa/workflow/swagger/v1/swagger.json", "Workflow Service");
+        //c.SwaggerEndpoint("https://api-stg.arif.sa/analytics/swagger/v1/swagger.json", "Analytics Service");
+        //c.SwaggerEndpoint("https://api-stg.arif.sa/tenant-management/swagger/v1/swagger.json", "Tenant Management Service");
+        //c.SwaggerEndpoint("https://api-stg.arif.sa/subscription/swagger/v1/swagger.json", "Subscription Service");
+        //c.SwaggerEndpoint("https://api-stg.arif.sa/knowledgebase/swagger/v1/swagger.json", "Knowledgebase Service");
 
         c.RoutePrefix = "swagger";
     });
