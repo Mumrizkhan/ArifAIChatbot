@@ -1,5 +1,5 @@
-import { store } from '../store/store';
-import { addMessage } from '../store/slices/chatSlice';
+import { store } from "../store/store";
+import { addMessage } from "../store/slices/chatSlice";
 
 interface ProactiveTrigger {
   condition: () => boolean;
@@ -7,6 +7,7 @@ interface ProactiveTrigger {
   delay: number;
   triggered: boolean;
   id: string;
+  timerId?: ReturnType<typeof setTimeout> | null; // added
 }
 
 class ProactiveService {
@@ -21,7 +22,7 @@ class ProactiveService {
   }
 
   removeTrigger(id: string) {
-    this.triggers = this.triggers.filter(trigger => trigger.id !== id);
+    this.triggers = this.triggers.filter((trigger) => trigger.id !== id);
   }
 
   startMonitoring() {
@@ -29,10 +30,14 @@ class ProactiveService {
 
     this.monitoringInterval = setInterval(() => {
       this.triggers.forEach((trigger) => {
-        if (!trigger.triggered && trigger.condition()) {
-          setTimeout(() => {
+        // Only schedule once
+        if (!trigger.triggered && !trigger.timerId && trigger.condition()) {
+          // Mark triggered BEFORE scheduling to avoid duplicate timers
+          trigger.triggered = true;
+          trigger.timerId = setTimeout(() => {
             this.sendProactiveMessage(trigger.message);
-            trigger.triggered = true;
+            // We keep triggered = true (fire only once)
+            trigger.timerId = null;
           }, trigger.delay);
         }
       });
@@ -54,11 +59,11 @@ class ProactiveService {
     const message = {
       id: `proactive_${Date.now()}`,
       content,
-      sender: 'bot' as const,
+      sender: "bot" as const,
       timestamp: new Date(),
-      type: 'text' as const,
+      type: "text" as const,
     };
-    
+
     store.dispatch(addMessage(message));
   }
 
@@ -69,7 +74,7 @@ class ProactiveService {
         const timeSinceActivity = Date.now() - this.lastActivity;
         return state.chat.isOpen && !state.chat.isTyping && timeSinceActivity > 30000;
       },
-      'Is there anything else I can help you with?',
+      "Is there anything else I can help you with?",
       30000
     );
 
@@ -78,13 +83,17 @@ class ProactiveService {
         const state = store.getState();
         return state.chat.isOpen && state.chat.currentConversation?.messages.length === 0;
       },
-      'Welcome! How can I assist you today?',
+      "Welcome! How can I assist you today?",
       2000
     );
   }
 
   resetTriggers() {
-    this.triggers.forEach(trigger => {
+    this.triggers.forEach((trigger) => {
+      if (trigger.timerId) {
+        clearTimeout(trigger.timerId);
+        trigger.timerId = null;
+      }
       trigger.triggered = false;
     });
   }
