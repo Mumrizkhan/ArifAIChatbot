@@ -10,7 +10,7 @@ pool:
 
 variables:
   buildConfiguration: 'Release'
-  outputDir: '$(Build.ArtifactStagingDirectory)/'  
+  outputDir: '$(Build.ArtifactStagingDirectory)/ApiGateway_publish'
   workingDirectory: 'chatbot-saas-platform/backend/src/ApiGateway'
   artifactName: 'ApiGateway'
 
@@ -21,6 +21,7 @@ steps:
       packageType: 'sdk'
       version: '9.x'
       installationPath: $(Agent.ToolsDirectory)/dotnet
+
   - task: DotNetCoreCLI@2
     displayName: 'Publish project'
     inputs:
@@ -33,8 +34,8 @@ steps:
   - task: ArchiveFiles@2
     displayName: 'Create ApiGateway.zip'
     inputs:
-      rootFolderOrFile: '$(outputDir)'
-      includeRootFolder: false     # <-- This makes the files appear directly when extracted
+      rootFolderOrFile: '$(outputDir)' # This folder now has only the published files
+      includeRootFolder: false         # Ensures no "ApiGateway" parent folder is added
       archiveType: 'zip'
       archiveFile: '$(Build.ArtifactStagingDirectory)/ApiGateway.zip'
       replaceExistingArchive: true
