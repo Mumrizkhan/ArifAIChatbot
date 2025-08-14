@@ -78,8 +78,8 @@ builder.Services.AddCors(options =>
         policy
             .AllowAnyOrigin()    // For development; restrict in production!
             .AllowAnyMethod()
-            .AllowAnyHeader()
-            .AllowCredentials(); 
+            .AllowAnyHeader();
+           
     });
 	
 });
