@@ -3,8 +3,8 @@
 
 <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Arif Chat Widget Test</title>
+    <meta name="viewport" content="width=device-width,initial-scale=1.0" />
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -43,13 +43,77 @@
             background: #0056b3;
         }
     </style>
+    <link rel="stylesheet" href="./arif-chat-widget.css">
 </head>
 
 <body>
-    <!-- Load the widget script -->
+    <div class="container">
+        <h1>Arif Chat Widget Test Page</h1>
+        <div class="test-section">
+            <button class="test-button" onclick="initializeWidget()">Initialize Widget</button>
+        </div>
+        <div class="test-section">
+            <div id="status">Widget not initialized</div>
+        </div>
+    </div>
+
     <script src="./arif-chat-widget.min.js"></script>
-    <link rel="stylesheet" href="./arif-chat-widget.css">
+    <script>
+        const CONFIG = {
+            tenantId: '83784EA6-5360-4F3C-843A-1ABD18D72E5D',
+            apiUrl: 'https://api-stg.arif.sa/chat',
+            websocketUrl: 'wss://api-stg.arif.sa/chat/ws'
+        };
+        let widget = null;
+
+        function initializeWidget() {
+            const Ctor = window.ChatbotWidget;
+            const statusEl = document.getElementById('status');
+            if (!Ctor) {
+                statusEl.textContent = 'Bundle not loaded';
+                return;
+            }
+            if (widget) {
+                statusEl.textContent = 'Already initialized';
+                return;
+            }
+            widget = new Ctor();
+            statusEl.textContent = 'Initializing...';
+            widget.init({
+                tenantId: CONFIG.tenantId,
+                apiUrl: CONFIG.apiUrl,
+                websocketUrl: CONFIG.websocketUrl,
+                features: {
+                    fileUpload: true,
+                    voiceMessages: true,
+                    typing: true,
+                    readReceipts: true,
+                    agentHandoff: true,
+                    conversationRating: true,
+                    conversationTranscript: true,
+                    proactiveMessages: true
+                },
+                behavior: {
+                    autoOpen: false,
+                    persistConversation: true,
+                    maxFileSize: 10 * 1024 * 1024,
+                    allowedFileTypes: ['image/*', '.pdf', '.doc', '.docx', '.txt'],
+                    maxMessageLength: 1000
+                },
+                userId: 'test-user-456',
+                metadata: {
+                    page: 'staging-index',
+                    source: 'staging'
+                }
+            }).then(() => {
+                statusEl.textContent = 'Widget ready ✓';
+            }).catch(e => {
+                console.error(e);
+                statusEl.textContent = 'Init failed: ' + (e.message || e);
+            });
+        }
+        window.initializeWidget = initializeWidget;
+    </script>
 </body>
 
 </html>
-</div>
