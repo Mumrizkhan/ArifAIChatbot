@@ -1,23 +1,27 @@
-import path from "path";
-import react from "@vitejs/plugin-react";
 import { defineConfig } from "vite";
+import react from "@vitejs/plugin-react";
+import path from "path";
 
+// Library build (staging/prod) + normal dev server
 export default defineConfig(({ mode }) => {
-  console.log("Building in mode:", mode);
-
+  const isProd = mode === "production";
   return {
     plugins: [react()],
+    resolve: {
+      alias: {
+        "@": path.resolve(__dirname, "src"),
+      },
+    },
     server: {
-      host: "0.0.0.0",
       port: 5173,
-      strictPort: true,
+      host: "0.0.0.0",
     },
     build: {
       lib: {
-        entry: path.resolve(__dirname, "src/widget.ts"),
+        entry: "src/widget.ts", // must export ChatbotWidget
         name: "ChatbotWidget",
-        fileName: (format) => (format === "umd" ? "arif-chat-widget.min.js" : "arif-chat-widget.es.js"),
         formats: ["umd", "es"],
+        fileName: (format) => (format === "umd" ? "arif-chat-widget.min.js" : "arif-chat-widget.es.js"),
       },
       cssCodeSplit: false,
       rollupOptions: {
@@ -26,30 +30,7 @@ export default defineConfig(({ mode }) => {
         },
       },
       minify: "terser",
-      terserOptions: {
-        compress: {
-          drop_console: mode === "production",
-          drop_debugger: true,
-          pure_funcs: ["console.log", "console.info", "console.debug"],
-          passes: 2,
-        },
-        mangle: {
-          safari10: true,
-        },
-      },
-      target: "es2015",
-      sourcemap: true,
-      outDir: "dist",
-      emptyOutDir: true,
-      copyPublicDir: true,
-    },
-    resolve: {
-      alias: {
-        "@": path.resolve(__dirname, "./src"),
-      },
-    },
-    define: {
-      "process.env.NODE_ENV": JSON.stringify(mode === "development" ? "development" : "production"),
+      sourcemap: !isProd,
     },
   };
 });

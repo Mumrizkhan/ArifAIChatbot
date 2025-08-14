@@ -3,7 +3,7 @@
 
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width,initial-scale=1.0" />
   <title>Arif Chat Widget Test</title>
   <style>
     body {
@@ -43,14 +43,12 @@
       background: #0056b3;
     }
   </style>
-  <!-- Keep same CSS reference for staging (after build copy/rename the file beside index.html) -->
   <link rel="stylesheet" href="./arif-chat-widget.css">
 </head>
 
 <body>
   <div class="container">
     <h1>Arif Chat Widget Test Page</h1>
-
     <div class="test-section">
       <h3>Widget Configuration Test</h3>
       <p>Testing different widget configurations and features:</p>
@@ -59,71 +57,42 @@
       <button class="test-button" onclick="changeTheme()">Change Theme</button>
       <button class="test-button" onclick="testProactiveMessage()">Test Proactive Message</button>
     </div>
-
     <div class="test-section">
       <h3>Widget Status</h3>
       <div id="status">Widget not initialized</div>
     </div>
-
     <div class="test-section">
       <h3>Test Results</h3>
       <div id="test-results"></div>
     </div>
   </div>
 
-  <script type="module">
-    // Unified dev vs staging loader
+  <script src="./arif-chat-widget.min.js"></script>
+  <script>
     const CONFIG = {
       tenantId: '83784EA6-5360-4F3C-843A-1ABD18D72E5D',
       apiUrl: 'https://api-stg.arif.sa/chat',
       websocketUrl: 'wss://api-stg.arif.sa/chat/ws'
     };
-
     let widget = null;
     let currentLanguage = 'en';
     let currentTheme = 'light';
-    const isDev = !!(import.meta && import.meta.env && import.meta.env.DEV);
 
-    function updateStatus(msg) { document.getElementById('status').textContent = msg; }
-    function addTestResult(test, result) {
+    function updateStatus(m) { document.getElementById('status').textContent = m; }
+    function addResult(test, res) {
       const wrap = document.getElementById('test-results');
-      const el = document.createElement('div');
-      el.innerHTML = `<strong>${test}:</strong> ${result}`;
-      el.style.margin = '5px 0';
-      el.style.color = result.includes('✓') ? 'green' : 'red';
-      wrap.appendChild(el);
+      const d = document.createElement('div');
+      d.innerHTML = `<strong>${test}:</strong> ${res}`;
+      d.style.margin = '5px 0';
+      d.style.color = res.includes('✓') ? 'green' : 'red';
+      wrap.appendChild(d);
     }
-
-    async function loadCtor() {
-      if (isDev) {
-        // Import source directly in dev (no built file yet)
-        const m = await import('/src/widget.ts');
-        return m.ChatbotWidget;
-      }
-      // Staging/Prod: ensure UMD loaded (load only once)
-      if (window.ChatbotWidget || (window.ArifChatWidget && window.ArifChatWidget.ChatbotWidget)) {
-        return window.ChatbotWidget || window.ArifChatWidget.ChatbotWidget;
-      }
-      // Dynamically inject if not already included
-      await new Promise((resolve, reject) => {
-        const s = document.createElement('script');
-        s.src = './arif-chat-widget.min.js';
-        s.onload = resolve;
-        s.onerror = () => reject(new Error('Failed to load arif-chat-widget.min.js'));
-        document.head.appendChild(s);
-      });
-      return window.ChatbotWidget || (window.ArifChatWidget && window.ArifChatWidget.ChatbotWidget);
-    }
+    function ctor() { return window.ChatbotWidget || (window.ArifChatWidget && window.ArifChatWidget.ChatbotWidget); }
 
     async function initializeWidget() {
       try {
-        updateStatus(isDev ? 'Loading (dev)...' : 'Loading bundle...');
-        const Ctor = await loadCtor();
-        if (!Ctor) {
-          addTestResult('Widget Initialization', '✗ Constructor missing');
-          updateStatus('Constructor not found');
-          return;
-        }
+        const Ctor = ctor();
+        if (!Ctor) { addResult('Initialization', '✗ Bundle not loaded'); updateStatus('Bundle missing'); return; }
         widget = new Ctor();
         updateStatus('Initializing...');
         await widget.init({
@@ -131,20 +100,11 @@
           apiUrl: CONFIG.apiUrl,
           websocketUrl: CONFIG.websocketUrl,
           features: {
-            fileUpload: true,
-            voiceMessages: true,
-            typing: true,
-            readReceipts: true,
-            agentHandoff: true,
-            conversationRating: true,
-            conversationTranscript: true,
-            proactiveMessages: true
+            fileUpload: true, voiceMessages: true, typing: true, readReceipts: true,
+            agentHandoff: true, conversationRating: true, conversationTranscript: true, proactiveMessages: true
           },
           behavior: {
-            autoOpen: false,
-            autoOpenDelay: 3000,
-            showWelcomeMessage: true,
-            persistConversation: true,
+            autoOpen: false, persistConversation: true,
             maxFileSize: 10 * 1024 * 1024,
             allowedFileTypes: ['image/*', '.pdf', '.doc', '.docx', '.txt'],
             maxMessageLength: 1000
@@ -152,32 +112,31 @@
           language: currentLanguage,
           rtl: currentLanguage === 'ar',
           userId: 'test-user-456',
-          metadata: { page: 'test-page', source: isDev ? 'local-dev' : 'staging' }
+          metadata: { page: 'test-page', source: 'staging' }
         });
-        updateStatus('Widget initialized successfully ✓');
-        addTestResult('Widget Initialization', '✓ Success');
-        addTestResult('Widget Ready Check', widget.isReady() ? '✓ Widget is ready' : '✗ Widget not ready');
+        updateStatus('Widget initialized ✓');
+        addResult('Initialization', '✓ Success');
+        addResult('Ready Check', widget.isReady() ? '✓ Widget is ready' : '✗ Not ready');
       } catch (e) {
-        updateStatus('Widget initialization failed');
-        addTestResult('Widget Initialization', '✗ Failed: ' + (e.message || e));
+        updateStatus('Init failed');
+        addResult('Initialization', '✗ ' + (e.message || e));
         console.error(e);
       }
     }
     window.initializeWidget = initializeWidget;
 
     function toggleLanguage() {
-      if (!widget) { addTestResult('Language Toggle', '✗ Widget not initialized'); return; }
+      if (!widget) { addResult('Language Toggle', '✗ Not initialized'); return; }
       currentLanguage = currentLanguage === 'en' ? 'ar' : 'en';
       widget.updateConfig({ language: currentLanguage, rtl: currentLanguage === 'ar' });
       document.body.dir = currentLanguage === 'ar' ? 'rtl' : 'ltr';
-      updateStatus(`Language changed to ${currentLanguage.toUpperCase()}`);
-      addTestResult('Language Toggle', `✓ Changed to ${currentLanguage.toUpperCase()}`);
-      addTestResult('RTL Support', currentLanguage === 'ar' ? '✓ RTL mode activated' : '✓ LTR mode activated');
+      updateStatus('Language: ' + currentLanguage.toUpperCase());
+      addResult('Language Toggle', '✓ ' + currentLanguage.toUpperCase());
     }
     window.toggleLanguage = toggleLanguage;
 
     function changeTheme() {
-      if (!widget) { addTestResult('Theme Change', '✗ Widget not initialized'); return; }
+      if (!widget) { addResult('Theme Change', '✗ Not initialized'); return; }
       currentTheme = currentTheme === 'light' ? 'dark' : 'light';
       widget.updateConfig({
         theme: currentTheme,
@@ -185,14 +144,14 @@
           ? { primary: '#bb86fc', secondary: '#03dac6', background: '#121212', surface: '#1e1e1e', text: '#ffffff' }
           : { primary: '#007bff', secondary: '#6c757d', background: '#ffffff', surface: '#f8f9fa', text: '#212529' }
       });
-      updateStatus(`Theme changed to ${currentTheme}`);
-      addTestResult('Theme Change', `✓ Changed to ${currentTheme} theme`);
+      updateStatus('Theme: ' + currentTheme);
+      addResult('Theme Change', '✓ ' + currentTheme);
     }
     window.changeTheme = changeTheme;
 
     function testProactiveMessage() {
-      if (!widget) { addTestResult('Proactive Message', '✗ Widget not initialized'); return; }
-      setTimeout(() => addTestResult('Proactive Message', '✓ Proactive message system tested'), 1000);
+      if (!widget) { addResult('Proactive Message', '✗ Not initialized'); return; }
+      setTimeout(() => addResult('Proactive Message', '✓ Tested'), 800);
       updateStatus('Testing proactive message...');
     }
     window.testProactiveMessage = testProactiveMessage;
