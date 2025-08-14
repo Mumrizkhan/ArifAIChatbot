@@ -3,20 +3,20 @@
 
 <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Arif Chat Widget Test</title>
+    <title>Arif Chat Widget Dev (LOCAL ONLY)</title>
+    <meta name="viewport" content="width=device-width,initial-scale=1.0" />
     <style>
         body {
             font-family: Arial, sans-serif;
             margin: 0;
             padding: 20px;
-            background-color: #f5f5f5;
+            background: #f5f5f5;
         }
 
         .container {
             max-width: 800px;
             margin: 0 auto;
-            background: white;
+            background: #fff;
             padding: 20px;
             border-radius: 8px;
             box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
@@ -31,7 +31,7 @@
 
         .test-button {
             background: #007bff;
-            color: white;
+            color: #fff;
             border: none;
             padding: 10px 20px;
             border-radius: 5px;
@@ -47,57 +47,60 @@
 
 <body>
     <div class="container">
-        <h1>Arif Chat Widget Test Page</h1>
-
+        <h1>Arif Chat Widget Dev Page</h1>
         <div class="test-section">
             <h3>Widget Configuration Test</h3>
-            <p>Testing different widget configurations and features:</p>
-
+            <p>LOCAL DEV ONLY (uses /src/widget.ts)</p>
             <button class="test-button" onclick="initializeWidget()">Initialize Widget</button>
             <button class="test-button" onclick="toggleLanguage()">Toggle Language (EN/AR)</button>
             <button class="test-button" onclick="changeTheme()">Change Theme</button>
             <button class="test-button" onclick="testProactiveMessage()">Test Proactive Message</button>
         </div>
-
         <div class="test-section">
             <h3>Widget Status</h3>
             <div id="status">Widget not initialized</div>
         </div>
-
         <div class="test-section">
             <h3>Test Results</h3>
             <div id="test-results"></div>
         </div>
     </div>
 
-    <!-- Load the widget script -->
     <script type="module">
+        // Guard: prevent accidental deployment usage
+        if (!import.meta.env.DEV) {
+            document.body.innerHTML = '<h2 style="font-family:Arial;margin:40px auto;max-width:600px;">dev.html should not be on staging/production. Remove it.</h2>';
+            throw new Error('Dev harness loaded outside Vite dev.');
+        }
+
         let widget = null;
         let currentLanguage = 'en';
         let currentTheme = 'light';
 
-        function updateStatus(message) {
-            document.getElementById('status').textContent = message;
-        }
+        const statusEl = () => document.getElementById('status');
+        const resultsEl = () => document.getElementById('test-results');
 
-        function addTestResult(test, result) {
-            const resultsDiv = document.getElementById('test-results');
-            const resultElement = document.createElement('div');
-            resultElement.innerHTML = `<strong>${test}:</strong> ${result}`;
-            resultElement.style.margin = '5px 0';
-            resultElement.style.color = result.includes('✓') ? 'green' : 'red';
-            resultsDiv.appendChild(resultElement);
+        function setStatus(msg) {
+            statusEl().textContent = msg;
+        }
+        function addResult(label, msg, ok = true) {
+            const d = document.createElement('div');
+            d.innerHTML = `<strong>${label}:</strong> ${ok ? '✓' : '✗'} ${msg}`;
+            d.style.margin = '5px 0';
+            d.style.color = ok ? 'green' : 'red';
+            resultsEl().appendChild(d);
         }
 
         async function initializeWidget() {
+            if (widget) {
+                addResult('Init', 'Already initialized');
+                return;
+            }
             try {
-                // Import the widget class
-                const widgetModule = await import('/src/widget.ts');
-                const { ChatbotWidget } = widgetModule;
-
+                const { ChatbotWidget } = await import('/src/widget.ts'); // dev-only source import
                 widget = new ChatbotWidget();
-
-                const config = {
+                setStatus('Initializing...');
+                await widget.init({
                     tenantId: '83784EA6-5360-4F3C-843A-1ABD18D72E5D',
                     apiUrl: 'https://api-stg.arif.sa/chat',
                     websocketUrl: 'wss://api-stg.arif.sa/chat/ws',
@@ -109,7 +112,7 @@
                         agentHandoff: true,
                         conversationRating: true,
                         conversationTranscript: true,
-                        proactiveMessages: true,
+                        proactiveMessages: true
                     },
                     behavior: {
                         autoOpen: false,
@@ -118,132 +121,71 @@
                         persistConversation: true,
                         maxFileSize: 10 * 1024 * 1024,
                         allowedFileTypes: ['image/*', '.pdf', '.doc', '.docx', '.txt'],
-                        maxMessageLength: 1000,
+                        maxMessageLength: 1000
                     },
                     userId: 'test-user-456',
                     metadata: {
-                        page: 'test-page',
-                        source: 'widget-test'
-                    }
-                };
-
-                await widget.init(config);
-                updateStatus('Widget initialized successfully ✓');
-                addTestResult('Widget Initialization', '✓ Success');
-
-                // Test if widget is ready
-                if (widget.isReady()) {
-                    addTestResult('Widget Ready Check', '✓ Widget is ready');
-                } else {
-                    addTestResult('Widget Ready Check', '✗ Widget not ready');
-                }
-
-            } catch (error) {
-                updateStatus('Widget initialization failed: ' + error.message);
-                addTestResult('Widget Initialization', '✗ Failed: ' + error.message);
-                console.error('Widget initialization error:', error);
-            }
-        }
-
-        window.initializeWidget = initializeWidget;
-
-        function toggleLanguage() {
-            if (!widget) {
-                addTestResult('Language Toggle', '✗ Widget not initialized');
-                return;
-            }
-
-            try {
-                currentLanguage = currentLanguage === 'en' ? 'ar' : 'en';
-
-                // Update widget config for language
-                widget.updateConfig({
+                        page: 'dev-page',
+                        source: 'local-dev'
+                    },
                     language: currentLanguage,
                     rtl: currentLanguage === 'ar'
                 });
+                setStatus('Widget initialized ✓');
+                addResult('Initialization', 'Success');
+                addResult('Ready', widget.isReady() ? 'Ready' : 'Not ready', widget.isReady());
+            } catch (e) {
+                setStatus('Init failed');
+                addResult('Initialization', e.message || e, false);
+                console.error(e);
+            }
+        }
+        window.initializeWidget = initializeWidget;
 
-                updateStatus(`Language changed to ${currentLanguage.toUpperCase()}`);
-                addTestResult('Language Toggle', `✓ Changed to ${currentLanguage.toUpperCase()}`);
+        window.toggleLanguage = function () {
+            if (!widget) {
+                addResult('Language', 'Not initialized', false);
+                return;
+            }
+            currentLanguage = currentLanguage === 'en' ? 'ar' : 'en';
+            widget.updateConfig({ language: currentLanguage, rtl: currentLanguage === 'ar' });
+            document.body.dir = currentLanguage === 'ar' ? 'rtl' : 'ltr';
+            addResult('Language', currentLanguage.toUpperCase());
+        };
 
-                // Test RTL support
-                if (currentLanguage === 'ar') {
-                    document.body.style.direction = 'rtl';
-                    addTestResult('RTL Support', '✓ RTL mode activated');
-                } else {
-                    document.body.style.direction = 'ltr';
-                    addTestResult('RTL Support', '✓ LTR mode activated');
+        window.changeTheme = function () {
+            if (!widget) {
+                addResult('Theme', 'Not initialized', false);
+                return;
+            }
+            currentTheme = currentTheme === 'light' ? 'dark' : 'light';
+            widget.updateConfig({
+                theme: currentTheme,
+                colors: currentTheme === 'dark' ? {
+                    primary: '#bb86fc',
+                    secondary: '#03dac6',
+                    background: '#121212',
+                    surface: '#1e1e1e',
+                    text: '#ffffff'
+                } : {
+                    primary: '#007bff',
+                    secondary: '#6c757d',
+                    background: '#ffffff',
+                    surface: '#f8f9fa',
+                    text: '#212529'
                 }
+            });
+            addResult('Theme', currentTheme);
+        };
 
-            } catch (error) {
-                addTestResult('Language Toggle', '✗ Failed: ' + error.message);
-                console.error('Language toggle error:', error);
-            }
-        }
-
-        window.toggleLanguage = toggleLanguage;
-
-        function changeTheme() {
+        window.testProactiveMessage = function () {
             if (!widget) {
-                addTestResult('Theme Change', '✗ Widget not initialized');
+                addResult('Proactive', 'Not initialized', false);
                 return;
             }
-
-            try {
-                currentTheme = currentTheme === 'light' ? 'dark' : 'light';
-
-                const themeConfig = {
-                    theme: currentTheme,
-                    colors: currentTheme === 'dark' ? {
-                        primary: '#bb86fc',
-                        secondary: '#03dac6',
-                        background: '#121212',
-                        surface: '#1e1e1e',
-                        text: '#ffffff'
-                    } : {
-                        primary: '#007bff',
-                        secondary: '#6c757d',
-                        background: '#ffffff',
-                        surface: '#f8f9fa',
-                        text: '#212529'
-                    }
-                };
-
-                widget.updateConfig(themeConfig);
-                updateStatus(`Theme changed to ${currentTheme}`);
-                addTestResult('Theme Change', `✓ Changed to ${currentTheme} theme`);
-
-            } catch (error) {
-                addTestResult('Theme Change', '✗ Failed: ' + error.message);
-                console.error('Theme change error:', error);
-            }
-        }
-
-        window.changeTheme = changeTheme;
-
-        function testProactiveMessage() {
-            if (!widget) {
-                addTestResult('Proactive Message', '✗ Widget not initialized');
-                return;
-            }
-
-            try {
-                // Simulate a proactive message trigger
-                setTimeout(() => {
-                    addTestResult('Proactive Message', '✓ Proactive message system tested');
-                }, 1000);
-
-                updateStatus('Testing proactive message...');
-
-            } catch (error) {
-                addTestResult('Proactive Message', '✗ Failed: ' + error.message);
-                console.error('Proactive message error:', error);
-            }
-        }
-
-        window.testProactiveMessage = testProactiveMessage;
-
+            setTimeout(() => addResult('Proactive', 'Simulated'), 800);
+        };
     </script>
 </body>
 
 </html>
-</div>
