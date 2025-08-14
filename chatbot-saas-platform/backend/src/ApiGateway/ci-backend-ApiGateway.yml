@@ -29,9 +29,19 @@ steps:
       projects: 'chatbot-saas-platform/backend/src/ApiGateway/ApiGateway.csproj'
       arguments: '--configuration $(buildConfiguration) --output $(outputDir)'
       zipAfterPublish: false
+
+  - task: ArchiveFiles@2
+    displayName: 'Create ApiGateway.zip'
+    inputs:
+      rootFolderOrFile: '$(outputDir)'
+      includeRootFolder: false     # <-- This makes the files appear directly when extracted
+      archiveType: 'zip'
+      archiveFile: '$(Build.ArtifactStagingDirectory)/ApiGateway.zip'
+      replaceExistingArchive: true
+
   - task: PublishBuildArtifacts@1
     displayName: 'Publish build artifact'
     inputs:
-      PathtoPublish: '$(outputDir)'
-      ArtifactName: 'arif-apigateway'
+      PathtoPublish: '$(Build.ArtifactStagingDirectory)/ApiGateway.zip'
+      ArtifactName: 'ApiGateway'
       publishLocation: 'Container'
