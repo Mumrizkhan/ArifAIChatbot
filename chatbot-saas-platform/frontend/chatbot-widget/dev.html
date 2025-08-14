@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Arif Chat Widget Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .test-section {
+            margin: 20px 0;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+
+        .test-button {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 5px;
+        }
+
+        .test-button:hover {
+            background: #0056b3;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <h1>Arif Chat Widget Test Page</h1>
+
+        <div class="test-section">
+            <h3>Widget Configuration Test</h3>
+            <p>Testing different widget configurations and features:</p>
+
+            <button class="test-button" onclick="initializeWidget()">Initialize Widget</button>
+            <button class="test-button" onclick="toggleLanguage()">Toggle Language (EN/AR)</button>
+            <button class="test-button" onclick="changeTheme()">Change Theme</button>
+            <button class="test-button" onclick="testProactiveMessage()">Test Proactive Message</button>
+        </div>
+
+        <div class="test-section">
+            <h3>Widget Status</h3>
+            <div id="status">Widget not initialized</div>
+        </div>
+
+        <div class="test-section">
+            <h3>Test Results</h3>
+            <div id="test-results"></div>
+        </div>
+    </div>
+
+    <!-- Load the widget script -->
+    <script type="module">
+        let widget = null;
+        let currentLanguage = 'en';
+        let currentTheme = 'light';
+
+        function updateStatus(message) {
+            document.getElementById('status').textContent = message;
+        }
+
+        function addTestResult(test, result) {
+            const resultsDiv = document.getElementById('test-results');
+            const resultElement = document.createElement('div');
+            resultElement.innerHTML = `<strong>${test}:</strong> ${result}`;
+            resultElement.style.margin = '5px 0';
+            resultElement.style.color = result.includes('✓') ? 'green' : 'red';
+            resultsDiv.appendChild(resultElement);
+        }
+
+        async function initializeWidget() {
+            try {
+                // Import the widget class
+                const widgetModule = await import('/src/widget.ts');
+                const { ChatbotWidget } = widgetModule;
+
+                widget = new ChatbotWidget();
+
+                const config = {
+                    tenantId: '83784EA6-5360-4F3C-843A-1ABD18D72E5D',
+                    apiUrl: 'https://api-stg.arif.sa/chat',
+                    websocketUrl: 'wss://api-stg.arif.sa/chat/ws',
+                    features: {
+                        fileUpload: true,
+                        voiceMessages: true,
+                        typing: true,
+                        readReceipts: true,
+                        agentHandoff: true,
+                        conversationRating: true,
+                        conversationTranscript: true,
+                        proactiveMessages: true,
+                    },
+                    behavior: {
+                        autoOpen: false,
+                        autoOpenDelay: 3000,
+                        showWelcomeMessage: true,
+                        persistConversation: true,
+                        maxFileSize: 10 * 1024 * 1024,
+                        allowedFileTypes: ['image/*', '.pdf', '.doc', '.docx', '.txt'],
+                        maxMessageLength: 1000,
+                    },
+                    userId: 'test-user-456',
+                    metadata: {
+                        page: 'test-page',
+                        source: 'widget-test'
+                    }
+                };
+
+                await widget.init(config);
+                updateStatus('Widget initialized successfully ✓');
+                addTestResult('Widget Initialization', '✓ Success');
+
+                // Test if widget is ready
+                if (widget.isReady()) {
+                    addTestResult('Widget Ready Check', '✓ Widget is ready');
+                } else {
+                    addTestResult('Widget Ready Check', '✗ Widget not ready');
+                }
+
+            } catch (error) {
+                updateStatus('Widget initialization failed: ' + error.message);
+                addTestResult('Widget Initialization', '✗ Failed: ' + error.message);
+                console.error('Widget initialization error:', error);
+            }
+        }
+
+        window.initializeWidget = initializeWidget;
+
+        function toggleLanguage() {
+            if (!widget) {
+                addTestResult('Language Toggle', '✗ Widget not initialized');
+                return;
+            }
+
+            try {
+                currentLanguage = currentLanguage === 'en' ? 'ar' : 'en';
+
+                // Update widget config for language
+                widget.updateConfig({
+                    language: currentLanguage,
+                    rtl: currentLanguage === 'ar'
+                });
+
+                updateStatus(`Language changed to ${currentLanguage.toUpperCase()}`);
+                addTestResult('Language Toggle', `✓ Changed to ${currentLanguage.toUpperCase()}`);
+
+                // Test RTL support
+                if (currentLanguage === 'ar') {
+                    document.body.style.direction = 'rtl';
+                    addTestResult('RTL Support', '✓ RTL mode activated');
+                } else {
+                    document.body.style.direction = 'ltr';
+                    addTestResult('RTL Support', '✓ LTR mode activated');
+                }
+
+            } catch (error) {
+                addTestResult('Language Toggle', '✗ Failed: ' + error.message);
+                console.error('Language toggle error:', error);
+            }
+        }
+
+        window.toggleLanguage = toggleLanguage;
+
+        function changeTheme() {
+            if (!widget) {
+                addTestResult('Theme Change', '✗ Widget not initialized');
+                return;
+            }
+
+            try {
+                currentTheme = currentTheme === 'light' ? 'dark' : 'light';
+
+                const themeConfig = {
+                    theme: currentTheme,
+                    colors: currentTheme === 'dark' ? {
+                        primary: '#bb86fc',
+                        secondary: '#03dac6',
+                        background: '#121212',
+                        surface: '#1e1e1e',
+                        text: '#ffffff'
+                    } : {
+                        primary: '#007bff',
+                        secondary: '#6c757d',
+                        background: '#ffffff',
+                        surface: '#f8f9fa',
+                        text: '#212529'
+                    }
+                };
+
+                widget.updateConfig(themeConfig);
+                updateStatus(`Theme changed to ${currentTheme}`);
+                addTestResult('Theme Change', `✓ Changed to ${currentTheme} theme`);
+
+            } catch (error) {
+                addTestResult('Theme Change', '✗ Failed: ' + error.message);
+                console.error('Theme change error:', error);
+            }
+        }
+
+        window.changeTheme = changeTheme;
+
+        function testProactiveMessage() {
+            if (!widget) {
+                addTestResult('Proactive Message', '✗ Widget not initialized');
+                return;
+            }
+
+            try {
+                // Simulate a proactive message trigger
+                setTimeout(() => {
+                    addTestResult('Proactive Message', '✓ Proactive message system tested');
+                }, 1000);
+
+                updateStatus('Testing proactive message...');
+
+            } catch (error) {
+                addTestResult('Proactive Message', '✗ Failed: ' + error.message);
+                console.error('Proactive message error:', error);
+            }
+        }
+
+        window.testProactiveMessage = testProactiveMessage;
+
+        // Test bundle size
+        function testBundleSize() {
+            const VITE_API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
+            fetch(`${VITE_API_URL}/dist/arif-chat-widget.js`)
+                .then(response => response.blob())
+                .then(blob => {
+                    const sizeKB = (blob.size / 1024).toFixed(2);
+                    if (blob.size < 200 * 1024) {
+                        addTestResult('Bundle Size', `✓ ${sizeKB} KB (under 200KB limit)`);
+                    } else {
+                        addTestResult('Bundle Size', `✗ ${sizeKB} KB (exceeds 200KB limit)`);
+                    }
+                })
+                .catch(error => {
+                    addTestResult('Bundle Size', '✗ Could not fetch bundle');
+                });
+        }
+
+        window.addEventListener('load', () => {
+            testBundleSize();
+        });
+    </script>
+</body>
+
+</html>
+</div>

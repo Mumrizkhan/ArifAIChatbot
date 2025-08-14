@@ -2,7 +2,7 @@ import React, { useState, useRef, useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useTranslation } from "react-i18next";
 import { RootState, AppDispatch } from "../store/store";
-import { sendMessage, startConversation, requestHumanAgent } from "@/store/slices/chatSlice";
+import { sendMessage, startConversation, requestHumanAgent } from "../store/slices/chatSlice";
 import { trackEvent } from "../store/slices/configSlice";
 import { signalRService } from "../services/websocket";
 import { Send, Paperclip, Mic, MicOff, User } from "lucide-react";
