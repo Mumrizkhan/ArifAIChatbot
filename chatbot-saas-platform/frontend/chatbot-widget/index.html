@@ -5,8 +5,6 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Arif Chat Widget Test</title>
-  <!-- Staging/Production stylesheet (present after build/deploy). Keep CSS below unchanged -->
-  <link id="widget-css" rel="stylesheet" href="./arif-chat-widget.css" media="print" onload="this.media='all'">
   <style>
     body {
       font-family: Arial, sans-serif;
@@ -45,6 +43,8 @@
       background: #0056b3;
     }
   </style>
+  <!-- Keep same CSS reference for staging (after build copy/rename the file beside index.html) -->
+  <link rel="stylesheet" href="./arif-chat-widget.css">
 </head>
 
 <body>
@@ -54,7 +54,6 @@
     <div class="test-section">
       <h3>Widget Configuration Test</h3>
       <p>Testing different widget configurations and features:</p>
-
       <button class="test-button" onclick="initializeWidget()">Initialize Widget</button>
       <button class="test-button" onclick="toggleLanguage()">Toggle Language (EN/AR)</button>
       <button class="test-button" onclick="changeTheme()">Change Theme</button>
@@ -72,51 +71,65 @@
     </div>
   </div>
 
-  <script>
-    const isLocal = location.hostname === 'localhost' || location.hostname === '127.0.0.1';
+  <script type="module">
+    // Unified dev vs staging loader
+    const CONFIG = {
+      tenantId: '83784EA6-5360-4F3C-843A-1ABD18D72E5D',
+      apiUrl: 'https://api-stg.arif.sa/chat',
+      websocketUrl: 'wss://api-stg.arif.sa/chat/ws'
+    };
+
     let widget = null;
     let currentLanguage = 'en';
     let currentTheme = 'light';
+    const isDev = !!(import.meta && import.meta.env && import.meta.env.DEV);
 
-    function updateStatus(message) {
-      document.getElementById('status').textContent = message;
-    }
+    function updateStatus(msg) { document.getElementById('status').textContent = msg; }
     function addTestResult(test, result) {
-      const resultsDiv = document.getElementById('test-results');
-      const resultElement = document.createElement('div');
-      resultElement.innerHTML = `<strong>${test}:</strong> ${result}`;
-      resultElement.style.margin = '5px 0';
-      resultElement.style.color = result.includes('✓') ? 'green' : 'red';
-      resultsDiv.appendChild(resultElement);
+      const wrap = document.getElementById('test-results');
+      const el = document.createElement('div');
+      el.innerHTML = `<strong>${test}:</strong> ${result}`;
+      el.style.margin = '5px 0';
+      el.style.color = result.includes('✓') ? 'green' : 'red';
+      wrap.appendChild(el);
     }
 
-    async function loadLocalCtor() {
-      const m = await import('/src/widget.ts');
-      return m.ChatbotWidget;
-    }
-    function loadDeployedCtor() {
-      return new Promise((resolve, reject) => {
-        if (window.ChatbotWidget) return resolve(window.ChatbotWidget);
+    async function loadCtor() {
+      if (isDev) {
+        // Import source directly in dev (no built file yet)
+        const m = await import('/src/widget.ts');
+        return m.ChatbotWidget;
+      }
+      // Staging/Prod: ensure UMD loaded (load only once)
+      if (window.ChatbotWidget || (window.ArifChatWidget && window.ArifChatWidget.ChatbotWidget)) {
+        return window.ChatbotWidget || window.ArifChatWidget.ChatbotWidget;
+      }
+      // Dynamically inject if not already included
+      await new Promise((resolve, reject) => {
         const s = document.createElement('script');
         s.src = './arif-chat-widget.min.js';
-        s.onload = () => window.ChatbotWidget ? resolve(window.ChatbotWidget) : reject(new Error('Global ChatbotWidget not found'));
-        s.onerror = () => reject(new Error('Failed loading arif-chat-widget.min.js'));
+        s.onload = resolve;
+        s.onerror = () => reject(new Error('Failed to load arif-chat-widget.min.js'));
         document.head.appendChild(s);
       });
-    }
-
-    async function resolveCtor() {
-      return isLocal ? loadLocalCtor() : loadDeployedCtor();
+      return window.ChatbotWidget || (window.ArifChatWidget && window.ArifChatWidget.ChatbotWidget);
     }
 
     async function initializeWidget() {
       try {
-        const ChatbotWidget = await resolveCtor();
-        widget = new ChatbotWidget();
-        const config = {
-          tenantId: '83784EA6-5360-4F3C-843A-1ABD18D72E5D',
-          apiUrl: 'https://api-stg.arif.sa/chat',
-          websocketUrl: 'wss://api-stg.arif.sa/chat/ws',
+        updateStatus(isDev ? 'Loading (dev)...' : 'Loading bundle...');
+        const Ctor = await loadCtor();
+        if (!Ctor) {
+          addTestResult('Widget Initialization', '✗ Constructor missing');
+          updateStatus('Constructor not found');
+          return;
+        }
+        widget = new Ctor();
+        updateStatus('Initializing...');
+        await widget.init({
+          tenantId: CONFIG.tenantId,
+          apiUrl: CONFIG.apiUrl,
+          websocketUrl: CONFIG.websocketUrl,
           features: {
             fileUpload: true,
             voiceMessages: true,
@@ -136,51 +149,44 @@
             allowedFileTypes: ['image/*', '.pdf', '.doc', '.docx', '.txt'],
             maxMessageLength: 1000
           },
+          language: currentLanguage,
+          rtl: currentLanguage === 'ar',
           userId: 'test-user-456',
-          metadata: { page: 'test-page', source: isLocal ? 'local-dev' : 'staging' }
-        };
-        await widget.init(config);
+          metadata: { page: 'test-page', source: isDev ? 'local-dev' : 'staging' }
+        });
         updateStatus('Widget initialized successfully ✓');
         addTestResult('Widget Initialization', '✓ Success');
         addTestResult('Widget Ready Check', widget.isReady() ? '✓ Widget is ready' : '✗ Widget not ready');
-      } catch (error) {
-        updateStatus('Widget initialization failed: ' + (error.message || error));
-        addTestResult('Widget Initialization', '✗ Failed: ' + (error.message || error));
-        console.error(error);
+      } catch (e) {
+        updateStatus('Widget initialization failed');
+        addTestResult('Widget Initialization', '✗ Failed: ' + (e.message || e));
+        console.error(e);
       }
     }
     window.initializeWidget = initializeWidget;
 
     function toggleLanguage() {
       if (!widget) { addTestResult('Language Toggle', '✗ Widget not initialized'); return; }
-      try {
-        currentLanguage = currentLanguage === 'en' ? 'ar' : 'en';
-        widget.updateConfig({ language: currentLanguage, rtl: currentLanguage === 'ar' });
-        document.body.style.direction = currentLanguage === 'ar' ? 'rtl' : 'ltr';
-        updateStatus(`Language changed to ${currentLanguage.toUpperCase()}`);
-        addTestResult('Language Toggle', `✓ Changed to ${currentLanguage.toUpperCase()}`);
-        addTestResult('RTL Support', `✓ ${currentLanguage === 'ar' ? 'RTL' : 'LTR'} mode`);
-      } catch (e) {
-        addTestResult('Language Toggle', '✗ Failed: ' + e.message);
-      }
+      currentLanguage = currentLanguage === 'en' ? 'ar' : 'en';
+      widget.updateConfig({ language: currentLanguage, rtl: currentLanguage === 'ar' });
+      document.body.dir = currentLanguage === 'ar' ? 'rtl' : 'ltr';
+      updateStatus(`Language changed to ${currentLanguage.toUpperCase()}`);
+      addTestResult('Language Toggle', `✓ Changed to ${currentLanguage.toUpperCase()}`);
+      addTestResult('RTL Support', currentLanguage === 'ar' ? '✓ RTL mode activated' : '✓ LTR mode activated');
     }
     window.toggleLanguage = toggleLanguage;
 
     function changeTheme() {
       if (!widget) { addTestResult('Theme Change', '✗ Widget not initialized'); return; }
-      try {
-        currentTheme = currentTheme === 'light' ? 'dark' : 'light';
-        widget.updateConfig({
-          theme: currentTheme,
-          colors: currentTheme === 'dark'
-            ? { primary: '#bb86fc', secondary: '#03dac6', background: '#121212', surface: '#1e1e1e', text: '#ffffff' }
-            : { primary: '#007bff', secondary: '#6c757d', background: '#ffffff', surface: '#f8f9fa', text: '#212529' }
-        });
-        updateStatus(`Theme changed to ${currentTheme}`);
-        addTestResult('Theme Change', `✓ Changed to ${currentTheme} theme`);
-      } catch (e) {
-        addTestResult('Theme Change', '✗ Failed: ' + e.message);
-      }
+      currentTheme = currentTheme === 'light' ? 'dark' : 'light';
+      widget.updateConfig({
+        theme: currentTheme,
+        colors: currentTheme === 'dark'
+          ? { primary: '#bb86fc', secondary: '#03dac6', background: '#121212', surface: '#1e1e1e', text: '#ffffff' }
+          : { primary: '#007bff', secondary: '#6c757d', background: '#ffffff', surface: '#f8f9fa', text: '#212529' }
+      });
+      updateStatus(`Theme changed to ${currentTheme}`);
+      addTestResult('Theme Change', `✓ Changed to ${currentTheme} theme`);
     }
     window.changeTheme = changeTheme;
 

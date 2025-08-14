@@ -2,11 +2,10 @@ import React, { useState, useRef, useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useTranslation } from "react-i18next";
 import { RootState, AppDispatch } from "../store/store";
-import { addMessage, sendMessage, startConversation, requestHumanAgent } from "@/store/slices/chatSlice";
+import { sendMessage, startConversation, requestHumanAgent } from "@/store/slices/chatSlice";
 import { trackEvent } from "../store/slices/configSlice";
 import { signalRService } from "../services/websocket";
 import { Send, Paperclip, Mic, MicOff, User } from "lucide-react";
-import { v4 as uuidv4 } from "uuid";
 
 export const MessageInput: React.FC = () => {
   const { t } = useTranslation();

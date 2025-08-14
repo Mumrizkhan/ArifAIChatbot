@@ -3,8 +3,8 @@ import react from "@vitejs/plugin-react";
 import { defineConfig } from "vite";
 
 export default defineConfig(({ mode }) => {
-  console.log('Building in mode:', mode);
-  
+  console.log("Building in mode:", mode);
+
   return {
     plugins: [react()],
     server: {
@@ -15,45 +15,22 @@ export default defineConfig(({ mode }) => {
     build: {
       lib: {
         entry: path.resolve(__dirname, "src/widget.ts"),
-        name: "ArifChatWidget",
-        fileName: (format) => `arif-chat-widget.${format}.js`,
-        formats: ["es", "umd", "iife"],
+        name: "ChatbotWidget",
+        fileName: (format) => (format === "umd" ? "arif-chat-widget.min.js" : "arif-chat-widget.es.js"),
+        formats: ["umd", "es"],
       },
+      cssCodeSplit: false,
       rollupOptions: {
-        external: [],
-        input: path.resolve(__dirname, "src/widget.ts"),
-        output: [
-          {
-            format: "es",
-            entryFileNames: "arif-chat-widget.es.js",
-            assetFileNames: "arif-chat-widget.[ext]",
-            exports: "named",
-            inlineDynamicImports: true,
-          },
-          {
-            format: "umd",
-            name: "ArifChatWidget",
-            entryFileNames: "arif-chat-widget.umd.js",
-            assetFileNames: "arif-chat-widget.[ext]",
-            exports: "named",
-            inlineDynamicImports: true,
-          },
-          {
-            format: "iife",
-            name: "ArifChatWidget",
-            entryFileNames: "arif-chat-widget.min.js",
-            assetFileNames: "arif-chat-widget.[ext]",
-            exports: "named",
-            inlineDynamicImports: true,
-          },
-        ],
+        output: {
+          assetFileNames: (asset) => (asset.name && asset.name.endsWith(".css") ? "arif-chat-widget.css" : asset.name || "asset.[ext]"),
+        },
       },
       minify: "terser",
       terserOptions: {
         compress: {
-          drop_console: mode === 'production',
+          drop_console: mode === "production",
           drop_debugger: true,
-          pure_funcs: ['console.log', 'console.info', 'console.debug'],
+          pure_funcs: ["console.log", "console.info", "console.debug"],
           passes: 2,
         },
         mangle: {
@@ -61,7 +38,6 @@ export default defineConfig(({ mode }) => {
         },
       },
       target: "es2015",
-      cssCodeSplit: false,
       sourcemap: true,
       outDir: "dist",
       emptyOutDir: true,
@@ -73,7 +49,7 @@ export default defineConfig(({ mode }) => {
       },
     },
     define: {
-      'process.env.NODE_ENV': JSON.stringify(mode === 'development' ? 'development' : 'production'),
-    }
+      "process.env.NODE_ENV": JSON.stringify(mode === "development" ? "development" : "production"),
+    },
   };
 });
