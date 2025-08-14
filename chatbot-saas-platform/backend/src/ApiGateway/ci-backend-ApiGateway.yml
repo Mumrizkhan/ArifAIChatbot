@@ -10,7 +10,7 @@ pool:
 
 variables:
   buildConfiguration: 'Release'
-  outputDir: '$(Build.ArtifactStagingDirectory)/arif-apigateway'  
+  outputDir: '$(Build.ArtifactStagingDirectory)/'  
   workingDirectory: 'chatbot-saas-platform/backend/src/ApiGateway'
   artifactName: 'ApiGateway'
 
@@ -27,7 +27,7 @@ steps:
       command: 'publish'
       publishWebProjects: false
       projects: 'chatbot-saas-platform/backend/src/ApiGateway/ApiGateway.csproj'
-      arguments: '--configuration $(buildConfiguration) --output $(outputDir)'
+      arguments: '--configuration $(buildConfiguration) --output $(outputDir) /p:GeneratePackageOnBuild=false'
       zipAfterPublish: false
 
   - task: ArchiveFiles@2
