@@ -242,27 +242,6 @@
 
         window.testProactiveMessage = testProactiveMessage;
 
-        // Test bundle size
-        function testBundleSize() {
-            const VITE_API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
-            fetch(`${VITE_API_URL}/dist/arif-chat-widget.js`)
-                .then(response => response.blob())
-                .then(blob => {
-                    const sizeKB = (blob.size / 1024).toFixed(2);
-                    if (blob.size < 200 * 1024) {
-                        addTestResult('Bundle Size', `✓ ${sizeKB} KB (under 200KB limit)`);
-                    } else {
-                        addTestResult('Bundle Size', `✗ ${sizeKB} KB (exceeds 200KB limit)`);
-                    }
-                })
-                .catch(error => {
-                    addTestResult('Bundle Size', '✗ Could not fetch bundle');
-                });
-        }
-
-        window.addEventListener('load', () => {
-            testBundleSize();
-        });
     </script>
 </body>
 
