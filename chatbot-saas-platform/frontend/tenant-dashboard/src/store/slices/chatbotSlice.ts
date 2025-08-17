@@ -60,7 +60,7 @@ const initialState: ChatbotState = {
 };
 
 export const fetchChatbotConfigs = createAsyncThunk("chatbot/fetchConfigs", async () => {
-  const response = await fetch(`${API_BASE_URL}/tenant-management/chatbot/configs`, {
+  const response = await fetch(`${API_BASE_URL}/tenant-management/chatbotconfigs`, {
     headers: {
       Authorization: `Bearer ${localStorage.getItem("token")}`,
     },
@@ -74,7 +74,7 @@ export const fetchChatbotConfigs = createAsyncThunk("chatbot/fetchConfigs", asyn
 });
 
 export const createChatbotConfig = createAsyncThunk("chatbot/createConfig", async (config: Omit<ChatbotConfig, "id">) => {
-  const response = await fetch(`${API_BASE_URL}/tenant-management/chatbot/configs`, {
+  const response = await fetch(`${API_BASE_URL}/tenant-management/chatbotconfigs`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -93,7 +93,7 @@ export const createChatbotConfig = createAsyncThunk("chatbot/createConfig", asyn
 export const updateChatbotConfig = createAsyncThunk(
   "chatbot/updateConfig",
   async ({ id, config }: { id: string; config: Partial<ChatbotConfig> }) => {
-    const response = await fetch(`${API_BASE_URL}/tenant-management/chatbot/configs/${id}`, {
+    const response = await fetch(`${API_BASE_URL}/tenant-management/chatbotconfigs/${id}`, {
       method: "PUT",
       headers: {
         "Content-Type": "application/json",
@@ -111,7 +111,7 @@ export const updateChatbotConfig = createAsyncThunk(
 );
 
 export const deleteChatbotConfig = createAsyncThunk("chatbot/deleteConfig", async (id: string) => {
-  const response = await fetch(`${API_BASE_URL}/tenant-management/chatbot/configs/${id}`, {
+  const response = await fetch(`${API_BASE_URL}/tenant-management/chatbotconfigs/${id}`, {
     method: "DELETE",
     headers: {
       Authorization: `Bearer ${localStorage.getItem("token")}`,
