@@ -78,7 +78,11 @@ const ChatbotConfigPage = () => {
   }, [config, setValue]);
 
   const onSubmit = (data: any) => {
-    dispatch(updateChatbotConfig(data));
+    if (!config?.id) {
+      console.error('No chatbot configuration found. Please refresh the page.');
+      return;
+    }
+    dispatch(updateChatbotConfig({ id: config.id, config: data }));
   };
 
   const handleFileUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
