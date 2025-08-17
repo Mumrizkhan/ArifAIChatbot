@@ -3,7 +3,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { useTranslation } from 'react-i18next';
 import { useForm } from 'react-hook-form';
 import { AppDispatch, RootState } from '../../store/store';
-import { fetchChatbotConfigs, updateChatbotConfig } from '../../store/slices/chatbotSlice';
+import { fetchChatbotConfigs, updateChatbotConfig, createChatbotConfig } from '../../store/slices/chatbotSlice';
 import { ChatbotService } from '../../services/chatbotService';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../../components/ui/card';
 import { Button } from '../../components/ui/button';
@@ -31,17 +31,31 @@ import {
   FileText,
   Zap,
   Globe,
+  Send,
 } from 'lucide-react';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from '../../components/ui/dialog';
 
 const ChatbotConfigPage = () => {
   const { t } = useTranslation();
   const dispatch = useDispatch<AppDispatch>();
   const { configs, isLoading } = useSelector((state: RootState) => state.chatbot);
   const config = configs && configs.length > 0 ? configs[0] : null;
+  const isCreateMode = !config;
   const [activeTab, setActiveTab] = useState('personality');
   const [isUploading, setIsUploading] = useState(false);
   const [uploadError, setUploadError] = useState<string | null>(null);
   const [uploadSuccess, setUploadSuccess] = useState<string | null>(null);
+  const [isTestModalOpen, setIsTestModalOpen] = useState(false);
+  const [testMessages, setTestMessages] = useState<Array<{id: string, content: string, sender: 'user' | 'bot', timestamp: Date}>>([]);
+  const [testInput, setTestInput] = useState('');
+  const [isTesting, setIsTesting] = useState(false);
 
   const { register, handleSubmit, setValue, watch, formState: { errors } } = useForm({
     defaultValues: {
@@ -77,12 +91,114 @@ const ChatbotConfigPage = () => {
     }
   }, [config, setValue]);
 
-  const onSubmit = (data: Record<string, any>) => {
-    if (!config?.id) {
-      console.error('No chatbot configuration found. Please refresh the page.');
-      return;
+  const onSubmit = (data: Record<string, unknown>) => {
+    if (isCreateMode) {
+      const createRequest = {
+        name: (data.name as string) || 'My Chatbot',
+        description: (data.personality as string) || 'AI Assistant',
+        isActive: true,
+        appearance: {
+          position: "bottom-right" as const,
+          size: "medium" as const,
+          primaryColor: "#007bff",
+          secondaryColor: "#6c757d",
+          borderRadius: "8px",
+          animation: "slide" as const
+        },
+        behavior: {
+          autoOpen: false,
+          autoOpenDelay: 3000,
+          showWelcomeMessage: true,
+          welcomeMessage: (data.welcomeMessage as string) || "Hello! How can I help you today?",
+          placeholderText: "Type your message...",
+          maxFileSize: 10485760,
+          allowedFileTypes: [".pdf", ".docx", ".txt", ".md"]
+        },
+        features: {
+          fileUpload: true,
+          voiceMessages: false,
+          typing: true,
+          readReceipts: true,
+          agentHandoff: true,
+          conversationRating: true,
+          conversationTranscript: true
+        },
+        aiSettings: {
+          model: "gpt-3.5-turbo",
+          temperature: 0.7,
+          maxTokens: 1000,
+          systemPrompt: (data.personality as string) || "You are a helpful AI assistant.",
+          fallbackMessage: (data.fallbackMessage as string) || "I'm sorry, I didn't understand that. Could you please rephrase your question?"
+        },
+        integrations: {
+          knowledgeBase: true,
+          crm: false,
+          analytics: true
+        }
+      };
+      dispatch(createChatbotConfig(createRequest));
+    } else {
+      if (!config?.id) {
+        console.error('No chatbot configuration found. Please refresh the page.');
+        return;
+      }
+      dispatch(updateChatbotConfig({ id: config.id, config: data }));
     }
-    dispatch(updateChatbotConfig({ id: config.id, config: data }));
+  };
+
+  const handleTestChatbot = async (message: string) => {
+    if (!message.trim()) return;
+
+    setIsTesting(true);
+    
+    const userMessage = {
+      id: `user_${Date.now()}`,
+      content: message,
+      sender: 'user' as const,
+      timestamp: new Date()
+    };
+    setTestMessages(prev => [...prev, userMessage]);
+    setTestInput('');
+
+    try {
+      const response = await ChatbotService.testChatbot(message);
+      
+      if (response.success) {
+        const botMessage = {
+          id: `bot_${Date.now()}`,
+          content: response.data.response,
+          sender: 'bot' as const,
+          timestamp: new Date()
+        };
+        setTestMessages(prev => [...prev, botMessage]);
+      } else {
+        const errorMessage = {
+          id: `bot_${Date.now()}`,
+          content: 'Sorry, I encountered an error while processing your message. Please try again.',
+          sender: 'bot' as const,
+          timestamp: new Date()
+        };
+        setTestMessages(prev => [...prev, errorMessage]);
+      }
+    } catch (error) {
+      console.error('Test chatbot error:', error);
+      const errorMessage = {
+        id: `bot_${Date.now()}`,
+        content: 'Sorry, I encountered an error while processing your message. Please try again.',
+        sender: 'bot' as const,
+        timestamp: new Date()
+      };
+      setTestMessages(prev => [...prev, errorMessage]);
+    } finally {
+      setIsTesting(false);
+    }
+  };
+
+  const handleTestSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (testInput.trim() && !isTesting) {
+      handleTestChatbot(testInput);
+    }
   };
 
   const handleFileUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -117,8 +233,8 @@ const ChatbotConfigPage = () => {
       setUploadSuccess(`Successfully uploaded ${files.length} file(s) to knowledge base`);
       
       event.target.value = '';
-    } catch (error: any) {
-      setUploadError(error.message || 'Failed to upload files');
+    } catch (error: unknown) {
+      setUploadError((error as Error).message || 'Failed to upload files');
     } finally {
       setIsUploading(false);
     }
@@ -158,19 +274,99 @@ const ChatbotConfigPage = () => {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold">{t('chatbot.title')}</h1>
+          <h1 className="text-3xl font-bold">
+            {isCreateMode ? t('chatbot.createTitle') || 'Create Chatbot' : t('chatbot.title')}
+          </h1>
           <p className="text-muted-foreground">
-            {t('chatbot.subtitle')}
+            {isCreateMode 
+              ? t('chatbot.createSubtitle') || 'Set up your first AI chatbot configuration'
+              : t('chatbot.subtitle')
+            }
           </p>
         </div>
         <div className="flex space-x-2">
-          <Button variant="outline">
-            <RefreshCw className="mr-2 h-4 w-4" />
-            {t('chatbot.testBot')}
-          </Button>
+          {!isCreateMode && (
+            <Dialog open={isTestModalOpen} onOpenChange={setIsTestModalOpen}>
+              <DialogTrigger asChild>
+                <Button variant="outline">
+                  <RefreshCw className="mr-2 h-4 w-4" />
+                  {t('chatbot.testBot')}
+                </Button>
+              </DialogTrigger>
+              <DialogContent className="max-w-2xl max-h-[80vh] flex flex-col">
+                <DialogHeader>
+                  <DialogTitle>Test Chatbot</DialogTitle>
+                  <DialogDescription>
+                    Test your chatbot configuration with live messages. This uses your current form settings.
+                  </DialogDescription>
+                </DialogHeader>
+                
+                <div className="flex-1 flex flex-col min-h-0">
+                  <div className="flex-1 overflow-y-auto border rounded-lg p-4 mb-4 bg-gray-50 dark:bg-gray-900 min-h-[300px]">
+                    {testMessages.length === 0 ? (
+                      <div className="flex items-center justify-center h-full text-gray-500">
+                        <div className="text-center">
+                          <MessageSquare className="mx-auto h-12 w-12 mb-2 opacity-50" />
+                          <p>Start a conversation to test your chatbot</p>
+                        </div>
+                      </div>
+                    ) : (
+                      <div className="space-y-4">
+                        {testMessages.map((message) => (
+                          <div
+                            key={message.id}
+                            className={`flex ${message.sender === 'user' ? 'justify-end' : 'justify-start'}`}
+                          >
+                            <div
+                              className={`max-w-[80%] rounded-lg px-4 py-2 ${
+                                message.sender === 'user'
+                                  ? 'bg-blue-500 text-white'
+                                  : 'bg-white dark:bg-gray-800 border'
+                              }`}
+                            >
+                              <p className="text-sm">{message.content}</p>
+                              <p className={`text-xs mt-1 opacity-70 ${
+                                message.sender === 'user' ? 'text-blue-100' : 'text-gray-500'
+                              }`}>
+                                {message.timestamp.toLocaleTimeString()}
+                              </p>
+                            </div>
+                          </div>
+                        ))}
+                        {isTesting && (
+                          <div className="flex justify-start">
+                            <div className="bg-white dark:bg-gray-800 border rounded-lg px-4 py-2">
+                              <div className="flex items-center space-x-1">
+                                <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce"></div>
+                                <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{animationDelay: '0.1s'}}></div>
+                                <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{animationDelay: '0.2s'}}></div>
+                              </div>
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    )}
+                  </div>
+                  
+                  <form onSubmit={handleTestSubmit} className="flex space-x-2">
+                    <Input
+                      value={testInput}
+                      onChange={(e) => setTestInput(e.target.value)}
+                      placeholder="Type your message..."
+                      disabled={isTesting}
+                      className="flex-1"
+                    />
+                    <Button type="submit" disabled={isTesting || !testInput.trim()}>
+                      <Send className="h-4 w-4" />
+                    </Button>
+                  </form>
+                </div>
+              </DialogContent>
+            </Dialog>
+          )}
           <Button onClick={handleSubmit(onSubmit)}>
             <Save className="mr-2 h-4 w-4" />
-            {t('common.save')}
+            {isCreateMode ? t('common.create') || 'Create' : t('common.save')}
           </Button>
         </div>
       </div>
@@ -323,15 +519,24 @@ const ChatbotConfigPage = () => {
             <CardHeader>
               <CardTitle>{t('chatbot.uploadTrainingData')}</CardTitle>
               <CardDescription>
-                {t('chatbot.uploadTrainingDataDesc')}
+                {isCreateMode 
+                  ? 'Save your chatbot configuration first to upload training documents'
+                  : t('chatbot.uploadTrainingDataDesc')
+                }
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
-              <div className="border-2 border-dashed border-muted-foreground/25 rounded-lg p-6 text-center">
-                <Upload className="mx-auto h-12 w-12 text-muted-foreground" />
+              <div className={`border-2 border-dashed rounded-lg p-6 text-center ${
+                isCreateMode ? 'border-muted-foreground/10 bg-muted/20' : 'border-muted-foreground/25'
+              }`}>
+                <Upload className={`mx-auto h-12 w-12 ${
+                  isCreateMode ? 'text-muted-foreground/50' : 'text-muted-foreground'
+                }`} />
                 <div className="mt-4">
-                  <Label htmlFor="file-upload" className="cursor-pointer">
-                    <span className="text-sm font-medium text-primary hover:text-primary/80">
+                  <Label htmlFor="file-upload" className={isCreateMode ? 'cursor-not-allowed' : 'cursor-pointer'}>
+                    <span className={`text-sm font-medium ${
+                      isCreateMode ? 'text-muted-foreground/50' : 'text-primary hover:text-primary/80'
+                    }`}>
                       {isUploading ? 'Uploading...' : t('chatbot.clickToUpload')}
                     </span>
                     <span className="text-sm text-muted-foreground"> {t('chatbot.orDragAndDrop')}</span>
@@ -342,7 +547,7 @@ const ChatbotConfigPage = () => {
                     multiple
                     accept=".txt,.pdf,.docx,.md"
                     onChange={handleFileUpload}
-                    disabled={isUploading}
+                    disabled={isUploading || isCreateMode}
                     className="hidden"
                   />
                 </div>

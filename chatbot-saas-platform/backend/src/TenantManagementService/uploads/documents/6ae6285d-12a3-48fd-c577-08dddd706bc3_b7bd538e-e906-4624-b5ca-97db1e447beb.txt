@@ -1,0 +1,44 @@
+Mosadaqa
+===============================
+
+Reporting Server
+----------------
+Server: P-Co-V-Cert-DB1.tetco.sa
+Url: http://p-co-v-cert-db1.tetco.sa/reportserver
+DB Name: cvsorg_MSCRM
+
+DB Server
+Server: P-Co-V-CertDB1.tetco.sa
+DB Name: cvsorg_MSCRM, MSCRM_CONFIG
+
+
+Microsoft Dynamics
+-------------------
+10.11.56.13
+10.11.56.14
+10.11.56.15
+
+Mosadaqa.sa
+---------------
+10.11.56.16
+10.11.56.17
+
+Office.mosadaqa
+---------------
+10.11.56.99
+10.11.56.100
+
+
+Background Jobs Service
+--------------------------
+10.11.56.17
+
+
+
+ "ConnectionStrings": {
+    "DefaultConnection": "trustServerCertificate=true;Data Source=.;Initial Catalog=Qasimati;Persist Security Info=True;User ID=qsmuser;Password=AxSz@#45678",
+    "DefaultConnectionWithoutTimeout": "trustServerCertificate=true;Data Source=.;Initial Catalog=Qasimati;Persist Security Info=True;User ID=qsmuser;Password=AxSz@#45678",
+    "HangFireConnection": "trustServerCertificate=true;Data Source=.;Initial Catalog=Qasimati_Hangfire;Persist Security Info=True;User ID=qsmuser;Password=AxSz@#45678",
+    "ExternalResourcesConnection": "trustServerCertificate=true;Data Source=.;Initial Catalog=Qasimati_Data;Persist Security Info=True;User ID=qsmuser;Password=AxSz@#45678",
+    "MdmConnection": "trustServerCertificate=true;Data Source=.;Initial Catalog=Qasimati_MDM;Persist Security Info=True;User ID=qsmuser;Password=AxSz@#45678"
+  },
