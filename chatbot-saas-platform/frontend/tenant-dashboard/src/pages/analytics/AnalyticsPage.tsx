@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useTranslation } from 'react-i18next';
+import { LucideIcon } from 'lucide-react';
 import { AppDispatch, RootState } from '../../store/store';
 import { 
   fetchAnalytics, 
@@ -62,7 +63,7 @@ const AnalyticsPage = () => {
   const [selectedTimeRange, setSelectedTimeRange] = useState('7d');
 
   useEffect(() => {
-    dispatch(fetchAnalytics({ startDate: dateRange.start, endDate: dateRange.end }));
+    dispatch(fetchAnalytics({ startDate: new Date(dateRange.start), endDate: new Date(dateRange.end) }));
     dispatch(fetchRealtimeAnalytics());
 
     const token = localStorage.getItem('token');
@@ -80,14 +81,21 @@ const AnalyticsPage = () => {
           });
 
           tenantSignalRService.setOnTenantNotification((notification) => {
-            dispatch(addTenantNotification(notification));
+            // Convert Date timestamp to string if needed
+            const serializedNotification = {
+              ...notification,
+              timestamp: notification.timestamp instanceof Date 
+                ? notification.timestamp.toISOString() 
+                : notification.timestamp
+            };
+            dispatch(addTenantNotification(serializedNotification));
           });
 
           tenantSignalRService.setOnConnectionStatusChange((isConnected) => {
             dispatch(setSignalRConnectionStatus(isConnected));
           });
 
-          tenantSignalRService.requestTenantAnalyticsUpdate(dateRange.start, dateRange.end);
+          tenantSignalRService.requestTenantAnalyticsUpdate(new Date(dateRange.start), new Date(dateRange.end));
         }
       });
     }
@@ -109,7 +117,7 @@ const AnalyticsPage = () => {
     const startDate = new Date(Date.now() - days * 24 * 60 * 60 * 1000);
     const endDate = new Date();
     
-    dispatch(setDateRange({ start: startDate, end: endDate }));
+    dispatch(setDateRange({ start: startDate.toISOString(), end: endDate.toISOString() }));
     dispatch(fetchAnalytics({ startDate, endDate }));
     
     if (isSignalRConnected) {
@@ -120,8 +128,8 @@ const AnalyticsPage = () => {
   const handleExport = (format: 'csv' | 'pdf' | 'excel') => {
     dispatch(exportAnalytics({ 
       format, 
-      startDate: dateRange.start, 
-      endDate: dateRange.end 
+      startDate: new Date(dateRange.start), 
+      endDate: new Date(dateRange.end)
     }));
   };
 
@@ -148,7 +156,15 @@ const AnalyticsPage = () => {
     { name: 'Sarah Wilson', conversations: 35, avgRating: 4.7, responseTime: 2.5 },
   ];
 
-  const MetricCard = ({ title, value, change, icon: Icon, description }: any) => (
+interface MetricCardProps {
+  title: string;
+  value: string | number;
+  change?: string;
+  icon: LucideIcon;
+  description?: string;
+}
+
+  const MetricCard = ({ title, value, change, icon: Icon, description }: MetricCardProps) => (
     <Card>
       <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
         <CardTitle className="text-sm font-medium">{title}</CardTitle>

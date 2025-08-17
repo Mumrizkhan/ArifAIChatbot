@@ -5,7 +5,7 @@ interface TenantNotification {
   type: "info" | "warning" | "error" | "success";
   title: string;
   message: string;
-  timestamp: Date;
+  timestamp: string; // Changed from Date to string (ISO format)
   tenantId: string;
 }
 
@@ -53,8 +53,8 @@ interface AnalyticsState {
   isLoading: boolean;
   error: string | null;
   dateRange: {
-    start: Date;
-    end: Date;
+    start: string; // Changed from Date to string (ISO format)
+    end: string;   // Changed from Date to string (ISO format)
   };
   refreshInterval: number;
   isSignalRConnected: boolean;
@@ -66,8 +66,8 @@ const initialState: AnalyticsState = {
   isLoading: false,
   error: null,
   dateRange: {
-    start: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000), // 30 days ago
-    end: new Date(),
+    start: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString(), // 30 days ago
+    end: new Date().toISOString(),
   },
   refreshInterval: 30000, // 30 seconds
   isSignalRConnected: false,
@@ -75,7 +75,7 @@ const initialState: AnalyticsState = {
 };
 
 export const fetchAnalytics = createAsyncThunk("analytics/fetchData", async (params: { startDate: Date; endDate: Date }) => {
-  const response = await fetch(`${API_BASE_URL}/analytic/analytics`, {
+  const response = await fetch(`${API_BASE_URL}/analytics/analytics`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -95,7 +95,7 @@ export const fetchAnalytics = createAsyncThunk("analytics/fetchData", async (par
 });
 
 export const fetchRealtimeAnalytics = createAsyncThunk("analytics/fetchRealtime", async () => {
-  const response = await fetch(`${API_BASE_URL}/analytic/analytics/realtime`, {
+  const response = await fetch(`${API_BASE_URL}/analytics/analytics/realtime`, {
     headers: {
       Authorization: `Bearer ${localStorage.getItem("token")}`,
     },
@@ -111,7 +111,7 @@ export const fetchRealtimeAnalytics = createAsyncThunk("analytics/fetchRealtime"
 export const exportAnalytics = createAsyncThunk(
   "analytics/export",
   async (params: { format: "csv" | "pdf" | "excel"; startDate: Date; endDate: Date }) => {
-    const response = await fetch(`${API_BASE_URL}/analytic/analytics/export`, {
+    const response = await fetch(`${API_BASE_URL}/analytics/analytics/export`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -146,7 +146,7 @@ const analyticsSlice = createSlice({
   name: "analytics",
   initialState,
   reducers: {
-    setDateRange: (state, action: PayloadAction<{ start: Date; end: Date }>) => {
+    setDateRange: (state, action: PayloadAction<{ start: string; end: string }>) => {
       state.dateRange = action.payload;
     },
     updateRealtimeData: (state, action: PayloadAction<AnalyticsData["realtime"]>) => {
