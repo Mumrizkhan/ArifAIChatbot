@@ -399,7 +399,7 @@ const SubscriptionsPage: React.FC = () => {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {(subscriptions.length > 0 ? subscriptions : mockSubscriptions).map((subscription) => (
+                  {(subscriptions?.length > 0 ? subscriptions : mockSubscriptions).map((subscription) => (
                     <TableRow key={subscription.id}>
                       <TableCell className="font-medium">
                         {(subscription as any).tenantName || (subscription as any).tenantId || t("common.unknown")}

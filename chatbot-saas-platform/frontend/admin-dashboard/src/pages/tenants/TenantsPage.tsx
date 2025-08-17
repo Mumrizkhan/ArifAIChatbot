@@ -232,7 +232,7 @@ const TenantsPage: React.FC = () => {
                   <TableCell className="font-medium">{tenant.name}</TableCell>
                   <TableCell>{tenant.domain}</TableCell>
                   <TableCell>{getStatusBadge(tenant.status)}</TableCell>
-                  <TableCell>{t(`tenants.plans.${tenant.subscriptionPlan.toLowerCase()}`)}</TableCell>
+                  <TableCell>{t(`tenants.plans.${tenant.subscriptionPlan?.toLowerCase()}`)}</TableCell>
                   <TableCell>
                     <div className="flex items-center">
                       <Users className="mr-1 h-4 w-4" />
