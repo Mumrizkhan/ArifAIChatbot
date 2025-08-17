@@ -10,7 +10,7 @@ pool:
 
 variables:
   buildConfiguration: 'Release'
-  outputDir: '$(Build.ArtifactStagingDirectory)/ApiGateway_publish'
+  outputDir: '$(Build.ArtifactStagingDirectory)'
   workingDirectory: 'chatbot-saas-platform/backend/src/ApiGateway'
   artifactName: 'ApiGateway'
 
@@ -29,20 +29,10 @@ steps:
       publishWebProjects: false
       projects: 'chatbot-saas-platform/backend/src/ApiGateway/ApiGateway.csproj'
       arguments: '--configuration $(buildConfiguration) --output $(outputDir) /p:GeneratePackageOnBuild=false'
-      zipAfterPublish: false
-
-  - task: ArchiveFiles@2
-    displayName: 'Create ApiGateway.zip'
-    inputs:
-      rootFolderOrFile: '$(outputDir)' # This folder now has only the published files
-      includeRootFolder: false         # Ensures no "ApiGateway" parent folder is added
-      archiveType: 'zip'
-      archiveFile: '$(Build.ArtifactStagingDirectory)/ApiGateway.zip'
-      replaceExistingArchive: true
-
+      zipAfterPublish: true
   - task: PublishBuildArtifacts@1
     displayName: 'Publish build artifact'
     inputs:
-      PathtoPublish: '$(Build.ArtifactStagingDirectory)/ApiGateway.zip'
+      PathtoPublish: '$(Build.ArtifactStagingDirectory)'
       ArtifactName: 'ApiGateway'
       publishLocation: 'Container'
