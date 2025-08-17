@@ -32,7 +32,7 @@ const TenantsPage: React.FC = () => {
   const [editingTenant, setEditingTenant] = useState<any>(null);
   const [newTenant, setNewTenant] = useState({
     name: "",
-    subDomain: "",
+    subdomain: "",
     customDomain: "",
     primaryColor: "",
     secondaryColor: "",
@@ -52,7 +52,7 @@ const TenantsPage: React.FC = () => {
       setIsCreateDialogOpen(false);
       setNewTenant({
         name: "",
-        subDomain: "",
+        subdomain: "",
         customDomain: "",
         primaryColor: "",
         secondaryColor: "",
@@ -160,9 +160,9 @@ const TenantsPage: React.FC = () => {
                   {t("tenants.domain")}
                 </Label>
                 <Input
-                  id="subDomain"
-                  value={newTenant.subDomain}
-                  onChange={(e) => setNewTenant({ ...newTenant, subDomain: e.target.value })}
+                  id="subdomain"
+                  value={newTenant.subdomain}
+                  onChange={(e) => setNewTenant({ ...newTenant, subdomain: e.target.value })}
                   className="col-span-3"
                 />
               </div>
@@ -308,7 +308,7 @@ const TenantsPage: React.FC = () => {
               {tenants.map((tenant) => (
                 <TableRow key={tenant.id}>
                   <TableCell className="font-medium">{tenant.name}</TableCell>
-                  <TableCell>{tenant?.subdomain}</TableCell>
+                  <TableCell>{tenant.subdomain}</TableCell>
                   <TableCell>{getStatusBadge(tenant.status)}</TableCell>
                   {/* <TableCell>{t(`tenants.plans.${tenant.subscriptionPlan?.toLowerCase()}`)}</TableCell> */}
                   <TableCell>{t(`tenants.subscriptionPlan`)}</TableCell>
