@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { useForm } from 'react-hook-form';
 import { AppDispatch, RootState } from '../../store/store';
 import { fetchChatbotConfigs, updateChatbotConfig } from '../../store/slices/chatbotSlice';
+import { ChatbotService } from '../../services/chatbotService';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../../components/ui/card';
 import { Button } from '../../components/ui/button';
 import { Input } from '../../components/ui/input';
@@ -38,6 +39,9 @@ const ChatbotConfigPage = () => {
   const { configs, isLoading } = useSelector((state: RootState) => state.chatbot);
   const config = configs && configs.length > 0 ? configs[0] : null;
   const [activeTab, setActiveTab] = useState('personality');
+  const [isUploading, setIsUploading] = useState(false);
+  const [uploadError, setUploadError] = useState<string | null>(null);
+  const [uploadSuccess, setUploadSuccess] = useState<string | null>(null);
 
   const { register, handleSubmit, setValue, watch, formState: { errors } } = useForm({
     defaultValues: {
@@ -77,14 +81,42 @@ const ChatbotConfigPage = () => {
     dispatch(updateChatbotConfig(data));
   };
 
-  const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const files = event.target.files;
-    if (files && files.length > 0) {
-      const formData = new FormData();
-      Array.from(files).forEach(file => {
-        formData.append('files', file);
+    if (!files || files.length === 0) return;
+    
+    if (!config?.id) {
+      setUploadError('No chatbot configuration found. Please save your configuration first.');
+      return;
+    }
+
+    setUploadError(null);
+    setUploadSuccess(null);
+    setIsUploading(true);
+
+    try {
+      const uploadPromises = Array.from(files).map(async (file: File) => {
+        const allowedTypes = ['.pdf', '.docx', '.txt', '.md'];
+        const fileExtension = '.' + file.name.split('.').pop()?.toLowerCase();
+        if (!allowedTypes.includes(fileExtension)) {
+          throw new Error(`File type ${fileExtension} is not supported. Allowed types: ${allowedTypes.join(', ')}`);
+        }
+
+        if (file.size > 10 * 1024 * 1024) {
+          throw new Error(`File ${file.name} exceeds 10MB size limit`);
+        }
+
+        return ChatbotService.uploadKnowledgeBaseDocument(config.id, file);
       });
-      console.log('Training data upload:', formData);
+
+      await Promise.all(uploadPromises);
+      setUploadSuccess(`Successfully uploaded ${files.length} file(s) to knowledge base`);
+      
+      event.target.value = '';
+    } catch (error: any) {
+      setUploadError(error.message || 'Failed to upload files');
+    } finally {
+      setIsUploading(false);
     }
   };
 
@@ -296,7 +328,7 @@ const ChatbotConfigPage = () => {
                 <div className="mt-4">
                   <Label htmlFor="file-upload" className="cursor-pointer">
                     <span className="text-sm font-medium text-primary hover:text-primary/80">
-                      {t('chatbot.clickToUpload')}
+                      {isUploading ? 'Uploading...' : t('chatbot.clickToUpload')}
                     </span>
                     <span className="text-sm text-muted-foreground"> {t('chatbot.orDragAndDrop')}</span>
                   </Label>
@@ -306,6 +338,7 @@ const ChatbotConfigPage = () => {
                     multiple
                     accept=".txt,.pdf,.docx,.md"
                     onChange={handleFileUpload}
+                    disabled={isUploading}
                     className="hidden"
                   />
                 </div>
@@ -313,6 +346,24 @@ const ChatbotConfigPage = () => {
                   {t('chatbot.supportedFormats')}
                 </p>
               </div>
+
+              {uploadError && (
+                <div className="p-3 text-sm text-red-600 bg-red-50 border border-red-200 rounded-md">
+                  {uploadError}
+                </div>
+              )}
+              
+              {uploadSuccess && (
+                <div className="p-3 text-sm text-green-600 bg-green-50 border border-green-200 rounded-md">
+                  {uploadSuccess}
+                </div>
+              )}
+
+              {isUploading && (
+                <div className="p-3 text-sm text-blue-600 bg-blue-50 border border-blue-200 rounded-md">
+                  Uploading files...
+                </div>
+              )}
 
             </CardContent>
           </Card>
