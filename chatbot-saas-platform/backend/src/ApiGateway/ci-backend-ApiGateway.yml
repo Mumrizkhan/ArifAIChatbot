@@ -26,7 +26,7 @@ steps:
     displayName: 'Publish project'
     inputs:
       command: 'publish'
-      publishWebProjects: true
+      publishWebProjects: false
       projects: 'chatbot-saas-platform/backend/src/ApiGateway/ApiGateway.csproj'
       arguments: '--configuration $(buildConfiguration) --output $(outputDir) /p:GeneratePackageOnBuild=false'
       zipAfterPublish: true
