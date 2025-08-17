@@ -166,7 +166,7 @@ const ChatbotConfigPage = () => {
       if (response.success) {
         const botMessage = {
           id: `bot_${Date.now()}`,
-          content: response.data.response,
+          content: response.data.botMessage.content,
           sender: 'bot' as const,
           timestamp: new Date()
         };
@@ -184,12 +184,14 @@ const ChatbotConfigPage = () => {
       console.error('Test chatbot error:', error);
       const errorMessage = {
         id: `bot_${Date.now()}`,
-        content: 'Sorry, I encountered an error while processing your message. Please try again.',
+        content: error instanceof Error && error.message.includes('conversation') 
+          ? 'Failed to create test conversation. Please try again.'
+          : 'Sorry, I encountered an error while processing your message. Please try again.',
         sender: 'bot' as const,
         timestamp: new Date()
       };
       setTestMessages(prev => [...prev, errorMessage]);
-    } finally {
+    }finally {
       setIsTesting(false);
     }
   };

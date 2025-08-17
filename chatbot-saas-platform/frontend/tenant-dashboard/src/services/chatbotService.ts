@@ -224,8 +224,25 @@ export class ChatbotService {
   }
 
   // Test chatbot - using ChatRuntimeService for actual chat functionality
-  static async testChatbot(message: string): Promise<ApiResponse<{ response: string; confidence: number }>> {
-    return apiClient.post<{ response: string; confidence: number }>('/chat/messages', { 
+  static async testChatbot(message: string, conversationId?: string): Promise<ApiResponse<{ userMessage: unknown; botMessage: { content: string }; success: boolean }>> {
+    if (!conversationId) {
+      const conversationResponse = await apiClient.post<{ id: string }>('/chat/conversations', {
+        tenantId: localStorage.getItem('tenantId') || '',
+        customerName: 'Test User',
+        customerEmail: 'test@example.com',
+        subject: 'Chatbot Test',
+        language: 'en'
+      });
+      
+      if (!conversationResponse.success || !conversationResponse.data) {
+        throw new Error('Failed to create test conversation');
+      }
+      
+      conversationId = conversationResponse.data.id;
+    }
+
+    return apiClient.post<{ userMessage: unknown; botMessage: { content: string }; success: boolean }>('/chat/messages', {
+      conversationId,
       content: message,
       type: 'text'
     });
