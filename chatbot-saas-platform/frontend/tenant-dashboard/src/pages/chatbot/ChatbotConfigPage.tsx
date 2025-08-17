@@ -31,7 +31,16 @@ import {
   FileText,
   Zap,
   Globe,
+  Send,
 } from 'lucide-react';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from '../../components/ui/dialog';
 
 const ChatbotConfigPage = () => {
   const { t } = useTranslation();
@@ -43,6 +52,10 @@ const ChatbotConfigPage = () => {
   const [isUploading, setIsUploading] = useState(false);
   const [uploadError, setUploadError] = useState<string | null>(null);
   const [uploadSuccess, setUploadSuccess] = useState<string | null>(null);
+  const [isTestModalOpen, setIsTestModalOpen] = useState(false);
+  const [testMessages, setTestMessages] = useState<Array<{id: string, content: string, sender: 'user' | 'bot', timestamp: Date}>>([]);
+  const [testInput, setTestInput] = useState('');
+  const [isTesting, setIsTesting] = useState(false);
 
   const { register, handleSubmit, setValue, watch, formState: { errors } } = useForm({
     defaultValues: {
@@ -133,6 +146,61 @@ const ChatbotConfigPage = () => {
     }
   };
 
+  const handleTestChatbot = async (message: string) => {
+    if (!message.trim()) return;
+
+    setIsTesting(true);
+    
+    const userMessage = {
+      id: `user_${Date.now()}`,
+      content: message,
+      sender: 'user' as const,
+      timestamp: new Date()
+    };
+    setTestMessages(prev => [...prev, userMessage]);
+    setTestInput('');
+
+    try {
+      const response = await ChatbotService.testChatbot(message);
+      
+      if (response.success) {
+        const botMessage = {
+          id: `bot_${Date.now()}`,
+          content: response.data.response,
+          sender: 'bot' as const,
+          timestamp: new Date()
+        };
+        setTestMessages(prev => [...prev, botMessage]);
+      } else {
+        const errorMessage = {
+          id: `bot_${Date.now()}`,
+          content: 'Sorry, I encountered an error while processing your message. Please try again.',
+          sender: 'bot' as const,
+          timestamp: new Date()
+        };
+        setTestMessages(prev => [...prev, errorMessage]);
+      }
+    } catch (error) {
+      console.error('Test chatbot error:', error);
+      const errorMessage = {
+        id: `bot_${Date.now()}`,
+        content: 'Sorry, I encountered an error while processing your message. Please try again.',
+        sender: 'bot' as const,
+        timestamp: new Date()
+      };
+      setTestMessages(prev => [...prev, errorMessage]);
+    } finally {
+      setIsTesting(false);
+    }
+  };
+
+  const handleTestSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (testInput.trim() && !isTesting) {
+      handleTestChatbot(testInput);
+    }
+  };
+
   const handleFileUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const files = event.target.files;
     if (!files || files.length === 0) return;
@@ -165,8 +233,8 @@ const ChatbotConfigPage = () => {
       setUploadSuccess(`Successfully uploaded ${files.length} file(s) to knowledge base`);
       
       event.target.value = '';
-    } catch (error: any) {
-      setUploadError(error.message || 'Failed to upload files');
+    } catch (error: unknown) {
+      setUploadError((error as Error).message || 'Failed to upload files');
     } finally {
       setIsUploading(false);
     }
@@ -218,10 +286,83 @@ const ChatbotConfigPage = () => {
         </div>
         <div className="flex space-x-2">
           {!isCreateMode && (
-            <Button variant="outline">
-              <RefreshCw className="mr-2 h-4 w-4" />
-              {t('chatbot.testBot')}
-            </Button>
+            <Dialog open={isTestModalOpen} onOpenChange={setIsTestModalOpen}>
+              <DialogTrigger asChild>
+                <Button variant="outline">
+                  <RefreshCw className="mr-2 h-4 w-4" />
+                  {t('chatbot.testBot')}
+                </Button>
+              </DialogTrigger>
+              <DialogContent className="max-w-2xl max-h-[80vh] flex flex-col">
+                <DialogHeader>
+                  <DialogTitle>Test Chatbot</DialogTitle>
+                  <DialogDescription>
+                    Test your chatbot configuration with live messages. This uses your current form settings.
+                  </DialogDescription>
+                </DialogHeader>
+                
+                <div className="flex-1 flex flex-col min-h-0">
+                  <div className="flex-1 overflow-y-auto border rounded-lg p-4 mb-4 bg-gray-50 dark:bg-gray-900 min-h-[300px]">
+                    {testMessages.length === 0 ? (
+                      <div className="flex items-center justify-center h-full text-gray-500">
+                        <div className="text-center">
+                          <MessageSquare className="mx-auto h-12 w-12 mb-2 opacity-50" />
+                          <p>Start a conversation to test your chatbot</p>
+                        </div>
+                      </div>
+                    ) : (
+                      <div className="space-y-4">
+                        {testMessages.map((message) => (
+                          <div
+                            key={message.id}
+                            className={`flex ${message.sender === 'user' ? 'justify-end' : 'justify-start'}`}
+                          >
+                            <div
+                              className={`max-w-[80%] rounded-lg px-4 py-2 ${
+                                message.sender === 'user'
+                                  ? 'bg-blue-500 text-white'
+                                  : 'bg-white dark:bg-gray-800 border'
+                              }`}
+                            >
+                              <p className="text-sm">{message.content}</p>
+                              <p className={`text-xs mt-1 opacity-70 ${
+                                message.sender === 'user' ? 'text-blue-100' : 'text-gray-500'
+                              }`}>
+                                {message.timestamp.toLocaleTimeString()}
+                              </p>
+                            </div>
+                          </div>
+                        ))}
+                        {isTesting && (
+                          <div className="flex justify-start">
+                            <div className="bg-white dark:bg-gray-800 border rounded-lg px-4 py-2">
+                              <div className="flex items-center space-x-1">
+                                <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce"></div>
+                                <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{animationDelay: '0.1s'}}></div>
+                                <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{animationDelay: '0.2s'}}></div>
+                              </div>
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    )}
+                  </div>
+                  
+                  <form onSubmit={handleTestSubmit} className="flex space-x-2">
+                    <Input
+                      value={testInput}
+                      onChange={(e) => setTestInput(e.target.value)}
+                      placeholder="Type your message..."
+                      disabled={isTesting}
+                      className="flex-1"
+                    />
+                    <Button type="submit" disabled={isTesting || !testInput.trim()}>
+                      <Send className="h-4 w-4" />
+                    </Button>
+                  </form>
+                </div>
+              </DialogContent>
+            </Dialog>
           )}
           <Button onClick={handleSubmit(onSubmit)}>
             <Save className="mr-2 h-4 w-4" />
