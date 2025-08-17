@@ -77,7 +77,7 @@ const ChatbotConfigPage = () => {
     }
   }, [config, setValue]);
 
-  const onSubmit = (data: any) => {
+  const onSubmit = (data: Record<string, any>) => {
     if (!config?.id) {
       console.error('No chatbot configuration found. Please refresh the page.');
       return;
