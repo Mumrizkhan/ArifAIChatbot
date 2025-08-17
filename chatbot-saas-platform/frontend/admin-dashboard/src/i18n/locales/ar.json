@@ -382,6 +382,10 @@
     }
   },
   "settings": {
+    "theme": "المظهر",
+    "lightMode": "فاتح",
+    "darkMode": "داكن",
+    "systemMode": "نظام",
     "language": "اللغة",
     "title": "الإعدادات",
     "description": "إدارة إعدادات التطبيق وتفضيلاتك",

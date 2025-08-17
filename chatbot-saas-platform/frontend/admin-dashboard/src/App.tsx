@@ -1,23 +1,23 @@
-import { useEffect } from 'react';
-import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
-import { Provider } from 'react-redux';
-import { store } from './store/store';
-import { useTranslation } from 'react-i18next';
-import { useSelector } from 'react-redux';
-import { RootState } from './store/store';
-import { ThemeProvider } from './components/theme/ThemeProvider';
-import { Toaster } from './components/ui/sonner';
-import './i18n';
+import { useEffect } from "react";
+import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
+import { Provider } from "react-redux";
+import { store } from "./store/store";
+import { useTranslation } from "react-i18next";
+import { useSelector } from "react-redux";
+import { RootState } from "./store/store";
+import { ThemeProvider } from "./components/theme/ThemeProvider";
+import { Toaster } from "./components/ui/sonner";
+import "./i18n";
 
-import Layout from './components/layout/Layout';
-import LoginPage from './pages/auth/LoginPage';
-import DashboardPage from './pages/dashboard/DashboardPage';
-import TenantsPage from './pages/tenants/TenantsPage';
-import UsersPage from './pages/users/UsersPage';
-import AnalyticsPage from './pages/analytics/AnalyticsPage';
-import SubscriptionsPage from './pages/subscriptions/SubscriptionsPage';
-import SettingsPage from './pages/settings/SettingsPage';
-import ProtectedRoute from './components/auth/ProtectedRoute';
+import Layout from "./components/layout/Layout";
+import LoginPage from "./pages/auth/LoginPage";
+import DashboardPage from "./pages/dashboard/DashboardPage";
+import TenantsPage from "./pages/tenants/TenantsPage";
+import UsersPage from "./pages/users/UsersPage";
+import AnalyticsPage from "./pages/analytics/AnalyticsPage";
+import SubscriptionsPage from "./pages/subscriptions/SubscriptionsPage";
+import SettingsPage from "./pages/settings/SettingsPage";
+import ProtectedRoute from "./components/auth/ProtectedRoute";
 
 function AppContent() {
   const { i18n } = useTranslation();
@@ -31,7 +31,7 @@ function AppContent() {
 
   return (
     <Router>
-      <div className={`min-h-screen bg-background ${direction === 'rtl' ? 'rtl' : 'ltr'}`}>
+      <div className={`min-h-screen bg-background ${direction === "rtl" ? "rtl" : "ltr"}`}>
         <Routes>
           <Route path="/login" element={<LoginPage />} />
           <Route

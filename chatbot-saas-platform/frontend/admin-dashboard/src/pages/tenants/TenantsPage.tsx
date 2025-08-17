@@ -23,10 +23,10 @@ import { Skeleton } from "../../components/ui/skeleton";
 import { Plus, Search, MoreHorizontal, Edit, Trash2, Building2, Users, MessageSquare, Calendar } from "lucide-react";
 
 const TenantsPage: React.FC = () => {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const dispatch = useDispatch<AppDispatch>();
   const { tenants, isLoading, currentPage, pageSize } = useSelector((state: RootState) => state.tenant);
-
+  const direction = i18n.language === "ar" ? "rtl" : "ltr";
   const [searchTerm, setSearchTerm] = useState("");
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
   const [editingTenant, setEditingTenant] = useState<any>(null);
@@ -125,7 +125,7 @@ const TenantsPage: React.FC = () => {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6" dir={direction}>
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold">{t("tenants.title")}</h1>
@@ -294,14 +294,14 @@ const TenantsPage: React.FC = () => {
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>{t("tenants.tenantName")}</TableHead>
-                <TableHead>{t("tenants.domain")}</TableHead>
-                <TableHead>{t("tenants.status.label")}</TableHead>
-                <TableHead>{t("tenants.subscriptionPlan")}</TableHead>
-                <TableHead>{t("tenants.userCount")}</TableHead>
-                <TableHead>{t("tenants.conversationCount")}</TableHead>
-                <TableHead>{t("tenants.createdAt")}</TableHead>
-                <TableHead>{t("tenants.actions")}</TableHead>
+                <TableHead className={direction === "rtl" ? "text-right" : "text-left"}>{t("tenants.tenantName")}</TableHead>
+                <TableHead className={direction === "rtl" ? "text-right" : "text-left"}>{t("tenants.domain")}</TableHead>
+                <TableHead className={direction === "rtl" ? "text-right" : "text-left"}>{t("tenants.status.label")}</TableHead>
+                <TableHead className={direction === "rtl" ? "text-right" : "text-left"}>{t("tenants.subscriptionPlan")}</TableHead>
+                <TableHead className={direction === "rtl" ? "text-right" : "text-left"}>{t("tenants.userCount")}</TableHead>
+                <TableHead className={direction === "rtl" ? "text-right" : "text-left"}>{t("tenants.conversationCount")}</TableHead>
+                <TableHead className={direction === "rtl" ? "text-right" : "text-left"}>{t("tenants.createdAt")}</TableHead>
+                <TableHead className={direction === "rtl" ? "text-right" : "text-left"}>{t("tenants.actions")}</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>

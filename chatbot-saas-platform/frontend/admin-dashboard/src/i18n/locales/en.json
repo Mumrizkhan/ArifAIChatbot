@@ -381,6 +381,10 @@
     }
   },
   "settings": {
+    "theme": "Theme",
+    "lightMode": "Light",
+    "darkMode": "Dark",
+    "systemMode": "System Mode",
     "language": "Language",
     "title": "Settings",
     "description": "Manage your application settings and preferences",

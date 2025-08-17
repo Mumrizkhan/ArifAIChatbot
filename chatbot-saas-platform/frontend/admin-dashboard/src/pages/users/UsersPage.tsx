@@ -24,9 +24,10 @@ import { Skeleton } from "../../components/ui/skeleton";
 import { Plus, Search, MoreHorizontal, Edit, Trash2, Users, UserCheck, UserX, Shield, Calendar } from "lucide-react";
 
 const UsersPage: React.FC = () => {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const dispatch = useDispatch<AppDispatch>();
   const { users, isLoading, currentPage, pageSize } = useSelector((state: RootState) => state.user);
+  const direction = i18n.language === "ar" ? "rtl" : "ltr";
 
   const [searchTerm, setSearchTerm] = useState("");
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
@@ -230,13 +231,13 @@ const UsersPage: React.FC = () => {
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>{t("users.name")}</TableHead>
-                <TableHead>{t("users.email")}</TableHead>
-                <TableHead>{t("users.role")}</TableHead>
-                <TableHead>{t("users.status.label")}</TableHead>
-                <TableHead>{t("users.lastLoginAt")}</TableHead>
-                <TableHead>{t("users.createdAt")}</TableHead>
-                <TableHead>{t("users.actions")}</TableHead>
+                <TableHead className={direction === "rtl" ? "text-right" : "text-left"}>{t("users.name")}</TableHead>
+                <TableHead className={direction === "rtl" ? "text-right" : "text-left"}>{t("users.email")}</TableHead>
+                <TableHead className={direction === "rtl" ? "text-right" : "text-left"}>{t("users.role")}</TableHead>
+                <TableHead className={direction === "rtl" ? "text-right" : "text-left"}>{t("users.status.label")}</TableHead>
+                <TableHead className={direction === "rtl" ? "text-right" : "text-left"}>{t("users.lastLoginAt")}</TableHead>
+                <TableHead className={direction === "rtl" ? "text-right" : "text-left"}>{t("users.createdAt")}</TableHead>
+                <TableHead className={direction === "rtl" ? "text-right" : "text-left"}>{t("users.actions")}</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>

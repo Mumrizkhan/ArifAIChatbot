@@ -16,7 +16,7 @@ import { Badge } from "../../components/ui/badge";
 import { Settings, Palette, Globe, Shield, Bell, Zap, Database, Mail, Smartphone, Key, Users, Monitor, Sun, Moon } from "lucide-react";
 
 const SettingsPage: React.FC = () => {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const dispatch = useDispatch<AppDispatch>();
   const { mode, language, primaryColor } = useSelector((state: RootState) => state.theme);
   const { user } = useSelector((state: RootState) => state.auth);
@@ -27,6 +27,12 @@ const SettingsPage: React.FC = () => {
       dispatch(fetchSettings(user.tenantId));
     }
   }, [dispatch, user?.tenantId]);
+  useEffect(() => {
+    const direction = language === "ar" ? "rtl" : "ltr";
+    document.documentElement.dir = direction; // Set the direction (RTL or LTR)
+    document.documentElement.lang = language; // Set the language attribute
+    i18n.changeLanguage(language); // Update i18n language
+  }, [language, i18n]);
 
   const handleThemeChange = (newMode: "light" | "dark" | "system") => {
     dispatch(setThemeMode(newMode));
@@ -73,13 +79,13 @@ const SettingsPage: React.FC = () => {
   ];
 
   return (
-    <div className="space-y-6">
+    <div className={`space-y-6 ${language === "ar" ? "rtl" : "ltr"}`}>
       <div>
         <h1 className="text-3xl font-bold">{t("settings.title")}</h1>
         <p className="text-muted-foreground">{t("settings.description")}</p>
       </div>
 
-      <Tabs defaultValue="general" className="space-y-4">
+      <Tabs dir={language === "ar" ? "rtl" : "ltr"} defaultValue="general" className="space-y-4">
         <TabsList className="grid w-full grid-cols-6">
           <TabsTrigger value="general">{t("settings.tabs.general")}</TabsTrigger>
           <TabsTrigger value="appearance">{t("settings.tabs.appearance")}</TabsTrigger>
