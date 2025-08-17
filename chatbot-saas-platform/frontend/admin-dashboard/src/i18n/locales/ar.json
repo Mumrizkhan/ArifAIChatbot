@@ -109,6 +109,11 @@
   },
   "tenants": {
     "title": "المستأجرين",
+    "customDomain": "النطاق المخصص",
+    "primaryColor": "اللون الأساسي",
+    "secondaryColor": "اللون الثانوي",
+    "defaultLanguage": "اللغة الافتراضية",
+    "isRtlEnabled": "تفعيل RTL",
     "description": "إدارة حسابات المستأجرين والاشتراكات",
     "createTenant": "إنشاء مستأجر",
     "editTenant": "تعديل المستأجر",
@@ -123,6 +128,7 @@
     "actions": "الإجراءات",
     "subscriptionPlan": "خطة الاشتراك",
     "searchPlaceholder": "البحث عن المستأجرين...",
+
     "status": {
       "label": "الحالة",
       "active": "نشط",
