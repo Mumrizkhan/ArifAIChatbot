@@ -40,7 +40,7 @@ steps:
       publishWebProjects: false
       projects: 'chatbot-saas-platform/backend/src/IdentityService/IdentityService.csproj'
       arguments: '--configuration $(buildConfiguration) --output $(outputDir)'
-      zipAfterPublish: false
+      zipAfterPublish: true
 
   - task: PublishBuildArtifacts@1
     displayName: 'Publish build artifact'
