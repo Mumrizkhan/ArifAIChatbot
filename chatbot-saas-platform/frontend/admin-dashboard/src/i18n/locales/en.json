@@ -455,15 +455,15 @@
     },
     "notifications": {
       "title": "Notifications",
-      "description": "Configure how you receive notifications",
-      "email": "Email Notifications",
-      "emailDescription": "Receive notifications via email",
-      "push": "Push Notifications",
-      "pushDescription": "Receive push notifications in your browser",
-      "sms": "SMS Notifications",
-      "smsDescription": "Receive notifications via SMS",
-      "inApp": "In-App Notifications",
-      "inAppDescription": "Show notifications within the application"
+      "noNotifications": "No notifications at this time",
+      "clearAll": "Clear All",
+      "tenant": "Tenant",
+      "types": {
+        "error": "Error",
+        "warning": "Warning",
+        "success": "Success",
+        "info": "Info"
+      }
     },
     "integrations": {
       "title": "Integrations",
