@@ -168,6 +168,14 @@ export class ChatbotService {
     return apiClient.upload<{ imported: number; failed: number }>('/chatbot/knowledge-base/import', formData);
   }
 
+  // Upload knowledge base document
+  static async uploadKnowledgeBaseDocument(configId: string, file: File): Promise<ApiResponse<{ message: string }>> {
+    const formData = new FormData();
+    formData.append('configId', configId);
+    formData.append('file', file);
+    return apiClient.upload<{ message: string }>(`/api/ChatbotConfigs/${configId}/knowledge-base/documents`, formData);
+  }
+
   static async exportKnowledgeBase(format: 'csv' | 'json' = 'csv'): Promise<ApiResponse<{ downloadUrl: string }>> {
     return apiClient.get<{ downloadUrl: string }>('/chatbot/knowledge-base/export', { format });
   }
