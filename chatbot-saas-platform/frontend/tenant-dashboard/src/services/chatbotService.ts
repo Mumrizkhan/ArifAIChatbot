@@ -225,7 +225,7 @@ export class ChatbotService {
 
   // Test chatbot - using ChatRuntimeService for actual chat functionality
   static async testChatbot(message: string): Promise<ApiResponse<{ response: string; confidence: number }>> {
-    return apiClient.post<{ response: string; confidence: number }>('/chat/messages', { 
+    return apiClient.post<{ response: string; confidence: number }>('/chat/chat/messages', { 
       content: message,
       type: 'text'
     });
