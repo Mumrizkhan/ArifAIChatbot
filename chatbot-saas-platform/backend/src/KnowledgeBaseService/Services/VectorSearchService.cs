@@ -27,8 +27,9 @@ public class VectorSearchService : IVectorSearchService
         
         var host = _configuration["Qdrant:Host"] ?? "localhost";
         var port = int.Parse(_configuration["Qdrant:Port"] ?? "6334");
+        var apiKey = _configuration["Qdrant:ApiKey"] ?? "";
         
-        _qdrantClient = new QdrantClient(host, port, https: false);
+        _qdrantClient = new QdrantClient(host, port, https: false, apiKey);
     }
 
     public async Task<List<DocumentSearchResult>> SearchSimilarDocumentsAsync(DocumentSearchRequest request, Guid tenantId)

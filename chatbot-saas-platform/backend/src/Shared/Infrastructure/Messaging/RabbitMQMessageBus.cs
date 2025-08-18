@@ -32,11 +32,11 @@ public class RabbitMQMessageBus : IMessageBus, IDisposable
         {
             var factory = new ConnectionFactory()
             {
-                HostName = configuration.GetConnectionString("RabbitMQ:Host") ?? "localhost",
-                Port = int.Parse(configuration.GetConnectionString("RabbitMQ:Port") ?? "5672"),
-                UserName = configuration.GetConnectionString("RabbitMQ:Username") ?? "guest",
-                Password = configuration.GetConnectionString("RabbitMQ:Password") ?? "guest",
-                VirtualHost = configuration.GetConnectionString("RabbitMQ:VirtualHost") ?? "/",
+                HostName = configuration.GetValue<string>("RabbitMQ:Host") ?? "localhost",
+                Port = int.Parse(configuration.GetValue<string>("RabbitMQ:Port") ?? "5672"),
+                UserName = configuration.GetValue<string>("RabbitMQ:Username") ?? "guest",
+                Password = configuration.GetValue<string>("RabbitMQ:Password") ?? "guest",
+                VirtualHost = configuration.GetValue<string>("RabbitMQ:VirtualHost") ?? "/",
                 AutomaticRecoveryEnabled = true,
                 NetworkRecoveryInterval = TimeSpan.FromSeconds(10)
             };
