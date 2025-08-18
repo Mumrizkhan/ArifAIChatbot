@@ -7,6 +7,7 @@
     "dev": "vite --open /dev.html",
     "build": "tsc -b && vite build",
     "lint": "eslint .",
+    "staging": "vite preview --open /index.html",
     "preview": "vite preview"
   },
   "dependencies": {
