@@ -1,30 +1,25 @@
 import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
-import path from "path";
+import { resolve } from "path";
 
-export default defineConfig(({ mode }) => ({
+export default defineConfig(() => ({
   plugins: [react()],
-  server: {
-    host: "0.0.0.0",
-    port: 5176,
-    strictPort: true,
-  },
   build: {
+    outDir: "dist",
+    // library mode -> no HTML files generated
     lib: {
-      entry: "src/widget.ts",
+      entry: resolve(__dirname, "src/widget.ts"),
       name: "ChatbotWidget",
       formats: ["umd", "es"],
-      fileName: (f) => (f === "umd" ? "arif-chat-widget.min.js" : "arif-chat-widget.es.js"),
+      fileName: (format) => (format === "umd" ? "arif-chat-widget.min.js" : "arif-chat-widget.es.js"),
     },
-    cssCodeSplit: false,
+    cssCodeSplit: true,
+    emptyOutDir: true,
     rollupOptions: {
-      input: mode === "production" ? path.resolve(__dirname, "index.html") : path.resolve(__dirname, "dev.html"), // Dynamically set entry point
       output: {
-        assetFileNames: (asset) => (asset.name && asset.name.endsWith(".css") ? "arif-chat-widget.css" : asset.name || "asset.[ext]"),
+        // ensure CSS gets a predictable name
+        assetFileNames: (assetInfo) => (assetInfo.name && assetInfo.name.endsWith(".css") ? "arif-chat-widget.css" : "asset.[ext]"),
       },
     },
-  },
-  server: {
-    open: mode === "development" ? "/dev.html" : "/index.html", // Automatically open the correct entry point
   },
 }));
