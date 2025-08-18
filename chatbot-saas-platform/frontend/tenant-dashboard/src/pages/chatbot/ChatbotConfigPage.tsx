@@ -155,8 +155,8 @@ const ChatbotConfigPage = () => {
     }
 
     try {
-      const { ChatbotWidget } = await import('http://localhost:5173/src/widget.ts') as any;
-      const widget = new ChatbotWidget();
+      const widgetModule = await import('http://localhost:5173/src/widget.ts') as any;
+      const widget = new widgetModule.ChatbotWidget();
       const formData = watch();
       
       await widget.init({
