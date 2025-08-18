@@ -1,8 +1,10 @@
 import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
 import { resolve } from "path";
+import { existsSync, unlinkSync } from "fs";
 
 export default defineConfig(() => ({
+  base: "./", // use relative paths so root/index.html can reference ./dist/...
   plugins: [react()],
   build: {
     outDir: "dist",
@@ -21,5 +23,15 @@ export default defineConfig(() => ({
         assetFileNames: (assetInfo) => (assetInfo.name && assetInfo.name.endsWith(".css") ? "arif-chat-widget.css" : "asset.[ext]"),
       },
     },
+  },
+  // remove demo.html if Vite unexpectedly produces it
+  buildEnd() {
+    const demo = resolve(__dirname, "dist/demo.html");
+    if (existsSync(demo)) {
+      try {
+        unlinkSync(demo);
+        console.log("Removed dist/demo.html");
+      } catch {}
+    }
   },
 }));

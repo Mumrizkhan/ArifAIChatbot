@@ -11,7 +11,6 @@ class SignalRService {
   async connect(tenantId: string, authToken: string, conversationId?: string): Promise<boolean> {
     try {
       store.dispatch(setConnectionStatus("connecting"));
-      console.log(this.hubUrl, "this.hubUrl,");
 
       this.connection = new HubConnectionBuilder()
         .withUrl(this.hubUrl, {

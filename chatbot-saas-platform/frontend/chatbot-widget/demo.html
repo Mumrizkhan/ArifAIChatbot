@@ -85,8 +85,8 @@
                 const widget = new ChatbotWidget();
                 widget.init({
                 tenantId: 'demo-tenant',
-                apiUrl: 'http://localhost:8000',
-                websocketUrl: 'ws://localhost:8000/chatHub'
+                apiUrl: 'https://api-stg-arif.tetco.sa',
+                websocketUrl: 'ws:https://api-stg-arif.tetco.sa/chatHub'
                 });
             </div>
         </div>
@@ -96,7 +96,7 @@
             <div class="demo-code">
                 &lt;script
                 src="./arif-chat-widget.umd.js"
-                data-chatbot-config='{"tenantId":"demo-tenant","apiUrl":"http://localhost:8000"}'&gt;
+                data-chatbot-config='{"tenantId":"demo-tenant","apiUrl":"https://api-stg-arif.tetco.sa"}'&gt;
                 &lt;/script&gt;
             </div>
         </div>
@@ -136,7 +136,7 @@
                 const widget = new window.ArifChatWidget.ChatbotWidget();
                 widget.init({
                     tenantId: 'demo-tenant-iife',
-                    apiUrl: 'http://localhost:8000',
+                    apiUrl: 'https://api-stg-arif.tetco.sa',
                     websocketUrl: 'ws://localhost:8000/chatHub',
                     theme: {
                         primaryColor: '#28a745',

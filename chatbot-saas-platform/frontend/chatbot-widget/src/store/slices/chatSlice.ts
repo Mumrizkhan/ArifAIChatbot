@@ -1,6 +1,6 @@
 import { createSlice, createAsyncThunk, PayloadAction } from "@reduxjs/toolkit";
 import { apiClient } from "../../services/apiClient";
-const VITE_API_URL = import.meta.env.VITE_API_URL || "http://localhost:8000";
+const VITE_API_URL = import.meta.env.VITE_API_URL || "https://api-stg-arif.tetco.sa";
 export interface Message {
   id: string;
   content: string;
