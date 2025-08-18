@@ -31,7 +31,6 @@ import {
   FileText,
   Zap,
   Globe,
-  Send,
 } from 'lucide-react';
 import {
   Dialog,
@@ -46,6 +45,7 @@ const ChatbotConfigPage = () => {
   const { t } = useTranslation();
   const dispatch = useDispatch<AppDispatch>();
   const { configs, isLoading } = useSelector((state: RootState) => state.chatbot);
+  const { user } = useSelector((state: RootState) => state.auth);
   const config = configs && configs.length > 0 ? configs[0] : null;
   const isCreateMode = !config;
   const [activeTab, setActiveTab] = useState('personality');
@@ -53,9 +53,7 @@ const ChatbotConfigPage = () => {
   const [uploadError, setUploadError] = useState<string | null>(null);
   const [uploadSuccess, setUploadSuccess] = useState<string | null>(null);
   const [isTestModalOpen, setIsTestModalOpen] = useState(false);
-  const [testMessages, setTestMessages] = useState<Array<{id: string, content: string, sender: 'user' | 'bot', timestamp: Date}>>([]);
-  const [testInput, setTestInput] = useState('');
-  const [isTesting, setIsTesting] = useState(false);
+  const [widgetInstance, setWidgetInstance] = useState<unknown>(null);
 
   const { register, handleSubmit, setValue, watch, formState: { errors } } = useForm({
     defaultValues: {
@@ -146,58 +144,61 @@ const ChatbotConfigPage = () => {
     }
   };
 
-  const handleTestChatbot = async (message: string) => {
-    if (!message.trim()) return;
-
-    setIsTesting(true);
-    
-    const userMessage = {
-      id: `user_${Date.now()}`,
-      content: message,
-      sender: 'user' as const,
-      timestamp: new Date()
-    };
-    setTestMessages(prev => [...prev, userMessage]);
-    setTestInput('');
-
-    try {
-      const response = await ChatbotService.testChatbot(message);
-      
-      if (response.success) {
-        const botMessage = {
-          id: `bot_${Date.now()}`,
-          content: response.data.response,
-          sender: 'bot' as const,
-          timestamp: new Date()
-        };
-        setTestMessages(prev => [...prev, botMessage]);
-      } else {
-        const errorMessage = {
-          id: `bot_${Date.now()}`,
-          content: 'Sorry, I encountered an error while processing your message. Please try again.',
-          sender: 'bot' as const,
-          timestamp: new Date()
-        };
-        setTestMessages(prev => [...prev, errorMessage]);
+  const initializeWidget = () => {
+    if (typeof window !== 'undefined' && (window as unknown as { ChatbotWidget?: unknown }).ChatbotWidget && user?.tenantId) {
+      if (widgetInstance) {
+        (widgetInstance as { destroy: () => void }).destroy();
       }
-    } catch (error) {
-      console.error('Test chatbot error:', error);
-      const errorMessage = {
-        id: `bot_${Date.now()}`,
-        content: 'Sorry, I encountered an error while processing your message. Please try again.',
-        sender: 'bot' as const,
-        timestamp: new Date()
-      };
-      setTestMessages(prev => [...prev, errorMessage]);
-    } finally {
-      setIsTesting(false);
+
+      const widget = new ((window as unknown as { ChatbotWidget: new () => { init: (config: unknown) => void } }).ChatbotWidget)();
+      const formData = watch();
+      
+      widget.init({
+        tenantId: user.tenantId,
+        apiUrl: 'http://localhost:8000',
+        websocketUrl: 'ws://localhost:8000/chatHub',
+        authToken: localStorage.getItem('token'),
+        theme: {
+          primaryColor: '#007bff',
+          position: 'bottom-right',
+          size: 'medium',
+          animation: 'slide'
+        },
+        branding: {
+          companyName: formData.name || 'Test Chatbot',
+          welcomeMessage: formData.welcomeMessage || 'Hello! How can I help you today?',
+          placeholderText: 'Type your message...'
+        },
+        language: formData.language || 'en',
+        features: {
+          fileUpload: true,
+          typing: formData.enableTypingIndicator,
+          readReceipts: true,
+          agentHandoff: true,
+          conversationRating: true,
+          conversationTranscript: true
+        },
+        behavior: {
+          autoOpen: true,
+          showWelcomeMessage: true,
+          persistConversation: false,
+          maxFileSize: 10485760,
+          allowedFileTypes: ['.pdf', '.docx', '.txt', '.md']
+        }
+      });
+      
+      setWidgetInstance(widget);
+      console.log('✅ TestBot widget initialized');
+    } else {
+      console.error('❌ ChatbotWidget not available or missing tenant context');
     }
   };
 
-  const handleTestSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (testInput.trim() && !isTesting) {
-      handleTestChatbot(testInput);
+  const destroyWidget = () => {
+    if (widgetInstance) {
+      (widgetInstance as { destroy: () => void }).destroy();
+      setWidgetInstance(null);
+      console.log('✅ TestBot widget destroyed');
     }
   };
 
@@ -223,18 +224,21 @@ const ChatbotConfigPage = () => {
         }
 
         if (file.size > 10 * 1024 * 1024) {
-          throw new Error(`File ${file.name} exceeds 10MB size limit`);
+          throw new Error(`File ${file.name} is too large. Maximum size is 10MB.`);
         }
 
-        return ChatbotService.uploadKnowledgeBaseDocument(config.id, file);
+        const response = await ChatbotService.uploadKnowledgeBaseDocument(config.id, file);
+        if (!response.success) {
+          throw new Error(`Failed to upload ${file.name}: Unknown error`);
+        }
+        return response;
       });
 
       await Promise.all(uploadPromises);
-      setUploadSuccess(`Successfully uploaded ${files.length} file(s) to knowledge base`);
-      
-      event.target.value = '';
-    } catch (error: unknown) {
-      setUploadError((error as Error).message || 'Failed to upload files');
+      setUploadSuccess(`Successfully uploaded ${files.length} file(s) to knowledge base.`);
+    } catch (error) {
+      console.error('Upload error:', error);
+      setUploadError(error instanceof Error ? error.message : 'Failed to upload files. Please try again.');
     } finally {
       setIsUploading(false);
     }
@@ -243,29 +247,23 @@ const ChatbotConfigPage = () => {
   const knowledgeBaseStats = {
     totalDocuments: 0,
     totalWords: 0,
-    lastUpdated: null,
+    lastUpdated: null
   };
 
-  if (isLoading && !config) {
+  if (isLoading) {
     return (
       <div className="space-y-6">
         <div className="flex items-center justify-between">
-          <Skeleton className="h-8 w-[200px]" />
-          <Skeleton className="h-10 w-[120px]" />
+          <div>
+            <Skeleton className="h-8 w-64" />
+            <Skeleton className="h-4 w-96 mt-2" />
+          </div>
+          <div className="flex space-x-2">
+            <Skeleton className="h-10 w-24" />
+            <Skeleton className="h-10 w-24" />
+          </div>
         </div>
-        <Card>
-          <CardHeader>
-            <Skeleton className="h-6 w-[150px]" />
-            <Skeleton className="h-4 w-[300px]" />
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-4">
-              {[...Array(5)].map((_, i) => (
-                <Skeleton key={i} className="h-10 w-full" />
-              ))}
-            </div>
-          </CardContent>
-        </Card>
+        <Skeleton className="h-96 w-full" />
       </div>
     );
   }
@@ -274,92 +272,52 @@ const ChatbotConfigPage = () => {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold">
-            {isCreateMode ? t('chatbot.createTitle') || 'Create Chatbot' : t('chatbot.title')}
+          <h1 className="text-3xl font-bold tracking-tight">
+            {isCreateMode ? t('chatbot.createChatbot') || 'Create Chatbot' : t('chatbot.configuration')}
           </h1>
           <p className="text-muted-foreground">
             {isCreateMode 
-              ? t('chatbot.createSubtitle') || 'Set up your first AI chatbot configuration'
-              : t('chatbot.subtitle')
+              ? 'Set up your first chatbot configuration to get started'
+              : t('chatbot.configurationDesc')
             }
           </p>
         </div>
         <div className="flex space-x-2">
           {!isCreateMode && (
-            <Dialog open={isTestModalOpen} onOpenChange={setIsTestModalOpen}>
+            <Dialog open={isTestModalOpen} onOpenChange={(open) => {
+              setIsTestModalOpen(open);
+              if (open) {
+                setTimeout(initializeWidget, 100);
+              } else {
+                destroyWidget();
+              }
+            }}>
               <DialogTrigger asChild>
                 <Button variant="outline">
                   <RefreshCw className="mr-2 h-4 w-4" />
                   {t('chatbot.testBot')}
                 </Button>
               </DialogTrigger>
-              <DialogContent className="max-w-2xl max-h-[80vh] flex flex-col">
-                <DialogHeader>
+              <DialogContent className="max-w-4xl max-h-[90vh] p-0 overflow-hidden">
+                <DialogHeader className="p-6 pb-0">
                   <DialogTitle>Test Chatbot</DialogTitle>
                   <DialogDescription>
-                    Test your chatbot configuration with live messages. This uses your current form settings.
+                    Testing your chatbot with the actual widget. This provides an authentic experience of how users will interact with your chatbot.
                   </DialogDescription>
                 </DialogHeader>
                 
-                <div className="flex-1 flex flex-col min-h-0">
-                  <div className="flex-1 overflow-y-auto border rounded-lg p-4 mb-4 bg-gray-50 dark:bg-gray-900 min-h-[300px]">
-                    {testMessages.length === 0 ? (
-                      <div className="flex items-center justify-center h-full text-gray-500">
-                        <div className="text-center">
-                          <MessageSquare className="mx-auto h-12 w-12 mb-2 opacity-50" />
-                          <p>Start a conversation to test your chatbot</p>
-                        </div>
-                      </div>
-                    ) : (
-                      <div className="space-y-4">
-                        {testMessages.map((message) => (
-                          <div
-                            key={message.id}
-                            className={`flex ${message.sender === 'user' ? 'justify-end' : 'justify-start'}`}
-                          >
-                            <div
-                              className={`max-w-[80%] rounded-lg px-4 py-2 ${
-                                message.sender === 'user'
-                                  ? 'bg-blue-500 text-white'
-                                  : 'bg-white dark:bg-gray-800 border'
-                              }`}
-                            >
-                              <p className="text-sm">{message.content}</p>
-                              <p className={`text-xs mt-1 opacity-70 ${
-                                message.sender === 'user' ? 'text-blue-100' : 'text-gray-500'
-                              }`}>
-                                {message.timestamp.toLocaleTimeString()}
-                              </p>
-                            </div>
-                          </div>
-                        ))}
-                        {isTesting && (
-                          <div className="flex justify-start">
-                            <div className="bg-white dark:bg-gray-800 border rounded-lg px-4 py-2">
-                              <div className="flex items-center space-x-1">
-                                <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce"></div>
-                                <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{animationDelay: '0.1s'}}></div>
-                                <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{animationDelay: '0.2s'}}></div>
-                              </div>
-                            </div>
-                          </div>
-                        )}
-                      </div>
-                    )}
+                <div className="p-6 pt-4">
+                  <div className="bg-gray-50 dark:bg-gray-900 rounded-lg p-4 min-h-[500px] relative">
+                    <div className="text-center text-gray-500 text-sm">
+                      <MessageSquare className="mx-auto h-8 w-8 mb-2 opacity-50" />
+                      <p>The chatbot widget will appear here when initialized.</p>
+                      <p className="text-xs mt-1">Look for the chat button in the bottom-right corner of this area.</p>
+                    </div>
                   </div>
                   
-                  <form onSubmit={handleTestSubmit} className="flex space-x-2">
-                    <Input
-                      value={testInput}
-                      onChange={(e) => setTestInput(e.target.value)}
-                      placeholder="Type your message..."
-                      disabled={isTesting}
-                      className="flex-1"
-                    />
-                    <Button type="submit" disabled={isTesting || !testInput.trim()}>
-                      <Send className="h-4 w-4" />
-                    </Button>
-                  </form>
+                  <div className="mt-4 text-xs text-gray-500 text-center">
+                    <p>💡 This uses your current form settings and provides the same experience as your website visitors.</p>
+                  </div>
                 </div>
               </DialogContent>
             </Dialog>
