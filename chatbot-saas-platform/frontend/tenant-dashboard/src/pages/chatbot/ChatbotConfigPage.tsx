@@ -144,16 +144,22 @@ const ChatbotConfigPage = () => {
     }
   };
 
-  const initializeWidget = () => {
-    if (typeof window !== 'undefined' && (window as unknown as { ChatbotWidget?: unknown }).ChatbotWidget && user?.tenantId) {
-      if (widgetInstance) {
-        (widgetInstance as { destroy: () => void }).destroy();
-      }
+  const initializeWidget = async () => {
+    if (!user?.tenantId) {
+      console.error('❌ Missing tenant context');
+      return;
+    }
 
-      const widget = new ((window as unknown as { ChatbotWidget: new () => { init: (config: unknown) => void } }).ChatbotWidget)();
+    if (widgetInstance) {
+      (widgetInstance as { destroy: () => void }).destroy();
+    }
+
+    try {
+      const { ChatbotWidget } = await import('http://localhost:5173/src/widget.ts') as any;
+      const widget = new ChatbotWidget();
       const formData = watch();
       
-      widget.init({
+      await widget.init({
         tenantId: user.tenantId,
         apiUrl: 'http://localhost:8000',
         websocketUrl: 'ws://localhost:8000/chatHub',
@@ -189,8 +195,8 @@ const ChatbotConfigPage = () => {
       
       setWidgetInstance(widget);
       console.log('✅ TestBot widget initialized');
-    } else {
-      console.error('❌ ChatbotWidget not available or missing tenant context');
+    } catch (e) {
+      console.error('❌ Failed to load or initialize ChatbotWidget:', e);
     }
   };
 
