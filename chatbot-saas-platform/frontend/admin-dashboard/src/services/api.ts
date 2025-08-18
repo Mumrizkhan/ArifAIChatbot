@@ -223,7 +223,7 @@ export const subscriptionApi = {
   },
 
   getBillingStats: async () => {
-    return apiClient.get<any>("/subscription/billing/stats");
+    return apiClient.get<any>("subscription/subscriptions/billing/stats");
   },
 };
 

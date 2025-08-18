@@ -14,10 +14,10 @@ import { XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, LineChart, L
 import { Plus, Search, DollarSign, Users, TrendingUp, CreditCard, CheckCircle, XCircle, Clock, Calendar, Download } from "lucide-react";
 
 const SubscriptionsPage: React.FC = () => {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const dispatch = useDispatch<AppDispatch>();
   const { plans, subscriptions, billingStats, isLoading, error } = useSelector((state: RootState) => state.subscription);
-
+  const direction = i18n.language === "ar" ? "rtl" : "ltr";
   useEffect(() => {
     dispatch(fetchPlans());
     dispatch(fetchSubscriptions({ page: 1, pageSize: 20 }));
@@ -277,7 +277,7 @@ const SubscriptionsPage: React.FC = () => {
         />
       </div>
 
-      <Tabs defaultValue="overview" className="space-y-4">
+      <Tabs defaultValue="overview" className="space-y-4" dir={direction}>
         <TabsList>
           <TabsTrigger value="overview">{t("subscriptions.tabs.overview")}</TabsTrigger>
           <TabsTrigger value="plans">{t("subscriptions.tabs.plans")}</TabsTrigger>

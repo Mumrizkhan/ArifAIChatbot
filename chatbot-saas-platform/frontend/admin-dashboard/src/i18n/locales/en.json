@@ -1,6 +1,7 @@
 {
   "common": {
     "loading": "Loading...",
+    "saving": "Saving...",
     "error": "Error",
     "success": "Success",
     "cancel": "Cancel",
@@ -108,6 +109,11 @@
   },
   "tenants": {
     "title": "Tenants",
+    "customDomain": "Custom Domain",
+    "primaryColor": "Primary Color",
+    "secondaryColor": "Secondary Color",
+    "defaultLanguage": "Default Language",
+    "isRtlEnabled": "Is RTL Enabled",
     "description": "Manage tenant accounts and subscriptions",
     "createTenant": "Create Tenant",
     "editTenant": "Edit Tenant",
@@ -375,6 +381,10 @@
     }
   },
   "settings": {
+    "theme": "Theme",
+    "lightMode": "Light",
+    "darkMode": "Dark",
+    "systemMode": "System Mode",
     "language": "Language",
     "title": "Settings",
     "description": "Manage your application settings and preferences",
@@ -445,15 +455,15 @@
     },
     "notifications": {
       "title": "Notifications",
-      "description": "Configure how you receive notifications",
-      "email": "Email Notifications",
-      "emailDescription": "Receive notifications via email",
-      "push": "Push Notifications",
-      "pushDescription": "Receive push notifications in your browser",
-      "sms": "SMS Notifications",
-      "smsDescription": "Receive notifications via SMS",
-      "inApp": "In-App Notifications",
-      "inAppDescription": "Show notifications within the application"
+      "noNotifications": "No notifications at this time",
+      "clearAll": "Clear All",
+      "tenant": "Tenant",
+      "types": {
+        "error": "Error",
+        "warning": "Warning",
+        "success": "Success",
+        "info": "Info"
+      }
     },
     "integrations": {
       "title": "Integrations",
@@ -508,11 +518,5 @@
       "orange": "Orange",
       "pink": "Pink"
     }
-  },
-  "common": {
-    "save": "Save",
-    "saving": "Saving...",
-    "reset": "Reset",
-    "error": "Error"
   }
 }

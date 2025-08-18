@@ -23,16 +23,21 @@ import { Skeleton } from "../../components/ui/skeleton";
 import { Plus, Search, MoreHorizontal, Edit, Trash2, Building2, Users, MessageSquare, Calendar } from "lucide-react";
 
 const TenantsPage: React.FC = () => {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const dispatch = useDispatch<AppDispatch>();
   const { tenants, isLoading, currentPage, pageSize } = useSelector((state: RootState) => state.tenant);
-
+  const direction = i18n.language === "ar" ? "rtl" : "ltr";
   const [searchTerm, setSearchTerm] = useState("");
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
   const [editingTenant, setEditingTenant] = useState<any>(null);
   const [newTenant, setNewTenant] = useState({
     name: "",
-    domain: "",
+    subdomain: "",
+    customDomain: "",
+    primaryColor: "",
+    secondaryColor: "",
+    defaultLanguage: "en",
+    isRtlEnabled: false,
     status: "Active" as "Active" | "Inactive" | "Suspended",
     subscriptionPlan: "Basic",
   });
@@ -45,7 +50,17 @@ const TenantsPage: React.FC = () => {
     try {
       await dispatch(createTenant(newTenant)).unwrap();
       setIsCreateDialogOpen(false);
-      setNewTenant({ name: "", domain: "", status: "Active" as "Active" | "Inactive" | "Suspended", subscriptionPlan: "Basic" });
+      setNewTenant({
+        name: "",
+        subdomain: "",
+        customDomain: "",
+        primaryColor: "",
+        secondaryColor: "",
+        defaultLanguage: "en",
+        isRtlEnabled: false,
+        status: "Active" as "Active" | "Inactive" | "Suspended",
+        subscriptionPlan: "Basic",
+      });
     } catch (error) {
       console.error("Failed to create tenant:", error);
     }
@@ -110,7 +125,7 @@ const TenantsPage: React.FC = () => {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6" dir={direction}>
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold">{t("tenants.title")}</h1>
@@ -145,10 +160,73 @@ const TenantsPage: React.FC = () => {
                   {t("tenants.domain")}
                 </Label>
                 <Input
-                  id="domain"
-                  value={newTenant.domain}
-                  onChange={(e) => setNewTenant({ ...newTenant, domain: e.target.value })}
+                  id="subdomain"
+                  value={newTenant.subdomain}
+                  onChange={(e) => setNewTenant({ ...newTenant, subdomain: e.target.value })}
                   className="col-span-3"
+                />
+              </div>
+              <div className="grid grid-cols-4 items-center gap-4">
+                <Label htmlFor="customDomain" className="text-right">
+                  {t("tenants.customDomain")}
+                </Label>
+                <Input
+                  id="customDomain"
+                  value={newTenant.customDomain}
+                  onChange={(e) => setNewTenant({ ...newTenant, customDomain: e.target.value })}
+                  className="col-span-3"
+                />
+              </div>
+              <div className="grid grid-cols-4 items-center gap-4">
+                <Label htmlFor="primaryColor" className="text-right">
+                  {t("tenants.primaryColor")}
+                </Label>
+                <Input
+                  id="primaryColor"
+                  type="color"
+                  value={newTenant.primaryColor}
+                  onChange={(e) => setNewTenant({ ...newTenant, primaryColor: e.target.value })}
+                  className="col-span-3 h-10 w-16 p-0 border-none bg-transparent"
+                  style={{ minWidth: "60px" }}
+                />
+              </div>
+              <div className="grid grid-cols-4 items-center gap-4">
+                <Label htmlFor="secondaryColor" className="text-right">
+                  {t("tenants.secondaryColor")}
+                </Label>
+                <Input
+                  id="secondaryColor"
+                  type="color"
+                  value={newTenant.secondaryColor}
+                  onChange={(e) => setNewTenant({ ...newTenant, secondaryColor: e.target.value })}
+                  className="col-span-3 h-10 w-16 p-0 border-none bg-transparent"
+                  style={{ minWidth: "60px" }}
+                />
+              </div>
+              <div className="grid grid-cols-4 items-center gap-4">
+                <Label htmlFor="defaultLanguage" className="text-right">
+                  {t("tenants.defaultLanguage")}
+                </Label>
+                <Select value={newTenant.defaultLanguage} onValueChange={(value) => setNewTenant({ ...newTenant, defaultLanguage: value })}>
+                  <SelectTrigger className="col-span-3">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="en">{t("language.english")}</SelectItem>
+                    <SelectItem value="ar">{t("language.arabic")}</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="grid grid-cols-4 items-center gap-4">
+                <Label htmlFor="isRtlEnabled" className="text-right">
+                  {t("tenants.isRtlEnabled")}
+                </Label>
+                <Input
+                  type="checkbox"
+                  id="isRtlEnabled"
+                  checked={newTenant.isRtlEnabled}
+                  onChange={(e) => setNewTenant({ ...newTenant, isRtlEnabled: e.target.checked })}
+                  className="col-span-3 h-5 w-5 accent-primary"
                 />
               </div>
               <div className="grid grid-cols-4 items-center gap-4">
@@ -216,23 +294,24 @@ const TenantsPage: React.FC = () => {
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>{t("tenants.tenantName")}</TableHead>
-                <TableHead>{t("tenants.domain")}</TableHead>
-                <TableHead>{t("tenants.status.label")}</TableHead>
-                <TableHead>{t("tenants.subscriptionPlan")}</TableHead>
-                <TableHead>{t("tenants.userCount")}</TableHead>
-                <TableHead>{t("tenants.conversationCount")}</TableHead>
-                <TableHead>{t("tenants.createdAt")}</TableHead>
-                <TableHead>{t("tenants.actions")}</TableHead>
+                <TableHead className={direction === "rtl" ? "text-right" : "text-left"}>{t("tenants.tenantName")}</TableHead>
+                <TableHead className={direction === "rtl" ? "text-right" : "text-left"}>{t("tenants.domain")}</TableHead>
+                <TableHead className={direction === "rtl" ? "text-right" : "text-left"}>{t("tenants.status.label")}</TableHead>
+                <TableHead className={direction === "rtl" ? "text-right" : "text-left"}>{t("tenants.subscriptionPlan")}</TableHead>
+                <TableHead className={direction === "rtl" ? "text-right" : "text-left"}>{t("tenants.userCount")}</TableHead>
+                <TableHead className={direction === "rtl" ? "text-right" : "text-left"}>{t("tenants.conversationCount")}</TableHead>
+                <TableHead className={direction === "rtl" ? "text-right" : "text-left"}>{t("tenants.createdAt")}</TableHead>
+                <TableHead className={direction === "rtl" ? "text-right" : "text-left"}>{t("tenants.actions")}</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {tenants.map((tenant) => (
                 <TableRow key={tenant.id}>
                   <TableCell className="font-medium">{tenant.name}</TableCell>
-                  <TableCell>{tenant.domain}</TableCell>
+                  <TableCell>{tenant.subdomain}</TableCell>
                   <TableCell>{getStatusBadge(tenant.status)}</TableCell>
-                  <TableCell>{t(`tenants.plans.${tenant.subscriptionPlan?.toLowerCase()}`)}</TableCell>
+                  {/* <TableCell>{t(`tenants.plans.${tenant.subscriptionPlan?.toLowerCase()}`)}</TableCell> */}
+                  <TableCell>{t(`tenants.subscriptionPlan`)}</TableCell>
                   <TableCell>
                     <div className="flex items-center">
                       <Users className="mr-1 h-4 w-4" />

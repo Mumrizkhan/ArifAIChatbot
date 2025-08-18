@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -11,20 +12,23 @@
             padding: 20px;
             background-color: #f5f5f5;
         }
+
         .container {
             max-width: 800px;
             margin: 0 auto;
             background: white;
             padding: 20px;
             border-radius: 8px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
         }
+
         .test-section {
             margin: 20px 0;
             padding: 15px;
             border: 1px solid #ddd;
             border-radius: 5px;
         }
+
         .test-button {
             background: #007bff;
             color: white;
@@ -34,19 +38,21 @@
             cursor: pointer;
             margin: 5px;
         }
+
         .test-button:hover {
             background: #0056b3;
         }
     </style>
 </head>
+
 <body>
     <div class="container">
         <h1>Arif Chat Widget Test Page</h1>
-        
+
         <div class="test-section">
             <h3>Widget Configuration Test</h3>
             <p>Testing different widget configurations and features:</p>
-            
+
             <button class="test-button" onclick="initializeWidget()">Initialize Widget</button>
             <button class="test-button" onclick="toggleLanguage()">Toggle Language (EN/AR)</button>
             <button class="test-button" onclick="changeTheme()">Change Theme</button>
@@ -66,7 +72,7 @@
 
     <!-- Load the widget script -->
     <script src="http://localhost:5176/src/widget.ts" type="module"></script>
-    
+
     <script>
         let widget = null;
         let currentLanguage = 'en';
@@ -90,13 +96,13 @@
                 // Import the widget class
                 const widgetModule = await import('http://localhost:5176/src/widget.ts');
                 const { ChatbotWidget } = widgetModule;
-                
+
                 widget = new ChatbotWidget();
-                
+
                 const config = {
                     tenantId: '83784EA6-5360-4F3C-843A-1ABD18D72E5D',
-                    apiUrl: 'http://localhost:8000/chat',
-                    websocketUrl: 'ws://localhost:8000/chat/ws',
+                    apiUrl: 'https://api-stg.arif.sa/chat',
+                    websocketUrl: 'wss://api-stg.arif.sa/chat/ws',
                     features: {
                         fileUpload: true,
                         voiceMessages: true,
@@ -126,14 +132,14 @@
                 await widget.init(config);
                 updateStatus('Widget initialized successfully ✓');
                 addTestResult('Widget Initialization', '✓ Success');
-                
+
                 // Test if widget is ready
                 if (widget.isReady()) {
                     addTestResult('Widget Ready Check', '✓ Widget is ready');
                 } else {
                     addTestResult('Widget Ready Check', '✗ Widget not ready');
                 }
-                
+
             } catch (error) {
                 updateStatus('Widget initialization failed: ' + error.message);
                 addTestResult('Widget Initialization', '✗ Failed: ' + error.message);
@@ -149,16 +155,16 @@
 
             try {
                 currentLanguage = currentLanguage === 'en' ? 'ar' : 'en';
-                
+
                 // Update widget config for language
                 widget.updateConfig({
                     language: currentLanguage,
                     rtl: currentLanguage === 'ar'
                 });
-                
+
                 updateStatus(`Language changed to ${currentLanguage.toUpperCase()}`);
                 addTestResult('Language Toggle', `✓ Changed to ${currentLanguage.toUpperCase()}`);
-                
+
                 // Test RTL support
                 if (currentLanguage === 'ar') {
                     document.body.style.direction = 'rtl';
@@ -167,7 +173,7 @@
                     document.body.style.direction = 'ltr';
                     addTestResult('RTL Support', '✓ LTR mode activated');
                 }
-                
+
             } catch (error) {
                 addTestResult('Language Toggle', '✗ Failed: ' + error.message);
                 console.error('Language toggle error:', error);
@@ -182,7 +188,7 @@
 
             try {
                 currentTheme = currentTheme === 'light' ? 'dark' : 'light';
-                
+
                 const themeConfig = {
                     theme: currentTheme,
                     colors: currentTheme === 'dark' ? {
@@ -199,11 +205,11 @@
                         text: '#212529'
                     }
                 };
-                
+
                 widget.updateConfig(themeConfig);
                 updateStatus(`Theme changed to ${currentTheme}`);
                 addTestResult('Theme Change', `✓ Changed to ${currentTheme} theme`);
-                
+
             } catch (error) {
                 addTestResult('Theme Change', '✗ Failed: ' + error.message);
                 console.error('Theme change error:', error);
@@ -221,9 +227,9 @@
                 setTimeout(() => {
                     addTestResult('Proactive Message', '✓ Proactive message system tested');
                 }, 1000);
-                
+
                 updateStatus('Testing proactive message...');
-                
+
             } catch (error) {
                 addTestResult('Proactive Message', '✗ Failed: ' + error.message);
                 console.error('Proactive message error:', error);
@@ -253,4 +259,5 @@
         });
     </script>
 </body>
+
 </html>

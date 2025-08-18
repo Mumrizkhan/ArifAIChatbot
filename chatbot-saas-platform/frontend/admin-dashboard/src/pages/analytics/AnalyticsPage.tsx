@@ -37,7 +37,8 @@ import {
 import { BarChart3, TrendingUp, Users, MessageSquare, Clock, Star, Download, Filter, Calendar, Bot, UserCheck } from "lucide-react";
 
 const AnalyticsPage: React.FC = () => {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
+  const direction = i18n.language === "ar" ? "rtl" : "ltr";
   const dispatch = useDispatch<AppDispatch>();
   const { conversationMetrics, agentMetrics, isLoading, selectedTimeRange, selectedTenant, isSignalRConnected } = useSelector(
     (state: RootState) => state.analytics
@@ -153,7 +154,7 @@ const AnalyticsPage: React.FC = () => {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6" dir={direction}>
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold">{t("analytics.title")}</h1>
@@ -195,7 +196,7 @@ const AnalyticsPage: React.FC = () => {
         </div>
       </div>
 
-      <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4">
+      <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4" dir={direction}>
         <TabsList>
           <TabsTrigger value="conversations">{t("analytics.tabs.conversations")}</TabsTrigger>
           <TabsTrigger value="agents">{t("analytics.tabs.agents")}</TabsTrigger>

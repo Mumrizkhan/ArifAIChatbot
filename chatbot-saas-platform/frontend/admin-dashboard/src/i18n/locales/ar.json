@@ -109,6 +109,11 @@
   },
   "tenants": {
     "title": "المستأجرين",
+    "customDomain": "النطاق المخصص",
+    "primaryColor": "اللون الأساسي",
+    "secondaryColor": "اللون الثانوي",
+    "defaultLanguage": "اللغة الافتراضية",
+    "isRtlEnabled": "تفعيل RTL",
     "description": "إدارة حسابات المستأجرين والاشتراكات",
     "createTenant": "إنشاء مستأجر",
     "editTenant": "تعديل المستأجر",
@@ -123,6 +128,7 @@
     "actions": "الإجراءات",
     "subscriptionPlan": "خطة الاشتراك",
     "searchPlaceholder": "البحث عن المستأجرين...",
+
     "status": {
       "label": "الحالة",
       "active": "نشط",
@@ -376,6 +382,10 @@
     }
   },
   "settings": {
+    "theme": "المظهر",
+    "lightMode": "فاتح",
+    "darkMode": "داكن",
+    "systemMode": "نظام",
     "language": "اللغة",
     "title": "الإعدادات",
     "description": "إدارة إعدادات التطبيق وتفضيلاتك",
@@ -446,15 +456,15 @@
     },
     "notifications": {
       "title": "الإشعارات",
-      "description": "تكوين كيفية استلام الإشعارات",
-      "email": "إشعارات البريد الإلكتروني",
-      "emailDescription": "استلام الإشعارات عبر البريد الإلكتروني",
-      "push": "الإشعارات المنبثقة",
-      "pushDescription": "استلام الإشعارات المنبثقة في متصفحك",
-      "sms": "إشعارات الرسائل النصية",
-      "smsDescription": "استلام الإشعارات عبر الرسائل النصية",
-      "inApp": "الإشعارات داخل التطبيق",
-      "inAppDescription": "عرض الإشعارات داخل التطبيق"
+      "noNotifications": "لا توجد إشعارات في الوقت الحالي",
+      "clearAll": "مسح الكل",
+      "tenant": "المستأجر",
+      "types": {
+        "error": "خطأ",
+        "warning": "تحذير",
+        "success": "نجاح",
+        "info": "معلومة"
+      }
     },
     "integrations": {
       "title": "التكاملات",

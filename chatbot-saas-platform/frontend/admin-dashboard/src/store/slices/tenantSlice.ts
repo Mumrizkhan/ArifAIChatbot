@@ -1,11 +1,11 @@
-import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit';
-import { tenantApi } from '../../services/api';
+import { createSlice, createAsyncThunk, PayloadAction } from "@reduxjs/toolkit";
+import { tenantApi } from "../../services/api";
 
 interface Tenant {
   id: string;
   name: string;
-  domain: string;
-  status: 'Active' | 'Inactive' | 'Suspended';
+  subdomain: string;
+  status: "Active" | "Inactive" | "Suspended";
   subscriptionPlan: string;
   createdAt: string;
   userCount: number;
@@ -33,39 +33,30 @@ const initialState: TenantState = {
 };
 
 export const fetchTenants = createAsyncThunk(
-  'tenant/fetchTenants',
+  "tenant/fetchTenants",
   async ({ page, pageSize, search }: { page: number; pageSize: number; search?: string }) => {
     const response = await tenantApi.getTenants(page, pageSize, search);
     return response;
   }
 );
 
-export const createTenant = createAsyncThunk(
-  'tenant/createTenant',
-  async (tenantData: Partial<Tenant>) => {
-    const response = await tenantApi.createTenant(tenantData);
-    return response;
-  }
-);
+export const createTenant = createAsyncThunk("tenant/createTenant", async (tenantData: Partial<Tenant>) => {
+  const response = await tenantApi.createTenant(tenantData);
+  return response;
+});
 
-export const updateTenant = createAsyncThunk(
-  'tenant/updateTenant',
-  async ({ id, data }: { id: string; data: Partial<Tenant> }) => {
-    const response = await tenantApi.updateTenant(id, data);
-    return response;
-  }
-);
+export const updateTenant = createAsyncThunk("tenant/updateTenant", async ({ id, data }: { id: string; data: Partial<Tenant> }) => {
+  const response = await tenantApi.updateTenant(id, data);
+  return response;
+});
 
-export const deleteTenant = createAsyncThunk(
-  'tenant/deleteTenant',
-  async (id: string) => {
-    await tenantApi.deleteTenant(id);
-    return id;
-  }
-);
+export const deleteTenant = createAsyncThunk("tenant/deleteTenant", async (id: string) => {
+  await tenantApi.deleteTenant(id);
+  return id;
+});
 
 const tenantSlice = createSlice({
-  name: 'tenant',
+  name: "tenant",
   initialState,
   reducers: {
     clearError: (state) => {
@@ -92,20 +83,20 @@ const tenantSlice = createSlice({
       })
       .addCase(fetchTenants.rejected, (state, action) => {
         state.isLoading = false;
-        state.error = action.error.message || 'Failed to fetch tenants';
+        state.error = action.error.message || "Failed to fetch tenants";
       })
       .addCase(createTenant.fulfilled, (state, action) => {
         state.tenants.unshift(action.payload);
         state.totalCount += 1;
       })
       .addCase(updateTenant.fulfilled, (state, action) => {
-        const index = state.tenants.findIndex(t => t.id === action.payload.id);
+        const index = state.tenants.findIndex((t) => t.id === action.payload.id);
         if (index !== -1) {
           state.tenants[index] = action.payload;
         }
       })
       .addCase(deleteTenant.fulfilled, (state, action) => {
-        state.tenants = state.tenants.filter(t => t.id !== action.payload);
+        state.tenants = state.tenants.filter((t) => t.id !== action.payload);
         state.totalCount -= 1;
       });
   },
