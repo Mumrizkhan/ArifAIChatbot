@@ -1,9 +1,9 @@
-import React, { useEffect, useState } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
 import { useTranslation } from 'react-i18next';
+import { useDispatch, useSelector } from 'react-redux';
 import { useForm } from 'react-hook-form';
+import { useState, useEffect } from 'react';
 import { AppDispatch, RootState } from '../../store/store';
-import { fetchChatbotConfigs, updateChatbotConfig, createChatbotConfig } from '../../store/slices/chatbotSlice';
+import { fetchChatbotConfigs, createChatbotConfig, updateChatbotConfig } from '../../store/slices/chatbotSlice';
 import { ChatbotService } from '../../services/chatbotService';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../../components/ui/card';
 import { Button } from '../../components/ui/button';
@@ -28,10 +28,6 @@ import {
   MessageSquare,
   Brain,
   Settings,
-  FileText,
-  Zap,
-  Globe,
-  Send,
 } from 'lucide-react';
 import {
   Dialog,
@@ -46,6 +42,7 @@ const ChatbotConfigPage = () => {
   const { t } = useTranslation();
   const dispatch = useDispatch<AppDispatch>();
   const { configs, isLoading } = useSelector((state: RootState) => state.chatbot);
+  const { user } = useSelector((state: RootState) => state.auth);
   const config = configs && configs.length > 0 ? configs[0] : null;
   const isCreateMode = !config;
   const [activeTab, setActiveTab] = useState('personality');
@@ -53,9 +50,7 @@ const ChatbotConfigPage = () => {
   const [uploadError, setUploadError] = useState<string | null>(null);
   const [uploadSuccess, setUploadSuccess] = useState<string | null>(null);
   const [isTestModalOpen, setIsTestModalOpen] = useState(false);
-  const [testMessages, setTestMessages] = useState<Array<{id: string, content: string, sender: 'user' | 'bot', timestamp: Date}>>([]);
-  const [testInput, setTestInput] = useState('');
-  const [isTesting, setIsTesting] = useState(false);
+  const [widgetInstance, setWidgetInstance] = useState<{ init: (config: unknown) => void; destroy: () => void } | null>(null);
 
   const { register, handleSubmit, setValue, watch, formState: { errors } } = useForm({
     defaultValues: {
@@ -146,60 +141,61 @@ const ChatbotConfigPage = () => {
     }
   };
 
-  const handleTestChatbot = async (message: string) => {
-    if (!message.trim()) return;
-
-    setIsTesting(true);
-    
-    const userMessage = {
-      id: `user_${Date.now()}`,
-      content: message,
-      sender: 'user' as const,
-      timestamp: new Date()
-    };
-    setTestMessages(prev => [...prev, userMessage]);
-    setTestInput('');
-
-    try {
-      const response = await ChatbotService.testChatbot(message);
-      
-      if (response.success) {
-        const botMessage = {
-          id: `bot_${Date.now()}`,
-          content: response.data.botMessage.content,
-          sender: 'bot' as const,
-          timestamp: new Date()
-        };
-        setTestMessages(prev => [...prev, botMessage]);
-      } else {
-        const errorMessage = {
-          id: `bot_${Date.now()}`,
-          content: 'Sorry, I encountered an error while processing your message. Please try again.',
-          sender: 'bot' as const,
-          timestamp: new Date()
-        };
-        setTestMessages(prev => [...prev, errorMessage]);
+  const initializeWidget = () => {
+    if (typeof window !== 'undefined' && (window as unknown as { ChatbotWidget: new () => { init: (config: unknown) => void; destroy: () => void } }).ChatbotWidget && user?.tenantId) {
+      if (widgetInstance) {
+        widgetInstance.destroy();
       }
-    } catch (error) {
-      console.error('Test chatbot error:', error);
-      const errorMessage = {
-        id: `bot_${Date.now()}`,
-        content: error instanceof Error && error.message.includes('conversation') 
-          ? 'Failed to create test conversation. Please try again.'
-          : 'Sorry, I encountered an error while processing your message. Please try again.',
-        sender: 'bot' as const,
-        timestamp: new Date()
-      };
-      setTestMessages(prev => [...prev, errorMessage]);
-    }finally {
-      setIsTesting(false);
+
+      const widget = new (window as unknown as { ChatbotWidget: new () => { init: (config: unknown) => void; destroy: () => void } }).ChatbotWidget();
+      const formData = watch();
+      
+      widget.init({
+        tenantId: user.tenantId,
+        apiUrl: 'http://localhost:8000',
+        websocketUrl: 'ws://localhost:8000/chatHub',
+        authToken: localStorage.getItem('token'),
+        theme: {
+          primaryColor: '#007bff',
+          position: 'bottom-right',
+          size: 'medium',
+          animation: 'slide'
+        },
+        branding: {
+          companyName: formData.name || 'Test Chatbot',
+          welcomeMessage: formData.welcomeMessage || 'Hello! How can I help you today?',
+          placeholderText: 'Type your message...'
+        },
+        language: formData.language || 'en',
+        features: {
+          fileUpload: true,
+          typing: formData.enableTypingIndicator,
+          readReceipts: true,
+          agentHandoff: true,
+          conversationRating: true,
+          conversationTranscript: true
+        },
+        behavior: {
+          autoOpen: true,
+          showWelcomeMessage: true,
+          persistConversation: false,
+          maxFileSize: 10485760,
+          allowedFileTypes: ['.pdf', '.docx', '.txt', '.md']
+        }
+      });
+      
+      setWidgetInstance(widget);
+      console.log('✅ TestBot widget initialized');
+    } else {
+      console.error('❌ ChatbotWidget not available or missing tenant context');
     }
   };
 
-  const handleTestSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (testInput.trim() && !isTesting) {
-      handleTestChatbot(testInput);
+  const destroyWidget = () => {
+    if (widgetInstance) {
+      widgetInstance.destroy();
+      setWidgetInstance(null);
+      console.log('✅ TestBot widget destroyed');
     }
   };
 
@@ -234,9 +230,12 @@ const ChatbotConfigPage = () => {
       await Promise.all(uploadPromises);
       setUploadSuccess(`Successfully uploaded ${files.length} file(s) to knowledge base`);
       
-      event.target.value = '';
-    } catch (error: unknown) {
-      setUploadError((error as Error).message || 'Failed to upload files');
+      setTimeout(() => {
+        setUploadSuccess(null);
+      }, 5000);
+    } catch (error) {
+      console.error('Upload error:', error);
+      setUploadError(error instanceof Error ? error.message : 'Failed to upload files');
     } finally {
       setIsUploading(false);
     }
@@ -244,30 +243,23 @@ const ChatbotConfigPage = () => {
 
   const knowledgeBaseStats = {
     totalDocuments: 0,
-    totalWords: 0,
-    lastUpdated: null,
+    totalSize: '0 MB'
   };
 
-  if (isLoading && !config) {
+  if (isLoading) {
     return (
       <div className="space-y-6">
         <div className="flex items-center justify-between">
-          <Skeleton className="h-8 w-[200px]" />
-          <Skeleton className="h-10 w-[120px]" />
+          <div>
+            <Skeleton className="h-8 w-64 mb-2" />
+            <Skeleton className="h-4 w-96" />
+          </div>
+          <Skeleton className="h-10 w-24" />
         </div>
-        <Card>
-          <CardHeader>
-            <Skeleton className="h-6 w-[150px]" />
-            <Skeleton className="h-4 w-[300px]" />
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-4">
-              {[...Array(5)].map((_, i) => (
-                <Skeleton key={i} className="h-10 w-full" />
-              ))}
-            </div>
-          </CardContent>
-        </Card>
+        <div className="space-y-4">
+          <Skeleton className="h-64 w-full" />
+          <Skeleton className="h-64 w-full" />
+        </div>
       </div>
     );
   }
@@ -288,80 +280,40 @@ const ChatbotConfigPage = () => {
         </div>
         <div className="flex space-x-2">
           {!isCreateMode && (
-            <Dialog open={isTestModalOpen} onOpenChange={setIsTestModalOpen}>
+            <Dialog open={isTestModalOpen} onOpenChange={(open) => {
+              setIsTestModalOpen(open);
+              if (open) {
+                setTimeout(initializeWidget, 100);
+              } else {
+                destroyWidget();
+              }
+            }}>
               <DialogTrigger asChild>
                 <Button variant="outline">
                   <RefreshCw className="mr-2 h-4 w-4" />
                   {t('chatbot.testBot')}
                 </Button>
               </DialogTrigger>
-              <DialogContent className="max-w-2xl max-h-[80vh] flex flex-col">
-                <DialogHeader>
+              <DialogContent className="max-w-4xl max-h-[90vh] p-0 overflow-hidden">
+                <DialogHeader className="p-6 pb-0">
                   <DialogTitle>Test Chatbot</DialogTitle>
                   <DialogDescription>
-                    Test your chatbot configuration with live messages. This uses your current form settings.
+                    Testing your chatbot with the actual widget. This provides an authentic experience of how users will interact with your chatbot.
                   </DialogDescription>
                 </DialogHeader>
                 
-                <div className="flex-1 flex flex-col min-h-0">
-                  <div className="flex-1 overflow-y-auto border rounded-lg p-4 mb-4 bg-gray-50 dark:bg-gray-900 min-h-[300px]">
-                    {testMessages.length === 0 ? (
-                      <div className="flex items-center justify-center h-full text-gray-500">
-                        <div className="text-center">
-                          <MessageSquare className="mx-auto h-12 w-12 mb-2 opacity-50" />
-                          <p>Start a conversation to test your chatbot</p>
-                        </div>
-                      </div>
-                    ) : (
-                      <div className="space-y-4">
-                        {testMessages.map((message) => (
-                          <div
-                            key={message.id}
-                            className={`flex ${message.sender === 'user' ? 'justify-end' : 'justify-start'}`}
-                          >
-                            <div
-                              className={`max-w-[80%] rounded-lg px-4 py-2 ${
-                                message.sender === 'user'
-                                  ? 'bg-blue-500 text-white'
-                                  : 'bg-white dark:bg-gray-800 border'
-                              }`}
-                            >
-                              <p className="text-sm">{message.content}</p>
-                              <p className={`text-xs mt-1 opacity-70 ${
-                                message.sender === 'user' ? 'text-blue-100' : 'text-gray-500'
-                              }`}>
-                                {message.timestamp.toLocaleTimeString()}
-                              </p>
-                            </div>
-                          </div>
-                        ))}
-                        {isTesting && (
-                          <div className="flex justify-start">
-                            <div className="bg-white dark:bg-gray-800 border rounded-lg px-4 py-2">
-                              <div className="flex items-center space-x-1">
-                                <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce"></div>
-                                <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{animationDelay: '0.1s'}}></div>
-                                <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{animationDelay: '0.2s'}}></div>
-                              </div>
-                            </div>
-                          </div>
-                        )}
-                      </div>
-                    )}
+                <div className="p-6 pt-4">
+                  <div className="bg-gray-50 dark:bg-gray-900 rounded-lg p-4 min-h-[500px] relative">
+                    <div className="text-center text-gray-500 text-sm">
+                      <MessageSquare className="mx-auto h-8 w-8 mb-2 opacity-50" />
+                      <p>The chatbot widget will appear here when initialized.</p>
+                      <p className="text-xs mt-1">Look for the chat button in the bottom-right corner of this area.</p>
+                    </div>
                   </div>
                   
-                  <form onSubmit={handleTestSubmit} className="flex space-x-2">
-                    <Input
-                      value={testInput}
-                      onChange={(e) => setTestInput(e.target.value)}
-                      placeholder="Type your message..."
-                      disabled={isTesting}
-                      className="flex-1"
-                    />
-                    <Button type="submit" disabled={isTesting || !testInput.trim()}>
-                      <Send className="h-4 w-4" />
-                    </Button>
-                  </form>
+                  <div className="mt-4 text-xs text-gray-500 text-center">
+                    <p>💡 This uses your current form settings and provides the same experience as your website visitors.</p>
+                  </div>
                 </div>
               </DialogContent>
             </Dialog>
@@ -402,69 +354,59 @@ const ChatbotConfigPage = () => {
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
-              <div className="grid gap-4 md:grid-cols-2">
-                <div className="space-y-2">
-                  <Label htmlFor="name">{t('chatbot.botName')}</Label>
-                  <Input
-                    id="name"
-                    {...register('name', { required: t('validation.required') })}
-                    placeholder={t('chatbot.botNamePlaceholder')}
-                  />
-                  {errors.name && (
-                    <p className="text-sm text-red-500">{errors.name.message}</p>
-                  )}
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="language">{t('chatbot.language')}</Label>
-                  <Select value={watch('language')} onValueChange={(value) => setValue('language', value)}>
-                    <SelectTrigger>
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="en">English</SelectItem>
-                      <SelectItem value="ar">العربية</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
+              <div className="space-y-2">
+                <Label htmlFor="name">{t('chatbot.name')}</Label>
+                <Input
+                  id="name"
+                  {...register('name', { required: t('validation.required') })}
+                  placeholder={t('chatbot.namePlaceholder')}
+                />
+                {errors.name && (
+                  <p className="text-sm text-destructive">{errors.name.message as string}</p>
+                )}
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="personality">{t('chatbot.personalityDescription')}</Label>
+                <Label htmlFor="personality">{t('chatbot.personality')}</Label>
                 <Textarea
                   id="personality"
                   {...register('personality')}
                   placeholder={t('chatbot.personalityPlaceholder')}
                   rows={4}
                 />
+                <p className="text-sm text-muted-foreground">
+                  {t('chatbot.personalityDesc')}
+                </p>
               </div>
 
-              <div className="grid gap-4 md:grid-cols-2">
+              <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label htmlFor="tone">{t('chatbot.tone')}</Label>
-                  <Select value={watch('tone')} onValueChange={(value) => setValue('tone', value)}>
+                  <Label htmlFor="language">{t('chatbot.language')}</Label>
+                  <Select defaultValue="en">
                     <SelectTrigger>
-                      <SelectValue />
+                      <SelectValue placeholder={t('chatbot.selectLanguage')} />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="friendly">{t('chatbot.toneFriendly')}</SelectItem>
-                      <SelectItem value="professional">{t('chatbot.toneProfessional')}</SelectItem>
-                      <SelectItem value="casual">{t('chatbot.toneCasual')}</SelectItem>
-                      <SelectItem value="formal">{t('chatbot.toneFormal')}</SelectItem>
+                      <SelectItem value="en">English</SelectItem>
+                      <SelectItem value="es">Spanish</SelectItem>
+                      <SelectItem value="fr">French</SelectItem>
+                      <SelectItem value="de">German</SelectItem>
+                      <SelectItem value="it">Italian</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="responseLength">{t('chatbot.responseLength')}</Label>
-                  <Select value={watch('responseLength')} onValueChange={(value) => setValue('responseLength', value)}>
+                  <Label htmlFor="tone">{t('chatbot.tone')}</Label>
+                  <Select defaultValue="friendly">
                     <SelectTrigger>
-                      <SelectValue />
+                      <SelectValue placeholder={t('chatbot.selectTone')} />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="short">{t('chatbot.responseShort')}</SelectItem>
-                      <SelectItem value="medium">{t('chatbot.responseMedium')}</SelectItem>
-                      <SelectItem value="long">{t('chatbot.responseLong')}</SelectItem>
+                      <SelectItem value="professional">Professional</SelectItem>
+                      <SelectItem value="friendly">Friendly</SelectItem>
+                      <SelectItem value="casual">Casual</SelectItem>
+                      <SelectItem value="formal">Formal</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
@@ -474,96 +416,45 @@ const ChatbotConfigPage = () => {
         </TabsContent>
 
         <TabsContent value="knowledge" className="space-y-4">
-          <div className="grid gap-4 md:grid-cols-3">
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">
-                  {t('chatbot.totalDocuments')}
-                </CardTitle>
-                <FileText className="h-4 w-4 text-muted-foreground" />
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">{knowledgeBaseStats.totalDocuments}</div>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">
-                  {t('chatbot.totalWords')}
-                </CardTitle>
-                <Zap className="h-4 w-4 text-muted-foreground" />
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">{knowledgeBaseStats.totalWords.toLocaleString()}</div>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">
-                  {t('chatbot.lastUpdated')}
-                </CardTitle>
-                <Globe className="h-4 w-4 text-muted-foreground" />
-              </CardHeader>
-              <CardContent>
-                <div className="text-sm">
-                  {knowledgeBaseStats.lastUpdated 
-                    ? new Date(knowledgeBaseStats.lastUpdated).toLocaleDateString()
-                    : t('common.never')
-                  }
-                </div>
-              </CardContent>
-            </Card>
-          </div>
-
           <Card>
             <CardHeader>
-              <CardTitle>{t('chatbot.uploadTrainingData')}</CardTitle>
+              <CardTitle>{t('chatbot.knowledgeBase')}</CardTitle>
               <CardDescription>
-                {isCreateMode 
-                  ? 'Save your chatbot configuration first to upload training documents'
-                  : t('chatbot.uploadTrainingDataDesc')
-                }
+                {t('chatbot.knowledgeBaseDesc')}
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
-              <div className={`border-2 border-dashed rounded-lg p-6 text-center ${
-                isCreateMode ? 'border-muted-foreground/10 bg-muted/20' : 'border-muted-foreground/25'
-              }`}>
-                <Upload className={`mx-auto h-12 w-12 ${
-                  isCreateMode ? 'text-muted-foreground/50' : 'text-muted-foreground'
-                }`} />
-                <div className="mt-4">
-                  <Label htmlFor="file-upload" className={isCreateMode ? 'cursor-not-allowed' : 'cursor-pointer'}>
-                    <span className={`text-sm font-medium ${
-                      isCreateMode ? 'text-muted-foreground/50' : 'text-primary hover:text-primary/80'
-                    }`}>
-                      {isUploading ? 'Uploading...' : t('chatbot.clickToUpload')}
-                    </span>
-                    <span className="text-sm text-muted-foreground"> {t('chatbot.orDragAndDrop')}</span>
-                  </Label>
-                  <Input
-                    id="file-upload"
-                    type="file"
-                    multiple
-                    accept=".txt,.pdf,.docx,.md"
-                    onChange={handleFileUpload}
-                    disabled={isUploading || isCreateMode}
-                    className="hidden"
-                  />
+              <div className="border-2 border-dashed border-muted-foreground/25 rounded-lg p-6">
+                <div className="text-center">
+                  <Upload className="mx-auto h-12 w-12 text-muted-foreground/50" />
+                  <div className="mt-4">
+                    <Label htmlFor="file-upload" className="cursor-pointer">
+                      <span className="text-sm font-medium text-primary hover:text-primary/80">
+                        {t('chatbot.uploadFiles')}
+                      </span>
+                      <Input
+                        id="file-upload"
+                        type="file"
+                        multiple
+                        accept=".pdf,.docx,.txt,.md"
+                        onChange={handleFileUpload}
+                        className="sr-only"
+                        disabled={isUploading}
+                      />
+                    </Label>
+                    <p className="text-xs text-muted-foreground mt-1">
+                      {t('chatbot.supportedFormats')}
+                    </p>
+                  </div>
                 </div>
-                <p className="text-xs text-muted-foreground mt-2">
-                  {t('chatbot.supportedFormats')}
-                </p>
               </div>
 
               {uploadError && (
-                <div className="p-3 text-sm text-red-600 bg-red-50 border border-red-200 rounded-md">
+                <div className="p-3 text-sm text-destructive bg-destructive/10 border border-destructive/20 rounded-md">
                   {uploadError}
                 </div>
               )}
-              
+
               {uploadSuccess && (
                 <div className="p-3 text-sm text-green-600 bg-green-50 border border-green-200 rounded-md">
                   {uploadSuccess}
@@ -572,10 +463,20 @@ const ChatbotConfigPage = () => {
 
               {isUploading && (
                 <div className="p-3 text-sm text-blue-600 bg-blue-50 border border-blue-200 rounded-md">
-                  Uploading files...
+                  {t('chatbot.uploading')}...
                 </div>
               )}
 
+              <div className="grid grid-cols-2 gap-4 pt-4">
+                <div className="text-center">
+                  <div className="text-2xl font-bold">{knowledgeBaseStats.totalDocuments}</div>
+                  <div className="text-sm text-muted-foreground">{t('chatbot.totalDocuments')}</div>
+                </div>
+                <div className="text-center">
+                  <div className="text-2xl font-bold">{knowledgeBaseStats.totalSize}</div>
+                  <div className="text-sm text-muted-foreground">{t('chatbot.totalSize')}</div>
+                </div>
+              </div>
             </CardContent>
           </Card>
         </TabsContent>
@@ -583,9 +484,9 @@ const ChatbotConfigPage = () => {
         <TabsContent value="behavior" className="space-y-4">
           <Card>
             <CardHeader>
-              <CardTitle>{t('chatbot.behaviorSettings')}</CardTitle>
+              <CardTitle>{t('chatbot.behavior')}</CardTitle>
               <CardDescription>
-                {t('chatbot.behaviorSettingsDesc')}
+                {t('chatbot.behaviorDesc')}
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-6">
@@ -596,10 +497,7 @@ const ChatbotConfigPage = () => {
                     {t('chatbot.enableEmojisDesc')}
                   </p>
                 </div>
-                <Switch
-                  checked={watch('enableEmojis')}
-                  onCheckedChange={(checked) => setValue('enableEmojis', checked)}
-                />
+                <Switch {...register('enableEmojis')} />
               </div>
 
               <div className="flex items-center justify-between">
@@ -609,10 +507,21 @@ const ChatbotConfigPage = () => {
                     {t('chatbot.enableTypingIndicatorDesc')}
                   </p>
                 </div>
-                <Switch
-                  checked={watch('enableTypingIndicator')}
-                  onCheckedChange={(checked) => setValue('enableTypingIndicator', checked)}
-                />
+                <Switch {...register('enableTypingIndicator')} />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="responseLength">{t('chatbot.responseLength')}</Label>
+                <Select defaultValue="medium">
+                  <SelectTrigger>
+                    <SelectValue placeholder={t('chatbot.selectResponseLength')} />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="short">Short</SelectItem>
+                    <SelectItem value="medium">Medium</SelectItem>
+                    <SelectItem value="long">Long</SelectItem>
+                  </SelectContent>
+                </Select>
               </div>
 
               <div className="space-y-2">
@@ -620,7 +529,8 @@ const ChatbotConfigPage = () => {
                 <Input
                   id="maxConversationLength"
                   type="number"
-                  {...register('maxConversationLength', { min: 1, max: 100 })}
+                  {...register('maxConversationLength')}
+                  placeholder="50"
                 />
                 <p className="text-sm text-muted-foreground">
                   {t('chatbot.maxConversationLengthDesc')}
@@ -633,12 +543,12 @@ const ChatbotConfigPage = () => {
         <TabsContent value="responses" className="space-y-4">
           <Card>
             <CardHeader>
-              <CardTitle>{t('chatbot.customResponses')}</CardTitle>
+              <CardTitle>{t('chatbot.welcomeMessage')}</CardTitle>
               <CardDescription>
-                {t('chatbot.customResponsesDesc')}
+                {t('chatbot.welcomeMessageDesc')}
               </CardDescription>
             </CardHeader>
-            <CardContent className="space-y-4">
+            <CardContent>
               <div className="space-y-2">
                 <Label htmlFor="welcomeMessage">{t('chatbot.welcomeMessage')}</Label>
                 <Textarea
@@ -647,8 +557,21 @@ const ChatbotConfigPage = () => {
                   placeholder={t('chatbot.welcomeMessagePlaceholder')}
                   rows={3}
                 />
+                <p className="text-sm text-muted-foreground">
+                  {t('chatbot.welcomeMessageDesc')}
+                </p>
               </div>
+            </CardContent>
+          </Card>
 
+          <Card>
+            <CardHeader>
+              <CardTitle>{t('chatbot.fallbackMessage')}</CardTitle>
+              <CardDescription>
+                {t('chatbot.fallbackMessageDesc')}
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
               <div className="space-y-2">
                 <Label htmlFor="fallbackMessage">{t('chatbot.fallbackMessage')}</Label>
                 <Textarea
