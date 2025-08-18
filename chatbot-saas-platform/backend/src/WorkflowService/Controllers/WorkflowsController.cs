@@ -9,7 +9,7 @@ namespace WorkflowService.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
-//[Authorize]
+[Authorize]
 public class WorkflowsController : ControllerBase
 {
     private readonly IWorkflowService _workflowService;

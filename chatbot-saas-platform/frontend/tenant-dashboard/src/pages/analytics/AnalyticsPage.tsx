@@ -73,7 +73,7 @@ const AnalyticsPage = () => {
         
         if (connected) {
           tenantSignalRService.setOnAnalyticsUpdate((analytics) => {
-            dispatch(updateAnalyticsDataRealtime(analytics as any));
+            dispatch(updateAnalyticsDataRealtime(analytics));
           });
 
           tenantSignalRService.setOnRealtimeUpdate((realtime) => {

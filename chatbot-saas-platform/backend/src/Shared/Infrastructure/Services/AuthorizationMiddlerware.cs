@@ -55,13 +55,13 @@ namespace Shared.Infrastructure.Services
                     return;
                 }
             }
-             tenantId = currentUserService.TenantId;
-            if (!tenantId.HasValue || !await tenantService.TenantExistsAsync(tenantId.Value))
-            {
-                context.Response.StatusCode = StatusCodes.Status403Forbidden;
-                await context.Response.WriteAsync("Forbidden: Invalid tenant");
-                return;
-            }
+            // tenantId = currentUserService.TenantId;
+            //if (!tenantId.HasValue || !await tenantService.TenantExistsAsync(tenantId.Value))
+            //{
+            //    context.Response.StatusCode = StatusCodes.Status403Forbidden;
+            //    await context.Response.WriteAsync("Forbidden: Invalid tenant");
+            //    return;
+            //}
 
             await _next(context);
         }

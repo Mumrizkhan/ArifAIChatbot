@@ -23,7 +23,7 @@ public static class ServiceCollectionExtensions
 
         services.AddStackExchangeRedisCache(options =>
         {
-            options.Configuration = configuration.GetConnectionString("Redis") ?? "localhost:6379";
+            options.Configuration = configuration.GetValue<string>("Redis:ConnectionString") ?? "localhost:6379";
             options.InstanceName = "ArifChatbot";   
 // Log the Redis configuration
             var logger = services.BuildServiceProvider().GetRequiredService<ILoggerFactory>().CreateLogger("ServiceCollectionExtensions");
@@ -37,7 +37,7 @@ public static class ServiceCollectionExtensions
             // var logger = provider.GetRequiredService<ILogger<ServiceCollectionExtensions>>();
             // With the following:
             var logger = provider.GetRequiredService<ILoggerFactory>().CreateLogger("ServiceCollectionExtensions");
-            var connectionString = configuration.GetConnectionString("Redis") ?? "localhost:6379";
+            var connectionString = configuration.GetValue<string>("Redis:ConnectionString") ?? "localhost:6379";
 
             // Log the Redis connection string
             logger.LogInformation("Connecting to Redis with connection string: {ConnectionString}", connectionString);
