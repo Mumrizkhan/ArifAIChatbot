@@ -166,7 +166,7 @@ const ChatbotConfigPage = () => {
       if (response.success) {
         const botMessage = {
           id: `bot_${Date.now()}`,
-          content: response.data.botMessage.content,
+          content: response.data.response,
           sender: 'bot' as const,
           timestamp: new Date()
         };
