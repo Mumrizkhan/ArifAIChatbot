@@ -2,12 +2,9 @@ trigger:
   branches:
     include:
       - dev
-  paths:
-    include:
-      - frontend/admin-dashboard/**
 
 pool:
-  name: ubuntu-22.04
+  vmImage: "ubuntu-latest"
 
 variables:
   frontendDir: "$(Build.SourcesDirectory)/frontend/admin-dashboard"
@@ -21,16 +18,19 @@ steps:
       versionSpec: "22.x"
     displayName: "Use Node 22"
 
-  # create  on the agent from pipeline variables (set these in pipeline variables/library)
+  # create .env.staging from pipeline variables (define these in pipeline)
   - script: |
       cat > .env.staging <<EOF
       VITE_API_BASE_URL=$(VITE_API_BASE_URL)
       VITE_API_TIMEOUT=$(VITE_API_TIMEOUT)
       VITE_AUTH_TOKEN_KEY=$(VITE_AUTH_TOKEN_KEY)
-      # add other VITE_* vars as needed
       EOF
     workingDirectory: $(frontendDir)
     displayName: "Create .env.staging"
+    env:
+      VITE_API_BASE_URL: $(VITE_API_BASE_URL)
+      VITE_API_TIMEOUT: $(VITE_API_TIMEOUT)
+      VITE_AUTH_TOKEN_KEY: $(VITE_AUTH_TOKEN_KEY)
 
   - script: npm ci
     workingDirectory: $(frontendDir)
