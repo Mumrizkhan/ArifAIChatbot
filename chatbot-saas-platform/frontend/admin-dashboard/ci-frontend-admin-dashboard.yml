@@ -1,7 +1,7 @@
 trigger:
   branches:
     include:
-      - dev  
+      - dev
 
   paths:
     include:
@@ -11,30 +11,28 @@ pool:
   name: ubuntu-22.04
 
 variables:
-  workingDirectory: 'chatbot-saas-platform/frontend/admin-dashboard'
-  artifactName: 'admin-dashboard'
+  workingDirectory: "chatbot-saas-platform/frontend/admin-dashboard"
+  artifactName: "admin-dashboard"
 
 steps:
-#  Use Node 22
-- task: NodeTool@0
-  inputs:
-    versionSpec: '22.x'
-  displayName: 'Use Node.js 22'
+  #  Use Node 22
+  - task: NodeTool@0
+    inputs:
+      versionSpec: "22.x"
+    displayName: "Use Node.js 22"
 
-# Install dependencies
-- script: npm ci
-  workingDirectory: $(workingDirectory)
-  displayName: 'Install NPM dependencies'
+  # Install & build frontend (staging)
+  - task: Npm@1
+    displayName: Install & build frontend (staging)
+    inputs:
+      command: custom
+      customCommand: "ci && npm run build:staging"
+    workingDirectory: "frontend/admin-dashboard"
 
-# Build React app
-- script: npm run build
-  workingDirectory: $(workingDirectory)
-  displayName: 'Build React app'
-
-# Publish build artifacts
-- task: PublishBuildArtifacts@1
-  inputs:
-    PathtoPublish: '$(workingDirectory)/dist'
-    ArtifactName: $(artifactName)
-    publishLocation: 'Container'
-  displayName: 'Publish Build Artifacts'
+  # Publish build artifacts
+  - task: PublishBuildArtifacts@1
+    inputs:
+      PathtoPublish: "$(workingDirectory)/dist"
+      ArtifactName: $(artifactName)
+      publishLocation: "Container"
+    displayName: "Publish Build Artifacts"
