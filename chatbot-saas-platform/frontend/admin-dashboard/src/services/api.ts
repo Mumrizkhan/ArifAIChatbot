@@ -1,13 +1,19 @@
 import axios, { AxiosInstance, AxiosResponse } from "axios";
 
+// Use Vite env (set at build/preview time)
 const API_BASE_URL = (import.meta.env.VITE_API_BASE_URL as string) || "https://api-stg-arif.tetco.sa";
+const API_TIMEOUT = Number(import.meta.env.VITE_API_TIMEOUT) || 10000;
+const AUTH_TOKEN_KEY = (import.meta.env.VITE_AUTH_TOKEN_KEY as string) || "token";
+
+// debug: confirm at runtime (preview or dev console)
+console.log("VITE env:", { MODE: import.meta.env.MODE, API_BASE_URL, API_TIMEOUT, AUTH_TOKEN_KEY });
 
 class ApiClient {
   private client: AxiosInstance;
   constructor() {
     this.client = axios.create({
       baseURL: API_BASE_URL,
-      timeout: 10000,
+      timeout: API_TIMEOUT,
       headers: {
         "Content-Type": "application/json",
       },
@@ -15,7 +21,7 @@ class ApiClient {
 
     this.client.interceptors.request.use(
       (config) => {
-        const token = localStorage.getItem("token");
+        const token = localStorage.getItem(AUTH_TOKEN_KEY);
         if (token) {
           config.headers.Authorization = `Bearer ${token}`;
         }
@@ -28,7 +34,7 @@ class ApiClient {
       (response) => response,
       (error) => {
         if (error.response?.status === 401) {
-          localStorage.removeItem("token");
+          localStorage.removeItem(AUTH_TOKEN_KEY);
           window.location.href = "/login";
         }
         return Promise.reject(error);
