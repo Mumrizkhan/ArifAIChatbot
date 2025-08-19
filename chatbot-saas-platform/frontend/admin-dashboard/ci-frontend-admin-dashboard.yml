@@ -6,7 +6,6 @@ trigger:
   paths:
     include:
       - chatbot-saas-platform/frontend/admin-dashboard/**
-
 pool:
   name: ubuntu-22.04
 
@@ -21,13 +20,15 @@ steps:
       versionSpec: "22.x"
     displayName: "Use Node.js 22"
 
-  # Install & build frontend (staging)
-  - task: Npm@1
-    displayName: Install & build frontend (staging)
-    inputs:
-      command: custom
-      customCommand: "ci && npm run build:staging"
-      workingDir: "frontend/admin-dashboard"
+  # Install dependencies
+  - script: npm install
+    workingDirectory: $(workingDirectory)
+    displayName: "Install NPM dependencies"
+
+  # Build React app
+  - script: npm run build
+    workingDirectory: $(workingDirectory)
+    displayName: "Build React app"
 
   # Publish build artifacts
   - task: PublishBuildArtifacts@1
