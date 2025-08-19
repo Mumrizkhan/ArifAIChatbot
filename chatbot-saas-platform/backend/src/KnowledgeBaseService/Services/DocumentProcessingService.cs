@@ -19,11 +19,17 @@ public class DocumentProcessingService : IDocumentProcessingService
     // private readonly OpenAIClient _openAIClient;
     private readonly ILogger<DocumentProcessingService> _logger;
     private readonly IConfiguration _configuration;
+    private readonly IVectorSearchService _vectorSearchService;
 
-    public DocumentProcessingService(ILogger<DocumentProcessingService> logger, IConfiguration configuration)
+    public DocumentProcessingService(
+        ILogger<DocumentProcessingService> logger, 
+        IConfiguration configuration, 
+        IVectorSearchService vectorSearchService)
     {
         _logger = logger;
         _configuration = configuration;
+        _vectorSearchService = vectorSearchService;
+
         var apiKey = _configuration["OpenAI:ApiKey"] ?? throw new InvalidOperationException("OpenAI API key not configured");
         // _openAIClient = new OpenAIClient(apiKey);
     }
@@ -275,7 +281,23 @@ Tags should be single words or short phrases (2-3 words max).";
     {
         try
         {
-            return true;
+            // Ensure the collection exists
+            var collectionCreated = await _vectorSearchService.CreateCollectionAsync(collectionName, chunks.First().TenantId);
+            if (!collectionCreated)
+            {
+                _logger.LogError("Failed to create or access collection {CollectionName}", collectionName);
+                return false;
+            }
+
+            // Upsert points into the vector database
+            var upserted = await _vectorSearchService.UpdateDocumentInVectorAsync(new Document
+            {
+                Id = chunks.First().DocumentId,
+                VectorCollectionName = collectionName,
+                TenantId = chunks.First().TenantId
+            }, chunks);
+
+            return upserted;
         }
         catch (Exception ex)
         {
