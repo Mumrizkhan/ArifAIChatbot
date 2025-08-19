@@ -81,8 +81,8 @@ public class AIController : ControllerBase
                 TenantId = _tenantService.GetCurrentTenantId(),
                 ConversationHistory = conversationHistory,
                 Model = request.Model ?? "gpt-4.1",
-                Temperature = request.Temperature ?? 0.7,
-                MaxTokens = request.MaxTokens ?? 1000
+                Temperature = request.Temperature ?? 0.5,
+                MaxTokens = request.MaxTokens ?? 200
             };
 
             AIResponse aiResponse;
