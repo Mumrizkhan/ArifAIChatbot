@@ -6,6 +6,7 @@ trigger:
   paths:
     include:
       - chatbot-saas-platform/frontend/admin-dashboard/**
+
 pool:
   name: ubuntu-22.04
 
@@ -21,7 +22,7 @@ steps:
     displayName: "Use Node.js 22"
 
   # Install dependencies
-  - script: npm install
+  - script: npm ci
     workingDirectory: $(workingDirectory)
     displayName: "Install NPM dependencies"
 
