@@ -1,6 +1,6 @@
 import axios, { AxiosInstance, AxiosResponse } from "axios";
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "https://api-stg-arif.tetco.sa";
+const API_BASE_URL = (import.meta.env.VITE_API_BASE_URL as string) || "https://api-stg-arif.tetco.sa";
 
 class ApiClient {
   private client: AxiosInstance;
