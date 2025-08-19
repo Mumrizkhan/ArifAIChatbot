@@ -3,17 +3,32 @@ import react from "@vitejs/plugin-react";
 import { resolve } from "path";
 
 export default defineConfig(() => ({
-  base: "./", // relative asset URLs
+  base: "./",
   plugins: [react()],
+  resolve: {
+    alias: {
+      // use the process polyfill for browser
+      process: "process/browser",
+    },
+  },
+  define: {
+    // ensure NODE_ENV is available in the bundle
+    "process.env.NODE_ENV": JSON.stringify(process.env.NODE_ENV || "production"),
+  },
   build: {
     outDir: "dist",
     emptyOutDir: true,
-    // force a single HTML entry: index.html
+    lib: {
+      entry: resolve(__dirname, "src/widget.ts"),
+      name: "ChatbotWidget",
+      formats: ["umd", "es"],
+      fileName: (format) => (format === "umd" ? "arif-chat-widget.min.js" : "arif-chat-widget.es.js"),
+    },
+    cssCodeSplit: true,
     rollupOptions: {
-      input: {
-        index: resolve(__dirname, "index.html"),
+      output: {
+        assetFileNames: (assetInfo) => (assetInfo.name && assetInfo.name.endsWith(".css") ? "arif-chat-widget.css" : "asset.[ext]"),
       },
     },
-    // if you build as a library instead, use the lib option (no HTML emitted)
   },
 }));
