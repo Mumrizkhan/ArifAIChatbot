@@ -5,6 +5,7 @@ import { useForm } from 'react-hook-form';
 import { AppDispatch, RootState } from '../../store/store';
 import { fetchChatbotConfigs, updateChatbotConfig, createChatbotConfig } from '../../store/slices/chatbotSlice';
 import { ChatbotService } from '../../services/chatbotService';
+import { KnowledgeBaseService } from '../../services/knowledgeBaseService';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../../components/ui/card';
 import { Button } from '../../components/ui/button';
 import { Input } from '../../components/ui/input';
@@ -204,11 +205,6 @@ const ChatbotConfigPage = () => {
   const handleFileUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const files = event.target.files;
     if (!files || files.length === 0) return;
-    
-    if (!config?.id) {
-      setUploadError('No chatbot configuration found. Please save your configuration first.');
-      return;
-    }
 
     setUploadError(null);
     setUploadSuccess(null);
@@ -226,7 +222,7 @@ const ChatbotConfigPage = () => {
           throw new Error(`File ${file.name} is too large. Maximum size is 10MB.`);
         }
 
-        const response = await ChatbotService.uploadKnowledgeBaseDocument(config.id, file);
+        const response = await KnowledgeBaseService.uploadDocument(file, file.name);
         if (!response.success) {
           throw new Error(`Failed to upload ${file.name}: Unknown error`);
         }
@@ -235,6 +231,8 @@ const ChatbotConfigPage = () => {
 
       await Promise.all(uploadPromises);
       setUploadSuccess(`Successfully uploaded ${files.length} file(s) to knowledge base.`);
+      
+      fetchKnowledgeBaseStats();
     } catch (error) {
       console.error('Upload error:', error);
       setUploadError(error instanceof Error ? error.message : 'Failed to upload files. Please try again.');
@@ -243,11 +241,32 @@ const ChatbotConfigPage = () => {
     }
   };
 
-  const knowledgeBaseStats = {
+  const [knowledgeBaseStats, setKnowledgeBaseStats] = useState({
     totalDocuments: 0,
     totalWords: 0,
-    lastUpdated: null
+    lastUpdated: null as string | null
+  });
+
+  const fetchKnowledgeBaseStats = async () => {
+    try {
+      const response = await KnowledgeBaseService.getStatistics();
+      if (response.success && response.data) {
+        setKnowledgeBaseStats({
+          totalDocuments: response.data.totalDocuments,
+          totalWords: response.data.totalChunks,
+          lastUpdated: response.data.lastUpdated
+        });
+      }
+    } catch (error) {
+      console.error('Failed to fetch knowledge base statistics:', error);
+    }
   };
+
+  useEffect(() => {
+    if (!isCreateMode) {
+      fetchKnowledgeBaseStats();
+    }
+  }, [isCreateMode]);
 
   if (isLoading && !config) {
     return (
@@ -522,24 +541,15 @@ const ChatbotConfigPage = () => {
             <CardHeader>
               <CardTitle>{t('chatbot.uploadTrainingData')}</CardTitle>
               <CardDescription>
-                {isCreateMode 
-                  ? 'Save your chatbot configuration first to upload training documents'
-                  : t('chatbot.uploadTrainingDataDesc')
-                }
+                {t('chatbot.uploadTrainingDataDesc')}
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
-              <div className={`border-2 border-dashed rounded-lg p-6 text-center ${
-                isCreateMode ? 'border-muted-foreground/10 bg-muted/20' : 'border-muted-foreground/25'
-              }`}>
-                <Upload className={`mx-auto h-12 w-12 ${
-                  isCreateMode ? 'text-muted-foreground/50' : 'text-muted-foreground'
-                }`} />
+              <div className="border-2 border-dashed rounded-lg p-6 text-center border-muted-foreground/25">
+                <Upload className="mx-auto h-12 w-12 text-muted-foreground" />
                 <div className="mt-4">
-                  <Label htmlFor="file-upload" className={isCreateMode ? 'cursor-not-allowed' : 'cursor-pointer'}>
-                    <span className={`text-sm font-medium ${
-                      isCreateMode ? 'text-muted-foreground/50' : 'text-primary hover:text-primary/80'
-                    }`}>
+                  <Label htmlFor="file-upload" className="cursor-pointer">
+                    <span className="text-sm font-medium text-primary hover:text-primary/80">
                       {isUploading ? 'Uploading...' : t('chatbot.clickToUpload')}
                     </span>
                     <span className="text-sm text-muted-foreground"> {t('chatbot.orDragAndDrop')}</span>
@@ -550,7 +560,7 @@ const ChatbotConfigPage = () => {
                     multiple
                     accept=".txt,.pdf,.docx,.md"
                     onChange={handleFileUpload}
-                    disabled={isUploading || isCreateMode}
+                    disabled={isUploading}
                     className="hidden"
                   />
                 </div>
