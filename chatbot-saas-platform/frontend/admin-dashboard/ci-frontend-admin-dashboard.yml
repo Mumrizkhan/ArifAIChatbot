@@ -3,10 +3,6 @@ trigger:
     include:
       - dev
 
-  paths:
-    include:
-      - chatbot-saas-platform/frontend/admin-dashboard/**
-
 pool:
   name: ubuntu-22.04
 
@@ -15,26 +11,38 @@ variables:
   artifactName: "admin-dashboard"
 
 steps:
-  #  Use Node 22
+  # Use Node.js 22
   - task: NodeTool@0
     inputs:
       versionSpec: "22.x"
     displayName: "Use Node.js 22"
 
+  # Create .env.staging dynamically
+  - script: |
+      cat > .env.staging <<EOF
+      VITE_API_BASE_URL=https://api-stg-arif.tetco.sa
+      VITE_API_URL=https://api-stg-arif.tetco.sa
+      VITE_SIGNALR_HUB_URL=https://api-stg-arif.tetco.sa/agentHub
+      VITE_APP_NAME=Admin Dashboard
+      VITE_ENABLE_HSTS=true
+      EOF
+    workingDirectory: $(Build.SourcesDirectory)/$(workingDirectory)
+    displayName: "Create .env.staging"
+
   # Install dependencies
   - script: npm ci
-    workingDirectory: $(workingDirectory)
+    workingDirectory: $(Build.SourcesDirectory)/$(workingDirectory)
     displayName: "Install NPM dependencies"
 
-  # Build React app
-  - script: npm run build
-    workingDirectory: $(workingDirectory)
-    displayName: "Build React app"
+  # Build React app in staging mode
+  - script: npm run build:staging
+    workingDirectory: $(Build.SourcesDirectory)/$(workingDirectory)
+    displayName: "Build React app (staging)"
 
   # Publish build artifacts
   - task: PublishBuildArtifacts@1
     inputs:
-      PathtoPublish: "$(workingDirectory)/dist"
+      PathtoPublish: "$(Build.SourcesDirectory)/$(workingDirectory)/dist"
       ArtifactName: $(artifactName)
       publishLocation: "Container"
     displayName: "Publish Build Artifacts"
