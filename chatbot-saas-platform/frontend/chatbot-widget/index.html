@@ -5,18 +5,27 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Arif Chat Widget</title>
-    <link rel="stylesheet" href="./dist/arif-chat-widget.css">
+    <link rel="stylesheet" href="./arif-chat-widget.css">
 </head>
 
 <body>
     <div id="widget-container"></div>
-    <script src="./dist/arif-chat-widget.min.js"></script>
     <script>
-        const widget = new window.ChatbotWidget();
-        widget.init({
-            tenantId: '83784EA6-5360-4F3C-843A-1ABD18D72E5D',
-            apiUrl: 'https://api-stg-arif.tetco.sa/chat',
-            websocketUrl: 'wss://api-stg-arif.tetco.sa/chat/ws',
+        window.process = { env: { NODE_ENV: 'production' } };
+    </script>
+    <script src="./arif-chat-widget.min.js"></script>
+    <script>
+        window.addEventListener('DOMContentLoaded', function () {
+            if (window.ChatbotWidget) {
+                const widget = new window.ChatbotWidget();
+                widget.init({
+                    tenantId: '83784EA6-5360-4F3C-843A-1ABD18D72E5D',
+                    apiUrl: 'https://api-stg-arif.tetco.sa/chat',
+                    websocketUrl: 'wss://api-stg-arif.tetco.sa/chat/ws',
+                });
+            } else {
+                console.error('ChatbotWidget is not loaded.');
+            }
         });
     </script>
 </body>
