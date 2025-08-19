@@ -11,6 +11,8 @@ export default defineConfig(() => {
       alias: {
         "@": path.resolve(__dirname, "src"),
       },
+      // resolve these extensions explicitly
+      extensions: [".mjs", ".js", ".ts", ".jsx", ".tsx", ".json"],
     },
     build: {
       rollupOptions: {
