@@ -1,5 +1,5 @@
 // Base API configuration and utilities
-export const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "https://api-stg.arif.sa";
+export const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "https://api-stg-arif.tetco.sa";
 
 export interface ApiResponse<T = any> {
   data: T;

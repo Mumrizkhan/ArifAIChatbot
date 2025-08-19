@@ -1,5 +1,5 @@
 import { createSlice, createAsyncThunk, PayloadAction } from "@reduxjs/toolkit";
-export const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "https://api-stg.arif.sa";
+export const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "https://api-stg-arif.tetco.sa";
 export interface TeamMember {
   id: string;
   name: string;
