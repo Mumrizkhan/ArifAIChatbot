@@ -3,46 +3,38 @@ trigger:
     include:
       - dev
 
+  paths:
+    include:
+      - chatbot-saas-platform/frontend/admin-dashboard/**
+
 pool:
-  vmImage: "ubuntu-latest"
+  name: ubuntu-22.04
 
 variables:
-  frontendDir: "$(Build.SourcesDirectory)/frontend/admin-dashboard"
+  workingDirectory: "chatbot-saas-platform/frontend/admin-dashboard"
   artifactName: "admin-dashboard"
 
 steps:
-  - checkout: self
-
+  #  Use Node 22
   - task: NodeTool@0
     inputs:
       versionSpec: "22.x"
-    displayName: "Use Node 22"
+    displayName: "Use Node.js 22"
 
-  # create .env.staging from pipeline variables (define these in pipeline)
-  - script: |
-      cat > .env.staging <<EOF
-      VITE_API_BASE_URL=$(VITE_API_BASE_URL)
-      VITE_API_TIMEOUT=$(VITE_API_TIMEOUT)
-      VITE_AUTH_TOKEN_KEY=$(VITE_AUTH_TOKEN_KEY)
-      EOF
-    workingDirectory: $(frontendDir)
-    displayName: "Create .env.staging"
-    env:
-      VITE_API_BASE_URL: $(VITE_API_BASE_URL)
-      VITE_API_TIMEOUT: $(VITE_API_TIMEOUT)
-      VITE_AUTH_TOKEN_KEY: $(VITE_AUTH_TOKEN_KEY)
-
+  # Install dependencies
   - script: npm ci
-    workingDirectory: $(frontendDir)
+    workingDirectory: $(workingDirectory)
     displayName: "Install NPM dependencies"
 
-  - script: npm run build:staging
-    workingDirectory: $(frontendDir)
-    displayName: "Build React app (staging)"
+  # Build React app
+  - script: npm run build
+    workingDirectory: $(workingDirectory)
+    displayName: "Build React app"
 
+  # Publish build artifacts
   - task: PublishBuildArtifacts@1
     inputs:
-      PathtoPublish: "$(frontendDir)/dist"
+      PathtoPublish: "$(workingDirectory)/dist"
       ArtifactName: $(artifactName)
       publishLocation: "Container"
     displayName: "Publish Build Artifacts"
