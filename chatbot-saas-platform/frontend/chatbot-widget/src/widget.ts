@@ -87,11 +87,11 @@ class ChatbotWidget {
     // Get default values from environment variables with fallbacks
     const defaultApiUrl = envConfig.apiUrl;
     const defaultWebsocketUrl = envConfig.websocketUrl;
-    
+
     console.log("🔧 Widget initializing with:", {
       apiUrl: widgetConfig.apiUrl || defaultApiUrl,
       websocketUrl: widgetConfig.websocketUrl || defaultWebsocketUrl,
-      tenantId: widgetConfig.tenantId
+      tenantId: widgetConfig.tenantId,
     });
 
     apiClient.setTenantId(widgetConfig.tenantId);
