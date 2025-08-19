@@ -12,11 +12,17 @@
     <div id="widget-container"></div>
     <script src="./arif-chat-widget.min.js"></script>
     <script>
-        const widget = new window.ChatbotWidget();
-        widget.init({
-            tenantId: '83784EA6-5360-4F3C-843A-1ABD18D72E5D',
-            apiUrl: 'https://api-stg-arif.tetco.sa/chat',
-            websocketUrl: 'wss://api-stg-arif.tetco.sa/chat/ws',
+        window.addEventListener('DOMContentLoaded', function () {
+            if (window.ChatbotWidget) {
+                const widget = new window.ChatbotWidget();
+                widget.init({
+                    tenantId: '83784EA6-5360-4F3C-843A-1ABD18D72E5D',
+                    apiUrl: 'https://api-stg-arif.tetco.sa/chat',
+                    websocketUrl: 'wss://api-stg-arif.tetco.sa/chat/ws',
+                });
+            } else {
+                console.error('ChatbotWidget is not loaded.');
+            }
         });
     </script>
 </body>
