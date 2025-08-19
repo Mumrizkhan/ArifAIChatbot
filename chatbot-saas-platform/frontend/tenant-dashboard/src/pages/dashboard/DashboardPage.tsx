@@ -51,7 +51,14 @@ const DashboardPage = () => {
           });
 
           tenantSignalRService.setOnTenantNotification((notification) => {
-            dispatch(addTenantNotification(notification));
+            // Convert Date timestamp to string if needed
+            const serializedNotification = {
+              ...notification,
+              timestamp: notification.timestamp instanceof Date 
+                ? notification.timestamp.toISOString() 
+                : notification.timestamp
+            };
+            dispatch(addTenantNotification(serializedNotification));
           });
 
           tenantSignalRService.setOnConnectionStatusChange((isConnected) => {
