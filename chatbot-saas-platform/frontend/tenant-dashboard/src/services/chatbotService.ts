@@ -138,48 +138,6 @@ export class ChatbotService {
     return apiClient.upload<{ avatar: string }>('/tenant-management/chatbotconfigs/avatar', formData);
   }
 
-  // Knowledge Base Operations
-  static async getKnowledgeBase(configId: string, params?: {
-    category?: string;
-    type?: string;
-    search?: string;
-    page?: number;
-    limit?: number;
-  }): Promise<ApiResponse<{ items: KnowledgeBaseItem[]; total: number }>> {
-    return apiClient.get(`/tenant-management/chatbotconfigs/${configId}/knowledge-base`, params);
-  }
-
-  static async createKnowledgeBaseItem(configId: string, data: CreateKnowledgeBaseData): Promise<ApiResponse<KnowledgeBaseItem>> {
-    return apiClient.post<KnowledgeBaseItem>(`/tenant-management/chatbotconfigs/${configId}/knowledge-base`, data);
-  }
-
-  static async updateKnowledgeBaseItem(configId: string, id: string, data: Partial<CreateKnowledgeBaseData>): Promise<ApiResponse<KnowledgeBaseItem>> {
-    return apiClient.put<KnowledgeBaseItem>(`/tenant-management/chatbotconfigs/${configId}/knowledge-base/${id}`, data);
-  }
-
-  static async deleteKnowledgeBaseItem(configId: string, id: string): Promise<ApiResponse<void>> {
-    return apiClient.delete<void>(`/tenant-management/chatbotconfigs/${configId}/knowledge-base/documents/${id}`);
-  }
-
-  // Bulk operations for knowledge base
-  static async bulkImportKnowledgeBase(configId: string, file: File): Promise<ApiResponse<{ imported: number; failed: number }>> {
-    const formData = new FormData();
-    formData.append('configId', configId);
-    formData.append('file', file);
-    return apiClient.upload<{ imported: number; failed: number }>(`/tenant-management/chatbotconfigs/${configId}/knowledge-base/import`, formData);
-  }
-
-  // Upload knowledge base document
-  static async uploadKnowledgeBaseDocument(configId: string, file: File): Promise<ApiResponse<{ message: string }>> {
-    const formData = new FormData();
-    formData.append('configId', configId);
-    formData.append('file', file);
-    return apiClient.upload<{ message: string }>(`/tenant-management/chatbotconfigs/${configId}/knowledge-base/documents`, formData);
-  }
-
-  static async exportKnowledgeBase(configId: string, format: 'csv' | 'json' = 'csv'): Promise<ApiResponse<{ downloadUrl: string }>> {
-    return apiClient.get<{ downloadUrl: string }>(`/tenant-management/chatbotconfigs/${configId}/knowledge-base/export`, { format });
-  }
 
   // Conversations - handled by ChatRuntimeService
   static async getConversations(params?: {
