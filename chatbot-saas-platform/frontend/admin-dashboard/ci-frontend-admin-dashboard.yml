@@ -27,7 +27,7 @@ steps:
     inputs:
       command: custom
       customCommand: "ci && npm run build:staging"
-    workingDirectory: "frontend/admin-dashboard"
+      workingDir: "frontend/admin-dashboard"
 
   # Publish build artifacts
   - task: PublishBuildArtifacts@1
