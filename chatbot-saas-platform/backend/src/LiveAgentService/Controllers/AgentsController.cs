@@ -9,7 +9,7 @@ namespace LiveAgentService.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
-[Authorize]
+//[Authorize]
 public class AgentsController : ControllerBase
 {
     private readonly IAgentManagementService _agentManagementService;
@@ -70,6 +70,28 @@ public class AgentsController : ControllerBase
         {
             _logger.LogError(ex, "Error getting agent conversations");
             return StatusCode(500, new { message = "Internal server error" });
+        }
+    }
+ 
+
+    [HttpGet("available")]
+    public async Task<IActionResult> GetAvailableAgent([FromQuery] Guid tenantId, [FromQuery] string? language = null)
+    {
+        try
+        {
+            var agentId = await _agentRoutingService.FindAvailableAgentAsync(tenantId, null, language);
+
+            if (agentId == null)
+            {
+                return NotFound(new { Message = "No available agent found." });
+            }
+
+            return Ok(new { AgentId = agentId });
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error finding available agent for tenant {TenantId}", tenantId);
+            return StatusCode(500, new { Message = "An error occurred while finding an available agent." });
         }
     }
 
