@@ -3,6 +3,7 @@ using Shared.Application.Common.Interfaces;
 using KnowledgeBaseService.Services;
 using KnowledgeBaseService.Models;
 using Shared.Domain.Entities;
+using Shared.Infrastructure.Persistence;
 namespace KnowledgeBaseService.Services;
 
 public class KnowledgeBaseService : IKnowledgeBaseService
@@ -12,19 +13,22 @@ public class KnowledgeBaseService : IKnowledgeBaseService
     private readonly IVectorSearchService _vectorSearchService;
     private readonly ILogger<KnowledgeBaseService> _logger;
     private readonly IConfiguration _configuration;
+    private readonly IServiceProvider _serviceProvider;
 
     public KnowledgeBaseService(
         IApplicationDbContext context,
         IDocumentProcessingService documentProcessingService,
         IVectorSearchService vectorSearchService,
         ILogger<KnowledgeBaseService> logger,
-        IConfiguration configuration)
+        IConfiguration configuration,
+        IServiceProvider serviceProvider)
     {
         _context = context;
         _documentProcessingService = documentProcessingService;
         _vectorSearchService = vectorSearchService;
         _logger = logger;
         _configuration = configuration;
+        _serviceProvider = serviceProvider;
     }
 
     public async Task<Document> UploadDocumentAsync(DocumentUploadRequest request, Guid tenantId, Guid userId)
@@ -297,30 +301,40 @@ public class KnowledgeBaseService : IKnowledgeBaseService
     {
         try
         {
-            document.Status = DocumentStatus.Processing;
-            await _context.SaveChangesAsync();
-
-            using var fileStream = new FileStream(document.FilePath, FileMode.Open, FileAccess.Read);
-            var result = await _documentProcessingService.ProcessDocumentAsync(document, fileStream);
-
-            if (result.IsSuccessful)
+            using (var scope = _serviceProvider.CreateScope())
             {
-                var chunks = await _documentProcessingService.ChunkDocumentAsync(document, document.Content);
-                _context.Set<DocumentChunk>().AddRange(chunks);
-                
-                var collectionName = $"tenant_{document.TenantId:N}_knowledge";
-                await _vectorSearchService.CreateCollectionAsync(collectionName, document.TenantId);
-                
-                await _vectorSearchService.UpdateDocumentInVectorAsync(document, chunks);
-            }
+                var dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+                var documentProcessingService = scope.ServiceProvider.GetRequiredService<IDocumentProcessingService>();
 
-            await _context.SaveChangesAsync();
+                document.Status = DocumentStatus.Processing;
+                await dbContext.SaveChangesAsync();
+
+                using var fileStream = new FileStream(document.FilePath, FileMode.Open, FileAccess.Read);
+                var result = await documentProcessingService.ProcessDocumentAsync(document, fileStream);
+
+                if (result.IsSuccessful)
+                {
+                    var chunks = await documentProcessingService.ChunkDocumentAsync(document, document.Content);
+                    dbContext.Set<DocumentChunk>().AddRange(chunks);
+
+                    var collectionName = $"tenant_{document.TenantId:N}_knowledge";
+                    var vectorSearchService = scope.ServiceProvider.GetRequiredService<IVectorSearchService>();
+                    await vectorSearchService.CreateCollectionAsync(collectionName, document.TenantId);
+                    await vectorSearchService.UpdateDocumentInVectorAsync(document, chunks);
+                }
+
+                await dbContext.SaveChangesAsync();
+            }
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error processing document {DocumentId} in background", document.Id);
             document.Status = DocumentStatus.Failed;
-            await _context.SaveChangesAsync();
+            using (var scope = _serviceProvider.CreateScope())
+            {
+                var dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+                await dbContext.SaveChangesAsync();
+            }
         }
     }
 
