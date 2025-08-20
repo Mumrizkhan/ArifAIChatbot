@@ -62,6 +62,7 @@ class ProactiveService {
       sender: "bot" as const,
       timestamp: new Date(),
       type: "text" as const,
+      pending: false,
     };
 
     store.dispatch(addMessage(message));
@@ -84,7 +85,7 @@ class ProactiveService {
         return state.chat.isOpen && state.chat.currentConversation?.messages.length === 0;
       },
       "Welcome! How can I assist you today?",
-      2000
+      0
     );
   }
 
