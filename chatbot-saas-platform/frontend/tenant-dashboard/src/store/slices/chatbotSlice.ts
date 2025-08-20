@@ -85,7 +85,6 @@ export const createChatbotConfig = createAsyncThunk("chatbot/createConfig", asyn
   const requestPayload = {
     ...otherConfig,
     Configuration: {
-      ...otherConfig,
       predefinedIntents: predefinedIntents || []
     }
   };
@@ -113,7 +112,6 @@ export const updateChatbotConfig = createAsyncThunk(
     const requestPayload = {
       ...otherConfig,
       Configuration: {
-        ...otherConfig,
         predefinedIntents: predefinedIntents || []
       }
     };
