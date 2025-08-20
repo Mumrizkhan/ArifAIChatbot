@@ -104,7 +104,7 @@ export const fetchConversations = createAsyncThunk(
     if (params?.priority) queryParams.append("priority", params.priority);
     if (params?.limit) queryParams.append("limit", params.limit.toString());
 
-    const response = await fetch(`${API_BASE_URL}/live-agent/conversations?${queryParams}`, {
+    const response = await fetch(`${API_BASE_URL}/agent/conversations?${queryParams}`, {
       headers: {
         Authorization: `Bearer ${localStorage.getItem("token")}`,
       },
@@ -119,7 +119,7 @@ export const fetchConversations = createAsyncThunk(
 );
 
 export const fetchConversation = createAsyncThunk("conversations/fetchOne", async (conversationId: string) => {
-  const response = await fetch(`${API_BASE_URL}/live-agent/conversations/${conversationId}`, {
+  const response = await fetch(`${API_BASE_URL}/agent/conversations/${conversationId}`, {
     headers: {
       Authorization: `Bearer ${localStorage.getItem("token")}`,
     },
@@ -145,7 +145,7 @@ export const sendMessage = createAsyncThunk(
     type?: Message["type"];
     metadata?: Message["metadata"];
   }) => {
-    const response = await fetch(`${API_BASE_URL}/live-agent/conversations/${conversationId}/messages`, {
+    const response = await fetch(`${API_BASE_URL}/agent/conversations/${conversationId}/messages`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -165,7 +165,7 @@ export const sendMessage = createAsyncThunk(
 export const updateConversationStatus = createAsyncThunk(
   "conversations/updateStatus",
   async ({ conversationId, status }: { conversationId: string; status: Conversation["status"] }) => {
-    const response = await fetch(`${API_BASE_URL}/live-agent/conversations/${conversationId}/status`, {
+    const response = await fetch(`${API_BASE_URL}/agent/conversations/${conversationId}/status`, {
       method: "PUT",
       headers: {
         "Content-Type": "application/json",
@@ -185,7 +185,7 @@ export const updateConversationStatus = createAsyncThunk(
 export const assignConversation = createAsyncThunk(
   "conversations/assign",
   async ({ conversationId, agentId }: { conversationId: string; agentId: string }) => {
-    const response = await fetch(`${API_BASE_URL}/live-agent/conversations/${conversationId}/assign`, {
+    const response = await fetch(`${API_BASE_URL}/agent/conversations/${conversationId}/assign`, {
       method: "PUT",
       headers: {
         "Content-Type": "application/json",
@@ -205,7 +205,7 @@ export const assignConversation = createAsyncThunk(
 export const transferConversation = createAsyncThunk(
   "conversations/transfer",
   async ({ conversationId, toAgentId, reason }: { conversationId: string; toAgentId: string; reason: string }) => {
-    const response = await fetch(`${API_BASE_URL}/live-agent/conversations/${conversationId}/transfer`, {
+    const response = await fetch(`${API_BASE_URL}/agent/conversations/${conversationId}/transfer`, {
       method: "PUT",
       headers: {
         "Content-Type": "application/json",
@@ -225,7 +225,7 @@ export const transferConversation = createAsyncThunk(
 export const rateConversation = createAsyncThunk(
   "conversations/rate",
   async ({ conversationId, rating, feedback }: { conversationId: string; rating: number; feedback?: string }) => {
-    const response = await fetch(`${API_BASE_URL}/live-agent/conversations/${conversationId}/rate`, {
+    const response = await fetch(`${API_BASE_URL}/agent/conversations/${conversationId}/rate`, {
       method: "PUT",
       headers: {
         "Content-Type": "application/json",
