@@ -1,10 +1,11 @@
-import React, { useEffect, useRef } from "react";
+import React, { useEffect, useRef, useMemo } from "react";
 import { useSelector } from "react-redux";
 import { useTranslation } from "react-i18next";
 import { RootState } from "../store/store";
 import { Message } from "../store/slices/chatSlice";
 import { MessageBubble } from "./MessageBubble";
 import { TypingIndicator } from "./TypingIndicator";
+import { IntentButtons } from "./IntentButtons";
 import { Bot } from "lucide-react";
 
 export const MessageList: React.FC = () => {
@@ -14,7 +15,7 @@ export const MessageList: React.FC = () => {
   const { branding } = useSelector((state: RootState) => state.theme);
   console.log(currentConversation);
 
-  const messages = currentConversation?.messages || [];
+  const messages = useMemo(() => currentConversation?.messages || [], [currentConversation?.messages]);
   console.log(messages, "rao");
 
   useEffect(() => {
@@ -35,14 +36,42 @@ export const MessageList: React.FC = () => {
     );
   };
 
+  const renderEmptyState = () => (
+    <div className="message-list-empty">
+      <div className="empty-state-avatar">
+        {branding.logo ? (
+          <img src={branding.logo} alt={branding.companyName || t("widget.title")} className="w-12 h-12 rounded-full" />
+        ) : (
+          <div className="w-12 h-12 rounded-full bg-primary flex items-center justify-center">
+            <Bot size={24} className="text-white" />
+          </div>
+        )}
+      </div>
+      <div className="empty-state-content">
+        <h3 className="empty-state-title">{branding.companyName || t("widget.title")}</h3>
+        <p className="empty-state-message">{branding.welcomeMessage || t("widget.welcomeMessage")}</p>
+        <IntentButtons />
+      </div>
+    </div>
+  );
+
+  const renderConversationStart = () => (
+    <div className="conversation-start">
+      <div className="conversation-start-line">
+        <span className="conversation-start-text">{t("widget.startConversation")}</span>
+      </div>
+    </div>
+  );
+
   return (
     <div className="message-list h-full min-h-0 overflow-y-auto" role="log" aria-label="Message List" aria-live="polite">
       {messages.length === 0 ? (
-        <div className="message-list-empty">No messages yet</div>
+        renderEmptyState()
       ) : (
         <div className="messages-container">
+          {renderConversationStart()}
           {messages.map(renderMessage)}
-          {/* {isTyping && typingUser && <TypingIndicator user={typingUser} />} */}
+          {isTyping && typingUser && <TypingIndicator user={typingUser} />}
         </div>
       )}
       <div ref={messagesEndRef} />

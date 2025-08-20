@@ -94,7 +94,7 @@ public class OpenAIService : IAIService
             if (contextDocuments.Any())
             {
                 var contextText = string.Join("\n\n", contextDocuments);
-                var systemPrompt = $"Use the following context to answer the user's question:\n\n{contextText}\n\nIf the context doesn't contain relevant information, don't user your general knowledge, answer \"I don’t know based on the available information.\"";
+                var systemPrompt = $"Use the following context to answer the user's question:\n\n{contextText}\n\nIf the context doesn't contain relevant information, don't user your general knowledge, answer \"I don’t know based on the available information.\" and don't include the text \"based on the available information\" if reply is found";
                 messages.Add(new SystemChatMessage(systemPrompt));
             }
             

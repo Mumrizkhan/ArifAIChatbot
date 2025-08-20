@@ -43,6 +43,13 @@ export interface ChatbotConfig {
     crm: boolean;
     analytics: boolean;
   };
+  predefinedIntents?: {
+    id: string;
+    label: string;
+    message: string;
+    category: string;
+    isActive: boolean;
+  }[];
 }
 
 interface ChatbotState {

@@ -908,3 +908,45 @@
 .chat-widget button:focus:not(:focus-visible) {
   outline: none;
 }
+
+/* Intent Buttons Styles */
+.intent-buttons {
+  margin-top: 16px;
+  text-align: center;
+}
+
+.intent-buttons-title {
+  font-size: 14px;
+  font-weight: 500;
+  margin-bottom: 12px;
+  color: var(--text-color);
+}
+
+.intent-buttons-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  justify-content: center;
+}
+
+.intent-button {
+  background: var(--primary-color);
+  color: white;
+  border: none;
+  border-radius: var(--border-radius);
+  padding: 8px 16px;
+  font-size: 14px;
+  cursor: pointer;
+  transition: background-color 0.2s, transform 0.1s;
+  font-family: inherit;
+}
+
+.intent-button:hover {
+  background: var(--primary-color-dark, var(--primary-color));
+  opacity: 0.9;
+  transform: translateY(-1px);
+}
+
+.intent-button:active {
+  transform: translateY(0);
+}

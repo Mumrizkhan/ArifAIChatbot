@@ -46,7 +46,9 @@ public class LiveAgentIntegrationService : ILiveAgentIntegrationService
     {
         try
         {
+            
             var response = await _httpClient.GetAsync($"{_liveAgentServiceUrl}/api/agents/available?tenantId={tenantId}&language={language}");
+
             if (response.IsSuccessStatusCode)
             {
                 var content = await response.Content.ReadAsStringAsync();

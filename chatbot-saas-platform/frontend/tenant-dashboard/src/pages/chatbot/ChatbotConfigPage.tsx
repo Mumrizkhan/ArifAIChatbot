@@ -33,6 +33,8 @@ import {
   Zap,
   Globe,
   Send,
+  Plus,
+  Trash2,
 } from 'lucide-react';
 import {
   Dialog,
@@ -57,6 +59,18 @@ const ChatbotConfigPage = () => {
   const [testMessages, setTestMessages] = useState<Array<{id: string, content: string, sender: 'user' | 'bot', timestamp: Date}>>([]);
   const [testInput, setTestInput] = useState('');
   const [isTesting, setIsTesting] = useState(false);
+  const [predefinedIntents, setPredefinedIntents] = useState<Array<{
+    id: string;
+    label: string;
+    message: string;
+    category: string;
+    isActive: boolean;
+  }>>([]);
+  const [newIntent, setNewIntent] = useState({
+    label: '',
+    message: '',
+    category: 'general'
+  });
 
   const { register, handleSubmit, setValue, watch, formState: { errors } } = useForm({
     defaultValues: {
@@ -76,6 +90,12 @@ const ChatbotConfigPage = () => {
   useEffect(() => {
     dispatch(fetchChatbotConfigs());
   }, [dispatch]);
+
+  useEffect(() => {
+    if (config?.predefinedIntents) {
+      setPredefinedIntents(config.predefinedIntents);
+    }
+  }, [config]);
 
   useEffect(() => {
     if (config) {
@@ -135,7 +155,8 @@ const ChatbotConfigPage = () => {
           knowledgeBase: true,
           crm: false,
           analytics: true
-        }
+        },
+        predefinedIntents: predefinedIntents
       };
       dispatch(createChatbotConfig(createRequest));
     } else {
@@ -143,8 +164,33 @@ const ChatbotConfigPage = () => {
         console.error('No chatbot configuration found. Please refresh the page.');
         return;
       }
-      dispatch(updateChatbotConfig({ id: config.id, config: data }));
+      const updateData = { ...data, predefinedIntents: predefinedIntents };
+      dispatch(updateChatbotConfig({ id: config.id, config: updateData }));
     }
+  };
+
+  const handleAddIntent = () => {
+    if (newIntent.label.trim() && newIntent.message.trim()) {
+      const intent = {
+        id: `intent_${Date.now()}`,
+        label: newIntent.label.trim(),
+        message: newIntent.message.trim(),
+        category: newIntent.category,
+        isActive: true
+      };
+      setPredefinedIntents([...predefinedIntents, intent]);
+      setNewIntent({ label: '', message: '', category: 'general' });
+    }
+  };
+
+  const handleRemoveIntent = (intentId: string) => {
+    setPredefinedIntents(predefinedIntents.filter(intent => intent.id !== intentId));
+  };
+
+  const handleToggleIntent = (intentId: string) => {
+    setPredefinedIntents(predefinedIntents.map(intent => 
+      intent.id === intentId ? { ...intent, isActive: !intent.isActive } : intent
+    ));
   };
 
   const handleTestChatbot = async (message: string) => {
@@ -421,6 +467,10 @@ const ChatbotConfigPage = () => {
             <MessageSquare className="mr-2 h-4 w-4" />
             {t('chatbot.responses')}
           </TabsTrigger>
+          <TabsTrigger value="intents">
+            <MessageSquare className="mr-2 h-4 w-4" />
+            Quick Start Intents
+          </TabsTrigger>
         </TabsList>
 
         <TabsContent value="personality" className="space-y-4">
@@ -682,6 +732,94 @@ const ChatbotConfigPage = () => {
                   {t('chatbot.fallbackMessageDesc')}
                 </p>
               </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="intents" className="space-y-4">
+          <Card>
+            <CardHeader>
+              <CardTitle>Predefined Intents</CardTitle>
+              <CardDescription>
+                Create quick-start buttons that appear when users first open the chat widget. These help users get started with common questions or requests.
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="grid gap-4 md:grid-cols-2">
+                <div className="space-y-2">
+                  <Label htmlFor="intent-label">Button Label</Label>
+                  <Input
+                    id="intent-label"
+                    value={newIntent.label}
+                    onChange={(e) => setNewIntent({ ...newIntent, label: e.target.value })}
+                    placeholder="e.g., Get Pricing Info"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="intent-category">Category</Label>
+                  <Select value={newIntent.category} onValueChange={(value) => setNewIntent({ ...newIntent, category: value })}>
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="general">General</SelectItem>
+                      <SelectItem value="greeting">Greeting</SelectItem>
+                      <SelectItem value="pricing">Pricing</SelectItem>
+                      <SelectItem value="support">Support</SelectItem>
+                      <SelectItem value="booking">Booking</SelectItem>
+                      <SelectItem value="complaint">Complaint</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+              
+              <div className="space-y-2">
+                <Label htmlFor="intent-message">Message to Send</Label>
+                <Textarea
+                  id="intent-message"
+                  value={newIntent.message}
+                  onChange={(e) => setNewIntent({ ...newIntent, message: e.target.value })}
+                  placeholder="e.g., I'd like to know more about your pricing plans"
+                  rows={3}
+                />
+              </div>
+
+              <Button onClick={handleAddIntent} disabled={!newIntent.label.trim() || !newIntent.message.trim()}>
+                <Plus className="mr-2 h-4 w-4" />
+                Add Intent
+              </Button>
+
+              {predefinedIntents.length > 0 && (
+                <div className="space-y-3">
+                  <h4 className="text-sm font-medium">Configured Intents</h4>
+                  <div className="space-y-2">
+                    {predefinedIntents.map((intent) => (
+                      <div key={intent.id} className="flex items-center justify-between p-3 border rounded-lg">
+                        <div className="flex-1">
+                          <div className="flex items-center gap-2">
+                            <span className="font-medium">{intent.label}</span>
+                            <span className="text-xs px-2 py-1 bg-gray-100 rounded-full">{intent.category}</span>
+                          </div>
+                          <p className="text-sm text-muted-foreground mt-1">{intent.message}</p>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <Switch
+                            checked={intent.isActive}
+                            onCheckedChange={() => handleToggleIntent(intent.id)}
+                          />
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => handleRemoveIntent(intent.id)}
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
             </CardContent>
           </Card>
         </TabsContent>
