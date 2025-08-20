@@ -227,7 +227,7 @@ public class KnowledgeBaseService : IKnowledgeBaseService
                 .Where(c => c.TenantId == tenantId)
                 .CountAsync();
 
-            _logger.LogInformation("Statistics for tenant {TenantId}: {DocumentCount} documents, {ChunkCount} chunks", 
+            _logger.LogInformation("Statistics for tenant {TenantId}: {DocumentCount} documents, {ChunkCount} chunks",
                 tenantId, documents.Count, chunks);
 
             var statistics = new KnowledgeBaseStatistics
@@ -244,8 +244,10 @@ public class KnowledgeBaseService : IKnowledgeBaseService
                 LastUpdated = DateTime.UtcNow
             };
 
-            _logger.LogInformation("Generated statistics for tenant {TenantId}: {Stats}", tenantId, 
+            _logger.LogInformation("Generated statistics for tenant {TenantId}: {Stats}", tenantId,
                 System.Text.Json.JsonSerializer.Serialize(statistics));
+
+            return statistics;
         }
         catch (Exception ex)
         {
