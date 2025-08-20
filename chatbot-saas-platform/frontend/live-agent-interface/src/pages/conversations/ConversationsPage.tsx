@@ -4,11 +4,14 @@ import { useTranslation } from "react-i18next";
 import { AppDispatch, RootState } from "../../store/store";
 import {
   fetchConversations,
+  fetchConversation,
   sendMessage,
   updateConversationStatus,
   setConversationSignalRStatus,
   assignConversationRealtime,
   transferConversationRealtime,
+  addMessage,
+  addNewConversation,
 } from "../../store/slices/conversationSlice";
 import { setSelectedConversation } from "../../store/slices/selectedConversationSlice";
 import { agentSignalRService } from "../../services/signalr";
@@ -34,6 +37,7 @@ const ConversationsPage = () => {
   const [statusFilter, setStatusFilter] = useState("all");
   const [messageText, setMessageText] = useState("");
   const [isTransferDialogOpen, setIsTransferDialogOpen] = useState(false);
+  const [previousConversationId, setPreviousConversationId] = useState<string | null>(null);
 
   // Get the actual selected conversation object
   const selectedConversation = conversations?.find((conv) => conv.id === conversationId) || null;
@@ -47,13 +51,32 @@ const ConversationsPage = () => {
     if (signalRConnected) {
       agentSignalRService.setOnConversationAssigned((assignment: any) => {
         dispatch(assignConversationRealtime(assignment));
+        dispatch(fetchConversation(assignment.conversationId));
       });
 
       agentSignalRService.setOnConversationTransferred((transfer: any) => {
         dispatch(transferConversationRealtime(transfer));
       });
+
+      agentSignalRService.setOnMessageReceived((message: any) => {
+        dispatch(addMessage(message));
+      });
     }
   }, [dispatch]);
+
+  useEffect(() => {
+    if (conversationId && conversationId !== previousConversationId) {
+      if (previousConversationId && agentSignalRService.getConnectionStatus()) {
+        agentSignalRService.leaveConversation(previousConversationId);
+      }
+      
+      if (agentSignalRService.getConnectionStatus()) {
+        agentSignalRService.joinConversation(conversationId);
+      }
+      
+      setPreviousConversationId(conversationId);
+    }
+  }, [conversationId, previousConversationId]);
 
   const filteredConversations =
     Array.isArray(conversations) ? conversations.filter((conversation) => {
