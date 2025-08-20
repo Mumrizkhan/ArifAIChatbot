@@ -6,6 +6,7 @@ using System.Text;
 using Shared.Application.Common.Interfaces;
 using Shared.Domain.Entities;
 using IdentityService.Models;
+using Shared.Domain.Enums;
 
 namespace IdentityService.Services;
 
@@ -70,6 +71,10 @@ public class AuthService : IAuthService
         {
             throw new UnauthorizedAccessException("Account is disabled");
         }
+
+        if (user.Role == UserRole.Agent)        
+            user.Status = UserStatus.Online;
+        
 
         user.LastLoginAt = DateTime.UtcNow;
         await _context.SaveChangesAsync();
