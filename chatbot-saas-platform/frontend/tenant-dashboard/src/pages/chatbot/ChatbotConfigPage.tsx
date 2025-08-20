@@ -222,7 +222,7 @@ const ChatbotConfigPage = () => {
           throw new Error(`File ${file.name} is too large. Maximum size is 10MB.`);
         }
 
-        const response = await KnowledgeBaseService.uploadDocument(file, file.name);
+        const response = await ChatbotService.uploadKnowledgeBaseDocument(file, file.name);
         if (!response.success) {
           throw new Error(`Failed to upload ${file.name}: Unknown error`);
         }
