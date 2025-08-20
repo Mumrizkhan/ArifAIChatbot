@@ -122,9 +122,14 @@ const chatSlice = createSlice({
     addMessage: (state, action: PayloadAction<Message>) => {
       if (state.currentConversation) {
         state.currentConversation.messages.push(action.payload);
-        if (!state.isOpen && action.payload.sender !== "user") {
-          state.unreadCount += 1;
-        }
+      } else {
+        // If no conversation exists, create a new one with the message
+        state.currentConversation = {
+          id: `temp-conversation-${Date.now()}`, // Temporary ID for the conversation
+          messages: [action.payload],
+          status: "active",
+          startedAt: new Date(),
+        };
       }
     },
     setTyping: (state, action: PayloadAction<{ isTyping: boolean; user?: string }>) => {
@@ -158,6 +163,18 @@ const chatSlice = createSlice({
       .addCase(sendMessage.pending, (state) => {
         state.isLoading = true;
         state.error = null;
+
+        // Add a pending bot message
+        if (state.currentConversation) {
+          state.currentConversation.messages.push({
+            id: `pending-bot-${Date.now()}`, // Temporary ID
+            content: "...", // Placeholder content
+            sender: "bot",
+            type: "text",
+            timestamp: new Date(),
+            metadata: {},
+          });
+        }
       })
       .addCase(sendMessage.fulfilled, (state, action) => {
         state.isLoading = false;
@@ -165,24 +182,23 @@ const chatSlice = createSlice({
         const body = action.payload as any;
         if (!state.currentConversation || !body) return;
 
-        const toPush: Message[] = [];
+        // Remove the pending bot message
+        state.currentConversation.messages = state.currentConversation.messages.filter((msg) => !msg.id.startsWith("pending-bot-"));
 
-        if (body.userMessage) {
-          const userMsg = normalizeApiMessage(body.userMessage, "user");
-          toPush.push(userMsg);
-        }
+        // Add the actual bot message
         if (body.botMessage) {
           const botMsg = normalizeApiMessage(body.botMessage, "bot");
-          toPush.push(botMsg);
-        }
-
-        if (toPush.length) {
-          state.currentConversation.messages.push(...toPush);
+          state.currentConversation.messages.push(botMsg);
         }
       })
       .addCase(sendMessage.rejected, (state, action) => {
         state.isLoading = false;
         state.error = (action.payload as any)?.message || action.error.message || "Failed to send message";
+
+        // Remove the pending bot message
+        if (state.currentConversation) {
+          state.currentConversation.messages = state.currentConversation.messages.filter((msg) => !msg.id.startsWith("pending-bot-"));
+        }
       })
       .addCase(startConversation.pending, (state) => {
         state.isLoading = true;

@@ -6,6 +6,7 @@ import { sendMessage, startConversation, requestHumanAgent } from "../store/slic
 import { trackEvent } from "../store/slices/configSlice";
 import { signalRService } from "../services/websocket";
 import { Send, Paperclip, Mic, MicOff, User } from "lucide-react";
+import { addMessage } from "../store/slices/chatSlice";
 
 export const MessageInput: React.FC = () => {
   const { t } = useTranslation();
@@ -81,6 +82,21 @@ export const MessageInput: React.FC = () => {
     if (!messageContent) return;
     setMessage("");
 
+    // Generate a temporary ID for the user message
+    const tempUserMessageId = `temp-user-${Date.now()}`;
+
+    // Optimistically add the user message to the UI
+    dispatch(
+      addMessage({
+        id: tempUserMessageId,
+        sender: "user",
+        content: messageContent,
+        type: "text",
+        timestamp: new Date(),
+        // pending: false, // User messages are not pending
+      })
+    );
+
     try {
       // Ensure conversation exists (start if needed)
       let conversation = currentConversation;
@@ -88,9 +104,10 @@ export const MessageInput: React.FC = () => {
         conversation = await dispatch(startConversation(widget.tenantId)).unwrap();
       }
 
-      // DO NOT dispatch addMessage here; API response will add both messages
+      // Send the user message to the API
       await dispatch(sendMessage({ content: messageContent, type: "text" })).unwrap();
 
+      // Optionally track the event
       dispatch(
         trackEvent({
           event: "message_sent",
@@ -98,7 +115,9 @@ export const MessageInput: React.FC = () => {
         })
       );
     } catch (err) {
-      console.error("Failed to send:", err);
+      console.error("Failed to send message:", err);
+
+      // Optionally handle errors (e.g., show a retry button or mark the message as failed)
     }
   };
 

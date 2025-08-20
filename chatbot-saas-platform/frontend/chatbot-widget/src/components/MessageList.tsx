@@ -29,49 +29,21 @@ export const MessageList: React.FC = () => {
     const isFirstInGroup = index === 0 || messages[index - 1].sender !== message.sender;
     const isLastInGroup = index === messages.length - 1 || messages[index + 1]?.sender !== message.sender;
 
+    // Use MessageBubble for pending bot message
     return (
       <MessageBubble key={message.id} message={message} isFirstInGroup={isFirstInGroup} isLastInGroup={isLastInGroup} showAvatar={isLastInGroup} />
     );
   };
 
-  const renderEmptyState = () => (
-    <div className="message-list-empty">
-      <div className="empty-state-avatar">
-        {branding.logo ? (
-          <img src={branding.logo} alt={branding.companyName || t("widget.title")} className="w-12 h-12 rounded-full" />
-        ) : (
-          <div className="w-12 h-12 rounded-full bg-primary flex items-center justify-center">
-            <Bot size={24} className="text-white" />
-          </div>
-        )}
-      </div>
-      <div className="empty-state-content">
-        <h3 className="empty-state-title">{branding.companyName || t("widget.title")}</h3>
-        <p className="empty-state-message">{branding.welcomeMessage || t("widget.welcomeMessage")}</p>
-      </div>
-    </div>
-  );
-
-  const renderConversationStart = () => (
-    <div className="conversation-start">
-      <div className="conversation-start-line">
-        <span className="conversation-start-text">{t("widget.startConversation")}</span>
-      </div>
-    </div>
-  );
-
   return (
-    <div className="message-list h-full min-h-0 overflow-y-auto" role="log" aria-label={t("accessibility.messageList")} aria-live="polite">
+    <div className="message-list h-full min-h-0 overflow-y-auto" role="log" aria-label="Message List" aria-live="polite">
       {messages.length === 0 ? (
-        renderEmptyState()
+        <div className="message-list-empty">No messages yet</div>
       ) : (
-        <>
-          {renderConversationStart()}
-          <div className="messages-container">
-            {messages.map(renderMessage)}
-            {isTyping && typingUser && <TypingIndicator user={typingUser} />}
-          </div>
-        </>
+        <div className="messages-container">
+          {messages.map(renderMessage)}
+          {/* {isTyping && typingUser && <TypingIndicator user={typingUser} />} */}
+        </div>
       )}
       <div ref={messagesEndRef} />
     </div>
