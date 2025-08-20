@@ -1,10 +1,10 @@
 import React from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { RootState } from "../store/store";
+import { RootState, AppDispatch } from "../store/store";
 import { sendMessage } from "../store/slices/chatSlice";
 
 export const IntentButtons: React.FC = () => {
-  const dispatch = useDispatch();
+  const dispatch = useDispatch<AppDispatch>();
   const { widget } = useSelector((state: RootState) => state.config);
   const predefinedIntents = widget.predefinedIntents || [];
 

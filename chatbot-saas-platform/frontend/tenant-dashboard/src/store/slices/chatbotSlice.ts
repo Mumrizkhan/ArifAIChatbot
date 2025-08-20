@@ -81,13 +81,22 @@ export const fetchChatbotConfigs = createAsyncThunk("chatbot/fetchConfigs", asyn
 });
 
 export const createChatbotConfig = createAsyncThunk("chatbot/createConfig", async (config: Omit<ChatbotConfig, "id">) => {
+  const { predefinedIntents, ...otherConfig } = config;
+  const requestPayload = {
+    ...otherConfig,
+    Configuration: {
+      ...otherConfig,
+      predefinedIntents: predefinedIntents || []
+    }
+  };
+
   const response = await fetch(`${API_BASE_URL}/tenant-management/chatbotconfigs`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
       Authorization: `Bearer ${localStorage.getItem("token")}`,
     },
-    body: JSON.stringify(config),
+    body: JSON.stringify(requestPayload),
   });
 
   if (!response.ok) {
@@ -100,13 +109,22 @@ export const createChatbotConfig = createAsyncThunk("chatbot/createConfig", asyn
 export const updateChatbotConfig = createAsyncThunk(
   "chatbot/updateConfig",
   async ({ id, config }: { id: string; config: Partial<ChatbotConfig> }) => {
+    const { predefinedIntents, ...otherConfig } = config;
+    const requestPayload = {
+      ...otherConfig,
+      Configuration: {
+        ...otherConfig,
+        predefinedIntents: predefinedIntents || []
+      }
+    };
+
     const response = await fetch(`${API_BASE_URL}/tenant-management/chatbotconfigs/${id}`, {
       method: "PUT",
       headers: {
         "Content-Type": "application/json",
         Authorization: `Bearer ${localStorage.getItem("token")}`,
       },
-      body: JSON.stringify(config),
+      body: JSON.stringify(requestPayload),
     });
 
     if (!response.ok) {
@@ -161,22 +179,33 @@ const chatbotSlice = createSlice({
       })
       .addCase(fetchChatbotConfigs.fulfilled, (state, action) => {
         state.isLoading = false;
-        state.configs = action.payload;
+        state.configs = action.payload.map((config: any) => ({
+          ...config,
+          predefinedIntents: config.Configuration?.predefinedIntents || []
+        }));
       })
       .addCase(fetchChatbotConfigs.rejected, (state, action) => {
         state.isLoading = false;
         state.error = action.error.message || "Failed to fetch chatbot configs";
       })
       .addCase(createChatbotConfig.fulfilled, (state, action) => {
-        state.configs.push(action.payload);
+        const mappedConfig = {
+          ...action.payload,
+          predefinedIntents: action.payload.Configuration?.predefinedIntents || []
+        };
+        state.configs.push(mappedConfig);
       })
       .addCase(updateChatbotConfig.fulfilled, (state, action) => {
-        const index = state.configs.findIndex((c) => c.id === action.payload.id);
+        const mappedConfig = {
+          ...action.payload,
+          predefinedIntents: action.payload.Configuration?.predefinedIntents || []
+        };
+        const index = state.configs.findIndex((c) => c.id === mappedConfig.id);
         if (index !== -1) {
-          state.configs[index] = action.payload;
+          state.configs[index] = mappedConfig;
         }
-        if (state.activeConfig && state.activeConfig.id === action.payload.id) {
-          state.activeConfig = action.payload;
+        if (state.activeConfig && state.activeConfig.id === mappedConfig.id) {
+          state.activeConfig = mappedConfig;
         }
       })
       .addCase(deleteChatbotConfig.fulfilled, (state, action) => {

@@ -5,7 +5,7 @@ import { RootState, AppDispatch } from "../store/store";
 import { sendMessage, startConversation, requestHumanAgent } from "../store/slices/chatSlice";
 import { trackEvent } from "../store/slices/configSlice";
 import { signalRService } from "../services/websocket";
-import { Send, Paperclip, Mic, MicOff, User } from "lucide-react";
+import { Send, Mic, MicOff, User } from "lucide-react";
 import { addMessage } from "../store/slices/chatSlice";
 
 export const MessageInput: React.FC = () => {
