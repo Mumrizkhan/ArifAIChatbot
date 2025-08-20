@@ -138,6 +138,24 @@ export class ChatbotService {
     return apiClient.upload<{ avatar: string }>('/tenant-management/chatbotconfigs/avatar', formData);
   }
 
+  // Knowledge Base Operations
+  static async uploadKnowledgeBaseDocument(configId: string, file: File, title?: string): Promise<ApiResponse<{ message: string }>> {
+    const formData = new FormData();
+    formData.append('configId', configId);
+    formData.append('file', file);
+    if (title) formData.append('title', title);
+    
+    return apiClient.upload<{ message: string }>(`/tenant-management/chatbotconfigs/${configId}/knowledge-base/documents`, formData);
+  }
+
+  static async getKnowledgeBase(configId: string): Promise<ApiResponse<{ Documents: any[] }>> {
+    return apiClient.get<{ Documents: any[] }>(`/tenant-management/chatbotconfigs/${configId}/knowledge-base`);
+  }
+
+  static async deleteKnowledgeBaseDocument(configId: string, documentId: string): Promise<ApiResponse<{ message: string }>> {
+    return apiClient.delete<{ message: string }>(`/tenant-management/chatbotconfigs/${configId}/knowledge-base/documents/${documentId}`);
+  }
+
 
   // Conversations - handled by ChatRuntimeService
   static async getConversations(params?: {
