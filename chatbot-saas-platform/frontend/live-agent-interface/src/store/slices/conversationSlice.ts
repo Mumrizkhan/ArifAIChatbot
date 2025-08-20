@@ -328,6 +328,12 @@ const conversationSlice = createSlice({
         conversation.assignedAgent = { id: action.payload.toAgentId, name: "Agent" };
       }
     },
+    addNewConversation: (state, action: PayloadAction<Conversation>) => {
+      const existingIndex = state.conversations.findIndex((c) => c.id === action.payload.id);
+      if (existingIndex === -1) {
+        state.conversations.unshift(action.payload);
+      }
+    },
   },
   extraReducers: (builder) => {
     builder
@@ -415,6 +421,7 @@ export const {
   setConversationSignalRStatus,
   assignConversationRealtime,
   transferConversationRealtime,
+  addNewConversation,
 } = conversationSlice.actions;
 
 export default conversationSlice.reducer;

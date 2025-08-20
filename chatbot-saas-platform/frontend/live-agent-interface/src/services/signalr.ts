@@ -64,6 +64,7 @@ class AgentSignalRService {
   private onConversationTaken?: (assignment: ConversationAssignment) => void;
   private onConversationTransferred?: (transfer: ConversationTransfer) => void;
   private onConversationEscalated?: (escalation: ConversationEscalation) => void;
+  private onMessageReceived?: (message: any) => void;
   private onAssistanceRequested?: (request: AssistanceRequest) => void;
   private onBroadcastMessage?: (message: BroadcastMessage) => void;
   private onConnectionStatusChange?: (isConnected: boolean) => void;
@@ -78,7 +79,7 @@ class AgentSignalRService {
 
     try {
       this.connection = new HubConnectionBuilder()
-        .withUrl('/agentHub', {
+        .withUrl('/chatHub', {
           accessTokenFactory: () => authToken,
         })
         .withAutomaticReconnect({
@@ -100,7 +101,7 @@ class AgentSignalRService {
       console.log('Agent SignalR connection established');
       this.onConnectionStatusChange?.(true);
       
-      await this.connection.invoke('JoinAgentGroup');
+      await this.connection.invoke('JoinAgentGroup', this.agentId);
       
       return true;
     } catch (error) {
@@ -134,6 +135,10 @@ class AgentSignalRService {
       this.onConversationEscalated?.(escalation);
     });
 
+    this.connection.on('ReceiveMessage', (message: any) => {
+      this.onMessageReceived?.(message);
+    });
+
     this.connection.on('AssistanceRequested', (request: AssistanceRequest) => {
       this.onAssistanceRequested?.(request);
     });
@@ -158,7 +163,7 @@ class AgentSignalRService {
       this.isConnected = true;
       this.onConnectionStatusChange?.(true);
       console.log('Agent SignalR reconnected');
-      this.connection?.invoke('JoinAgentGroup');
+      this.connection?.invoke('JoinAgentGroup', this.agentId);
     });
   }
 
@@ -180,6 +185,10 @@ class AgentSignalRService {
 
   setOnConversationEscalated(handler: (escalation: ConversationEscalation) => void): void {
     this.onConversationEscalated = handler;
+  }
+
+  setOnMessageReceived(handler: (message: any) => void): void {
+    this.onMessageReceived = handler;
   }
 
   setOnAssistanceRequested(handler: (request: AssistanceRequest) => void): void {
@@ -297,6 +306,32 @@ class AgentSignalRService {
 
   getTenantId(): string | null {
     return this.tenantId;
+  }
+
+  async joinConversation(conversationId: string): Promise<void> {
+    if (!this.isConnected || !this.connection) {
+      console.warn('SignalR not connected, cannot join conversation');
+      return;
+    }
+
+    try {
+      await this.connection.invoke('JoinConversation', conversationId);
+    } catch (error) {
+      console.error('Failed to join conversation:', error);
+    }
+  }
+
+  async leaveConversation(conversationId: string): Promise<void> {
+    if (!this.isConnected || !this.connection) {
+      console.warn('SignalR not connected, cannot leave conversation');
+      return;
+    }
+
+    try {
+      await this.connection.invoke('LeaveConversation', conversationId);
+    } catch (error) {
+      console.error('Failed to leave conversation:', error);
+    }
   }
 }
 
