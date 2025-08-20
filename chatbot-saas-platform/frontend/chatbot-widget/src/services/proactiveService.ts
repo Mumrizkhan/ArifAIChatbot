@@ -56,6 +56,16 @@ class ProactiveService {
   }
 
   private sendProactiveMessage(content: string) {
+    const state = store.getState();
+    const currentConversation = state.chat.currentConversation;
+
+    // Ensure the conversation exists and has no messages
+    if (!currentConversation || currentConversation.messages.length > 0) {
+      console.log("Proactive message skipped because there are existing messages.");
+      return;
+    }
+
+    // Add the proactive message
     const message = {
       id: `proactive_${Date.now()}`,
       content,
@@ -82,10 +92,13 @@ class ProactiveService {
     this.addTrigger(
       () => {
         const state = store.getState();
-        return state.chat.isOpen && state.chat.currentConversation?.messages.length === 0;
+        const currentConversation = state.chat.currentConversation;
+
+        // Only trigger if the conversation is open and no messages exist
+        return state.chat.isOpen && !!currentConversation && currentConversation.messages.length === 0;
       },
       "Welcome! How can I assist you today?",
-      0
+      0 // Fire immediately when the chat opens
     );
   }
 
