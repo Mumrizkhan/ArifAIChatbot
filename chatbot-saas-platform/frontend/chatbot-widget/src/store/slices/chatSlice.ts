@@ -164,16 +164,20 @@ const chatSlice = createSlice({
         state.isLoading = true;
         state.error = null;
 
-        // Add a pending bot message
+        // Add a pending bot message only if there are no existing pending messages
         if (state.currentConversation) {
-          state.currentConversation.messages.push({
-            id: `pending-bot-${Date.now()}`, // Temporary ID
-            content: "...", // Placeholder content
-            sender: "bot",
-            type: "text",
-            timestamp: new Date(),
-            metadata: {},
-          });
+          const hasPendingBotMessage = state.currentConversation.messages.some((msg) => msg.id.startsWith("pending-bot-"));
+
+          if (!hasPendingBotMessage) {
+            state.currentConversation.messages.push({
+              id: `pending-bot-${Date.now()}`, // Temporary ID
+              content: "...", // Placeholder content
+              sender: "bot",
+              type: "text",
+              timestamp: new Date(),
+              metadata: {},
+            });
+          }
         }
       })
       .addCase(sendMessage.fulfilled, (state, action) => {
@@ -207,9 +211,15 @@ const chatSlice = createSlice({
       .addCase(startConversation.fulfilled, (state, action) => {
         state.isLoading = false;
         const conv = action.payload as any;
+
+        // Preserve existing messages if they already exist
         state.currentConversation = {
           ...conv,
-          messages: Array.isArray(conv?.messages) ? conv.messages : [],
+          messages: state.currentConversation?.messages.length
+            ? state.currentConversation.messages
+            : Array.isArray(conv?.messages)
+            ? conv.messages
+            : [],
         };
         state.error = null;
       })
