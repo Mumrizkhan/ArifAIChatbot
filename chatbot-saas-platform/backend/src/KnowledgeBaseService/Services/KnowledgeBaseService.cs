@@ -35,6 +35,8 @@ public class KnowledgeBaseService : IKnowledgeBaseService
     {
         try
         {
+            _logger.LogInformation("Starting document upload for tenant {TenantId}, file: {FileName}", tenantId, request.File.FileName);
+            
             var document = new Document
             {
                 Id = Guid.NewGuid(),
@@ -56,6 +58,8 @@ public class KnowledgeBaseService : IKnowledgeBaseService
 
             _context.Set<Document>().Add(document);
             await _context.SaveChangesAsync();
+            
+            _logger.LogInformation("Document {DocumentId} uploaded successfully for tenant {TenantId}. Starting background processing.", document.Id, tenantId);
 
             _ = Task.Run(async () => await ProcessDocumentInBackgroundAsync(document));
 
@@ -223,7 +227,10 @@ public class KnowledgeBaseService : IKnowledgeBaseService
                 .Where(c => c.TenantId == tenantId)
                 .CountAsync();
 
-            return new KnowledgeBaseStatistics
+            _logger.LogInformation("Statistics for tenant {TenantId}: {DocumentCount} documents, {ChunkCount} chunks",
+                tenantId, documents.Count, chunks);
+
+            var statistics = new KnowledgeBaseStatistics
             {
                 TotalDocuments = documents.Count,
                 ProcessedDocuments = documents.Count(d => d.Status == DocumentStatus.Processed),
@@ -236,6 +243,11 @@ public class KnowledgeBaseService : IKnowledgeBaseService
                     .ToDictionary(g => g.Key, g => g.Count()),
                 LastUpdated = DateTime.UtcNow
             };
+
+            _logger.LogInformation("Generated statistics for tenant {TenantId}: {Stats}", tenantId,
+                System.Text.Json.JsonSerializer.Serialize(statistics));
+
+            return statistics;
         }
         catch (Exception ex)
         {
@@ -301,6 +313,8 @@ public class KnowledgeBaseService : IKnowledgeBaseService
     {
         try
         {
+            _logger.LogInformation("Starting background processing for document {DocumentId} in tenant {TenantId}", document.Id, document.TenantId);
+            
             using (var scope = _serviceProvider.CreateScope())
             {
                 var dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
@@ -308,6 +322,8 @@ public class KnowledgeBaseService : IKnowledgeBaseService
 
                 document.Status = DocumentStatus.Processing;
                 await dbContext.SaveChangesAsync();
+                
+                _logger.LogInformation("Document {DocumentId} status updated to Processing", document.Id);
 
                 using var fileStream = new FileStream(document.FilePath, FileMode.Open, FileAccess.Read);
                 var result = await documentProcessingService.ProcessDocumentAsync(document, fileStream);
@@ -319,8 +335,18 @@ public class KnowledgeBaseService : IKnowledgeBaseService
 
                     var collectionName = $"tenant_{document.TenantId:N}_knowledge";
                     var vectorSearchService = scope.ServiceProvider.GetRequiredService<IVectorSearchService>();
+                    
+                    _logger.LogInformation("Creating/accessing collection {CollectionName} for document {DocumentId}", collectionName, document.Id);
                     await vectorSearchService.CreateCollectionAsync(collectionName, document.TenantId);
+                    
+                    _logger.LogInformation("Storing document {DocumentId} with {ChunkCount} chunks in vector database", document.Id, chunks.Count);
                     await vectorSearchService.UpdateDocumentInVectorAsync(document, chunks);
+                    
+                    _logger.LogInformation("Document {DocumentId} successfully processed and stored in vector database", document.Id);
+                }
+                else
+                {
+                    _logger.LogError("Document processing failed for {DocumentId}: {ErrorMessage}", document.Id, result.ErrorMessage);
                 }
 
                 await dbContext.SaveChangesAsync();

@@ -282,4 +282,41 @@ public class DocumentsController : ControllerBase
             _ => "application/octet-stream"
         };
     }
+
+    [HttpGet("validate-multi-document")]
+    public async Task<IActionResult> ValidateMultiDocumentSupport()
+    {
+        try
+        {
+            var tenantId = _tenantService.GetCurrentTenantId();
+            var documents = await _knowledgeBaseService.GetDocumentsAsync(tenantId);
+            var statistics = await _knowledgeBaseService.GetStatisticsAsync(tenantId);
+            
+            var validation = new
+            {
+                TenantId = tenantId,
+                DocumentCount = documents.Count,
+                ProcessedDocuments = statistics.ProcessedDocuments,
+                FailedDocuments = statistics.FailedDocuments,
+                TotalChunks = statistics.TotalChunks,
+                CollectionName = $"tenant_{tenantId:N}_knowledge",
+                MultiDocumentSupported = documents.Count > 1,
+                Documents = documents.Select(d => new
+                {
+                    d.Id,
+                    d.Title,
+                    d.Status,
+                    d.ChunkCount,
+                    d.IsEmbedded
+                }).ToList()
+            };
+
+            return Ok(validation);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error validating multi-document support");
+            return StatusCode(500, new { message = "Internal server error", error = ex.Message });
+        }
+    }
 }
