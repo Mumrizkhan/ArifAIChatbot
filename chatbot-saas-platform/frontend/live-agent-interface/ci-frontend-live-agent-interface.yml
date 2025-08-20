@@ -27,8 +27,7 @@ steps:
 
   # Build React app with staging environment
   - script: |
-      export NODE_ENV=staging
-      npm run build
+      npm run build -- --mode staging
     workingDirectory: $(workingDirectory)
     displayName: "Build React app with staging environment"
 
