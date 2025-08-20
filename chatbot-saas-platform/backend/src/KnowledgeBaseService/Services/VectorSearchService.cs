@@ -37,6 +37,8 @@ public class VectorSearchService : IVectorSearchService
         try
         {
             var collectionName = $"tenant_{tenantId:N}_knowledge";
+            _logger.LogInformation("Searching documents in collection {CollectionName} for tenant {TenantId}, query: {Query}, limit: {Limit}", 
+                collectionName, tenantId, request.Query, request.Limit);
             
             var queryEmbedding = await GenerateQueryEmbeddingAsync(request.Query);
             if (queryEmbedding == null)
@@ -45,8 +47,9 @@ public class VectorSearchService : IVectorSearchService
                 return new List<DocumentSearchResult>();
             }
 
-
             var response = await _qdrantClient.SearchAsync(collectionName, queryEmbedding, limit: (ulong)request.Limit, scoreThreshold: (float)request.MinScore);
+            
+            _logger.LogInformation("Qdrant search returned {ResultCount} results for tenant {TenantId}", response.Count(), tenantId);
             
             var results = new List<DocumentSearchResult>();
             var documentIds = new List<Guid>();
@@ -59,6 +62,9 @@ public class VectorSearchService : IVectorSearchService
                     documentIds.Add(documentId);
                 }
             }
+
+            _logger.LogInformation("Found {UniqueDocumentCount} unique documents in search results for tenant {TenantId}: {DocumentIds}", 
+                documentIds.Distinct().Count(), tenantId, string.Join(", ", documentIds.Distinct()));
 
             var documents = await _context.Set<Document>()
                 .Where(d => documentIds.Contains(d.Id) && d.TenantId == tenantId)
@@ -96,6 +102,9 @@ public class VectorSearchService : IVectorSearchService
                     }
                 }
             }
+
+            _logger.LogInformation("Returning {FinalResultCount} search results from {UniqueDocuments} documents for tenant {TenantId}", 
+                results.Count, results.Select(r => r.DocumentId).Distinct().Count(), tenantId);
 
             return results.OrderByDescending(r => r.Score).ToList();
         }
