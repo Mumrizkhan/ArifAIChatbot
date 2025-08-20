@@ -206,12 +206,15 @@ const ChatbotConfigPage = () => {
     const files = event.target.files;
     if (!files || files.length === 0) return;
 
+    console.log(`Starting upload of ${files.length} files`);
     setUploadError(null);
     setUploadSuccess(null);
     setIsUploading(true);
 
     try {
-      const uploadPromises = Array.from(files).map(async (file: File) => {
+      const uploadPromises = Array.from(files).map(async (file: File, index: number) => {
+        console.log(`Processing file ${index + 1}/${files.length}: ${file.name}`);
+        
         const allowedTypes = ['.pdf', '.docx', '.txt', '.md'];
         const fileExtension = '.' + file.name.split('.').pop()?.toLowerCase();
         if (!allowedTypes.includes(fileExtension)) {
@@ -226,13 +229,20 @@ const ChatbotConfigPage = () => {
         if (!response.success) {
           throw new Error(`Failed to upload ${file.name}: Unknown error`);
         }
+        
+        console.log(`Successfully uploaded file ${index + 1}/${files.length}: ${file.name}`);
         return response;
       });
 
       await Promise.all(uploadPromises);
-      setUploadSuccess(`Successfully uploaded ${files.length} file(s) to knowledge base.`);
+      console.log(`All ${files.length} files uploaded successfully`);
       
-      fetchKnowledgeBaseStats();
+      setUploadSuccess(`Successfully uploaded ${files.length} file(s) to knowledge base. Documents are being processed in the background.`);
+      
+      setTimeout(() => {
+        fetchKnowledgeBaseStats();
+      }, 2000);
+      
     } catch (error) {
       console.error('Upload error:', error);
       setUploadError(error instanceof Error ? error.message : 'Failed to upload files. Please try again.');

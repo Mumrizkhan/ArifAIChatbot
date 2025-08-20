@@ -88,4 +88,8 @@ export class KnowledgeBaseService {
     });
     return response;
   }
+
+  static async validateMultiDocumentSupport(): Promise<ApiResponse<any>> {
+    return apiClient.get<any>('/knowledgebase/documents/validate-multi-document');
+  }
 }
