@@ -38,6 +38,13 @@ export interface ChatbotConfig {
     systemPrompt: string;
     fallbackMessage: string;
   };
+  predefinedIntents: {
+    id: string;
+    label: string;
+    message: string;
+    category: string;
+    isActive: boolean;
+  }[];
   integrations: {
     knowledgeBase: boolean;
     crm: boolean;
