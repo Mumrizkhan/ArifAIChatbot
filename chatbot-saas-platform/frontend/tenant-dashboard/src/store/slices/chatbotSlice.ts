@@ -38,18 +38,18 @@ export interface ChatbotConfig {
     systemPrompt: string;
     fallbackMessage: string;
   };
-  predefinedIntents: {
+  integrations: {
+    knowledgeBase: boolean;
+    crm: boolean;
+    analytics: boolean;
+  };
+  predefinedIntents?: {
     id: string;
     label: string;
     message: string;
     category: string;
     isActive: boolean;
   }[];
-  integrations: {
-    knowledgeBase: boolean;
-    crm: boolean;
-    analytics: boolean;
-  };
 }
 
 interface ChatbotState {

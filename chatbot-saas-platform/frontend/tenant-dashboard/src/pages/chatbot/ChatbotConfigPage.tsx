@@ -156,7 +156,7 @@ const ChatbotConfigPage = () => {
           crm: false,
           analytics: true
         },
-        predefinedIntents: []
+        predefinedIntents: predefinedIntents
       };
       dispatch(createChatbotConfig(createRequest));
     } else {
