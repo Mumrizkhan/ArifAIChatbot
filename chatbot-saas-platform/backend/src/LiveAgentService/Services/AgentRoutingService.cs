@@ -28,15 +28,15 @@ public class AgentRoutingService : IAgentRoutingService
                 .Where(ut => ut.TenantId == tenantId && 
                            (ut.Role == TenantRole.Agent || ut.Role == TenantRole.Admin) &&
                            ut.IsActive)
-                .Select(ut => new { ut.UserId, ut.User.Email, ut.User.PreferredLanguage })
+                .Select(ut => new { ut.UserId, ut.User.Email, ut.User.PreferredLanguage,ut.User.Status })
                 .ToListAsync();
 
             var availableAgents = new List<Guid>();
 
             foreach (var agent in agents)
             {
-                var status = GetAgentStatusAsync(agent.UserId).Result;
-                if (status == AgentStatus.Online)
+                //var status = GetAgentStatusAsync(agent.UserId).Result;
+                if (agent.Status == UserStatus.Online)
                 {
                     var activeConversations = await GetActiveConversationCountAsync(agent.UserId);
                     if (activeConversations < 5) // Max conversations per agent
