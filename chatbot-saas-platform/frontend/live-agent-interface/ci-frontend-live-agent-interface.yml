@@ -1,7 +1,7 @@
 trigger:
   branches:
     include:
-      - dev  
+      - dev
 
   paths:
     include:
@@ -10,30 +10,32 @@ pool:
   name: ubuntu-22.04
 
 variables:
-  workingDirectory: 'chatbot-saas-platform/frontend/live-agent-interface'
-  artifactName: 'live-agent-interface'
+  workingDirectory: "chatbot-saas-platform/frontend/live-agent-interface"
+  artifactName: "live-agent-interface"
 
 steps:
-#  Use Node 22
-- task: NodeTool@0
-  inputs:
-    versionSpec: '22.x'
-  displayName: 'Use Node.js 22'
+  #  Use Node 22
+  - task: NodeTool@0
+    inputs:
+      versionSpec: "22.x"
+    displayName: "Use Node.js 22"
 
-# Install dependencies
-- script: npm install
-  workingDirectory: $(workingDirectory)
-  displayName: 'Install NPM dependencies'
+  # Install dependencies
+  - script: npm install
+    workingDirectory: $(workingDirectory)
+    displayName: "Install NPM dependencies"
 
-# Build React app
-- script: npm run build
-  workingDirectory: $(workingDirectory)
-  displayName: 'Build React app'
+  # Build React app with staging environment
+  - script: |
+      export NODE_ENV=staging
+      npm run build
+    workingDirectory: $(workingDirectory)
+    displayName: "Build React app with staging environment"
 
-# Publish build artifacts
-- task: PublishBuildArtifacts@1
-  inputs:
-    PathtoPublish: '$(workingDirectory)/dist'
-    ArtifactName: $(artifactName)
-    publishLocation: 'Container'
-  displayName: 'Publish Build Artifacts'
+  # Publish build artifacts
+  - task: PublishBuildArtifacts@1
+    inputs:
+      PathtoPublish: "$(workingDirectory)/dist"
+      ArtifactName: $(artifactName)
+      publishLocation: "Container"
+    displayName: "Publish Build Artifacts"
