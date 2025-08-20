@@ -81,7 +81,7 @@ public class ConversationsController : ControllerBase
             }
 
             var conversations = await _agentRoutingService.GetAgentConversationsAsync(agentId.Value);
-            var conversation = conversations.FirstOrDefault(c => c.Id == conversationId);
+            var conversation = conversations.FirstOrDefault(c => c.ConversationId == conversationId);
 
             if (conversation == null)
             {
