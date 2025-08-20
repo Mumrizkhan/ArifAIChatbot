@@ -1,7 +1,7 @@
 import { createSlice, createAsyncThunk, PayloadAction } from "@reduxjs/toolkit";
 
 // Add API base URL configuration
-const API_BASE_URL = import.meta.env.API_BASE_URL 
+const API_BASE_URL = (import.meta as any).env.VITE_API_BASE_URL || 'http://localhost:5000'
 
 export interface Agent {
   id: string;
@@ -73,7 +73,7 @@ const initialState: AgentState = {
 };
 
 export const fetchAgentProfile = createAsyncThunk("agent/fetchProfile", async (agentId: string) => {
-  const response = await fetch(`${API_BASE_URL}/agent/agents/${agentId}`, {
+  const response = await fetch(`${API_BASE_URL}/live-agent/agents/${agentId}`, {
     headers: {
       Authorization: `Bearer ${localStorage.getItem("token")}`,
     },
@@ -89,7 +89,7 @@ export const fetchAgentProfile = createAsyncThunk("agent/fetchProfile", async (a
 export const updateAgentProfile = createAsyncThunk(
   "agent/updateProfile",
   async ({ id, profileData }: { id: string; profileData: Partial<Agent> }) => {
-    const response = await fetch(`${API_BASE_URL}/agent/agents/${id}`, {
+    const response = await fetch(`${API_BASE_URL}/live-agent/agents/${id}`, {
       method: "PUT",
       headers: {
         "Content-Type": "application/json",
@@ -107,7 +107,7 @@ export const updateAgentProfile = createAsyncThunk(
 );
 
 export const updateAgentStatus = createAsyncThunk("agent/updateStatus", async ({ agentId, status }: { agentId: string; status: Agent["status"] }) => {
-  const response = await fetch(`${API_BASE_URL}/agent/agents/${agentId}/status`, {
+  const response = await fetch(`${API_BASE_URL}/live-agent/agents/${agentId}/status`, {
     method: "PUT",
     headers: {
       "Content-Type": "application/json",
@@ -124,7 +124,7 @@ export const updateAgentStatus = createAsyncThunk("agent/updateStatus", async ({
 });
 
 export const fetchAgentStats = createAsyncThunk("agent/fetchStats", async (agentId: string) => {
-  const response = await fetch(`${API_BASE_URL}/agent/agents/${agentId}/stats`, {
+  const response = await fetch(`${API_BASE_URL}/live-agent/agents/${agentId}/stats`, {
     headers: {
       Authorization: `Bearer ${localStorage.getItem("token")}`,
     },
@@ -138,7 +138,7 @@ export const fetchAgentStats = createAsyncThunk("agent/fetchStats", async (agent
 });
 
 export const fetchAllAgents = createAsyncThunk("agent/fetchAll", async () => {
-  const response = await fetch(`${API_BASE_URL}/agent/agents`, {
+  const response = await fetch(`${API_BASE_URL}/live-agent/agents`, {
     headers: {
       Authorization: `Bearer ${localStorage.getItem("token")}`,
     },
