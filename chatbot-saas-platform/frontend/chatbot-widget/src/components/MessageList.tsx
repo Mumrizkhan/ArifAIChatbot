@@ -5,6 +5,7 @@ import { RootState } from "../store/store";
 import { Message } from "../store/slices/chatSlice";
 import { MessageBubble } from "./MessageBubble";
 import { TypingIndicator } from "./TypingIndicator";
+import { IntentButtons } from "./IntentButtons";
 import { Bot } from "lucide-react";
 
 export const MessageList: React.FC = () => {
@@ -48,6 +49,7 @@ export const MessageList: React.FC = () => {
       <div className="empty-state-content">
         <h3 className="empty-state-title">{branding.companyName || t("widget.title")}</h3>
         <p className="empty-state-message">{branding.welcomeMessage || t("widget.welcomeMessage")}</p>
+        <IntentButtons />
       </div>
     </div>
   );

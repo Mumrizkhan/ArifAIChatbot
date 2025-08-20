@@ -33,6 +33,13 @@ interface WidgetConfig {
     trackUserJourney: boolean;
     customEvents: string[];
   };
+  predefinedIntents: {
+    id: string;
+    label: string;
+    message: string;
+    category: string;
+    isActive: boolean;
+  }[];
 }
 
 interface ConfigState {
@@ -78,6 +85,7 @@ const defaultConfig: WidgetConfig = {
     trackUserJourney: false,
     customEvents: [],
   },
+  predefinedIntents: [],
 };
 
 const initialState: ConfigState = {
@@ -100,6 +108,7 @@ const configSlice = createSlice({
         websocketUrl?: string;
         features?: Partial<WidgetConfig['features']>;
         behavior?: Partial<WidgetConfig['behavior']>;
+        predefinedIntents?: WidgetConfig['predefinedIntents'];
       };
       userId?: string;
       metadata?: Record<string, any>;
@@ -114,6 +123,9 @@ const configSlice = createSlice({
         }
         if (config.behavior) {
           state.widget.behavior = { ...state.widget.behavior, ...config.behavior };
+        }
+        if (config.predefinedIntents) {
+          state.widget.predefinedIntents = config.predefinedIntents;
         }
       }
       state.userId = userId;

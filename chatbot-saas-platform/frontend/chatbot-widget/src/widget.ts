@@ -62,6 +62,13 @@ interface WidgetConfig {
     allowedFileTypes?: string[];
     maxMessageLength?: number;
   };
+  predefinedIntents?: {
+    id: string;
+    label: string;
+    message: string;
+    category: string;
+    isActive: boolean;
+  }[];
 }
 
 class ChatbotWidget {
@@ -114,6 +121,7 @@ class ChatbotWidget {
           websocketUrl: widgetConfig.websocketUrl || defaultWebsocketUrl,
           features: widgetConfig.features,
           behavior: widgetConfig.behavior,
+          predefinedIntents: widgetConfig.predefinedIntents,
         },
         userId: widgetConfig.userId,
         metadata: widgetConfig.metadata,
@@ -291,6 +299,7 @@ class ChatbotWidget {
             websocketUrl: this.config.websocketUrl || "/chatHub",
             features: this.config.features,
             behavior: this.config.behavior,
+            predefinedIntents: this.config.predefinedIntents,
           },
           userId: this.config.userId,
           metadata: this.config.metadata,
