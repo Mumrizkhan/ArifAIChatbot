@@ -184,7 +184,7 @@ export const MessageInput: React.FC = () => {
 
       <div className="message-input-wrapper">
         <div className="input-container">
-          {widget.features.fileUpload && (
+          {/* {widget.features.fileUpload && (
             <button
               className="input-action-button"
               onClick={() => fileInputRef.current?.click()}
@@ -194,7 +194,7 @@ export const MessageInput: React.FC = () => {
             >
               <Paperclip size={18} />
             </button>
-          )}
+          )} */}
 
           <textarea
             ref={inputRef}
