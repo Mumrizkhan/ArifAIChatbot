@@ -9,6 +9,7 @@ using Shared.Infrastructure.Services;
 using Shared.Infrastructure.Extensions;
 using System.Text;
 using Serilog;
+using Shared.Application.Services;
 
 Log.Logger = new LoggerConfiguration()
     .WriteTo.Console()
@@ -49,7 +50,7 @@ builder.Services.AddSwaggerGen(options =>
 builder.Services.AddInfrastructure(builder.Configuration);
 builder.Services.AddScoped<DocumentProcessingService>();
 builder.Services.AddScoped<IDocumentProcessingService, AsyncDocumentProcessingService>();
-builder.Services.AddScoped<IVectorSearchService, VectorSearchService>();
+builder.Services.AddScoped<IVectorService,QdrantService>();
 builder.Services.AddScoped<IKnowledgeBaseService, KnowledgeBaseService.Services.KnowledgeBaseService>();
 builder.Services.AddHttpContextAccessor();
 

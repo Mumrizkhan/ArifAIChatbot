@@ -1,11 +1,13 @@
+using AIOrchestrationService.Models;
+using AIOrchestrationService.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Shared.Application.Common.Interfaces;
+using Shared.Application.Services;
 using Shared.Domain.Entities;
 using Shared.Domain.Enums;
-using AIOrchestrationService.Services;
-using AIOrchestrationService.Models;
+using Shared.Infrastructure.Services;
 
 namespace AIOrchestrationService.Controllers;
 
@@ -60,12 +62,12 @@ public class AIController : ControllerBase
                 .ToList();
 
             var contextDocuments = new List<string>();
-            var collectionName = $"tenant_{_tenantService.GetCurrentTenantId():N}_knowledge";
+            //var collectionName = $"tenant_{_tenantService.GetCurrentTenantId():N}_knowledge";
             
             try
             {
-                var searchResults = await _vectorService.SearchSimilarAsync(
-                    request.Message, collectionName, 3);
+                var searchResults = await _vectorService.SearchAcrossAllCollectionsAsync(_tenantService.GetCurrentTenantId(),//SearchSimilarAsync(
+                    request.Message, 3);
                 contextDocuments = searchResults.Select(r => r.Content).ToList();
             }
             catch (Exception ex)
@@ -81,7 +83,7 @@ public class AIController : ControllerBase
                 TenantId = _tenantService.GetCurrentTenantId(),
                 ConversationHistory = conversationHistory,
                 Model = request.Model ?? "gpt-4.1",
-                Temperature = request.Temperature ?? 0.5,
+                Temperature = request.Temperature ?? 0.7,
                 MaxTokens = request.MaxTokens ?? 200
             };
 

@@ -2,6 +2,8 @@ using Microsoft.EntityFrameworkCore;
 using Shared.Application.Common.Interfaces;
 using Shared.Domain.Entities;
 using AIOrchestrationService.Models;
+using Shared.Application.Common.Models;
+using Shared.Application.Services;
 
 namespace AIOrchestrationService.Services;
 

@@ -108,6 +108,7 @@ app.UseHttpsRedirection();
 app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();
+app.UseWebSockets();
 app.MapHub<AgentHub>("/agentHub");
 
 app.Run();

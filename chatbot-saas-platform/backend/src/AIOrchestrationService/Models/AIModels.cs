@@ -36,13 +36,7 @@ public class ConversationMessage
     public DateTime Timestamp { get; set; }
 }
 
-public class SearchResult
-{
-    public string Id { get; set; } = string.Empty;
-    public string Content { get; set; } = string.Empty;
-    public double Score { get; set; }
-    public Dictionary<string, object> Metadata { get; set; } = new();
-}
+
 
 public class EmbeddingRequest
 {

@@ -4,13 +4,14 @@ using KnowledgeBaseService.Services;
 using KnowledgeBaseService.Models;
 using Shared.Domain.Entities;
 using Shared.Infrastructure.Persistence;
+using Shared.Application.Services;
 namespace KnowledgeBaseService.Services;
 
 public class KnowledgeBaseService : IKnowledgeBaseService
 {
     private readonly IApplicationDbContext _context;
     private readonly IDocumentProcessingService _documentProcessingService;
-    private readonly IVectorSearchService _vectorSearchService;
+    private readonly IVectorService _vectorSearchService;
     private readonly ILogger<KnowledgeBaseService> _logger;
     private readonly IConfiguration _configuration;
     private readonly IServiceProvider _serviceProvider;
@@ -18,7 +19,7 @@ public class KnowledgeBaseService : IKnowledgeBaseService
     public KnowledgeBaseService(
         IApplicationDbContext context,
         IDocumentProcessingService documentProcessingService,
-        IVectorSearchService vectorSearchService,
+        IVectorService vectorSearchService,
         ILogger<KnowledgeBaseService> logger,
         IConfiguration configuration,
         IServiceProvider serviceProvider)
@@ -36,7 +37,7 @@ public class KnowledgeBaseService : IKnowledgeBaseService
         try
         {
             _logger.LogInformation("Starting document upload for tenant {TenantId}, file: {FileName}", tenantId, request.File.FileName);
-            
+
             var document = new Document
             {
                 Id = Guid.NewGuid(),
@@ -58,7 +59,7 @@ public class KnowledgeBaseService : IKnowledgeBaseService
 
             _context.Set<Document>().Add(document);
             await _context.SaveChangesAsync();
-            
+
             _logger.LogInformation("Document {DocumentId} uploaded successfully for tenant {TenantId}. Starting background processing.", document.Id, tenantId);
 
             _ = Task.Run(async () => await ProcessDocumentInBackgroundAsync(document));
@@ -116,7 +117,7 @@ public class KnowledgeBaseService : IKnowledgeBaseService
 
             if (!string.IsNullOrEmpty(document.VectorCollectionName))
             {
-                await _vectorSearchService.DeleteDocumentFromVectorAsync(documentId, document.VectorCollectionName);
+                await _vectorSearchService.DeleteDocumentAsync(document.VectorCollectionName, documentId);
             }
 
             var chunks = await _context.Set<DocumentChunk>()
@@ -146,7 +147,27 @@ public class KnowledgeBaseService : IKnowledgeBaseService
     {
         try
         {
-            return await _vectorSearchService.SearchSimilarDocumentsAsync(request, tenantId);
+            var result = await _vectorSearchService.SearchAcrossAllCollectionsAsync(tenantId, request.Query, request.Limit);
+            if (result == null || !result.Any())
+            {
+                _logger.LogInformation("No documents found for tenant {TenantId} with query: {Query}", tenantId, request.Query);
+                return new List<DocumentSearchResult>();
+            }
+
+            var documentSearchResults = result.Select(r => new DocumentSearchResult
+            {
+                DocumentId = Guid.Parse(r.Id),
+                Title = r.Metadata.ContainsKey("Title") ? r.Metadata["Title"].ToString() : "Untitled",
+                Content = r.Content,
+                Score = r.Score,
+                Tags = r.Metadata.ContainsKey("Tags") ? r.Metadata["Tags"] as List<string> : new List<string>(),
+                Summary = r.Metadata.ContainsKey("Summary") ? r.Metadata["Summary"].ToString() : string.Empty,
+                CreatedAt = r.Metadata.ContainsKey("CreatedAt") ? DateTime.Parse(r.Metadata["CreatedAt"].ToString()) : DateTime.UtcNow,
+                Metadata = r.Metadata.ToDictionary(kv => kv.Key, kv => kv.Value)                
+
+            }).ToList();
+
+            return documentSearchResults;
         }
         catch (Exception ex)
         {
@@ -158,7 +179,7 @@ public class KnowledgeBaseService : IKnowledgeBaseService
     public async Task<RAGResponse> GenerateRAGResponseAsync(RAGRequest request, Guid tenantId)
     {
         var stopwatch = System.Diagnostics.Stopwatch.StartNew();
-        
+
         try
         {
             var searchRequest = new DocumentSearchRequest
@@ -314,7 +335,7 @@ public class KnowledgeBaseService : IKnowledgeBaseService
         try
         {
             _logger.LogInformation("Starting background processing for document {DocumentId} in tenant {TenantId}", document.Id, document.TenantId);
-            
+
             using (var scope = _serviceProvider.CreateScope())
             {
                 var dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
@@ -322,7 +343,7 @@ public class KnowledgeBaseService : IKnowledgeBaseService
 
                 document.Status = DocumentStatus.Processing;
                 await dbContext.SaveChangesAsync();
-                
+
                 _logger.LogInformation("Document {DocumentId} status updated to Processing", document.Id);
 
                 using var fileStream = new FileStream(document.FilePath, FileMode.Open, FileAccess.Read);
@@ -333,15 +354,15 @@ public class KnowledgeBaseService : IKnowledgeBaseService
                     var chunks = await documentProcessingService.ChunkDocumentAsync(document, document.Content);
                     dbContext.Set<DocumentChunk>().AddRange(chunks);
 
-                    var collectionName = $"tenant_{document.TenantId:N}_knowledge";
-                    var vectorSearchService = scope.ServiceProvider.GetRequiredService<IVectorSearchService>();
-                    
+                    var collectionName = $"tenant_{document.TenantId:N}_collection_{Guid.NewGuid()}";
+                    var vectorSearchService = scope.ServiceProvider.GetRequiredService<IVectorService>();
+
                     _logger.LogInformation("Creating/accessing collection {CollectionName} for document {DocumentId}", collectionName, document.Id);
-                    await vectorSearchService.CreateCollectionAsync(collectionName, document.TenantId);
-                    
+                    await vectorSearchService.CreateCollectionAsync(collectionName);
+
                     _logger.LogInformation("Storing document {DocumentId} with {ChunkCount} chunks in vector database", document.Id, chunks.Count);
-                    await vectorSearchService.UpdateDocumentInVectorAsync(document, chunks);
-                    
+                    await vectorSearchService.UpsertDocumentAsync(document, chunks);
+
                     _logger.LogInformation("Document {DocumentId} successfully processed and stored in vector database", document.Id);
                 }
                 else
