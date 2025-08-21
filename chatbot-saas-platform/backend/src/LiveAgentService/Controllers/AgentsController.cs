@@ -1,9 +1,10 @@
+using LiveAgentService.Models;
+using LiveAgentService.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using LiveAgentService.Services;
-using LiveAgentService.Models;
-using Shared.Infrastructure.Services;
 using Shared.Application.Common.Interfaces;
+using Shared.Infrastructure.Extensions;
+using Shared.Infrastructure.Services;
 
 namespace LiveAgentService.Controllers;
 
@@ -129,7 +130,7 @@ public class AgentsController : ControllerBase
     {
         try
         {
-            if (Enum.TryParse<AgentStatus>(request.Status, out var status))
+            if (Enum.TryParse<AgentStatus>(request.Status.FirstCharToUpper(), out var status))
             {
                 var updated = await _agentRoutingService.SetAgentStatusAsync(agentId, status);
                 if (updated)
