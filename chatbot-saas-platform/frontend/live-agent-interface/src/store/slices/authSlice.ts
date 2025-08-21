@@ -11,6 +11,7 @@ interface User {
   tenantId: string;
   avatar?: string;
   permissions: string[];
+  isActive: boolean; // Assuming isActive can be "true" or "false" as strings
 }
 
 interface AuthState {

@@ -16,14 +16,36 @@ import { MessageSquare, Users, Clock, Star, TrendingUp, Activity, Phone, Mail, B
 const DashboardPage = () => {
   const { t } = useTranslation();
   const dispatch = useDispatch<AppDispatch>();
+
+  // Fetch data from Redux store
   const { conversations, isLoading: conversationsLoading } = useSelector((state: RootState) => state.conversations);
-  const { currentAgent, stats: agentStats, isSignalRConnected } = useSelector((state: RootState) => state.agent);
+  const { stats: agentStats, isSignalRConnected } = useSelector((state: RootState) => state.agent);
+  const { user, token } = useSelector((state: RootState) => state.auth); // Fetch user from auth slice
+  const currentAgentId = user?.id; // Extract the agent's ID
+  console.log("rao", token);
+  console.log(isSignalRConnected, "SignalR Connection Status");
+  console.log(currentAgentId, "Current Agent ID");
 
   useEffect(() => {
     dispatch(fetchConversations());
-    if (currentAgent?.id) {
-      dispatch(fetchAgentProfile(currentAgent.id));
-      dispatch(fetchAgentStats(currentAgent.id));
+
+    if (currentAgentId && token) {
+      dispatch(fetchAgentProfile(currentAgentId));
+      dispatch(fetchAgentStats(currentAgentId));
+
+      // Call the connect method to establish the SignalR connection
+      const connectToSignalR = async () => {
+        try {
+          // const authToken = "your-auth-token"; // Replace with the actual token
+          const tenantId = user?.tenantId || "your-tenant-id"; // Replace with the actual tenant ID
+          const isConnected = await agentSignalRService.connect(token, currentAgentId, tenantId);
+          console.log("SignalR connected:", isConnected);
+        } catch (error) {
+          console.error("Failed to connect to SignalR:", error);
+        }
+      };
+
+      connectToSignalR();
 
       if (isSignalRConnected) {
         agentSignalRService.setOnAgentStatusChanged((statusUpdate: any) => {
@@ -33,13 +55,13 @@ const DashboardPage = () => {
 
       const interval = setInterval(() => {
         if (!isSignalRConnected) {
-          dispatch(fetchAgentStats(currentAgent.id));
+          dispatch(fetchAgentStats(currentAgentId));
         }
       }, 30000);
 
       return () => clearInterval(interval);
     }
-  }, [dispatch, currentAgent?.id, isSignalRConnected]);
+  }, [dispatch, currentAgentId, isSignalRConnected]);
 
   const getStatusBadge = (status: string) => {
     const variants: Record<string, "default" | "secondary" | "destructive"> = {
@@ -105,13 +127,13 @@ const DashboardPage = () => {
         </div>
         <div className="flex items-center space-x-4">
           <div className="flex items-center space-x-1">
-            <div className={`w-2 h-2 rounded-full ${isSignalRConnected ? "bg-green-500" : "bg-red-500"}`} />
-            <span className="text-xs text-muted-foreground">{isSignalRConnected ? t("dashboard.liveUpdates") : t("dashboard.staticData")}</span>
+            <div className={`w-2 h-2 rounded-full ${user?.isActive ? "bg-green-500" : "bg-red-500"}`} />
+            <span className="text-xs text-muted-foreground">{user?.isActive ? t("dashboard.liveUpdates") : t("dashboard.staticData")}</span>
           </div>
           <div className="flex items-center space-x-2">
-            <Badge variant={currentAgent?.status === "online" ? "default" : "secondary"}>
+            <Badge variant={user?.isActive === true ? "default" : "secondary"}>
               <Activity className="mr-1 h-3 w-3" />
-              {t(`agent.status.${currentAgent?.status || "offline"}`)}
+              {t(`agent.state.${user?.isActive || false}`)}
             </Badge>
             <Button variant="outline">{t("dashboard.takeBreak")}</Button>
           </div>
@@ -125,7 +147,9 @@ const DashboardPage = () => {
             <MessageSquare className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{Array.isArray(conversations) ? conversations.filter((c: any) => c.status === "active").length : 3}</div>
+            <div className="text-2xl font-bold">
+              {Array.isArray(conversations) ? conversations.filter((c: any) => c.status === "active").length : 3}
+            </div>
             <div className="flex items-center text-xs text-muted-foreground">
               <TrendingUp className="mr-1 h-3 w-3" />
               {t("dashboard.currentlyHandling")}
@@ -267,22 +291,24 @@ const DashboardPage = () => {
             <CardDescription>{t("dashboard.agentProfileDesc")}</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
-            {currentAgent ? (
+            {user ? (
               <div className="space-y-4">
                 <div className="flex items-center space-x-4">
                   <Avatar className="h-16 w-16">
-                    <AvatarImage src={currentAgent.avatar} />
+                    <AvatarImage src={user.avatar} />
                     <AvatarFallback>
-                      {currentAgent.name
-                        .split(" ")
-                        .map((n) => n[0])
-                        .join("")}
+                      {user?.name
+                        ? user.name
+                            .split(" ")
+                            .map((n) => n[0])
+                            .join("")
+                        : "U"}
                     </AvatarFallback>
                   </Avatar>
                   <div>
-                    <h3 className="text-lg font-semibold">{currentAgent.name}</h3>
-                    <p className="text-sm text-muted-foreground">{currentAgent.email}</p>
-                    <Badge variant={currentAgent.status === "online" ? "default" : "secondary"}>{t(`agent.status.${currentAgent.status}`)}</Badge>
+                    <h3 className="text-lg font-semibold">{user.name}</h3>
+                    <p className="text-sm text-muted-foreground">{user.email}</p>
+                    <Badge variant={user.isActive === true ? "default" : "secondary"}>{t(`agent.status.${user.isActive}`)}</Badge>
                   </div>
                 </div>
 
