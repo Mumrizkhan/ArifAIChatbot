@@ -1,8 +1,8 @@
-import { HubConnection, HubConnectionBuilder, LogLevel } from '@microsoft/signalr';
+import { HubConnection, HubConnectionBuilder, LogLevel } from "@microsoft/signalr";
 
 interface AgentStatusUpdate {
   agentId: string;
-  status: 'online' | 'away' | 'busy' | 'offline';
+  status: "online" | "away" | "busy" | "offline";
   timestamp: Date;
 }
 
@@ -44,7 +44,7 @@ interface BroadcastMessage {
 
 interface AgentNotification {
   id: string;
-  type: 'info' | 'warning' | 'error' | 'success';
+  type: "info" | "warning" | "error" | "success";
   title: string;
   message: string;
   timestamp: Date;
@@ -79,7 +79,7 @@ class AgentSignalRService {
 
     try {
       this.connection = new HubConnectionBuilder()
-        .withUrl('/chatHub', {
+        .withUrl(`https://api-stg-arif.tetco.sa/chat/chatHub`, {
           accessTokenFactory: () => authToken,
         })
         .withAutomaticReconnect({
@@ -94,18 +94,18 @@ class AgentSignalRService {
         .build();
 
       this.setupEventHandlers();
-      
+
       await this.connection.start();
       this.isConnected = true;
-      
-      console.log('Agent SignalR connection established');
+
+      console.log("Agent SignalR connection established");
       this.onConnectionStatusChange?.(true);
-      
-      await this.connection.invoke('JoinAgentGroup', this.agentId);
-      
+
+      await this.connection.invoke("JoinAgentGroup", this.agentId);
+
       return true;
     } catch (error) {
-      console.error('Failed to connect to AgentHub:', error);
+      console.error("Failed to connect to AgentHub:", error);
       this.isConnected = false;
       this.onConnectionStatusChange?.(false);
       return false;
@@ -115,55 +115,48 @@ class AgentSignalRService {
   private setupEventHandlers(): void {
     if (!this.connection) return;
 
-    this.connection.on('AgentStatusChanged', (status: AgentStatusUpdate) => {
+    this.connection.on("AgentStatusChanged", (status: AgentStatusUpdate) => {
       this.onAgentStatusChanged?.(status);
     });
 
-    this.connection.on('ConversationAssigned', (assignment: ConversationAssignment) => {
+    this.connection.on("ConversationAssigned", (assignment: ConversationAssignment) => {
       this.onConversationAssigned?.(assignment);
     });
 
-    this.connection.on('ConversationTaken', (assignment: ConversationAssignment) => {
+    this.connection.on("ConversationTaken", (assignment: ConversationAssignment) => {
       this.onConversationTaken?.(assignment);
     });
 
-    this.connection.on('ConversationTransferred', (transfer: ConversationTransfer) => {
+    this.connection.on("ConversationTransferred", (transfer: ConversationTransfer) => {
       this.onConversationTransferred?.(transfer);
     });
 
-    this.connection.on('ConversationEscalated', (escalation: ConversationEscalation) => {
+    this.connection.on("ConversationEscalated", (escalation: ConversationEscalation) => {
       this.onConversationEscalated?.(escalation);
     });
 
-    this.connection.on('ReceiveMessage', (message: any) => {
+    this.connection.on("ReceiveMessage", (message: any) => {
       this.onMessageReceived?.(message);
     });
 
-    this.connection.on('AssistanceRequested', (request: AssistanceRequest) => {
+    this.connection.on("AssistanceRequested", (request: AssistanceRequest) => {
       this.onAssistanceRequested?.(request);
     });
 
-    this.connection.on('BroadcastMessage', (message: BroadcastMessage) => {
+    this.connection.on("BroadcastMessage", (message: BroadcastMessage) => {
       this.onBroadcastMessage?.(message);
     });
 
-    this.connection.onclose(() => {
-      this.isConnected = false;
-      this.onConnectionStatusChange?.(false);
-      console.log('Agent SignalR connection closed');
+    this.connection.onclose((error) => {
+      console.error("SignalR connection closed:", error);
     });
 
-    this.connection.onreconnecting(() => {
-      this.isConnected = false;
-      this.onConnectionStatusChange?.(false);
-      console.log('Agent SignalR reconnecting...');
+    this.connection.onreconnecting((error) => {
+      console.warn("SignalR reconnecting:", error);
     });
 
     this.connection.onreconnected(() => {
-      this.isConnected = true;
-      this.onConnectionStatusChange?.(true);
-      console.log('Agent SignalR reconnected');
-      this.connection?.invoke('JoinAgentGroup', this.agentId);
+      console.log("SignalR reconnected");
     });
   }
 
@@ -200,88 +193,88 @@ class AgentSignalRService {
   }
 
   setOnAgentNotification(handler: (notification: AgentNotification) => void): void {
-    console.log('Agent notification handler set:', handler);
+    console.log("Agent notification handler set:", handler);
   }
 
   setOnConnectionStatusChange(handler: (isConnected: boolean) => void): void {
     this.onConnectionStatusChange = handler;
   }
 
-  async updateAgentStatus(status: 'online' | 'away' | 'busy' | 'offline'): Promise<void> {
+  async updateAgentStatus(status: "online" | "away" | "busy" | "offline"): Promise<void> {
     if (!this.isConnected || !this.connection) {
-      console.warn('SignalR not connected, cannot update agent status');
+      console.warn("SignalR not connected, cannot update agent status");
       return;
     }
 
     try {
-      await this.connection.invoke('UpdateAgentStatus', status);
+      await this.connection.invoke("UpdateAgentStatus", status);
     } catch (error) {
-      console.error('Failed to update agent status:', error);
+      console.error("Failed to update agent status:", error);
     }
   }
 
   async acceptConversation(conversationId: string): Promise<void> {
     if (!this.isConnected || !this.connection) {
-      console.warn('SignalR not connected, cannot accept conversation');
+      console.warn("SignalR not connected, cannot accept conversation");
       return;
     }
 
     try {
-      await this.connection.invoke('AcceptConversation', conversationId);
+      await this.connection.invoke("AcceptConversation", conversationId);
     } catch (error) {
-      console.error('Failed to accept conversation:', error);
+      console.error("Failed to accept conversation:", error);
     }
   }
 
   async transferConversation(conversationId: string, targetAgentId: string, reason: string): Promise<void> {
     if (!this.isConnected || !this.connection) {
-      console.warn('SignalR not connected, cannot transfer conversation');
+      console.warn("SignalR not connected, cannot transfer conversation");
       return;
     }
 
     try {
-      await this.connection.invoke('TransferConversation', conversationId, targetAgentId, reason);
+      await this.connection.invoke("TransferConversation", conversationId, targetAgentId, reason);
     } catch (error) {
-      console.error('Failed to transfer conversation:', error);
+      console.error("Failed to transfer conversation:", error);
     }
   }
 
   async escalateConversation(conversationId: string, reason: string): Promise<void> {
     if (!this.isConnected || !this.connection) {
-      console.warn('SignalR not connected, cannot escalate conversation');
+      console.warn("SignalR not connected, cannot escalate conversation");
       return;
     }
 
     try {
-      await this.connection.invoke('EscalateConversation', conversationId, reason);
+      await this.connection.invoke("EscalateConversation", conversationId, reason);
     } catch (error) {
-      console.error('Failed to escalate conversation:', error);
+      console.error("Failed to escalate conversation:", error);
     }
   }
 
   async requestAssistance(conversationId: string, message: string): Promise<void> {
     if (!this.isConnected || !this.connection) {
-      console.warn('SignalR not connected, cannot request assistance');
+      console.warn("SignalR not connected, cannot request assistance");
       return;
     }
 
     try {
-      await this.connection.invoke('RequestAssistance', conversationId, message);
+      await this.connection.invoke("RequestAssistance", conversationId, message);
     } catch (error) {
-      console.error('Failed to request assistance:', error);
+      console.error("Failed to request assistance:", error);
     }
   }
 
-  async broadcastToAgents(message: string, messageType: string = 'info'): Promise<void> {
+  async broadcastToAgents(message: string, messageType: string = "info"): Promise<void> {
     if (!this.isConnected || !this.connection) {
-      console.warn('SignalR not connected, cannot broadcast message');
+      console.warn("SignalR not connected, cannot broadcast message");
       return;
     }
 
     try {
-      await this.connection.invoke('BroadcastToAgents', message, messageType);
+      await this.connection.invoke("BroadcastToAgents", message, messageType);
     } catch (error) {
-      console.error('Failed to broadcast message:', error);
+      console.error("Failed to broadcast message:", error);
     }
   }
 
@@ -310,27 +303,27 @@ class AgentSignalRService {
 
   async joinConversation(conversationId: string): Promise<void> {
     if (!this.isConnected || !this.connection) {
-      console.warn('SignalR not connected, cannot join conversation');
+      console.warn("SignalR not connected, cannot join conversation");
       return;
     }
 
     try {
-      await this.connection.invoke('JoinConversation', conversationId);
+      await this.connection.invoke("JoinConversation", conversationId);
     } catch (error) {
-      console.error('Failed to join conversation:', error);
+      console.error("Failed to join conversation:", error);
     }
   }
 
   async leaveConversation(conversationId: string): Promise<void> {
     if (!this.isConnected || !this.connection) {
-      console.warn('SignalR not connected, cannot leave conversation');
+      console.warn("SignalR not connected, cannot leave conversation");
       return;
     }
 
     try {
-      await this.connection.invoke('LeaveConversation', conversationId);
+      await this.connection.invoke("LeaveConversation", conversationId);
     } catch (error) {
-      console.error('Failed to leave conversation:', error);
+      console.error("Failed to leave conversation:", error);
     }
   }
 }

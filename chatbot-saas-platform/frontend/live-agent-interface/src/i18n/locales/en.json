@@ -88,7 +88,11 @@
     "averageResponseTime": "Average Response Time",
     "customerSatisfaction": "Customer Satisfaction",
     "totalConversations": "Total Conversations",
-    "resolutionRate": "Resolution Rate"
+    "resolutionRate": "Resolution Rate",
+    "state": {
+      "true": "Active",
+      "false": "Inactive"
+    }
   },
   "conversations": {
     "subtitle": "Manage your conversations",

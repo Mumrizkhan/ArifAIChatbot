@@ -88,7 +88,11 @@
     "averageResponseTime": "متوسط وقت الاستجابة",
     "customerSatisfaction": "رضا العملاء",
     "totalConversations": "إجمالي المحادثات",
-    "resolutionRate": "معدل الحل"
+    "resolutionRate": "معدل الحل",
+    "state": {
+      "true": "نشط",
+      "false": "غير نشط"
+    }
   },
   "conversations": {
     "subtitle": "إدارة محادثاتك",
