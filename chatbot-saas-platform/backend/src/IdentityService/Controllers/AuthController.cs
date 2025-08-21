@@ -116,7 +116,8 @@ public class AuthController : ControllerBase
                 user.Role,
                 user.PreferredLanguage,
                 user.IsActive,
-                user.LastLoginAt
+                user.LastLoginAt,
+                user.TenantId
             });
         }
         catch (Exception ex)
