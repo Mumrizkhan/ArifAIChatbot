@@ -182,7 +182,7 @@ class AgentSignalRService {
       // connected -> join agent group (guarded)
       if (this.isConnected && conn && this.agentId) {
         try {
-          await conn.invoke("JoinAgentGroup", this.agentId);
+          await conn.invoke("JoinAgentGroup");
           console.log("Joined agent group:", this.agentId);
         } catch (invokeErr) {
           console.error("JoinAgentGroup failed:", invokeErr);
