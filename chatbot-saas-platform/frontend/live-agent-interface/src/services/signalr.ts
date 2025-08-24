@@ -142,7 +142,6 @@ class AgentSignalRService {
 
       // wire handlers once per connection instance and before starting
       if (!this.handlersWired && this.connection) {
-        alert("here");
         this.setupEventHandlers();
         this.handlersWired = true;
       }

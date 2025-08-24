@@ -100,24 +100,42 @@ const transformConversationAssignment = (assignment: any): Conversation => {
   return {
     id: assignment.conversationId || assignment.ConversationId,
     customer: {
-      id: assignment.customerId || 'unknown',
-      name: assignment.customerName || assignment.CustomerName || 'Unknown Customer',
+      id: assignment.customerId || "unknown",
+      name: assignment.customerName || assignment.CustomerName || "Unknown Customer",
       email: assignment.customerEmail || assignment.CustomerEmail,
-      language: 'en'
+      language: "en",
     },
-    assignedAgent: assignment.agentId || assignment.AgentId ? {
-      id: assignment.agentId || assignment.AgentId,
-      name: 'Agent'
-    } : undefined,
-    status: (assignment.status || assignment.Status || 'active').toLowerCase() as any,
-    priority: (assignment.priority || assignment.Priority || 'medium').toLowerCase() as any,
-    channel: 'web' as any,
-    subject: assignment.subject || assignment.Subject || 'Conversation',
+    assignedAgent:
+      assignment.agentId || assignment.AgentId
+        ? {
+            id: assignment.agentId || assignment.AgentId,
+            name: "Agent",
+          }
+        : undefined,
+    status: (() => {
+      const statusValue = assignment.status || assignment.Status;
+      if (typeof statusValue === "string") {
+        return statusValue.toLowerCase();
+      }
+      return "active";
+    })() as any,
+    priority: (() => {
+      const priorityValue = assignment.priority || assignment.Priority;
+      // Only call toLowerCase if it's a string
+      if (typeof priorityValue === "string") {
+        return priorityValue.toLowerCase();
+      }
+      // It's likely a numeric priority (1,2,3) or other non-string format
+      // Convert to expected string format or use default
+      return "medium";
+    })() as any,
+    channel: "web" as any,
+    subject: assignment.subject || assignment.Subject || "Conversation",
     tags: [],
     messages: [],
     createdAt: new Date(assignment.assignedAt || assignment.AssignedAt || Date.now()),
     updatedAt: new Date(assignment.lastMessageAt || assignment.LastMessageAt || Date.now()),
-    unreadCount: assignment.unreadMessages || assignment.UnreadMessages || 0
+    unreadCount: assignment.unreadMessages || assignment.UnreadMessages || 0,
   };
 };
 
@@ -343,7 +361,7 @@ const conversationSlice = createSlice({
     assignConversationRealtime: (state, action: PayloadAction<ConversationAssignment>) => {
       const existingIndex = state.conversations.findIndex((c) => c.id === action.payload.conversationId);
       const transformedConversation = transformConversationAssignment(action.payload);
-      
+
       if (existingIndex !== -1) {
         state.conversations[existingIndex] = transformedConversation;
       } else {
