@@ -116,6 +116,18 @@ class SignalRService {
       );
     });
 
+    this.connection.on("ConversationAssigned", (assignmentInfo) => {
+      console.log("Conversation assigned to agent:", assignmentInfo);
+      store.dispatch(
+        assignAgent({
+          id: assignmentInfo.AgentId || assignmentInfo.ConversationId,
+          name: assignmentInfo.CustomerName || "Agent",
+          avatar: undefined,
+        })
+      );
+      store.dispatch(updateConversationStatus("active"));
+    });
+
     this.connection.on("ConversationStatusChanged", (status) => {
       store.dispatch(updateConversationStatus(status));
     });
