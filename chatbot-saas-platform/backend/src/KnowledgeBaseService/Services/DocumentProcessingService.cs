@@ -11,6 +11,7 @@ using System.Text;
 using System.Text.RegularExpressions;
 using Shared.Domain.Entities;
 using Document = Shared.Domain.Entities.Document;
+using Shared.Application.Services;
 
 namespace KnowledgeBaseService.Services;
 
@@ -19,12 +20,12 @@ public class DocumentProcessingService : IDocumentProcessingService
     // private readonly OpenAIClient _openAIClient;
     private readonly ILogger<DocumentProcessingService> _logger;
     private readonly IConfiguration _configuration;
-    private readonly IVectorSearchService _vectorSearchService;
+    private readonly IVectorService _vectorSearchService;
 
     public DocumentProcessingService(
         ILogger<DocumentProcessingService> logger, 
-        IConfiguration configuration, 
-        IVectorSearchService vectorSearchService)
+        IConfiguration configuration,
+        IVectorService vectorSearchService)
     {
         _logger = logger;
         _configuration = configuration;
@@ -53,7 +54,8 @@ public class DocumentProcessingService : IDocumentProcessingService
 
             var embeddingsGenerated = await GenerateEmbeddingsAsync(chunks);
             
-            var collectionName = $"tenant_{document.TenantId:N}_knowledge";
+            var collectionName = $"tenant_{document.TenantId:N}_collection_{Guid.NewGuid()}";
+           
             var storedInVector = await StoreInVectorDatabaseAsync(chunks, collectionName);
             
             document.IsEmbedded = embeddingsGenerated && storedInVector;
@@ -282,7 +284,7 @@ Tags should be single words or short phrases (2-3 words max).";
         try
         {
             // Ensure the collection exists
-            var collectionCreated = await _vectorSearchService.CreateCollectionAsync(collectionName, chunks.First().TenantId);
+            var collectionCreated = await _vectorSearchService.CreateCollectionAsync(collectionName);
             if (!collectionCreated)
             {
                 _logger.LogError("Failed to create or access collection {CollectionName}", collectionName);
@@ -290,7 +292,7 @@ Tags should be single words or short phrases (2-3 words max).";
             }
 
             // Upsert points into the vector database
-            var upserted = await _vectorSearchService.UpdateDocumentInVectorAsync(new Document
+            var upserted = await _vectorSearchService.UpsertDocumentAsync(new Document
             {
                 Id = chunks.First().DocumentId,
                 VectorCollectionName = collectionName,

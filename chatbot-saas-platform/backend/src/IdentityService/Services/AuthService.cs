@@ -242,10 +242,11 @@ public class AuthService : IAuthService
             FirstName = user.FirstName,
             LastName = user.LastName,
             PhoneNumber = user.PhoneNumber,
-            AvatarUrl = user.AvatarUrl,
+            AvatarUrl = user.AvatarUrl??"",
             Role = user.Role.ToString(),
             IsActive = user.IsActive,
-            CreatedAt = user.CreatedAt
+            CreatedAt = user.CreatedAt,
+            TenantId= user.TenantId,
         };
     }
 }

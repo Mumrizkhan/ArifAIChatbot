@@ -24,7 +24,7 @@ steps:
     displayName: 'Restore NuGet packages'
     inputs:
       command: 'restore'
-      projects: 'chatbot-saas-platform/backend/src/LiveAgentService/LiveAgentService.csproj'
+      projects: 'chatbot-saas-platform/backend/src/**/*.csproj'
 
   - task: DotNetCoreCLI@2
     displayName: 'Build project'

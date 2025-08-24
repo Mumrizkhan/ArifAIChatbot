@@ -9,6 +9,7 @@ using Shared.Infrastructure.Services;
 using Shared.Infrastructure.Extensions;
 using System.Text;
 using Serilog;
+using Shared.Application.Services;
 
 Log.Logger = new LoggerConfiguration()
     .WriteTo.Console()

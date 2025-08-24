@@ -33,7 +33,8 @@ public class UserDto
     public DateTime? LastLoginAt { get; set; }
     public string PreferredLanguage { get; set; } = string.Empty;
     public string? PhoneNumber { get; internal set; }
-    public object AvatarUrl { get; internal set; }
+    public string AvatarUrl { get; internal set; }
+    public Guid TenantId { get; set; }
 }
 
 public class CreateUserRequest

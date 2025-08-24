@@ -1,4 +1,5 @@
 using AIOrchestrationService.Models;
+using Shared.Application.Common.Models;
 
 namespace AIOrchestrationService.Services;
 

@@ -2,7 +2,9 @@ trigger:
   branches:
     include:
       - dev
-
+  paths:
+    include:
+      - chatbot-saas-platform/frontend/admin-dashboard**
 pool:
   name: ubuntu-22.04
 
