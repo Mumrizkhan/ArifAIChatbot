@@ -19,7 +19,10 @@ steps:
       packageType: 'sdk'
       version: '9.x'
       installationPath: $(Agent.ToolsDirectory)/dotnet
-
+  - script: |
+      dotnet --info
+      which dotnet
+    displayName: "Verify .NET SDK in use"
   - task: DotNetCoreCLI@2
     displayName: 'Restore NuGet packages'
     inputs:
