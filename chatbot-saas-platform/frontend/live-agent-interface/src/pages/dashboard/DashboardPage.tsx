@@ -36,8 +36,9 @@ const DashboardPage = () => {
       // Call the connect method to establish the SignalR connection
       const connectToSignalR = async () => {
         try {
+          console.log("Connecting to SignalR...", user?.tenantId);
           // const authToken = "your-auth-token"; // Replace with the actual token
-          const tenantId = user?.tenantId || "your-tenant-id"; // Replace with the actual tenant ID
+          const tenantId = user?.tenantId; // Replace with the actual tenant ID
           const isConnected = await agentSignalRService.connect(token, currentAgentId, tenantId);
           console.log("SignalR connected:", isConnected);
         } catch (error) {
