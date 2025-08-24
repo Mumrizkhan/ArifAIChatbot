@@ -70,8 +70,16 @@ class AgentSignalRService {
   private onConnectionStatusChange?: (isConnected: boolean) => void;
 
   async connect(authToken: string, agentId: string, tenantId: string): Promise<boolean> {
+    console.log("connect() called with agentId:", agentId);
+
     if (this.isConnected) {
+      console.warn("Already connected to SignalR");
       return true;
+    }
+
+    if (!agentId) {
+      console.error("Invalid agentId:", agentId);
+      return false;
     }
 
     this.agentId = agentId;
@@ -79,7 +87,7 @@ class AgentSignalRService {
 
     try {
       this.connection = new HubConnectionBuilder()
-        .withUrl(`https://api-stg-arif.tetco.sa/chat/chatHub`, {
+        .withUrl(`https://api-stg-arif.tetco.sa/agent/agentHub`, {
           accessTokenFactory: () => authToken,
         })
         .withAutomaticReconnect({
@@ -94,13 +102,13 @@ class AgentSignalRService {
         .build();
 
       this.setupEventHandlers();
-
       await this.connection.start();
       this.isConnected = true;
 
       console.log("Agent SignalR connection established");
       this.onConnectionStatusChange?.(true);
 
+      console.log("Agent ID being sent to JoinAgentGroup:", this.agentId);
       await this.connection.invoke("JoinAgentGroup", this.agentId);
 
       return true;

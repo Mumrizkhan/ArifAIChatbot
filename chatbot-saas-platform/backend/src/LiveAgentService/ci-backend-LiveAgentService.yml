@@ -19,13 +19,15 @@ steps:
       packageType: 'sdk'
       version: '9.x'
       installationPath: $(Agent.ToolsDirectory)/dotnet
-
+  - script: |
+      dotnet --info
+      which dotnet
+    displayName: "Verify .NET SDK in use"
   - task: DotNetCoreCLI@2
-    displayName: 'Restore NuGet packages'
+    displayName: 'Dotnet Restore'
     inputs:
       command: 'restore'
       projects: 'chatbot-saas-platform/backend/src/**/*.csproj'
-
   - task: DotNetCoreCLI@2
     displayName: 'Build project'
     inputs:
