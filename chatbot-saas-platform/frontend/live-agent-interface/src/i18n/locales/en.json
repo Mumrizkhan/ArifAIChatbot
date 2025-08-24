@@ -154,7 +154,11 @@
     "typeMessage": "Type a message...",
     "selectConversation": "Select a conversation",
     "selectConversationDesc": "Choose a conversation from the list to start chatting.",
-    "escalated": "Escalated"
+    "escalated": "Escalated",
+    "status": {
+      "active": "Active",
+      "true": "Active"
+    }
   },
   "customers": {
     "title": "Customers",
