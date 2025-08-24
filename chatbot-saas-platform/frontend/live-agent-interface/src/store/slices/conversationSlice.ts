@@ -8,7 +8,7 @@ export interface Message {
   conversationId: string;
   content: string;
   sender: "customer" | "agent" | "system";
-  timestamp: Date;
+  timestamp: string; // Changed from Date to string
   type: "text" | "file" | "image" | "system";
   metadata?: {
     fileName?: string;
@@ -43,8 +43,8 @@ export interface Conversation {
   subject?: string;
   tags: string[];
   messages: Message[];
-  createdAt: Date;
-  updatedAt: Date;
+  createdAt: string; // Changed from Date to string
+  updatedAt: string; // Changed from Date to string
   waitTime?: number;
   responseTime?: number;
   rating?: number;
@@ -133,8 +133,8 @@ const transformConversationAssignment = (assignment: any): Conversation => {
     subject: assignment.subject || assignment.Subject || "Conversation",
     tags: [],
     messages: [],
-    createdAt: new Date(assignment.assignedAt || assignment.AssignedAt || Date.now()),
-    updatedAt: new Date(assignment.lastMessageAt || assignment.LastMessageAt || Date.now()),
+    createdAt: new Date(assignment.assignedAt || assignment.AssignedAt || Date.now()).toISOString(),
+    updatedAt: new Date(assignment.lastMessageAt || assignment.LastMessageAt || Date.now()).toISOString(),
     unreadCount: assignment.unreadMessages || assignment.UnreadMessages || 0,
   };
 };
@@ -302,7 +302,7 @@ const conversationSlice = createSlice({
       const conversation = state.conversations.find((c) => c.id === action.payload.conversationId);
       if (conversation) {
         conversation.messages.push(action.payload);
-        conversation.updatedAt = new Date();
+        conversation.updatedAt = new Date().toISOString();
         if (state.activeConversation?.id !== conversation.id) {
           conversation.unreadCount += 1;
         }
@@ -409,7 +409,7 @@ const conversationSlice = createSlice({
         const conversation = state.conversations.find((c) => c.id === action.payload.conversationId);
         if (conversation) {
           conversation.messages.push(action.payload);
-          conversation.updatedAt = new Date();
+          conversation.updatedAt = new Date().toISOString();
         }
         if (state.activeConversation?.id === action.payload.conversationId) {
           state.activeConversation!.messages.push(action.payload);
