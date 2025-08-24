@@ -1,4 +1,6 @@
+using Newtonsoft.Json;
 using System.Text.Json;
+using System.Text.Json.Serialization;
 
 namespace ChatRuntimeService.Services;
 
@@ -52,8 +54,13 @@ public class LiveAgentIntegrationService : ILiveAgentIntegrationService
             if (response.IsSuccessStatusCode)
             {
                 var content = await response.Content.ReadAsStringAsync();
-                var result = JsonSerializer.Deserialize<FindAgentResponse>(content);
-                return result?.AgentId;
+                var options = new JsonSerializerOptions
+                {
+                    PropertyNameCaseInsensitive = true
+                };
+
+                var result = System.Text.Json.JsonSerializer.Deserialize<FindAgentResponse>(content, options);
+                return Guid.Parse( result?.AgentId??"");
             }
             return null;
         }
@@ -82,5 +89,6 @@ public class LiveAgentIntegrationService : ILiveAgentIntegrationService
 
 public class FindAgentResponse
 {
-    public Guid? AgentId { get; set; }
+
+    public string AgentId { get; set; } 
 }
