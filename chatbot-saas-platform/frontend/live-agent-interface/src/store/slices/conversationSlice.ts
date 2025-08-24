@@ -96,6 +96,31 @@ const initialState: ConversationState = {
   isSignalRConnected: false,
 };
 
+const transformConversationAssignment = (assignment: any): Conversation => {
+  return {
+    id: assignment.conversationId || assignment.ConversationId,
+    customer: {
+      id: assignment.customerId || 'unknown',
+      name: assignment.customerName || assignment.CustomerName || 'Unknown Customer',
+      email: assignment.customerEmail || assignment.CustomerEmail,
+      language: 'en'
+    },
+    assignedAgent: assignment.agentId || assignment.AgentId ? {
+      id: assignment.agentId || assignment.AgentId,
+      name: 'Agent'
+    } : undefined,
+    status: (assignment.status || assignment.Status || 'active').toLowerCase() as any,
+    priority: (assignment.priority || assignment.Priority || 'medium').toLowerCase() as any,
+    channel: 'web' as any,
+    subject: assignment.subject || assignment.Subject || 'Conversation',
+    tags: [],
+    messages: [],
+    createdAt: new Date(assignment.assignedAt || assignment.AssignedAt || Date.now()),
+    updatedAt: new Date(assignment.lastMessageAt || assignment.LastMessageAt || Date.now()),
+    unreadCount: assignment.unreadMessages || assignment.UnreadMessages || 0
+  };
+};
+
 export const fetchConversations = createAsyncThunk(
   "conversations/fetchAll",
   async (params?: { status?: string; priority?: string; limit?: number }) => {
@@ -316,10 +341,13 @@ const conversationSlice = createSlice({
       state.isSignalRConnected = action.payload;
     },
     assignConversationRealtime: (state, action: PayloadAction<ConversationAssignment>) => {
-      const conversation = state.conversations.find((c) => c.id === action.payload.conversationId);
-      if (conversation) {
-        conversation.status = "active";
-        conversation.assignedAgent = { id: action.payload.agentId, name: "Agent" };
+      const existingIndex = state.conversations.findIndex((c) => c.id === action.payload.conversationId);
+      const transformedConversation = transformConversationAssignment(action.payload);
+      
+      if (existingIndex !== -1) {
+        state.conversations[existingIndex] = transformedConversation;
+      } else {
+        state.conversations.unshift(transformedConversation);
       }
     },
     transferConversationRealtime: (state, action: PayloadAction<ConversationTransfer>) => {
@@ -328,10 +356,11 @@ const conversationSlice = createSlice({
         conversation.assignedAgent = { id: action.payload.toAgentId, name: "Agent" };
       }
     },
-    addNewConversation: (state, action: PayloadAction<Conversation>) => {
-      const existingIndex = state.conversations.findIndex((c) => c.id === action.payload.id);
+    addNewConversation: (state, action: PayloadAction<Conversation | any>) => {
+      const conversation = action.payload.id ? action.payload : transformConversationAssignment(action.payload);
+      const existingIndex = state.conversations.findIndex((c) => c.id === conversation.id);
       if (existingIndex === -1) {
-        state.conversations.unshift(action.payload);
+        state.conversations.unshift(conversation);
       }
     },
   },
@@ -343,7 +372,8 @@ const conversationSlice = createSlice({
       })
       .addCase(fetchConversations.fulfilled, (state, action) => {
         state.isLoading = false;
-        state.conversations = Array.isArray(action.payload) ? action.payload : [];
+        const rawConversations = Array.isArray(action.payload) ? action.payload : [];
+        state.conversations = rawConversations.map(transformConversationAssignment);
       })
       .addCase(fetchConversations.rejected, (state, action) => {
         state.isLoading = false;

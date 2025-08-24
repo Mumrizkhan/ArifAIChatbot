@@ -129,7 +129,7 @@ app.UseHangfireDashboard("/hangfire", new DashboardOptions
 });
 
 app.MapControllers();
-app.MapHub<WorkflowHub>("/workflowHub");
+app.MapHub<WorkflowHub>("/workflowHub").RequireCors("AllowAll");
 
 app.Run();
 
