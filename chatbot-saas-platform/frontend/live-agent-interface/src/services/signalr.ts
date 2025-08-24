@@ -70,6 +70,7 @@ class AgentSignalRService {
 
   private agentId: string | null = null;
   private tenantId: string | null = null;
+  private isInAgentGroup: boolean = false;
 
   private onAgentStatusChanged?: (status: AgentStatusUpdate) => void;
   private onConversationAssigned?: (assignment: ConversationAssignment) => void;
@@ -119,8 +120,9 @@ class AgentSignalRService {
       }
 
       if (!this.connection) {
+        const API_BASE_URL = (import.meta as any).env.VITE_API_BASE_URL || "https://api-stg-arif.tetco.sa";
         this.connection = new HubConnectionBuilder()
-          .withUrl(`https://api-stg-arif.tetco.sa/agent/agentHub`, {
+          .withUrl(`${API_BASE_URL}/agent/agenthub`, {
             accessTokenFactory: () => authToken,
             transport: this.debugForceLongPolling ? HttpTransportType.LongPolling : undefined,
           })
@@ -140,6 +142,7 @@ class AgentSignalRService {
 
       // wire handlers once per connection instance and before starting
       if (!this.handlersWired && this.connection) {
+        alert("here");
         this.setupEventHandlers();
         this.handlersWired = true;
       }
@@ -182,21 +185,51 @@ class AgentSignalRService {
       // connected -> join agent group (guarded)
       if (this.isConnected && conn && this.agentId) {
         try {
-          await conn.invoke("JoinAgentGroup");
-          console.log("Joined agent group:", this.agentId);
-        } catch (invokeErr) {
-          console.error("JoinAgentGroup failed:", invokeErr);
-          // clean up to allow fresh rebuild on next try
-          try {
-            await conn.stop();
-          } catch (e) {
-            /* ignore */
+          // Add retry logic for JoinAgentGroup
+          let joinSuccess = false;
+          let attempts = 0;
+          const maxAttempts = 3;
+
+          while (!joinSuccess && attempts < maxAttempts) {
+            try {
+              attempts++;
+              console.log(`Attempting to join agent group (attempt ${attempts}/${maxAttempts})...`);
+              await conn.invoke("JoinAgentGroup");
+              console.log("Joined agent group:", this.agentId);
+              joinSuccess = true;
+            } catch (invokeErr) {
+              // Try to get more diagnostic info from the error
+              console.error(
+                `JoinAgentGroup failed (attempt ${attempts}/${maxAttempts}):`,
+                typeof invokeErr === "object" && invokeErr && "message" in invokeErr ? (invokeErr as any).message : String(invokeErr),
+                typeof invokeErr === "object" && invokeErr && "stack" in invokeErr ? (invokeErr as any).stack : ""
+              );
+
+              if (attempts < maxAttempts) {
+                // Wait before retry with exponential backoff
+                const delay = Math.min(1000 * Math.pow(2, attempts - 1), 5000);
+                console.log(`Retrying JoinAgentGroup in ${delay}ms...`);
+                await new Promise((resolve) => setTimeout(resolve, delay));
+              } else {
+                // Log detailed diagnostic info on final failure
+                console.error("All JoinAgentGroup attempts failed. Connection state:", conn.state, "AgentId:", this.agentId);
+              }
+            }
           }
-          this.connection = null;
-          this.handlersWired = false;
-          this.isConnected = false;
-          this.onConnectionStatusChange?.(false);
-          return false;
+
+          // Only consider connection failed if we couldn't join after retries
+          if (!joinSuccess) {
+            // Don't disconnect - you're connected but just not in a group
+            // Let the app continue working with limited functionality
+            console.warn("Connected to SignalR but failed to join agent group");
+            // Option: Set a flag to indicate partial connection
+            this.isInAgentGroup = false;
+          } else {
+            this.isInAgentGroup = true;
+          }
+        } catch (outerErr) {
+          console.error("Unexpected error in JoinAgentGroup logic:", outerErr);
+          // Continue anyway - connection is established
         }
       } else {
         if (!this.agentId) console.warn("No agentId available; skipping JoinAgentGroup");
@@ -222,6 +255,7 @@ class AgentSignalRService {
     });
 
     this.connection.on("ConversationAssigned", (assignment: ConversationAssignment) => {
+      console.log(assignment, "ConversationAssigned");
       try {
         this.onConversationAssigned?.(assignment);
       } catch (e) {
