@@ -119,8 +119,9 @@ class AgentSignalRService {
       }
 
       if (!this.connection) {
+        const API_BASE_URL = (import.meta as any).env.VITE_API_BASE_URL || "https://api-stg-arif.tetco.sa";
         this.connection = new HubConnectionBuilder()
-          .withUrl(`https://api-stg-arif.tetco.sa/agent/agentHub`, {
+          .withUrl(`${API_BASE_URL}/agent/agenthub`, {
             accessTokenFactory: () => authToken,
             transport: this.debugForceLongPolling ? HttpTransportType.LongPolling : undefined,
           })
