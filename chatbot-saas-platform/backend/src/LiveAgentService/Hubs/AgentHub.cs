@@ -7,7 +7,7 @@ using LiveAgentService.Models;
 
 namespace LiveAgentService.Hubs;
 
-[Authorize]
+//[Authorize]
 public class AgentHub : Hub
 {
     private readonly IApplicationDbContext _context;
