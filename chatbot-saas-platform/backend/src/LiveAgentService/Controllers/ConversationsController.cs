@@ -17,6 +17,7 @@ public class ConversationsController : ControllerBase
     private readonly ITenantService _tenantService;
     private readonly IAgentRoutingService _agentRoutingService;
     private readonly IQueueManagementService _queueManagementService;
+    private readonly IChatRuntimeIntegrationService _chatRuntimeIntegrationService;
     private readonly ILogger<ConversationsController> _logger;
 
     public ConversationsController(
@@ -25,6 +26,7 @@ public class ConversationsController : ControllerBase
         ITenantService tenantService,
         IAgentRoutingService agentRoutingService,
         IQueueManagementService queueManagementService,
+        IChatRuntimeIntegrationService chatRuntimeIntegrationService,
         ILogger<ConversationsController> logger)
     {
         _agentManagementService = agentManagementService;
@@ -32,6 +34,7 @@ public class ConversationsController : ControllerBase
         _tenantService = tenantService;
         _agentRoutingService = agentRoutingService;
         _queueManagementService = queueManagementService;
+        _chatRuntimeIntegrationService = chatRuntimeIntegrationService;
         _logger = logger;
     }
 
@@ -130,21 +133,32 @@ public class ConversationsController : ControllerBase
                 return Unauthorized();
             }
 
-            var message = new
+            var success = await _chatRuntimeIntegrationService.SendMessageAsync(
+                conversationId, 
+                request.Content, 
+                request.Type ?? "text", 
+                agentId.Value);
+
+            if (success)
             {
-                id = Guid.NewGuid(),
-                conversationId,
-                content = request.Content,
-                sender = "agent",
-                timestamp = DateTime.UtcNow,
-                type = request.Type ?? "text",
-                metadata = request.Metadata,
-                isRead = false
-            };
+                var response = new
+                {
+                    id = Guid.NewGuid(),
+                    conversationId,
+                    content = request.Content,
+                    sender = "agent",
+                    senderId = agentId.Value,
+                    timestamp = DateTime.UtcNow,
+                    type = request.Type ?? "text",
+                    metadata = request.Metadata,
+                    success = true
+                };
 
-            _logger.LogInformation("Agent {AgentId} sent message to conversation {ConversationId}", agentId, conversationId);
+                _logger.LogInformation("Agent {AgentId} sent message to conversation {ConversationId}", agentId, conversationId);
+                return Ok(response);
+            }
 
-            return Ok(message);
+            return StatusCode(500, new { message = "Failed to send message" });
         }
         catch (Exception ex)
         {

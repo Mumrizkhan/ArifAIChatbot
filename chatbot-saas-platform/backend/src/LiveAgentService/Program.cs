@@ -48,6 +48,8 @@ builder.Services.AddSwaggerGen(options =>
 builder.Services.AddSignalR();
 
 builder.Services.AddInfrastructure(builder.Configuration);
+builder.Services.AddHttpClient<IChatRuntimeIntegrationService, ChatRuntimeIntegrationService>();
+builder.Services.AddScoped<IChatRuntimeIntegrationService, ChatRuntimeIntegrationService>();
 builder.Services.AddScoped<IAgentRoutingService, AgentRoutingService>();
 builder.Services.AddScoped<IQueueManagementService, QueueManagementService>();
 builder.Services.AddScoped<IAgentManagementService, AgentManagementService>();
