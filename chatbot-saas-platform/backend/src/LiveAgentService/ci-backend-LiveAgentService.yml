@@ -23,11 +23,9 @@ steps:
       dotnet --info
       which dotnet
     displayName: "Verify .NET SDK in use"
-  - task: DotNetCoreCLI@2
-    displayName: 'Restore NuGet packages'
-    inputs:
-      command: 'restore'
-      projects: 'chatbot-saas-platform/backend/src/**/*.csproj'
+  - script: |
+      dotnet restore chatbot-saas-platform/backend/src/LiveAgentService/LiveAgentService.csproj
+    displayName: 'Restore with dotnet CLI'
 
   - task: DotNetCoreCLI@2
     displayName: 'Build project'
