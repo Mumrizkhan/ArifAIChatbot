@@ -183,16 +183,7 @@ class SignalRService {
   }
 
   async requestAgent(): Promise<void> {
-    if (this.connection?.state === HubConnectionState.Connected) {
-      try {
-        await this.connection.invoke("RequestAgent");
-        console.log("Agent handoff requested via SignalR");
-      } catch (error) {
-        console.error("Failed to request agent via SignalR:", error);
-      }
-    } else {
-      console.log("SignalR not connected, agent handoff requested via API only");
-    }
+    console.log("Agent handoff requested - handled via HTTP API call in Redux action");
   }
 
   private scheduleReconnect(tenantId: string, authToken: string, conversationId?: string) {
