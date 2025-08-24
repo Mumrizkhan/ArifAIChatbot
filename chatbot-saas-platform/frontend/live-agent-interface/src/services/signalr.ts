@@ -1,4 +1,4 @@
-import { HubConnection, HubConnectionBuilder, LogLevel } from "@microsoft/signalr";
+import { HubConnection, HubConnectionBuilder, HubConnectionState, HttpTransportType, LogLevel } from "@microsoft/signalr";
 
 interface AgentStatusUpdate {
   agentId: string;
@@ -52,10 +52,22 @@ interface AgentNotification {
 }
 
 class AgentSignalRService {
+  // Set true to force LongPolling for quick isolation test (do NOT use in production)
+  private debugForceLongPolling = false;
+  // small helper for safe logging
+  private safeTokenLength(tok: string | null) {
+    return tok ? tok.length : 0;
+  }
+
   private connection: HubConnection | null = null;
   private isConnected = false;
+  private isConnecting = false;
+  private handlersWired = false;
+  private lastAuthToken: string | null = null;
+
   private maxReconnectAttempts = 5;
   private reconnectDelay = 5000;
+
   private agentId: string | null = null;
   private tenantId: string | null = null;
 
@@ -67,104 +79,251 @@ class AgentSignalRService {
   private onMessageReceived?: (message: any) => void;
   private onAssistanceRequested?: (request: AssistanceRequest) => void;
   private onBroadcastMessage?: (message: BroadcastMessage) => void;
+  private onAgentNotification?: (notification: AgentNotification) => void;
   private onConnectionStatusChange?: (isConnected: boolean) => void;
 
   async connect(authToken: string, agentId: string, tenantId: string): Promise<boolean> {
-    console.log("connect() called with agentId:", agentId);
+    console.log("AgentSignalRService.connect called with agentId:", agentId);
 
-    if (this.isConnected) {
-      console.warn("Already connected to SignalR");
-      return true;
-    }
-
-    if (!agentId) {
-      console.error("Invalid agentId:", agentId);
+    if (this.isConnecting) {
+      console.warn("Connect already in progress - skipping duplicate call");
       return false;
     }
 
-    this.agentId = agentId;
-    this.tenantId = tenantId;
+    this.isConnecting = true;
 
     try {
-      this.connection = new HubConnectionBuilder()
-        .withUrl(`https://api-stg-arif.tetco.sa/agent/agentHub`, {
-          accessTokenFactory: () => authToken,
-        })
-        .withAutomaticReconnect({
-          nextRetryDelayInMilliseconds: (retryContext) => {
-            if (retryContext.previousRetryCount < this.maxReconnectAttempts) {
-              return this.reconnectDelay;
-            }
-            return null;
-          },
-        })
-        .configureLogging(LogLevel.Information)
-        .build();
+      if (this.isConnected) {
+        console.log("Already connected");
+        return true;
+      }
 
-      this.setupEventHandlers();
-      await this.connection.start();
-      this.isConnected = true;
+      if (!agentId) {
+        console.error("Invalid agentId", agentId);
+        return false;
+      }
 
-      console.log("Agent SignalR connection established");
+      this.agentId = agentId;
+      this.tenantId = tenantId;
+
+      const needRebuild = !this.connection || this.lastAuthToken !== authToken;
+      if (needRebuild && this.connection) {
+        console.log("Auth token changed or connection missing - stopping existing connection to rebuild");
+        try {
+          await this.connection.stop();
+        } catch (e) {
+          console.warn("Error stopping existing connection:", e);
+        }
+        this.connection = null;
+        this.handlersWired = false;
+      }
+
+      if (!this.connection) {
+        this.connection = new HubConnectionBuilder()
+          .withUrl(`https://api-stg-arif.tetco.sa/agent/agentHub`, {
+            accessTokenFactory: () => authToken,
+            transport: this.debugForceLongPolling ? HttpTransportType.LongPolling : undefined,
+          })
+          .withAutomaticReconnect({
+            nextRetryDelayInMilliseconds: (retryContext) => {
+              if (retryContext.previousRetryCount < this.maxReconnectAttempts) {
+                return this.reconnectDelay;
+              }
+              return null;
+            },
+          })
+          .configureLogging(LogLevel.Trace) // verbose during debugging
+          .build();
+
+        this.lastAuthToken = authToken;
+      }
+
+      // wire handlers once per connection instance and before starting
+      if (!this.handlersWired && this.connection) {
+        this.setupEventHandlers();
+        this.handlersWired = true;
+      }
+
+      // use local reference to avoid races where this.connection is cleared during start
+      const conn = this.connection;
+      if (!conn) {
+        console.error("Connection cleared before start");
+        return false;
+      }
+
+      if (conn.state === HubConnectionState.Connected) {
+        console.log("Connection already in Connected state");
+        this.isConnected = true;
+      } else if (conn.state === HubConnectionState.Disconnected) {
+        console.log("Starting SignalR connection...");
+        try {
+          // timeout to avoid hanging indefinitely
+          await Promise.race([conn.start(), new Promise((_, rej) => setTimeout(() => rej(new Error("SignalR start timeout")), 20000))]);
+          this.isConnected = true;
+          console.log("SignalR connection started, state:", conn.state);
+        } catch (startErr: any) {
+          console.error("Failed to start the connection:", startErr?.name ?? startErr, startErr?.message ?? "");
+          // cleanup broken instance so next attempt rebuilds
+          try {
+            await conn.stop();
+          } catch (e) {
+            /* ignore */
+          }
+          this.connection = null;
+          this.handlersWired = false;
+          this.isConnected = false;
+          this.onConnectionStatusChange?.(false);
+          return false;
+        }
+      } else {
+        console.warn("Connection in transient state:", conn.state, " - skipping start");
+      }
+
+      // connected -> join agent group (guarded)
+      if (this.isConnected && conn && this.agentId) {
+        try {
+          await conn.invoke("JoinAgentGroup", this.agentId);
+          console.log("Joined agent group:", this.agentId);
+        } catch (invokeErr) {
+          console.error("JoinAgentGroup failed:", invokeErr);
+          // clean up to allow fresh rebuild on next try
+          try {
+            await conn.stop();
+          } catch (e) {
+            /* ignore */
+          }
+          this.connection = null;
+          this.handlersWired = false;
+          this.isConnected = false;
+          this.onConnectionStatusChange?.(false);
+          return false;
+        }
+      } else {
+        if (!this.agentId) console.warn("No agentId available; skipping JoinAgentGroup");
+      }
+
       this.onConnectionStatusChange?.(true);
-
-      console.log("Agent ID being sent to JoinAgentGroup:", this.agentId);
-      await this.connection.invoke("JoinAgentGroup", this.agentId);
-
-      return true;
-    } catch (error) {
-      console.error("Failed to connect to AgentHub:", error);
-      this.isConnected = false;
-      this.onConnectionStatusChange?.(false);
-      return false;
+      return this.isConnected;
+    } finally {
+      this.isConnecting = false;
     }
   }
 
   private setupEventHandlers(): void {
     if (!this.connection) return;
 
+    // standard server -> client events
     this.connection.on("AgentStatusChanged", (status: AgentStatusUpdate) => {
-      this.onAgentStatusChanged?.(status);
+      try {
+        this.onAgentStatusChanged?.(status);
+      } catch (e) {
+        console.error("onAgentStatusChanged handler error:", e);
+      }
     });
 
     this.connection.on("ConversationAssigned", (assignment: ConversationAssignment) => {
-      this.onConversationAssigned?.(assignment);
+      try {
+        this.onConversationAssigned?.(assignment);
+      } catch (e) {
+        console.error("onConversationAssigned handler error:", e);
+      }
     });
 
     this.connection.on("ConversationTaken", (assignment: ConversationAssignment) => {
-      this.onConversationTaken?.(assignment);
+      try {
+        this.onConversationTaken?.(assignment);
+      } catch (e) {
+        console.error("onConversationTaken handler error:", e);
+      }
     });
 
     this.connection.on("ConversationTransferred", (transfer: ConversationTransfer) => {
-      this.onConversationTransferred?.(transfer);
+      try {
+        this.onConversationTransferred?.(transfer);
+      } catch (e) {
+        console.error("onConversationTransferred handler error:", e);
+      }
     });
 
     this.connection.on("ConversationEscalated", (escalation: ConversationEscalation) => {
-      this.onConversationEscalated?.(escalation);
+      try {
+        this.onConversationEscalated?.(escalation);
+      } catch (e) {
+        console.error("onConversationEscalated handler error:", e);
+      }
     });
 
     this.connection.on("ReceiveMessage", (message: any) => {
-      this.onMessageReceived?.(message);
+      try {
+        this.onMessageReceived?.(message);
+      } catch (e) {
+        console.error("onMessageReceived handler error:", e);
+      }
     });
 
     this.connection.on("AssistanceRequested", (request: AssistanceRequest) => {
-      this.onAssistanceRequested?.(request);
+      try {
+        this.onAssistanceRequested?.(request);
+      } catch (e) {
+        console.error("onAssistanceRequested handler error:", e);
+      }
     });
 
     this.connection.on("BroadcastMessage", (message: BroadcastMessage) => {
-      this.onBroadcastMessage?.(message);
+      try {
+        this.onBroadcastMessage?.(message);
+      } catch (e) {
+        console.error("onBroadcastMessage handler error:", e);
+      }
     });
 
+    // lifecycle handlers - provide rich logging and maintain state
     this.connection.onclose((error) => {
-      console.error("SignalR connection closed:", error);
+      if (error) {
+        console.error("SignalR onclose — name:", (error as any).name, "message:", (error as any).message);
+      } else {
+        console.error("SignalR onclose — closed without error");
+      }
+      this.isConnected = false;
+      this.onConnectionStatusChange?.(false);
+      // keep connection instance for automatic reconnect to use; cleanup happens on failed start
     });
 
     this.connection.onreconnecting((error) => {
       console.warn("SignalR reconnecting:", error);
+      this.onConnectionStatusChange?.(false);
     });
 
     this.connection.onreconnected(() => {
       console.log("SignalR reconnected");
+      this.onConnectionStatusChange?.(true);
+
+      // optionally re-join conversation/group without blocking the event loop
+      if (!this.connection) return;
+      if (!this.agentId) return;
+
+      (async () => {
+        try {
+          const conn = this.connection!;
+          const maxWait = 5000;
+          const start = Date.now();
+          while (conn && conn.state !== HubConnectionState.Connected && Date.now() - start < maxWait) {
+            await new Promise((r) => setTimeout(r, 200));
+          }
+          if (conn && conn.state === HubConnectionState.Connected) {
+            try {
+              await conn.invoke("JoinAgentGroup", this.agentId!);
+              console.log("Re-joined agent group after reconnect:", this.agentId);
+            } catch (err) {
+              console.error("Failed to re-join agent group after reconnect:", err);
+            }
+          } else {
+            console.warn("Connection not in Connected state after reconnected event; skipping rejoin");
+          }
+        } catch (err) {
+          console.error("Error in onreconnected handler:", err);
+        }
+      })();
     });
   }
 
@@ -201,7 +360,7 @@ class AgentSignalRService {
   }
 
   setOnAgentNotification(handler: (notification: AgentNotification) => void): void {
-    console.log("Agent notification handler set:", handler);
+    this.onAgentNotification = handler;
   }
 
   setOnConnectionStatusChange(handler: (isConnected: boolean) => void): void {
@@ -286,29 +445,6 @@ class AgentSignalRService {
     }
   }
 
-  disconnect(): void {
-    if (this.connection) {
-      this.connection.stop();
-      this.connection = null;
-      this.isConnected = false;
-      this.agentId = null;
-      this.tenantId = null;
-      this.onConnectionStatusChange?.(false);
-    }
-  }
-
-  getConnectionStatus(): boolean {
-    return this.isConnected;
-  }
-
-  getAgentId(): string | null {
-    return this.agentId;
-  }
-
-  getTenantId(): string | null {
-    return this.tenantId;
-  }
-
   async joinConversation(conversationId: string): Promise<void> {
     if (!this.isConnected || !this.connection) {
       console.warn("SignalR not connected, cannot join conversation");
@@ -333,6 +469,34 @@ class AgentSignalRService {
     } catch (error) {
       console.error("Failed to leave conversation:", error);
     }
+  }
+
+  async disconnect(): Promise<void> {
+    if (this.connection) {
+      try {
+        await this.connection.stop();
+      } catch (e) {
+        console.warn("Error while stopping SignalR connection:", e);
+      }
+      this.connection = null;
+      this.isConnected = false;
+      this.handlersWired = false;
+      this.agentId = null;
+      this.tenantId = null;
+      this.onConnectionStatusChange?.(false);
+    }
+  }
+
+  getConnectionStatus(): boolean {
+    return this.isConnected;
+  }
+
+  getAgentId(): string | null {
+    return this.agentId;
+  }
+
+  getTenantId(): string | null {
+    return this.tenantId;
   }
 }
 

@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useTranslation } from "react-i18next";
 import { AppDispatch, RootState } from "../../store/store";
@@ -29,40 +29,44 @@ const DashboardPage = () => {
   useEffect(() => {
     dispatch(fetchConversations());
 
-    if (currentAgentId && token) {
-      dispatch(fetchAgentProfile(currentAgentId));
-      dispatch(fetchAgentStats(currentAgentId));
+    if (!currentAgentId || !token) return;
 
-      // Call the connect method to establish the SignalR connection
-      const connectToSignalR = async () => {
-        try {
-          console.log("Connecting to SignalR...", user?.tenantId);
-          // const authToken = "your-auth-token"; // Replace with the actual token
-          const tenantId = user?.tenantId; // Replace with the actual tenant ID
-          const isConnected = await agentSignalRService.connect(token, currentAgentId, tenantId);
-          console.log("SignalR connected:", isConnected);
-        } catch (error) {
-          console.error("Failed to connect to SignalR:", error);
-        }
-      };
-
-      connectToSignalR();
-
-      if (isSignalRConnected) {
-        agentSignalRService.setOnAgentStatusChanged((statusUpdate: any) => {
-          dispatch(updateAgentStatusRealtime(statusUpdate));
-        });
+    // avoid multiple connect attempts (React Strict Mode / multiple mounts)
+    const connectedRef = { current: (agentSignalRService as any).isConnected ?? false } as { current: boolean };
+    // local wrapper that ensures single successful connection
+    const connectToSignalR = async () => {
+      if (connectedRef.current) return;
+      try {
+        console.log("Connecting to SignalR...", user?.tenantId);
+        const tenantId = user?.tenantId;
+        const ok = await agentSignalRService.connect(token, currentAgentId, tenantId);
+        console.log("SignalR connected:", ok);
+        connectedRef.current = !!ok;
+      } catch (error) {
+        console.error("Failed to connect to SignalR:", error);
+        connectedRef.current = false;
       }
+    };
 
-      const interval = setInterval(() => {
-        if (!isSignalRConnected) {
-          dispatch(fetchAgentStats(currentAgentId));
-        }
-      }, 30000);
+    connectToSignalR();
 
-      return () => clearInterval(interval);
-    }
-  }, [dispatch, currentAgentId, isSignalRConnected]);
+    // register handler regardless of current connection state (handler persistence)
+    agentSignalRService.setOnAgentStatusChanged((statusUpdate: any) => {
+      dispatch(updateAgentStatusRealtime(statusUpdate));
+    });
+
+    const interval = setInterval(() => {
+      if (!isSignalRConnected) {
+        dispatch(fetchAgentStats(currentAgentId));
+      }
+    }, 30000);
+
+    return () => {
+      clearInterval(interval);
+      // do not stop SignalR here unless you want disconnect on page unmount:
+      // agentSignalRService.disconnect();
+    };
+  }, [dispatch, currentAgentId, token, user?.tenantId, isSignalRConnected]);
 
   const getStatusBadge = (status: string) => {
     const variants: Record<string, "default" | "secondary" | "destructive"> = {
