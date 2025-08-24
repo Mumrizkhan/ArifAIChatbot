@@ -95,7 +95,7 @@ export const startConversation = createAsyncThunk("chat/startConversation", asyn
 });
 
 export const requestHumanAgent = createAsyncThunk("chat/requestHumanAgent", async (conversationId: string) => {
-  return await apiClient.post(`${VITE_API_URL}/chat/chat/conversations/${conversationId}/escalate`);
+  return await apiClient.post(`${VITE_API_URL}/chat/conversations/${conversationId}/escalate`);
 });
 
 const chatSlice = createSlice({
