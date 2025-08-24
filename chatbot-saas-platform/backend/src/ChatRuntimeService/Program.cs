@@ -121,6 +121,6 @@ app.UseHttpsRedirection();
 app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();
-app.MapHub<ChatHub>("/chatHub").RequireCors("FrontEnd");
+app.MapHub<ChatHub>("/chatHub").RequireCors("AllowAll");
 
 app.Run();
