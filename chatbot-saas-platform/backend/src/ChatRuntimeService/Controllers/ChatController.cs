@@ -279,6 +279,16 @@ public class ChatController : ControllerBase
                             Language = conversation.Language
                         });
 
+                    await _hubContext.Clients.Group($"conversation_{id}")
+                        .SendAsync("ConversationAssigned", new
+                        {
+                            ConversationId = id,
+                            AgentId = availableAgentId.Value,
+                            CustomerName = conversation.CustomerName,
+                            Subject = conversation.Subject,
+                            Language = conversation.Language
+                        });
+
                     return Ok(new { 
                         success = true, 
                         message = "Conversation assigned to human agent",
