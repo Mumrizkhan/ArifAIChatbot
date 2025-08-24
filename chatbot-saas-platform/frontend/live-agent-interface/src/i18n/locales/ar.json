@@ -154,7 +154,11 @@
     "typeMessage": "اكتب رسالة...",
     "selectConversation": "اختر محادثة",
     "selectConversationDesc": "اختر محادثة من القائمة لبدء المحادثة.",
-    "escalated": "تم التصعيد"
+    "escalated": "تم التصعيد",
+    "status": {
+      "active": "نشط",
+      "true": "نشط"
+    }
   },
   "customers": {
     "title": "العملاء",

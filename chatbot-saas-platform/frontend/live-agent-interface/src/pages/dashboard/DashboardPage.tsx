@@ -25,7 +25,18 @@ const DashboardPage = () => {
   console.log("rao", token);
   console.log(isSignalRConnected, "SignalR Connection Status");
   console.log(currentAgentId, "Current Agent ID");
+  // Add this helper function at the top of your component (after the imports)
+  const formatToLocalTime = (timestamp: string | number | Date) => {
+    if (!timestamp) return "";
 
+    const date = new Date(timestamp);
+
+    return date.toLocaleString(undefined, {
+      hour: "2-digit",
+      minute: "2-digit",
+      hour12: true,
+    });
+  };
   useEffect(() => {
     dispatch(fetchConversations());
 
@@ -68,16 +79,45 @@ const DashboardPage = () => {
     };
   }, [dispatch, currentAgentId, token, user?.tenantId, isSignalRConnected]);
 
-  const getStatusBadge = (status: string) => {
+  const getStatusBadge = (status: string | undefined | null) => {
+    // Normalize status - handle null/undefined and convert to lowercase
+    const normalizedStatus = (status || "").toLowerCase();
+
+    // Log status for debugging
+    console.log("Conversation status:", status, "Normalized:", normalizedStatus);
+
+    // Define status mappings with possible variations
     const variants: Record<string, "default" | "secondary" | "destructive"> = {
+      // Original lowercase mappings
       active: "default",
       waiting: "secondary",
       resolved: "default",
       escalated: "destructive",
+
+      // Add common variations that might come from API
+      "in progress": "default",
+      pending: "secondary",
+      new: "secondary",
+      closed: "default",
+      completed: "default",
+      open: "default",
+
+      // Add numeric status mappings if your API uses numbers
+      "1": "default", // often active/open
+      "2": "secondary", // often waiting/pending
+      "3": "default", // often resolved/closed
+      "4": "destructive", // often escalated
     };
+
+    // Return badge with fallback to secondary if status not in mapping
     return (
-      <Badge variant={variants[status] || "secondary"}>
-        <span>{t(`conversation.status.${status}`)}</span>
+      <Badge variant={variants[normalizedStatus] || "secondary"}>
+        <span>
+          {t(`conversation.status.${normalizedStatus}`, {
+            // Fallback if translation key doesn't exist
+            defaultValue: status || t("conversation.status.unknown"),
+          })}
+        </span>
       </Badge>
     );
   };
@@ -215,7 +255,15 @@ const DashboardPage = () => {
             <ResponsiveContainer width="100%" height={300}>
               <LineChart data={performanceData}>
                 <CartesianGrid strokeDasharray="3 3" />
-                <XAxis dataKey="date" tickFormatter={(value) => new Date(value).toLocaleDateString()} />
+                <XAxis
+                  dataKey="date"
+                  tickFormatter={(value) =>
+                    new Date(value).toLocaleDateString(undefined, {
+                      month: "short",
+                      day: "numeric",
+                    })
+                  }
+                />
                 <YAxis yAxisId="left" />
                 <YAxis yAxisId="right" orientation="right" />
                 <Tooltip />
@@ -276,7 +324,7 @@ const DashboardPage = () => {
                   </div>
                   <div className="flex items-center space-x-2">
                     {getStatusBadge(conversation.status)}
-                    <span className="text-xs text-muted-foreground">{new Date(conversation.updatedAt).toLocaleTimeString()}</span>
+                    <span className="text-xs text-muted-foreground">{formatToLocalTime(conversation.updatedAt)}</span>
                   </div>
                 </div>
               ))
@@ -313,7 +361,7 @@ const DashboardPage = () => {
                   <div>
                     <h3 className="text-lg font-semibold">{user.name}</h3>
                     <p className="text-sm text-muted-foreground">{user.email}</p>
-                    <Badge variant={user.isActive === true ? "default" : "secondary"}>{t(`agent.status.${user.isActive}`)}</Badge>
+                    <Badge variant={user.isActive === true ? "default" : "secondary"}>{t(`agent.state.${user.isActive}`)}</Badge>
                   </div>
                 </div>
 

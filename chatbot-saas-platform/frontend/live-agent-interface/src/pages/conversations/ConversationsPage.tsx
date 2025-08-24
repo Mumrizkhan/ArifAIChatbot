@@ -69,24 +69,25 @@ const ConversationsPage = () => {
       if (previousConversationId && agentSignalRService.getConnectionStatus()) {
         agentSignalRService.leaveConversation(previousConversationId);
       }
-      
+
       if (agentSignalRService.getConnectionStatus()) {
         agentSignalRService.joinConversation(conversationId);
       }
-      
+
       setPreviousConversationId(conversationId);
     }
   }, [conversationId, previousConversationId]);
 
-  const filteredConversations =
-    Array.isArray(conversations) ? conversations.filter((conversation) => {
-      const matchesSearch =
-        conversation.customer?.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        (conversation.messages?.length > 0 &&
-          conversation.messages[conversation.messages.length - 1]?.content?.toLowerCase().includes(searchTerm.toLowerCase()));
-      const matchesStatus = statusFilter === "all" || conversation.status === statusFilter;
-      return matchesSearch && matchesStatus;
-    }) : [];
+  const filteredConversations = Array.isArray(conversations)
+    ? conversations.filter((conversation) => {
+        const matchesSearch =
+          conversation.customer?.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          (conversation.messages?.length > 0 &&
+            conversation.messages[conversation.messages.length - 1]?.content?.toLowerCase().includes(searchTerm.toLowerCase()));
+        const matchesStatus = statusFilter === "all" || conversation.status === statusFilter;
+        return matchesSearch && matchesStatus;
+      })
+    : [];
 
   const handleSendMessage = () => {
     if (messageText.trim() && selectedConversation) {
@@ -117,14 +118,51 @@ const ConversationsPage = () => {
     }
   };
 
-  const getStatusBadge = (status: string) => {
+  const getStatusBadge = (status: string | undefined | null) => {
+    // Handle undefined/null status
+    if (!status) {
+      return <Badge variant="secondary">{t("conversation.status.unknown")}</Badge>;
+    }
+
+    // Normalize status to lowercase for consistent matching
+    const normalizedStatus = status.toLowerCase();
+
+    // Debug - add this temporarily to see what values you're getting
+    console.log("Status value:", status, "Normalized:", normalizedStatus);
+
+    // Define variant mappings - add any variations your API might return
     const variants: Record<string, "default" | "secondary" | "destructive"> = {
       active: "default",
       waiting: "secondary",
       resolved: "default",
       escalated: "destructive",
+
+      // Common variations
+      open: "default",
+      new: "secondary",
+      pending: "secondary",
+      closed: "default",
+      completed: "default",
+
+      // Add numeric mappings if needed
+      "1": "default", // typically active/open
+      "2": "secondary", // typically waiting/pending
+      "3": "default", // typically resolved/closed
+      "4": "destructive", // typically escalated
     };
-    return <Badge variant={variants[status] || "secondary"}>{t(`conversation.status.${status}`)}</Badge>;
+
+    // Get variant with fallback
+    const variant = variants[normalizedStatus] || "secondary";
+
+    // Return the badge with translation
+    return (
+      <Badge variant={variant}>
+        {t(`conversation.status.${normalizedStatus}`, {
+          // Fallback if translation key doesn't exist
+          defaultValue: status,
+        })}
+      </Badge>
+    );
   };
 
   const getPriorityColor = (priority: string) => {
