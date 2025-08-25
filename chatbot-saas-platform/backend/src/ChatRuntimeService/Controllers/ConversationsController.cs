@@ -58,7 +58,7 @@ public class ConversationsController : ControllerBase
                 Status = conversation.Status.ToString(),
                 Channel = conversation.Channel.ToString(),
                 Language = conversation.Language,
-                CreatedAt = conversation.CreatedAt,
+                CreatedAt = conversation.CreatedAt.ToString("O"), // ISO 8601 format
                 MessageCount = conversation.MessageCount
             });
         }
@@ -80,11 +80,10 @@ public class ConversationsController : ControllerBase
                 .OrderByDescending(c => c.UpdatedAt ?? c.CreatedAt);
 
             var totalCount = await query.CountAsync();
-            var conversations = await query
+            var conversationsData = await query
                 .Skip((page - 1) * pageSize)
                 .Take(pageSize)
-                .Select(c => new ConversationDto
-                {
+                .Select(c => new {
                     Id = c.Id,
                     CustomerName = c.CustomerName,
                     CustomerEmail = c.CustomerEmail,
@@ -98,6 +97,21 @@ public class ConversationsController : ControllerBase
                     AssignedAgentId = c.AssignedAgentId
                 })
                 .ToListAsync();
+
+            var conversations = conversationsData.Select(c => new ConversationDto
+            {
+                Id = c.Id,
+                CustomerName = c.CustomerName,
+                CustomerEmail = c.CustomerEmail,
+                Subject = c.Subject,
+                Status = c.Status,
+                Channel = c.Channel,
+                Language = c.Language,
+                CreatedAt = c.CreatedAt.ToString("O"), // ISO 8601 format
+                UpdatedAt = c.UpdatedAt?.ToString("O"),
+                MessageCount = c.MessageCount,
+                AssignedAgentId = c.AssignedAgentId
+            }).ToList();
 
             return Ok(new
             {
@@ -140,9 +154,9 @@ public class ConversationsController : ControllerBase
                 Status = conversation.Status.ToString(),
                 Channel = conversation.Channel.ToString(),
                 Language = conversation.Language,
-                CreatedAt = conversation.CreatedAt,
-                UpdatedAt = conversation.UpdatedAt,
-                EndedAt = conversation.EndedAt,
+                CreatedAt = conversation.CreatedAt.ToString("O"), // ISO 8601 format
+                UpdatedAt = conversation.UpdatedAt?.ToString("O"),
+                EndedAt = conversation.EndedAt?.ToString("O"),
                 MessageCount = conversation.MessageCount,
                 AssignedAgentId = conversation.AssignedAgentId,
                 CustomerSatisfactionRating = conversation.CustomerSatisfactionRating,
@@ -154,7 +168,7 @@ public class ConversationsController : ControllerBase
                     Type = m.Type.ToString(),
                     Sender = m.Sender.ToString(),
                     SenderId = m.SenderId,
-                    CreatedAt = m.CreatedAt,
+                    CreatedAt = m.CreatedAt.ToString("O"), // ISO 8601 format
                     IsRead = m.IsRead,
                     AttachmentUrl = m.AttachmentUrl
                 }).ToList()
@@ -163,6 +177,93 @@ public class ConversationsController : ControllerBase
         catch (Exception ex)
         {
             _logger.LogError(ex, $"Error retrieving conversation {id}");
+            return StatusCode(500, new { message = "Internal server error" });
+        }
+    }
+
+    // Internal endpoint for other services (like LiveAgentService) to get conversation details
+    [HttpGet("internal/{id}")]
+    [AllowAnonymous] // Allow internal service calls
+    public async Task<IActionResult> GetConversationInternal(Guid id)
+    {
+        try
+        {
+            // Get tenant from header for internal calls
+            var tenantId = _tenantService.GetCurrentTenantId();
+            
+            var conversation = await _context.Conversations
+                .FirstOrDefaultAsync(c => c.Id == id && c.TenantId == tenantId);
+
+            if (conversation == null)
+            {
+                return NotFound(new { message = "Conversation not found" });
+            }
+
+            return Ok(new 
+            {
+                Id = conversation.Id,
+                CustomerName = conversation.CustomerName,
+                CustomerEmail = conversation.CustomerEmail,
+                CustomerPhone = conversation.CustomerPhone,
+                Subject = conversation.Subject,
+                Status = conversation.Status.ToString(),
+                Channel = conversation.Channel.ToString(),
+                Language = conversation.Language,
+                TenantId = conversation.TenantId,
+                AssignedAgentId = conversation.AssignedAgentId,
+                CreatedAt = conversation.CreatedAt,
+                UpdatedAt = conversation.UpdatedAt,
+                MessageCount = conversation.MessageCount
+            });
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, $"Error retrieving conversation {id} for internal service");
+            return StatusCode(500, new { message = "Internal server error" });
+        }
+    }
+
+    // Internal endpoint for other services to get conversation messages
+    [HttpGet("internal/{id}/messages")]
+    [AllowAnonymous] // Allow internal service calls
+    public async Task<IActionResult> GetConversationMessagesInternal(Guid id)
+    {
+        try
+        {
+            // Get tenant from header for internal calls
+            var tenantId = _tenantService.GetCurrentTenantId();
+            
+            var conversation = await _context.Conversations
+                .FirstOrDefaultAsync(c => c.Id == id && c.TenantId == tenantId);
+
+            if (conversation == null)
+            {
+                return NotFound(new { message = "Conversation not found" });
+            }
+
+            var messages = await _context.Messages
+                .Where(m => m.ConversationId == id && m.TenantId == tenantId)
+                .OrderBy(m => m.CreatedAt)
+                .Select(m => new 
+                {
+                    Id = m.Id,
+                    ConversationId = m.ConversationId,
+                    Content = m.Content,
+                    Type = m.Type.ToString(),
+                    Sender = m.Sender.ToString(),
+                    SenderId = m.SenderId,
+                    CreatedAt = m.CreatedAt,
+                    IsRead = m.IsRead,
+                    SenderName = m.Sender == MessageSender.Customer ? "Customer" : 
+                               m.Sender == MessageSender.Agent ? "Agent" : "AI Assistant"
+                })
+                .ToListAsync();
+
+            return Ok(messages);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, $"Error retrieving messages for conversation {id}");
             return StatusCode(500, new { message = "Internal server error" });
         }
     }
@@ -319,8 +420,8 @@ public class ConversationDto
     public string Status { get; set; } = string.Empty;
     public string Channel { get; set; } = string.Empty;
     public string Language { get; set; } = string.Empty;
-    public DateTime CreatedAt { get; set; }
-    public DateTime? UpdatedAt { get; set; }
+    public string CreatedAt { get; set; }
+    public string? UpdatedAt { get; set; }
     public int MessageCount { get; set; }
     public Guid? AssignedAgentId { get; set; }
 }
@@ -328,7 +429,7 @@ public class ConversationDto
 public class ConversationDetailDto : ConversationDto
 {
     public string? CustomerPhone { get; set; }
-    public DateTime? EndedAt { get; set; }
+    public string? EndedAt { get; set; }
     public int? CustomerSatisfactionRating { get; set; }
     public string? CustomerFeedback { get; set; }
     public List<MessageDto> Messages { get; set; } = new();
@@ -341,7 +442,7 @@ public class MessageDto
     public string Type { get; set; } = string.Empty;
     public string Sender { get; set; } = string.Empty;
     public Guid? SenderId { get; set; }
-    public DateTime CreatedAt { get; set; }
+    public string CreatedAt { get; set; }
     public bool IsRead { get; set; }
     public string? AttachmentUrl { get; set; }
 }

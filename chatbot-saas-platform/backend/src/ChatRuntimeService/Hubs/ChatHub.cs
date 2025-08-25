@@ -35,6 +35,8 @@ public class ChatHub : Hub
     {
         try
         {
+            _logger.LogInformation($"JoinConversation called with ID: {conversationId}, User: {_currentUserService.UserId}, Tenant: {_tenantService.GetCurrentTenantId()}");
+            
             if (Guid.TryParse(conversationId, out var convId))
             {
                 var conversation = await _context.Conversations
@@ -43,8 +45,16 @@ public class ChatHub : Hub
                 if (conversation != null)
                 {
                     await Groups.AddToGroupAsync(Context.ConnectionId, $"conversation_{conversationId}");
-                    _logger.LogInformation($"User {_currentUserService.UserId} joined conversation {conversationId}");
+                    _logger.LogInformation($"User {_currentUserService.UserId} successfully joined conversation {conversationId}");
                 }
+                else
+                {
+                    _logger.LogWarning($"Conversation {conversationId} not found for tenant {_tenantService.GetCurrentTenantId()}");
+                }
+            }
+            else
+            {
+                _logger.LogWarning($"Invalid conversation ID format: {conversationId}");
             }
         }
         catch (Exception ex)

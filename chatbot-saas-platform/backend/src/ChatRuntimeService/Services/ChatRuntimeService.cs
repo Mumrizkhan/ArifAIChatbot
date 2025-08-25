@@ -85,8 +85,8 @@ public class ChatRuntimeService : IChatRuntimeService
             TenantId = conversation.TenantId,
             UserId = conversation.UserId,
             AssignedAgentId = conversation.AssignedAgentId,
-            CreatedAt = conversation.CreatedAt,
-            UpdatedAt = conversation.UpdatedAt,
+            CreatedAt = conversation.CreatedAt.ToString("O"),
+            UpdatedAt = conversation.UpdatedAt?.ToString("O")??"",
             UserName = conversation.User != null ? $"{conversation.User.FirstName} {conversation.User.LastName}" : null,
             Messages = conversation.Messages.Select(MapMessageToDto).ToList()
         };
@@ -150,8 +150,8 @@ public class ChatRuntimeService : IChatRuntimeService
             TenantId = conversation.TenantId,
             UserId = conversation.UserId,
             AssignedAgentId = conversation.AssignedAgentId,
-            CreatedAt = conversation.CreatedAt,
-            UpdatedAt = conversation.UpdatedAt,
+            CreatedAt = conversation.CreatedAt.ToString("O"),
+            UpdatedAt = conversation.UpdatedAt?.ToString("O"),
             Messages = conversation.Messages?.Select(MapMessageToDto).ToList() ?? new List<MessageDto>()
         };
     }
@@ -165,7 +165,7 @@ public class ChatRuntimeService : IChatRuntimeService
             Content = message.Content,
             SenderType = message.SenderType,
             SenderId = message.SenderId,
-            CreatedAt = message.CreatedAt
+            CreatedAt = message.CreatedAt.ToString("O")
         };
     }
 }

@@ -1,12 +1,12 @@
 import { createSlice, createAsyncThunk, PayloadAction } from "@reduxjs/toolkit";
 import { apiClient } from "../../services/apiClient";
-const VITE_API_URL = import.meta.env.VITE_API_URL || "https://api-stg-arif.tetco.sa";
+import { ensureISOString } from "../../utils/timestamp";
 export interface Message {
   id: string;
   content: string;
   sender: "user" | "bot" | "agent";
   type: "text" | "file" | "image" | "typing";
-  timestamp: Date;
+  timestamp: string; // ISO string format for Redux serialization
   metadata?: {
     fileName?: string;
     fileSize?: number;
@@ -29,8 +29,8 @@ export interface Conversation {
     name: string;
     avatar?: string;
   };
-  startedAt: Date;
-  endedAt?: Date;
+  startedAt: string; // ISO string format for Redux serialization
+  endedAt?: string; // ISO string format for Redux serialization
 }
 
 interface ChatState {
@@ -44,7 +44,7 @@ interface ChatState {
   isLoading: boolean;
   error: string | null;
   connectionStatus: "connecting" | "connected" | "disconnected" | "error";
-  lastSeen?: Date;
+  lastSeen?: string; // ISO string format for Redux serialization
 }
 
 const initialState: ChatState = {
@@ -59,46 +59,115 @@ const initialState: ChatState = {
   connectionStatus: "disconnected",
 };
 
+interface ApiResponse {
+  userMessage?: unknown;
+  botMessage?: unknown;
+  success?: boolean;
+}
+
+interface ErrorPayload {
+  message?: string;
+}
+
+interface ConversationPayload {
+  id: string;
+  messages?: unknown[];
+  status?: string;
+  startedAt?: string;
+}
+
+interface ConfigState {
+  tenantId: string;
+}
+
+interface RootState {
+  chat: ChatState;
+  config: ConfigState;
+}
+
 export const sendMessage = createAsyncThunk(
   "chat/sendMessage",
   async (payload: { content: string; type: "text" | "file" }, { getState, rejectWithValue }) => {
     try {
-      const { chat } = getState() as { chat: ChatState };
+      const { chat } = getState() as RootState;
       const conversationId = chat.currentConversation?.id;
-      if (!conversationId) throw new Error("No active conversation");
+      
+      // Conversation should already exist when chat is opened
+      if (!conversationId) {
+        throw new Error("No active conversation found. Please open the chat widget first.");
+      }
 
-      const res = await apiClient.post(`${import.meta.env.VITE_API_URL}/chat/chat/messages`, {
+      const res = await apiClient.post("/chat/chat/messages", {
         conversationId,
         content: payload.content,
         type: payload.type,
       });
 
-      // Support both axios-like and body-returning clients
-      const body = res && typeof res === "object" && "data" in res ? (res as any).data : res;
-      return body; // { userMessage, botMessage, success }
-    } catch (e: any) {
-      return rejectWithValue(e?.response?.data ?? { message: e?.message || "Send failed" });
+      return res;
+    } catch (e: unknown) {
+      const error = e as { response?: { data?: unknown }; message?: string };
+      return rejectWithValue(error?.response?.data ?? { message: error?.message || "Send failed" });
     }
   }
 );
 
-export const startConversation = createAsyncThunk("chat/startConversation", async (tenantId: string) => {
-  const data = await apiClient.post(`${VITE_API_URL}/chat/chat/conversations`, {
+export const startConversation = createAsyncThunk("chat/startConversation", async (tenantId: string, { getState }) => {
+  console.log("🚀 Starting conversation for tenant:", tenantId);
+  
+  const data = await apiClient.post("/chat/chat/conversations", {
     tenantId,
     customerName: "Anonymous User",
     language: "en",
   });
 
-  return {
+  console.log("✅ Conversation created via API:", data);
+
+  const conversation = {
     id: data.id,
     messages: [],
     status: "active" as const,
-    startedAt: new Date(data.createdAt || new Date()),
+    startedAt: new Date(data.startedAt || new Date()).toISOString(),
   } as Conversation;
+
+  // Setup SignalR connection and event handlers for this conversation
+  try {
+    const { signalRService } = await import("../../services/websocket");
+    const state = getState() as any;
+    const authToken = state.config?.widget?.authToken;
+    
+    if (authToken) {
+      // First establish SignalR connection if not already connected
+      if (!signalRService.isConnected()) {
+        console.log("SignalR: Establishing connection for conversation:", data.id);
+        const connected = await signalRService.connect(tenantId, authToken, data.id);
+        if (connected) {
+          console.log("✅ SignalR connection established with conversation:", data.id);
+        } else {
+          console.warn("⚠️ Failed to establish SignalR connection");
+        }
+      } else {
+        // If already connected, just join the conversation
+        console.log("SignalR: Already connected, joining conversation:", data.id);
+        const started = await signalRService.startConversation(data.id);
+        if (started) {
+          console.log("✅ SignalR conversation setup completed for:", data.id);
+        } else {
+          console.warn("⚠️ Failed to setup SignalR for conversation:", data.id);
+        }
+      }
+    } else {
+      console.warn("⚠️ No authToken available - SignalR connection will not be established");
+    }
+  } catch (error) {
+    console.error("❌ Error setting up SignalR for conversation:", error);
+    // Don't fail the conversation creation if SignalR setup fails
+  }
+
+  return conversation;
 });
 
 export const requestHumanAgent = createAsyncThunk("chat/requestHumanAgent", async (conversationId: string) => {
-  return await apiClient.post(`${VITE_API_URL}/chat/chat/conversations/${conversationId}/escalate`);
+  return await apiClient.post(`/chat/chat/conversations/${conversationId}/escalate`);
 });
 
 const chatSlice = createSlice({
@@ -126,13 +195,9 @@ const chatSlice = createSlice({
       if (state.currentConversation) {
         state.currentConversation.messages.push(action.payload);
       } else {
-        // If no conversation exists, create a new one with the message
-        state.currentConversation = {
-          id: `temp-conversation-${Date.now()}`, // Temporary ID for the conversation
-          messages: [action.payload],
-          status: "active",
-          startedAt: new Date(),
-        };
+        // If no conversation exists, we should not create a temp conversation
+        // Instead, we'll create a real conversation through the API
+        console.warn("No active conversation found. A new conversation should be created through the API first.");
       }
     },
     setTyping: (state, action: PayloadAction<{ isTyping: boolean; user?: string }>) => {
@@ -158,7 +223,7 @@ const chatSlice = createSlice({
     },
     markAsRead: (state) => {
       state.unreadCount = 0;
-      state.lastSeen = new Date();
+      state.lastSeen = new Date().toISOString();
     },
   },
   extraReducers: (builder) => {
@@ -177,7 +242,7 @@ const chatSlice = createSlice({
               content: "...", // Placeholder content
               sender: "bot",
               type: "text",
-              timestamp: new Date(),
+              timestamp: new Date().toISOString(),
               metadata: {},
             });
           }
@@ -186,7 +251,7 @@ const chatSlice = createSlice({
       .addCase(sendMessage.fulfilled, (state, action) => {
         state.isLoading = false;
 
-        const body = action.payload as any;
+        const body = action.payload as ApiResponse;
         if (!state.currentConversation || !body) return;
 
         // Remove the pending bot message
@@ -200,7 +265,7 @@ const chatSlice = createSlice({
       })
       .addCase(sendMessage.rejected, (state, action) => {
         state.isLoading = false;
-        state.error = (action.payload as any)?.message || action.error.message || "Failed to send message";
+        state.error = (action.payload as ErrorPayload)?.message || action.error.message || "Failed to send message";
 
         // Remove the pending bot message
         if (state.currentConversation) {
@@ -213,15 +278,17 @@ const chatSlice = createSlice({
       })
       .addCase(startConversation.fulfilled, (state, action) => {
         state.isLoading = false;
-        const conv = action.payload as any;
+        const conv = action.payload as ConversationPayload;
 
         // Preserve existing messages if they already exist
         state.currentConversation = {
-          ...conv,
+          id: conv.id || `conv-${Date.now()}`,
+          status: conv.status as Conversation["status"] || "active",
+          startedAt: ensureISOString(conv.startedAt),
           messages: state.currentConversation?.messages.length
             ? state.currentConversation.messages
             : Array.isArray(conv?.messages)
-            ? conv.messages
+            ? (conv.messages as Message[])
             : [],
         };
         state.error = null;
@@ -263,7 +330,7 @@ export const {
 export default chatSlice.reducer;
 
 // Helper to normalize API messages into your Message shape
-const mapSender = (s: any, fallback: "user" | "bot" | "agent"): Message["sender"] => {
+const mapSender = (s: unknown, fallback: "user" | "bot" | "agent"): Message["sender"] => {
   const v = String(s ?? "").toLowerCase();
   if (v === "bot") return "bot";
   if (v === "customer" || v === "user") return "user";
@@ -271,10 +338,16 @@ const mapSender = (s: any, fallback: "user" | "bot" | "agent"): Message["sender"
   return fallback;
 };
 
-const normalizeApiMessage = (apiMsg: any, senderFallback: "user" | "bot" | "agent"): Message => ({
-  id: apiMsg.id,
-  content: apiMsg.content,
-  type: (apiMsg.type || "text").toString().toLowerCase(), // "Text" -> "text"
-  sender: mapSender(apiMsg.sender, senderFallback), // "Customer"/"Bot" -> "user"/"bot"
-  timestamp: new Date(apiMsg.createdAt ?? apiMsg.timestamp ?? Date.now()),
-});
+const normalizeApiMessage = (apiMsg: unknown, senderFallback: "user" | "bot" | "agent"): Message => {
+  const msg = apiMsg as Record<string, unknown>;
+  // Use utility to ensure timestamp is always an ISO string
+  const timestamp = ensureISOString(msg.createdAt ?? msg.timestamp);
+
+  return {
+    id: String(msg.id || `msg-${Date.now()}`),
+    content: String(msg.content || ""),
+    type: (msg.type || "text").toString().toLowerCase() as Message["type"], // "Text" -> "text"
+    sender: mapSender(msg.sender, senderFallback), // "Customer"/"Bot" -> "user"/"bot"
+    timestamp: timestamp,
+  };
+};

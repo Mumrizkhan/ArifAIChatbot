@@ -3,13 +3,13 @@ import { HubConnection, HubConnectionBuilder, HubConnectionState, HttpTransportT
 interface AgentStatusUpdate {
   agentId: string;
   status: "online" | "away" | "busy" | "offline";
-  timestamp: Date;
+  timestamp: string; // ISO string instead of Date
 }
 
 interface ConversationAssignment {
   conversationId: string;
   agentId: string;
-  timestamp: Date;
+  timestamp: string; // ISO string instead of Date
 }
 
 interface ConversationTransfer {
@@ -17,7 +17,7 @@ interface ConversationTransfer {
   fromAgentId: string;
   toAgentId: string;
   reason: string;
-  timestamp: Date;
+  timestamp: string; // ISO string instead of Date
 }
 
 interface ConversationEscalation {
@@ -25,21 +25,21 @@ interface ConversationEscalation {
   agentId: string;
   reason: string;
   priority: string;
-  timestamp: Date;
+  timestamp: string; // ISO string instead of Date
 }
 
 interface AssistanceRequest {
   conversationId: string;
   requestingAgentId: string;
   message: string;
-  timestamp: Date;
+  timestamp: string; // ISO string instead of Date
 }
 
 interface BroadcastMessage {
   message: string;
   type: string;
   fromAgentId: string;
-  timestamp: Date;
+  timestamp: string; // ISO string instead of Date
 }
 
 interface AgentNotification {
@@ -47,7 +47,7 @@ interface AgentNotification {
   type: "info" | "warning" | "error" | "success";
   title: string;
   message: string;
-  timestamp: Date;
+  timestamp: string; // ISO string instead of Date
   agentId: string;
 }
 
@@ -125,6 +125,7 @@ class AgentSignalRService {
           .withUrl(`${API_BASE_URL}/agent/agenthub`, {
             accessTokenFactory: () => authToken,
             transport: this.debugForceLongPolling ? HttpTransportType.LongPolling : undefined,
+            withCredentials: true
           })
           .withAutomaticReconnect({
             nextRetryDelayInMilliseconds: (retryContext) => {

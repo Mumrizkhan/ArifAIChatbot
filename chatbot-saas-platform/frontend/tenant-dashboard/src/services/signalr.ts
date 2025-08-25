@@ -71,6 +71,7 @@ class TenantSignalRService {
       this.connection = new HubConnectionBuilder()
         .withUrl('/chatHub', {
           accessTokenFactory: () => authToken,
+          withCredentials: true
         })
         .withAutomaticReconnect({
           nextRetryDelayInMilliseconds: (retryContext) => {

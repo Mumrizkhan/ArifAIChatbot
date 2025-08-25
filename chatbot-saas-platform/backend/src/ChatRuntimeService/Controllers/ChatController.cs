@@ -65,8 +65,8 @@ public class ChatController : ControllerBase
                 messages = new object[] { },
                 status = "active",
                 assignedAgent = (object?)null,
-                startedAt = conversation.CreatedAt,
-                endedAt = (DateTime?)null
+                startedAt = conversation.CreatedAt.ToString("O"), // ISO 8601 format
+                endedAt = (string?)null // Changed to string to match the format
             });
         }
         catch (Exception ex)
@@ -131,7 +131,7 @@ public class ChatController : ControllerBase
                 Type = userMessage.Type.ToString(),
                 Sender = userMessage.Sender.ToString(),
                 SenderId = userMessage.SenderId,
-                CreatedAt = userMessage.CreatedAt,
+                CreatedAt = userMessage.CreatedAt.ToString("O"), // ISO 8601 format
                 SenderName = conversation.CustomerName ?? "Customer"
             };
 
@@ -142,10 +142,19 @@ public class ChatController : ControllerBase
                 conversation.Status == ConversationStatus.Queued ||
                 conversation.AssignedAgentId.HasValue)
             {
+                // Notify agents via LiveAgentService when customer sends message to assigned conversation
                 if (conversation.AssignedAgentId.HasValue)
                 {
-                    await _hubContext.Clients.Group($"agent_{conversation.AssignedAgentId}")
-                        .SendAsync("ReceiveMessage", userMessageDto);
+                    await _liveAgentIntegrationService.NotifyMessageAsync(
+                        conversationId,
+                        userMessage.Id,
+                        userMessage.Content,
+                        userMessage.Type.ToString(),
+                        userMessage.Sender.ToString(),
+                        userMessage.SenderId,
+                        conversation.CustomerName ?? "Customer",
+                        userMessage.CreatedAt
+                    );
                 }
                 
                 return Ok(new
@@ -157,7 +166,7 @@ public class ChatController : ControllerBase
                         content = userMessage.Content,
                         type = userMessage.Type.ToString(),
                         sender = userMessage.Sender.ToString(),
-                        createdAt = userMessage.CreatedAt
+                        createdAt = userMessage.CreatedAt.ToString("O") // ISO 8601 format
                     },
                     routedToAgent = true,
                     success = true
@@ -196,7 +205,7 @@ public class ChatController : ControllerBase
                 Type = botMessage.Type.ToString(),
                 Sender = botMessage.Sender.ToString(),
                 SenderId = botMessage.SenderId,
-                CreatedAt = botMessage.CreatedAt,
+                CreatedAt = botMessage.CreatedAt.ToString("O"), // ISO 8601 format
                 SenderName = "AI Assistant"
             };
 
@@ -212,7 +221,7 @@ public class ChatController : ControllerBase
                     content = userMessage.Content,
                     type = userMessage.Type.ToString(),
                     sender = userMessage.Sender.ToString(),
-                    createdAt = userMessage.CreatedAt
+                    createdAt = userMessage.CreatedAt.ToString("O") // ISO 8601 format
                 },
                 botMessage = new
                 {
@@ -221,7 +230,7 @@ public class ChatController : ControllerBase
                     content = botMessage.Content,
                     type = botMessage.Type.ToString(),
                     sender = botMessage.Sender.ToString(),
-                    createdAt = botMessage.CreatedAt
+                    createdAt = botMessage.CreatedAt.ToString("O") // ISO 8601 format
                 },
                 success = true
             });
@@ -229,6 +238,103 @@ public class ChatController : ControllerBase
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error processing chat message");
+            return StatusCode(500, new { message = "Internal server error" });
+        }
+    }
+
+    [HttpPost("agent-messages")]
+    [AllowAnonymous] 
+    public async Task<IActionResult> SendAgentMessage([FromBody] SendAgentMessageRequest request)
+    {
+        try
+        {
+            if (string.IsNullOrWhiteSpace(request.Content))
+            {
+                return BadRequest(new { message = "Message content is required" });
+            }
+
+            if (!Guid.TryParse(request.ConversationId, out var conversationId))
+            {
+                return BadRequest(new { message = "Invalid conversation ID" });
+            }
+
+            var conversation = await _context.Conversations
+                .FirstOrDefaultAsync(c => c.Id == conversationId);
+
+            if (conversation == null)
+            {
+                return NotFound(new { message = "Conversation not found" });
+            }
+
+            if (!Enum.TryParse<MessageType>(request.Type, true, out var messageType))
+            {
+                messageType = MessageType.Text;
+            }
+
+            var agentMessage = new Message
+            {
+                Id = Guid.NewGuid(),
+                ConversationId = conversationId,
+                Content = request.Content,
+                Type = messageType,
+                Sender = MessageSender.Agent,
+                SenderId = request.SenderId,
+                CreatedAt = DateTime.UtcNow,
+                TenantId = conversation.TenantId,
+                IsRead = false
+            };
+
+            _context.Messages.Add(agentMessage);
+            conversation.MessageCount++;
+            conversation.UpdatedAt = DateTime.UtcNow;
+            await _context.SaveChangesAsync();
+
+            var agentMessageDto = new
+            {
+                Id = agentMessage.Id,
+                ConversationId = agentMessage.ConversationId,
+                Content = agentMessage.Content,
+                Type = agentMessage.Type.ToString(),
+                Sender = agentMessage.Sender.ToString(),
+                SenderId = agentMessage.SenderId,
+                CreatedAt = agentMessage.CreatedAt.ToString("O"), // ISO 8601 format
+                SenderName = "Agent"
+            };
+
+            // Send to conversation participants (customers via ChatHub)
+            await _hubContext.Clients.Group($"conversation_{conversationId}")
+                .SendAsync("ReceiveMessage", agentMessageDto);
+
+            // Also notify agents via LiveAgentService if the conversation has an assigned agent
+            if (conversation.AssignedAgentId.HasValue)
+            {
+                await _liveAgentIntegrationService.NotifyMessageAsync(
+                    conversationId,
+                    agentMessage.Id,
+                    agentMessage.Content,
+                    agentMessage.Type.ToString(),
+                    agentMessage.Sender.ToString(),
+                    agentMessage.SenderId,
+                    "Agent",
+                    agentMessage.CreatedAt
+                );
+            }
+
+            return Ok(new
+            {
+                id = agentMessage.Id,
+                conversationId = agentMessage.ConversationId,
+                content = agentMessage.Content,
+                type = agentMessage.Type.ToString(),
+                sender = agentMessage.Sender.ToString(),
+                senderId = agentMessage.SenderId,
+                createdAt = agentMessage.CreatedAt.ToString("O"), // ISO 8601 format
+                success = true
+            });
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error processing agent message");
             return StatusCode(500, new { message = "Internal server error" });
         }
     }
@@ -270,24 +376,22 @@ public class ChatController : ControllerBase
                     conversation.Status = ConversationStatus.Active;
                     await _context.SaveChangesAsync();
 
-                    await _hubContext.Clients.Group($"agent_{availableAgentId.Value}")
-                        .SendAsync("ConversationAssigned", new
-                        {
-                            ConversationId = id,
-                            CustomerName = conversation.CustomerName,
-                            Subject = conversation.Subject,
-                            Language = conversation.Language
-                        });
+                    var assignmentPayload = new
+                    {
+                        ConversationId = id,
+                        AgentId = availableAgentId.Value,
+                        AgentName = "Agent", // Default agent name for now
+                        CustomerName = conversation.CustomerName,
+                        CustomerEmail = conversation.CustomerEmail,
+                        Subject = conversation.Subject,
+                        Language = conversation.Language,
+                        Timestamp = DateTime.UtcNow.ToString("O"), // ISO 8601 format
+                        Status = "active"
+                    };
 
+                    // Send to conversation participants (customers)
                     await _hubContext.Clients.Group($"conversation_{id}")
-                        .SendAsync("ConversationAssigned", new
-                        {
-                            ConversationId = id,
-                            AgentId = availableAgentId.Value,
-                            CustomerName = conversation.CustomerName,
-                            Subject = conversation.Subject,
-                            Language = conversation.Language
-                        });
+                        .SendAsync("ConversationAssigned", assignmentPayload);
 
                     return Ok(new { 
                         success = true, 
@@ -297,7 +401,17 @@ public class ChatController : ControllerBase
                 }
             }
 
+            // No available agent - add to queue and notify agents via LiveAgentService
             await _liveAgentIntegrationService.AddToQueueAsync(id);
+            
+            // Send escalation notification to agents via LiveAgentService
+            await _liveAgentIntegrationService.NotifyEscalationAsync(
+                id, 
+                conversation.CustomerName, 
+                conversation.CustomerEmail, 
+                conversation.Subject, 
+                conversation.Language
+            );
 
             return Ok(new { 
                 success = true, 
@@ -327,4 +441,12 @@ public class SendChatMessageRequest
     public string ConversationId { get; set; } = string.Empty;
     public string Content { get; set; } = string.Empty;
     public string Type { get; set; } = "text";
+}
+
+public class SendAgentMessageRequest
+{
+    public string ConversationId { get; set; } = string.Empty;
+    public string Content { get; set; } = string.Empty;
+    public string Type { get; set; } = "text";
+    public Guid? SenderId { get; set; }
 }

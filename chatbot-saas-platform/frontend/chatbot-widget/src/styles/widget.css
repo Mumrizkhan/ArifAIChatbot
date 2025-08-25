@@ -68,27 +68,6 @@
   border: 2px solid white;
 }
 
-.connection-indicator {
-  position: absolute;
-  bottom: 4px;
-  right: 4px;
-  width: 12px;
-  height: 12px;
-  border-radius: 50%;
-  background: white;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.connection-icon.connected {
-  color: #10b981;
-}
-
-.connection-icon.disconnected {
-  color: #ef4444;
-}
-
 .chat-button-tooltip {
   position: absolute;
   bottom: 70px;

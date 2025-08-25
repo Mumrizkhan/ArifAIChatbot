@@ -55,7 +55,7 @@ export interface Conversation {
 interface ConversationAssignment {
   conversationId: string;
   agentId: string;
-  timestamp: Date;
+  timestamp: string; // ISO string instead of Date
 }
 
 interface ConversationTransfer {
@@ -63,7 +63,7 @@ interface ConversationTransfer {
   fromAgentId: string;
   toAgentId: string;
   reason: string;
-  timestamp: Date;
+  timestamp: string; // ISO string instead of Date
 }
 
 interface ConversationState {
@@ -97,19 +97,21 @@ const initialState: ConversationState = {
 };
 
 const transformConversationAssignment = (assignment: any): Conversation => {
+  console.log("Transforming conversation assignment:", assignment);
+  
   return {
     id: assignment.conversationId || assignment.ConversationId,
     customer: {
-      id: assignment.customerId || "unknown",
+      id: assignment.customerId || assignment.CustomerId || "unknown",
       name: assignment.customerName || assignment.CustomerName || "Unknown Customer",
       email: assignment.customerEmail || assignment.CustomerEmail,
-      language: "en",
+      language: assignment.language || assignment.Language || "en",
     },
     assignedAgent:
       assignment.agentId || assignment.AgentId
         ? {
             id: assignment.agentId || assignment.AgentId,
-            name: "Agent",
+            name: assignment.agentName || assignment.AgentName || "Agent",
           }
         : undefined,
     status: (() => {
@@ -133,8 +135,8 @@ const transformConversationAssignment = (assignment: any): Conversation => {
     subject: assignment.subject || assignment.Subject || "Conversation",
     tags: [],
     messages: [],
-    createdAt: new Date(assignment.assignedAt || assignment.AssignedAt || Date.now()).toISOString(),
-    updatedAt: new Date(assignment.lastMessageAt || assignment.LastMessageAt || Date.now()).toISOString(),
+    createdAt: assignment.timestamp || assignment.Timestamp || new Date().toISOString(),
+    updatedAt: assignment.timestamp || assignment.Timestamp || new Date().toISOString(),
     unreadCount: assignment.unreadMessages || assignment.UnreadMessages || 0,
   };
 };

@@ -131,7 +131,7 @@ public class NotificationHub : Hub
                 await Clients.Caller.SendAsync("AllNotificationsMarkedAsRead", new
                 {
                     Count = unreadNotifications.Count,
-                    ReadAt = DateTime.UtcNow
+                    ReadAt = DateTime.UtcNow.ToString("O")
                 });
 
                 _logger.LogInformation($"All notifications marked as read for user {userId}. Count: {unreadNotifications.Count}");
@@ -247,7 +247,7 @@ public class NotificationHub : Hub
                         Message = message,
                         Type = messageType,
                         FromUserId = userId,
-                        Timestamp = DateTime.UtcNow
+                        Timestamp = DateTime.UtcNow.ToString("O")
                     });
 
                     _logger.LogInformation($"Admin {userId} broadcasted message to tenant {tenantId}");

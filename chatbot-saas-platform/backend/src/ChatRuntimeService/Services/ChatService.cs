@@ -80,7 +80,7 @@ public class ChatService : IChatService
             Content = botMessage.Content,
             SenderType = botMessage.SenderType,
             SenderId = botMessage.SenderId,
-            CreatedAt = botMessage.CreatedAt
+            CreatedAt = botMessage.CreatedAt.ToString("O")
         };
     }
 
@@ -117,8 +117,8 @@ public class ChatService : IChatService
             TenantId = conversation.TenantId,
             UserId = conversation.UserId,
             AssignedAgentId = conversation.AssignedAgentId,
-            CreatedAt = conversation.CreatedAt,
-            UpdatedAt = conversation.UpdatedAt,
+            CreatedAt = conversation.CreatedAt.ToString("O"),
+            UpdatedAt = conversation.UpdatedAt?.ToString("O"),
             Messages = new List<MessageDto>()
         };
     }

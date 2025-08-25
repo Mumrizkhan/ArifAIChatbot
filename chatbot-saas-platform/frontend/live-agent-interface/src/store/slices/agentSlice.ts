@@ -42,14 +42,14 @@ interface AgentNotification {
   type: "info" | "warning" | "error" | "success";
   title: string;
   message: string;
-  timestamp: Date;
+  timestamp: string; // ISO string instead of Date
   agentId: string;
 }
 
 interface AgentStatusUpdate {
   agentId: string;
   status: "online" | "away" | "busy" | "offline";
-  timestamp: Date;
+  timestamp: string; // ISO string instead of Date
 }
 
 interface AgentState {

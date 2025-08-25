@@ -88,8 +88,11 @@ class ChatbotWidget {
       throw new Error("tenantId is required to initialize the chatbot widget");
     }
 
-    // Store config for later use
-    this.config = widgetConfig;
+    // Store config for later use and normalize tenant ID to lowercase
+    this.config = {
+      ...widgetConfig,
+      tenantId: widgetConfig.tenantId.toLowerCase() // Normalize GUID to lowercase
+    };
 
     // Get default values from environment variables with fallbacks
     const defaultApiUrl = envConfig.apiUrl;
@@ -98,10 +101,10 @@ class ChatbotWidget {
     console.log("🔧 Widget initializing with:", {
       apiUrl: widgetConfig.apiUrl || defaultApiUrl,
       websocketUrl: widgetConfig.websocketUrl || defaultWebsocketUrl,
-      tenantId: widgetConfig.tenantId,
+      tenantId: this.config.tenantId, // Use normalized tenant ID
     });
 
-    apiClient.setTenantId(widgetConfig.tenantId);
+    apiClient.setTenantId(this.config.tenantId); // Use normalized tenant ID
 
     this.container = document.createElement("div");
     this.container.id = "chatbot-widget-container";
@@ -115,7 +118,7 @@ class ChatbotWidget {
 
     store.dispatch(
       initializeWidget({
-        tenantId: widgetConfig.tenantId,
+        tenantId: this.config.tenantId, // Use normalized tenant ID
         config: {
           apiUrl: widgetConfig.apiUrl || defaultApiUrl,
           websocketUrl: widgetConfig.websocketUrl || defaultWebsocketUrl,
@@ -132,7 +135,6 @@ class ChatbotWidget {
       const { aiService } = await import("./services/aiService");
       const { fileService } = await import("./services/fileService");
       const { proactiveService } = await import("./services/proactiveService");
-      const { signalRService } = await import("./services/websocket");
 
       aiService.initialize(widgetConfig.apiUrl || defaultApiUrl);
       fileService.initialize(widgetConfig.apiUrl || defaultApiUrl);
@@ -141,20 +143,42 @@ class ChatbotWidget {
       const authToken =
         widgetConfig.authToken ||
         "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJuYW1laWQiOiIxZDhmOGQ2MS0zNjRhLTQyMWUtYTllYS1jMWUxYTIyMWQ5N2YiLCJlbWFpbCI6InRlbmFudDFAZXhhbXBsZS5jb20iLCJyb2xlIjoiVGVuYW50QWRtaW4iLCJ0ZW5hbnRfaWQiOiI4Mzc4NGVhNi01MzYwLTRmM2MtODQzYS0xYWJkMThkNzJlNWQiLCJuYmYiOjE3NTUwODM1MDYsImV4cCI6MTc1NTE2OTkwNiwiaWF0IjoxNzU1MDgzNTA2LCJpc3MiOiJBcmlmUGxhdGZvcm0iLCJhdWQiOiJBcmlmUGxhdGZvcm0ifQ.BVlKSkEeS9YsVh48VW0rWfl21zi-NZvHdS4u2p1eQsU";
-      // if (widgetConfig.authToken) {
-
+      
+      // Store auth token for later use when conversation is created
       if (authToken) {
-        console.log("Attempting to connect with authToken...");
-        console.log("Attempting to connect with Tenantid...", widgetConfig.tenantId);
-        const connected = await signalRService.connect(widgetConfig.tenantId, authToken);
-        if (connected) {
-          this.connection = signalRService;
-          console.log("✅ SignalR connection established");
-        } else {
-          console.warn("⚠️ Failed to establish SignalR connection");
-        }
+        console.log("Auth token stored for SignalR connection after conversation creation");
+        // Store the auth token and SignalR setup for when conversation is created
+        store.dispatch(
+          initializeWidget({
+            tenantId: this.config.tenantId,
+            config: {
+              apiUrl: widgetConfig.apiUrl || defaultApiUrl,
+              websocketUrl: widgetConfig.websocketUrl || defaultWebsocketUrl,
+              features: widgetConfig.features,
+              behavior: widgetConfig.behavior,
+              predefinedIntents: widgetConfig.predefinedIntents,
+              authToken: authToken, // Store auth token in config
+            },
+            userId: widgetConfig.userId,
+            metadata: widgetConfig.metadata,
+          })
+        );
       } else {
         console.warn("⚠️ No authToken provided - SignalR connection will not be established");
+        store.dispatch(
+          initializeWidget({
+            tenantId: this.config.tenantId,
+            config: {
+              apiUrl: widgetConfig.apiUrl || defaultApiUrl,
+              websocketUrl: widgetConfig.websocketUrl || defaultWebsocketUrl,
+              features: widgetConfig.features,
+              behavior: widgetConfig.behavior,
+              predefinedIntents: widgetConfig.predefinedIntents,
+            },
+            userId: widgetConfig.userId,
+            metadata: widgetConfig.metadata,
+          })
+        );
       }
 
       if (widgetConfig.features?.proactiveMessages) {
@@ -186,10 +210,25 @@ class ChatbotWidget {
 
     this.isInitialized = true;
 
+    // Check if there's an existing conversation and setup SignalR handlers
+    if (this.connection) {
+      try {
+        const currentState = store.getState() as any;
+        const currentConversation = currentState.chat?.currentConversation;
+        if (currentConversation?.id) {
+          console.log("Setting up SignalR for existing conversation:", currentConversation.id);
+          await this.connection.setupExistingConversation(currentConversation.id);
+        }
+      } catch (error) {
+        console.warn("Failed to setup existing conversation on SignalR:", error);
+      }
+    }
+
     // Analytics tracking
-    if (typeof window !== "undefined" && (window as any).gtag) {
-      (window as any).gtag("event", "chatbot_widget_initialized", {
-        tenant_id: widgetConfig.tenantId,
+    if (typeof window !== "undefined" && 'gtag' in window) {
+      const gtag = (window as unknown as { gtag: Function }).gtag;
+      gtag("event", "chatbot_widget_initialized", {
+        tenant_id: this.config.tenantId,
       });
     }
 
@@ -257,7 +296,7 @@ class ChatbotWidget {
           id: `proactive_${Date.now()}`,
           content: message.content,
           sender: "bot",
-          timestamp: new Date(), // ✅ Already serialized as ISO string
+          timestamp: new Date().toISOString(), // ✅ Now properly serialized as ISO string
           type: "text",
         })
       );
@@ -296,7 +335,7 @@ class ChatbotWidget {
           tenantId: this.config.tenantId,
           config: {
             apiUrl: this.config.apiUrl || "/api",
-            websocketUrl: this.config.websocketUrl || "/chatHub",
+            websocketUrl: this.config.websocketUrl || "/chathub",
             features: this.config.features,
             behavior: this.config.behavior,
             predefinedIntents: this.config.predefinedIntents,

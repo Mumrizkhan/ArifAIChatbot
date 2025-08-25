@@ -91,9 +91,20 @@ builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowAll", policy =>
     {
-        policy.AllowAnyOrigin()
+        var allowedOrigins = new[] { 
+            "http://localhost:3000", 
+            "http://localhost:3001", 
+            "http://localhost:3002", 
+            "http://localhost:5173", 
+            "http://localhost:5174", 
+            "http://localhost:5175",
+            "http://localhost:8000"
+        };
+        
+        policy.WithOrigins(allowedOrigins)
               .AllowAnyMethod()
-              .AllowAnyHeader();
+              .AllowAnyHeader()
+              .AllowCredentials();
     });
 });
 

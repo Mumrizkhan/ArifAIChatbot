@@ -2,18 +2,16 @@ import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { useSelector } from 'react-redux';
 import { RootState } from '../store/store';
-import { MessageCircle, Wifi, WifiOff } from 'lucide-react';
+import { MessageCircle } from 'lucide-react';
 
 interface ChatButtonProps {
   onClick: () => void;
   unreadCount: number;
-  isConnected: boolean;
 }
 
 export const ChatButton: React.FC<ChatButtonProps> = ({
   onClick,
   unreadCount,
-  isConnected,
 }) => {
   const { t } = useTranslation();
   const { branding } = useSelector((state: RootState) => state.theme);
@@ -41,14 +39,6 @@ export const ChatButton: React.FC<ChatButtonProps> = ({
             {unreadCount > 99 ? '99+' : unreadCount}
           </span>
         )}
-        
-        <div className="connection-indicator">
-          {isConnected ? (
-            <Wifi size={12} className="connection-icon connected" />
-          ) : (
-            <WifiOff size={12} className="connection-icon disconnected" />
-          )}
-        </div>
       </div>
       
       {branding.welcomeMessage && (

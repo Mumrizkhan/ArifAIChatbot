@@ -70,7 +70,7 @@ class ProactiveService {
       id: `proactive_${Date.now()}`,
       content,
       sender: "bot" as const,
-      timestamp: new Date(),
+      timestamp: new Date().toISOString(),
       type: "text" as const,
       pending: false,
     };

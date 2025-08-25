@@ -130,7 +130,7 @@ export const NotificationCenter: React.FC<NotificationCenterProps> = ({ isOpen, 
                             {notification.message}
                           </p>
                           <p className="text-xs text-gray-500 dark:text-gray-400 mt-2">
-                            {formatDistanceToNow(notification.timestamp, { addSuffix: true })}
+                            {formatDistanceToNow(new Date(notification.timestamp), { addSuffix: true })}
                           </p>
                           
                           {notification.actionUrl && notification.actionText && (

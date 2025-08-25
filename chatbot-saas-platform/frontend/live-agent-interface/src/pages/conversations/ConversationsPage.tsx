@@ -50,8 +50,18 @@ const ConversationsPage = () => {
 
     if (signalRConnected) {
       agentSignalRService.setOnConversationAssigned((assignment: any) => {
+        console.log("ConversationAssigned event received:", assignment);
         dispatch(assignConversationRealtime(assignment));
-        dispatch(fetchConversation(assignment.conversationId));
+        if (assignment.conversationId || assignment.ConversationId) {
+          const convId = assignment.conversationId || assignment.ConversationId;
+          dispatch(fetchConversation(convId));
+          
+          // Automatically join the conversation group to receive real-time events
+          if (agentSignalRService.getConnectionStatus()) {
+            console.log("Auto-joining conversation group after assignment:", convId);
+            agentSignalRService.joinConversation(convId);
+          }
+        }
       });
 
       agentSignalRService.setOnConversationTransferred((transfer: any) => {
