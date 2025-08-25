@@ -51,6 +51,15 @@ public class AgentHub : Hub
                     Status = AgentStatus.Online.ToString(),
                     Timestamp = DateTime.UtcNow
                 });
+                await Groups.AddToGroupAsync(Context.ConnectionId, $"agent_{agentId}");
+               // await _agentRoutingService.SetAgentStatusAsync(agentId.Value, AgentStatus.Online);
+
+                await Clients.Group($"agent_{agentId}").SendAsync("AgentStatusChanged", new
+                {
+                    AgentId = agentId.Value,
+                    Status = AgentStatus.Online.ToString(),
+                    Timestamp = DateTime.UtcNow
+                });
 
                 _logger.LogInformation($"Agent {agentId} joined tenant {tenantId} group");
             }
