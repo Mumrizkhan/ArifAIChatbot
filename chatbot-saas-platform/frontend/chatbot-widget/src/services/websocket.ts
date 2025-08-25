@@ -296,7 +296,7 @@ class SignalRService {
   }
 
   async requestAgent(): Promise<void> {
-    console.log("Agent handoff requested");
+    console.log("Agent handoff requested - handled via HTTP API call in Redux action");
   }
 
   private scheduleReconnect(tenantId: string, authToken: string, conversationId?: string) {
