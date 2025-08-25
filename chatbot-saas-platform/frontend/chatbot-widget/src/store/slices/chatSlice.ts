@@ -14,6 +14,9 @@ export interface Message {
     imageUrl?: string;
     senderId?: string;
     senderName?: string;
+    systemMessage?: boolean;
+    agentId?: string;
+    agentName?: string;
   };
 }
 
