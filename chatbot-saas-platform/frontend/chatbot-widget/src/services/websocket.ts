@@ -118,18 +118,119 @@ class SignalRService {
 
     this.connection.on("ConversationAssigned", (assignmentInfo) => {
       console.log("Conversation assigned to agent:", assignmentInfo);
-      store.dispatch(
-        assignAgent({
-          id: assignmentInfo.AgentId || assignmentInfo.ConversationId,
-          name: assignmentInfo.CustomerName || "Agent",
-          avatar: undefined,
-        })
-      );
-      store.dispatch(updateConversationStatus("active"));
+      
+      // Handle different possible payload structures from the backend
+      const agentId = assignmentInfo.AgentId || assignmentInfo.agentId || assignmentInfo.Id || assignmentInfo.id;
+      const agentName = assignmentInfo.AgentName || assignmentInfo.agentName || 
+                       assignmentInfo.Name || assignmentInfo.name || 
+                       assignmentInfo.CustomerName || "Agent";
+      const agentAvatar = assignmentInfo.AgentAvatar || assignmentInfo.agentAvatar || 
+                         assignmentInfo.Avatar || assignmentInfo.avatar;
+      
+      if (agentId) {
+        store.dispatch(
+          assignAgent({
+            id: agentId.toString(),
+            name: agentName,
+            avatar: agentAvatar,
+          })
+        );
+        
+        // Update conversation status to indicate agent is now handling the conversation
+        store.dispatch(updateConversationStatus("active"));
+        
+        // Optionally add a system message to indicate agent assignment
+        store.dispatch(
+          addMessage({
+            id: `system-agent-assigned-${Date.now()}`,
+            content: `${agentName} has joined the conversation`,
+            sender: "bot",
+            type: "text",
+            timestamp: new Date(),
+            metadata: {
+              systemMessage: true,
+              agentId: agentId.toString(),
+              agentName: agentName,
+            },
+          })
+        );
+      } else {
+        console.warn("ConversationAssigned: No valid agent ID found in payload:", assignmentInfo);
+      }
     });
 
     this.connection.on("ConversationStatusChanged", (status) => {
+      console.log("Conversation status changed:", status);
       store.dispatch(updateConversationStatus(status));
+    });
+
+    // Additional handlers for conversation events
+    this.connection.on("AgentJoined", (agentInfo) => {
+      console.log("Agent joined conversation:", agentInfo);
+      const agentId = agentInfo.id || agentInfo.Id || agentInfo.agentId || agentInfo.AgentId;
+      const agentName = agentInfo.name || agentInfo.Name || agentInfo.agentName || agentInfo.AgentName || "Agent";
+      const agentAvatar = agentInfo.avatar || agentInfo.Avatar || agentInfo.agentAvatar || agentInfo.AgentAvatar;
+      
+      if (agentId) {
+        store.dispatch(
+          assignAgent({
+            id: agentId.toString(),
+            name: agentName,
+            avatar: agentAvatar,
+          })
+        );
+        
+        store.dispatch(
+          addMessage({
+            id: `system-agent-joined-${Date.now()}`,
+            content: `${agentName} has joined the conversation`,
+            sender: "bot",
+            type: "text",
+            timestamp: new Date(),
+            metadata: {
+              systemMessage: true,
+              agentId: agentId.toString(),
+              agentName: agentName,
+            },
+          })
+        );
+      }
+    });
+
+    this.connection.on("AgentLeft", (agentInfo) => {
+      console.log("Agent left conversation:", agentInfo);
+      const agentName = agentInfo.name || agentInfo.Name || agentInfo.agentName || agentInfo.AgentName || "Agent";
+      
+      store.dispatch(
+        addMessage({
+          id: `system-agent-left-${Date.now()}`,
+          content: `${agentName} has left the conversation`,
+          sender: "bot",
+          type: "text",
+          timestamp: new Date(),
+          metadata: {
+            systemMessage: true,
+          },
+        })
+      );
+    });
+
+    this.connection.on("ConversationEnded", (endInfo) => {
+      console.log("Conversation ended:", endInfo);
+      store.dispatch(updateConversationStatus("ended"));
+      
+      store.dispatch(
+        addMessage({
+          id: `system-conversation-ended-${Date.now()}`,
+          content: "This conversation has ended",
+          sender: "bot",
+          type: "text",
+          timestamp: new Date(),
+          metadata: {
+            systemMessage: true,
+          },
+        })
+      );
     });
   }
 
