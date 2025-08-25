@@ -22,20 +22,26 @@ const DashboardPage = () => {
   const { stats: agentStats, isSignalRConnected } = useSelector((state: RootState) => state.agent);
   const { user, token } = useSelector((state: RootState) => state.auth); // Fetch user from auth slice
   const currentAgentId = user?.id; // Extract the agent's ID
-  console.log("rao", token);
   console.log(isSignalRConnected, "SignalR Connection Status");
   console.log(currentAgentId, "Current Agent ID");
-  // Add this helper function at the top of your component (after the imports)
   const formatToLocalTime = (timestamp: string | number | Date) => {
     if (!timestamp) return "";
 
-    const date = new Date(timestamp);
-
-    return date.toLocaleString(undefined, {
-      hour: "2-digit",
-      minute: "2-digit",
-      hour12: true,
-    });
+    try {
+      console.log("Raw timestamp input:", timestamp);
+      const date = new Date(timestamp);
+      const options: Intl.DateTimeFormatOptions = {
+        hour: "2-digit",
+        minute: "2-digit",
+        hour12: true,
+        timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone, // Get user's timezone
+      };
+      const localTime = new Intl.DateTimeFormat(undefined, options).format(date);
+      return localTime;
+    } catch (e) {
+      console.error("Error formatting time:", e);
+      return String(timestamp);
+    }
   };
   useEffect(() => {
     dispatch(fetchConversations());
@@ -341,7 +347,8 @@ const DashboardPage = () => {
                   <div className="flex items-center space-x-2">
                     {getStatusBadge(conversation.status)}
                     {/* <span className="text-xs text-muted-foreground">{formatToLocalTime(conversation.updatedAt)}</span> */}
-                    <span>{new Date(conversation.updatedAt).toLocaleTimeString()}</span>
+                    {/* <span>{new Date(conversation.updatedAt).toLocaleTimeString()}</span> */}
+                    <span className="text-xs text-muted-foreground">{formatToLocalTime(conversation.updatedAt)}</span>
                   </div>
                 </div>
               ))

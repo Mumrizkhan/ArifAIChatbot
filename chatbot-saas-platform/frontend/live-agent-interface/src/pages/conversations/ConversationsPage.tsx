@@ -174,6 +174,40 @@ const ConversationsPage = () => {
       </Badge>
     );
   };
+  // Update your formatToLocalTime function with this more direct approach
+  const formatToLocalTime = (timestamp: string | number | Date) => {
+    if (!timestamp) return "";
+
+    try {
+      // Log raw input for debugging
+      console.log("Raw timestamp input:", timestamp);
+
+      // Create a Date object from the timestamp
+      // For ISO strings (2025-08-25T07:20:11) this will be interpreted as UTC
+      const date = new Date(timestamp);
+
+      // Explicitly format using the user's local timezone
+      const options: Intl.DateTimeFormatOptions = {
+        hour: "2-digit",
+        minute: "2-digit",
+        hour12: true,
+        timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone, // Get user's timezone
+      };
+
+      // Format the time
+      const localTime = new Intl.DateTimeFormat(undefined, options).format(date);
+
+      // Log for comparison
+      console.log(`Original time: ${timestamp}`);
+      console.log(`Local time: ${localTime}`);
+      console.log(`User timezone: ${Intl.DateTimeFormat().resolvedOptions().timeZone}`);
+
+      return localTime;
+    } catch (e) {
+      console.error("Error formatting time:", e);
+      return String(timestamp);
+    }
+  };
 
   const getPriorityColor = (priority: string) => {
     const colors: Record<string, string> = {
@@ -292,7 +326,8 @@ const ConversationsPage = () => {
                           </p>
                           <div className="flex items-center space-x-2 mt-1">
                             {getStatusBadge(conversation.status)}
-                            <span>{new Date(conversation.updatedAt).toLocaleTimeString()}</span>
+                            {/* <span>{new Date(conversation.updatedAt).toLocaleTimeString()}</span> */}
+                            <span className="text-xs text-muted-foreground">{formatToLocalTime(conversation.updatedAt)}</span>
                           </div>
                         </div>
                       </div>
