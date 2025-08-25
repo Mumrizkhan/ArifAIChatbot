@@ -282,7 +282,7 @@ const ConversationsPage = () => {
                           </p>
                           <div className="flex items-center space-x-2 mt-1">
                             {getStatusBadge(conversation.status)}
-                            <span className="text-xs text-muted-foreground">{new Date(conversation.updatedAt).toLocaleTimeString()}</span>
+                            <span>{new Date(conversation.updatedAt).toLocaleTimeString()}</span>
                           </div>
                         </div>
                       </div>

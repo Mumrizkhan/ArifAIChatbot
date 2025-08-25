@@ -324,7 +324,8 @@ const DashboardPage = () => {
                   </div>
                   <div className="flex items-center space-x-2">
                     {getStatusBadge(conversation.status)}
-                    <span className="text-xs text-muted-foreground">{formatToLocalTime(conversation.updatedAt)}</span>
+                    {/* <span className="text-xs text-muted-foreground">{formatToLocalTime(conversation.updatedAt)}</span> */}
+                    <span>{new Date(conversation.updatedAt).toLocaleTimeString()}</span>
                   </div>
                 </div>
               ))
