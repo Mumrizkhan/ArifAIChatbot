@@ -393,6 +393,15 @@ public class ChatController : ControllerBase
                     await _hubContext.Clients.Group($"conversation_{id}")
                         .SendAsync("ConversationAssigned", assignmentPayload);
 
+                    // Send escalation notification to agents via LiveAgentService
+                    await _liveAgentIntegrationService.NotifyEscalationAsync(
+                        id,
+                        conversation.CustomerName,
+                        conversation.CustomerEmail,
+                        conversation.Subject,
+                        conversation.Language
+                    );
+
                     return Ok(new { 
                         success = true, 
                         message = "Conversation assigned to human agent",
@@ -404,14 +413,7 @@ public class ChatController : ControllerBase
             // No available agent - add to queue and notify agents via LiveAgentService
             await _liveAgentIntegrationService.AddToQueueAsync(id);
             
-            // Send escalation notification to agents via LiveAgentService
-            await _liveAgentIntegrationService.NotifyEscalationAsync(
-                id, 
-                conversation.CustomerName, 
-                conversation.CustomerEmail, 
-                conversation.Subject, 
-                conversation.Language
-            );
+          
 
             return Ok(new { 
                 success = true, 
