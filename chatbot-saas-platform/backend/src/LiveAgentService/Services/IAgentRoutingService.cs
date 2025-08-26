@@ -11,4 +11,5 @@ public interface IAgentRoutingService
     Task<bool> SetAgentStatusAsync(Guid agentId, AgentStatus status);
     Task<AgentStatus> GetAgentStatusAsync(Guid agentId);
     Task<List<ConversationAssignment>> GetAgentConversationsAsync(Guid agentId);
+    Task NotifyAgentsOfEscalationAsync(Guid tenantId, object escalationData);
 }

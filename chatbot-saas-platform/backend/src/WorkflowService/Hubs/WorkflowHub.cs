@@ -259,7 +259,7 @@ public class WorkflowHub : Hub
                         UpdateType = updateType,
                         Data = data,
                         UpdatedBy = userId,
-                        Timestamp = DateTime.UtcNow
+                        Timestamp = DateTime.UtcNow.ToString("O")
                     });
 
                     _logger.LogInformation($"Workflow {workflowId} update broadcasted by user {userId}");

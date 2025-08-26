@@ -1,7 +1,7 @@
 // Environment configuration helper
 export const config = {
   apiUrl: import.meta.env.VITE_API_URL || "https://api-stg.arif.sa",
-  websocketUrl: import.meta.env.VITE_WEBSOCKET_URL || "wss://api-stg.arif.sa/chat/chatHub",
+  websocketUrl: import.meta.env.VITE_WEBSOCKET_URL || "wss://api-stg.arif.sa/chat/chathub",
   apiEndpoint: import.meta.env.VITE_CHATBOT_API_ENDPOINT || "/chatbot",
   jwtSecret: import.meta.env.VITE_JWT_SECRET_KEY || "",
   apiKey: import.meta.env.VITE_API_KEY || "",

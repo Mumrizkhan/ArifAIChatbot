@@ -2,7 +2,7 @@ import React, { useEffect, useRef } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useTranslation } from "react-i18next";
 import { RootState, AppDispatch } from "../store/store";
-import { toggleChat, minimizeChat, maximizeChat, closeChat, markAsRead } from "../store/slices/chatSlice";
+import { toggleChat, minimizeChat, maximizeChat, closeChat, markAsRead, startConversation } from "../store/slices/chatSlice";
 import { trackEvent } from "../store/slices/configSlice";
 import { ChatHeader } from "./ChatHeader";
 import { MessageList } from "./MessageList";
@@ -17,7 +17,7 @@ export const ChatWidget: React.FC = () => {
   const dispatch = useDispatch<AppDispatch>();
   const widgetRef = useRef<HTMLDivElement>(null);
 
-  const { isOpen, isMinimized, unreadCount, connectionStatus } = useSelector((state: RootState) => state.chat);
+  const { isOpen, isMinimized, unreadCount, connectionStatus, currentConversation } = useSelector((state: RootState) => state.chat);
   const { config, isRTL, language } = useSelector((state: RootState) => state.theme);
   const { widget, isInitialized } = useSelector((state: RootState) => state.config);
 
@@ -53,7 +53,24 @@ export const ChatWidget: React.FC = () => {
     }
   }, [widget.behavior.autoOpen, widget.behavior.autoOpenDelay, isOpen, dispatch]);
 
+  // Create conversation when chat is opened for the first time
+  useEffect(() => {
+    console.log("🔍 Chat conversation creation check:", {
+      isOpen,
+      currentConversation: currentConversation?.id,
+      isInitialized,
+      tenantId: widget.tenantId,
+      shouldCreate: isOpen && !currentConversation && isInitialized && widget.tenantId
+    });
+    
+    if (isOpen && !currentConversation && isInitialized && widget.tenantId) {
+      console.log("🚀 Chat opened - creating conversation for tenant:", widget.tenantId);
+      dispatch(startConversation(widget.tenantId));
+    }
+  }, [isOpen, currentConversation, isInitialized, widget.tenantId, dispatch]);
+
   const handleToggleChat = () => {
+    console.log("🎯 Toggle chat clicked - current state:", { isOpen, currentConversation: currentConversation?.id });
     dispatch(toggleChat());
     dispatch(
       trackEvent({
@@ -143,7 +160,7 @@ export const ChatWidget: React.FC = () => {
       aria-expanded={isOpen}
     >
       {!isOpen ? (
-        <ChatButton onClick={handleToggleChat} unreadCount={unreadCount} isConnected={connectionStatus === "connected"} />
+        <ChatButton onClick={handleToggleChat} unreadCount={unreadCount} />
       ) : (
         <div className="chat-container">
           {!isMinimized && (

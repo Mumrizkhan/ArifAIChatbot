@@ -72,10 +72,20 @@ const DashboardPage = () => {
       dispatch(updateAgentStatusRealtime(statusUpdate));
     });
 
-    // Listen for conversation assignment and refetch conversations
+    // Add conversation assignment handler for dashboard
     agentSignalRService.setOnConversationAssigned((assignment: any) => {
-      console.log("[SignalR] ConversationAssigned event received:", assignment);
-      dispatch(fetchConversations());
+      console.log("Dashboard: ConversationAssigned event received:", assignment);
+      // Refresh agent stats to reflect new assignment
+      dispatch(fetchAgentStats(currentAgentId));
+
+      // Auto-join conversation group for real-time events
+      if (assignment.conversationId || assignment.ConversationId) {
+        const convId = assignment.conversationId || assignment.ConversationId;
+        if (agentSignalRService.getConnectionStatus()) {
+          console.log("Dashboard: Auto-joining conversation group after assignment:", convId);
+          agentSignalRService.joinConversation(convId);
+        }
+      }
     });
 
     const interval = setInterval(() => {

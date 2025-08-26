@@ -5,6 +5,7 @@ import { RootState } from '../store/store';
 import { Message } from '../store/slices/chatSlice';
 import { Bot, User, UserCheck, Download, FileText, Image } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
+import { ensureISOString } from '../utils/timestamp';
 
 interface MessageBubbleProps {
   message: Message;
@@ -156,8 +157,9 @@ export const MessageBubble: React.FC<MessageBubbleProps> = ({
     ].filter(Boolean).join(' ');
   };
 
-  const formatTimestamp = (timestamp: Date) => {
-    return formatDistanceToNow(timestamp, { addSuffix: true });
+  const formatTimestamp = (timestamp: string) => {
+    const date = new Date(timestamp);
+    return formatDistanceToNow(date, { addSuffix: true });
   };
 
   return (
@@ -186,7 +188,7 @@ export const MessageBubble: React.FC<MessageBubbleProps> = ({
           
           {isLastInGroup && (
             <div className="message-timestamp">
-              <time dateTime={message.timestamp.toISOString()}>
+              <time dateTime={ensureISOString(message.timestamp)}>
                 {formatTimestamp(message.timestamp)}
               </time>
             </div>

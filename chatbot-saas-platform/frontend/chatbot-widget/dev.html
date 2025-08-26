@@ -103,7 +103,7 @@
                 await widget.init({
                     tenantId: '83784EA6-5360-4F3C-843A-1ABD18D72E5D',
                     apiUrl: 'http://localhost:8000/chat',
-                    websocketUrl: 'ws://localhost:8000/chat/ws',
+                    websocketUrl: 'http://localhost:8000/chat/chathub',
                     features: {
                         fileUpload: true,
                         voiceMessages: true,
@@ -139,6 +139,28 @@
                 addResult('Initialization', e.message || e, false);
                 console.error(e);
             }
+            
+            // Expose SignalR testing method globally
+            window.testSignalR = async (content = "Test message") => {
+                try {
+                    const { signalRService } = await import('./src/services/websocket.ts');
+                    const state = widget.store.getState();
+                    const conversationId = state.chat?.currentConversation?.id;
+                    
+                    if (conversationId) {
+                        console.log('🧪 Testing SignalR with conversation:', conversationId);
+                        const result = await signalRService.sendTestMessage(conversationId, content);
+                        console.log('Test result:', result);
+                        return result;
+                    } else {
+                        console.warn('No active conversation found');
+                        return false;
+                    }
+                } catch (error) {
+                    console.error('SignalR test failed:', error);
+                    return false;
+                }
+            };
         }
         window.initializeWidget = initializeWidget;
 

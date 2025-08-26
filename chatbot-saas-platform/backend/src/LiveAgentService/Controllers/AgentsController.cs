@@ -1,7 +1,9 @@
 using LiveAgentService.Models;
 using LiveAgentService.Services;
+using LiveAgentService.Hubs;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.SignalR;
 using Shared.Application.Common.Interfaces;
 using Shared.Infrastructure.Extensions;
 using Shared.Infrastructure.Services;
@@ -18,6 +20,7 @@ public class AgentsController : ControllerBase
     private readonly ITenantService _tenantService;
     private readonly IAgentRoutingService _agentRoutingService;
     private readonly IQueueManagementService _queueManagementService;
+    private readonly IHubContext<AgentHub> _hubContext;
     private readonly ILogger<AgentsController> _logger;
 
     public AgentsController(
@@ -26,6 +29,7 @@ public class AgentsController : ControllerBase
         ITenantService tenantService,
         IAgentRoutingService agentRoutingService,
         IQueueManagementService queueManagementService,
+        IHubContext<AgentHub> hubContext,
         ILogger<AgentsController> logger)
     {
         _agentManagementService = agentManagementService;
@@ -33,6 +37,7 @@ public class AgentsController : ControllerBase
         _tenantService = tenantService;
         _agentRoutingService = agentRoutingService;
         _queueManagementService = queueManagementService;
+        _hubContext = hubContext;
         _logger = logger;
     }
 
@@ -165,6 +170,65 @@ public class AgentsController : ControllerBase
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error getting agent status");
+            return StatusCode(500, new { message = "Internal server error" });
+        }
+    }
+
+    [HttpPost("notify-escalation")]
+    public async Task<IActionResult> NotifyEscalation([FromBody] EscalationNotificationRequest request)
+    {
+        try
+        {
+            var tenantId = _tenantService.GetCurrentTenantId();
+
+            // Send ConversationAssigned event to all agents in the tenant
+            await _agentRoutingService.NotifyAgentsOfEscalationAsync(tenantId, new
+            {
+                ConversationId = request.ConversationId,
+                CustomerName = request.CustomerName,
+                CustomerEmail = request.CustomerEmail,
+                Subject = request.Subject,
+                Language = request.Language,
+                Status = "pending",
+                Timestamp = DateTime.UtcNow.ToString("O")
+            });
+
+            return Ok(new { message = "Escalation notification sent to agents" });
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error sending escalation notification for conversation {ConversationId}", request.ConversationId);
+            return StatusCode(500, new { message = "Internal server error" });
+        }
+    }
+
+    [HttpPost("notify-message")]
+    public async Task<IActionResult> NotifyMessage([FromBody] MessageNotificationRequest request)
+    {
+        try
+        {
+            var tenantId = _tenantService.GetCurrentTenantId();
+
+            // Send MessageReceived event to all agents in the conversation
+            await _hubContext.Clients.Group($"conversation_{request.ConversationId}")
+                .SendAsync("MessageReceived", new
+                {
+                    Id = request.MessageId,
+                    ConversationId = request.ConversationId,
+                    Content = request.Content,
+                    Type = request.Type ?? "text",
+                    Sender = request.Sender,
+                    SenderId = request.SenderId,
+                    SenderName = request.SenderName,
+                    CreatedAt = request.CreatedAt,
+                    Timestamp = DateTime.UtcNow.ToString("O")
+                });
+
+            return Ok(new { message = "Message notification sent to agents" });
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error sending message notification for conversation {ConversationId}", request.ConversationId);
             return StatusCode(500, new { message = "Internal server error" });
         }
     }
@@ -399,6 +463,15 @@ public class AgentsController : ControllerBase
             return StatusCode(500, new { message = "Internal server error" });
         }
     }
+}
+
+public class EscalationNotificationRequest
+{
+    public Guid ConversationId { get; set; }
+    public string? CustomerName { get; set; }
+    public string? CustomerEmail { get; set; }
+    public string? Subject { get; set; }
+    public string? Language { get; set; }
 }
 
 

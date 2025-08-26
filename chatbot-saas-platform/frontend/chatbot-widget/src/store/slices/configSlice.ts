@@ -4,6 +4,7 @@ interface WidgetConfig {
   tenantId: string;
   apiUrl: string;
   websocketUrl: string;
+  authToken?: string;
   features: {
     fileUpload: boolean;
     voiceMessages: boolean;
@@ -106,6 +107,7 @@ const configSlice = createSlice({
       config?: {
         apiUrl?: string;
         websocketUrl?: string;
+        authToken?: string;
         features?: Partial<WidgetConfig['features']>;
         behavior?: Partial<WidgetConfig['behavior']>;
         predefinedIntents?: WidgetConfig['predefinedIntents'];
@@ -118,6 +120,7 @@ const configSlice = createSlice({
       if (config) {
         if (config.apiUrl) state.widget.apiUrl = config.apiUrl;
         if (config.websocketUrl) state.widget.websocketUrl = config.websocketUrl;
+        if (config.authToken) state.widget.authToken = config.authToken;
         if (config.features) {
           state.widget.features = { ...state.widget.features, ...config.features };
         }

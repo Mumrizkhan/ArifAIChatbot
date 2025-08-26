@@ -8,7 +8,7 @@ export interface Notification {
   type: "info" | "success" | "warning" | "error";
   title: string;
   message: string;
-  timestamp: Date;
+  timestamp: string; // ISO string instead of Date
   isRead: boolean;
   actionUrl?: string;
   actionText?: string;
@@ -147,7 +147,7 @@ const notificationSlice = createSlice({
       const notification: Notification = {
         ...action.payload,
         id: `notification_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
-        timestamp: new Date(),
+        timestamp: new Date().toISOString(),
         isRead: false,
       };
 
@@ -253,7 +253,7 @@ const notificationSlice = createSlice({
         if (action.payload) {
           state.notifications.unshift({
             ...action.payload,
-            timestamp: new Date(action.payload.timestamp),
+            timestamp: action.payload.timestamp, // Already an ISO string
           });
         }
       });

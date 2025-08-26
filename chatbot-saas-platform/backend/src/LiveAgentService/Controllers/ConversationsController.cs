@@ -49,21 +49,77 @@ public class ConversationsController : ControllerBase
                 return Unauthorized();
             }
 
-            var conversations = await _agentRoutingService.GetAgentConversationsAsync(agentId.Value);
+            var conversationAssignments = await _agentRoutingService.GetAgentConversationsAsync(agentId.Value);
             
             if (!string.IsNullOrEmpty(status))
             {
-                conversations = conversations.Where(c => c.Status.ToString().Equals(status, StringComparison.OrdinalIgnoreCase)).ToList();
+                conversationAssignments = conversationAssignments.Where(c => c.Status.ToString().Equals(status, StringComparison.OrdinalIgnoreCase)).ToList();
             }
             
             if (!string.IsNullOrEmpty(priority))
             {
-                conversations = conversations.Where(c => c.Priority.ToString().Equals(priority, StringComparison.OrdinalIgnoreCase)).ToList();
+                conversationAssignments = conversationAssignments.Where(c => c.Priority.ToString().Equals(priority, StringComparison.OrdinalIgnoreCase)).ToList();
             }
 
-            conversations = conversations.Take(limit).ToList();
+            conversationAssignments = conversationAssignments.Take(limit).ToList();
 
-            return Ok(conversations);
+            // Enrich with actual conversation data from ChatRuntimeService
+            var enrichedConversations = new List<object>();
+            
+            foreach (var assignment in conversationAssignments)
+            {
+                var conversationDetails = await _chatRuntimeIntegrationService.GetConversationDetailsAsync(assignment.ConversationId);
+                
+                if (conversationDetails != null)
+                {
+                    // Get the latest messages to show preview and get real last message time
+                    var messages = await _chatRuntimeIntegrationService.GetConversationMessagesAsync(assignment.ConversationId);
+                    var lastMessage = messages.OrderByDescending(m => m.CreatedAt).FirstOrDefault();
+                    var latestMessagePreview = lastMessage?.Content?.Length > 50 
+                        ? lastMessage.Content.Substring(0, 50) + "..." 
+                        : lastMessage?.Content ?? "";
+
+                    enrichedConversations.Add(new
+                    {
+                        ConversationId = assignment.ConversationId,
+                        AgentId = assignment.AgentId,
+                        CustomerName = conversationDetails.CustomerName ?? "Unknown Customer",
+                        CustomerEmail = conversationDetails.CustomerEmail,
+                        Subject = conversationDetails.Subject ?? "No Subject",
+                        Status = conversationDetails.Status,
+                        Language = conversationDetails.Language,
+                        AssignedAt = assignment.AssignedAt,
+                        LastMessageAt = lastMessage?.CreatedAt ?? conversationDetails.UpdatedAt ?? conversationDetails.CreatedAt,
+                        LastMessagePreview = latestMessagePreview,
+                        LastMessageSender = lastMessage?.Sender ?? "System",
+                        UnreadMessages = messages.Count(m => !m.IsRead && m.Sender != "Agent"), // Count unread non-agent messages
+                        MessageCount = conversationDetails.MessageCount,
+                        Priority = assignment.Priority,
+                        CreatedAt = conversationDetails.CreatedAt,
+                        UpdatedAt = conversationDetails.UpdatedAt
+                    });
+                }
+                else
+                {
+                    // Fallback to assignment data if conversation details unavailable
+                    enrichedConversations.Add(new
+                    {
+                        ConversationId = assignment.ConversationId,
+                        AgentId = assignment.AgentId,
+                        CustomerName = assignment.CustomerName ?? "Unknown Customer",
+                        Subject = assignment.Subject ?? "No Subject", 
+                        Status = assignment.Status.ToString(),
+                        AssignedAt = assignment.AssignedAt,
+                        LastMessageAt = assignment.LastMessageAt,
+                        LastMessagePreview = "Unable to load messages",
+                        UnreadMessages = assignment.UnreadMessages,
+                        Priority = assignment.Priority,
+                        MessageCount = 0
+                    });
+                }
+            }
+
+            return Ok(enrichedConversations);
         }
         catch (Exception ex)
         {
@@ -84,14 +140,52 @@ public class ConversationsController : ControllerBase
             }
 
             var conversations = await _agentRoutingService.GetAgentConversationsAsync(agentId.Value);
-            var conversation = conversations.FirstOrDefault(c => c.ConversationId == conversationId);
+            var assignment = conversations.FirstOrDefault(c => c.ConversationId == conversationId);
 
-            if (conversation == null)
+            if (assignment == null)
             {
                 return NotFound(new { message = "Conversation not found" });
             }
 
-            return Ok(conversation);
+            // Get enriched conversation data from ChatRuntimeService
+            var conversationDetails = await _chatRuntimeIntegrationService.GetConversationDetailsAsync(conversationId);
+            var messages = await _chatRuntimeIntegrationService.GetConversationMessagesAsync(conversationId);
+
+            if (conversationDetails == null)
+            {
+                return NotFound(new { message = "Conversation details not found" });
+            }
+
+            return Ok(new
+            {
+                ConversationId = conversationId,
+                AgentId = assignment.AgentId,
+                CustomerName = conversationDetails.CustomerName,
+                CustomerEmail = conversationDetails.CustomerEmail,
+                CustomerPhone = conversationDetails.CustomerPhone,
+                Subject = conversationDetails.Subject,
+                Status = conversationDetails.Status,
+                Language = conversationDetails.Language,
+                Channel = conversationDetails.Channel,
+                TenantId = conversationDetails.TenantId,
+                AssignedAt = assignment.AssignedAt,
+                CreatedAt = conversationDetails.CreatedAt,
+                UpdatedAt = conversationDetails.UpdatedAt,
+                MessageCount = conversationDetails.MessageCount,
+                Priority = assignment.Priority,
+                Messages = messages.Select(m => new 
+                {
+                    Id = m.Id,
+                    ConversationId = m.ConversationId,
+                    Content = m.Content,
+                    Type = m.Type,
+                    Sender = m.Sender,
+                    SenderId = m.SenderId,
+                    SenderName = m.SenderName,
+                    CreatedAt = m.CreatedAt,
+                    IsRead = m.IsRead
+                }).OrderBy(m => m.CreatedAt).ToList()
+            });
         }
         catch (Exception ex)
         {

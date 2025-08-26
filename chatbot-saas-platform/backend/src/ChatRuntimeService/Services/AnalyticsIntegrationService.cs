@@ -1,5 +1,5 @@
 using System.Text.Json;
-
+using Shared.Application.Common.Interfaces;
 using ChatRuntimeService.Models;
 
 namespace ChatRuntimeService.Services;
@@ -9,23 +9,34 @@ public class AnalyticsIntegrationService : IAnalyticsIntegrationService
     private readonly HttpClient _httpClient;
     private readonly IConfiguration _configuration;
     private readonly ILogger<AnalyticsIntegrationService> _logger;
+    private readonly ITenantService _tenantService;
     private readonly string _analyticsServiceUrl;
 
     public AnalyticsIntegrationService(
         HttpClient httpClient,
         IConfiguration configuration,
-        ILogger<AnalyticsIntegrationService> logger)
+        ILogger<AnalyticsIntegrationService> logger,
+        ITenantService tenantService)
     {
         _httpClient = httpClient;
         _configuration = configuration;
         _logger = logger;
+        _tenantService = tenantService;
         _analyticsServiceUrl = _configuration["Services:Analytics"] ?? "http://localhost:5001";
+    }
+
+    private void SetTenantHeader()
+    {
+        var tenantId = _tenantService.GetCurrentTenantId();
+        _httpClient.DefaultRequestHeaders.Remove("X-Tenant-ID");
+        _httpClient.DefaultRequestHeaders.Add("X-Tenant-ID", tenantId.ToString());
     }
 
     public async Task<RealtimeAnalyticsDto> GetRealtimeAnalyticsAsync()
     {
         try
         {
+            SetTenantHeader();
             var response = await _httpClient.GetAsync($"{_analyticsServiceUrl}/api/analytics/realtime");
             if (response.IsSuccessStatusCode)
             {
@@ -49,6 +60,7 @@ public class AnalyticsIntegrationService : IAnalyticsIntegrationService
     {
         try
         {
+            SetTenantHeader();
             var response = await _httpClient.GetAsync($"{_analyticsServiceUrl}/api/analytics/dashboard");
             if (response.IsSuccessStatusCode)
             {
@@ -72,6 +84,7 @@ public class AnalyticsIntegrationService : IAnalyticsIntegrationService
     {
         try
         {
+            SetTenantHeader();
             var queryParams = $"timeRange={timeRange}";
             if (!string.IsNullOrEmpty(tenantId))
             {
@@ -101,6 +114,7 @@ public class AnalyticsIntegrationService : IAnalyticsIntegrationService
     {
         try
         {
+            SetTenantHeader();
             var queryParams = $"timeRange={timeRange}";
             if (!string.IsNullOrEmpty(tenantId))
             {
@@ -130,6 +144,7 @@ public class AnalyticsIntegrationService : IAnalyticsIntegrationService
     {
         try
         {
+            SetTenantHeader();
             var request = new AnalyticsRequest
             {
                 TenantId = tenantId,

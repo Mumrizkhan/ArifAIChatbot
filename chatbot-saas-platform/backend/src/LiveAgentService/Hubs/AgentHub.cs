@@ -4,6 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using Shared.Application.Common.Interfaces;
 using LiveAgentService.Services;
 using LiveAgentService.Models;
+using LiveAgentService.Models;
 
 namespace LiveAgentService.Hubs;
 
@@ -49,7 +50,7 @@ public class AgentHub : Hub
                 {
                     AgentId = agentId.Value,
                     Status = AgentStatus.Online.ToString(),
-                    Timestamp = DateTime.UtcNow
+                    Timestamp = DateTime.UtcNow.ToString("O")
                 });
                 await Groups.AddToGroupAsync(Context.ConnectionId, $"agent_{agentId}");
                // await _agentRoutingService.SetAgentStatusAsync(agentId.Value, AgentStatus.Online);
@@ -58,7 +59,7 @@ public class AgentHub : Hub
                 {
                     AgentId = agentId.Value,
                     Status = AgentStatus.Online.ToString(),
-                    Timestamp = DateTime.UtcNow
+                    Timestamp = DateTime.UtcNow.ToString("O")
                 });
 
                 _logger.LogInformation($"Agent {agentId} joined tenant {tenantId} group");
@@ -86,7 +87,7 @@ public class AgentHub : Hub
                 {
                     AgentId = agentId.Value,
                     Status = AgentStatus.Offline.ToString(),
-                    Timestamp = DateTime.UtcNow
+                    Timestamp = DateTime.UtcNow.ToString("O")
                 });
 
                 _logger.LogInformation($"Agent {agentId} left tenant {tenantId} group");
@@ -95,6 +96,57 @@ public class AgentHub : Hub
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error leaving agent group");
+        }
+    }
+
+    public async Task JoinConversation(string conversationId)
+    {
+        try
+        {
+            var agentId = _currentUserService.UserId;
+            var tenantId = _tenantService.GetCurrentTenantId();
+
+            _logger.LogInformation($"Agent {agentId} attempting to join conversation {conversationId}");
+
+            if (Guid.TryParse(conversationId, out var convId) && agentId.HasValue)
+            {
+                // Verify the conversation exists and the agent has permission to join it
+                var conversation = await _context.Conversations
+                    .FirstOrDefaultAsync(c => c.Id == convId && c.TenantId == tenantId);
+
+                if (conversation != null)
+                {
+                    // Add agent to the conversation group
+                    await Groups.AddToGroupAsync(Context.ConnectionId, $"conversation_{conversationId}");
+                    _logger.LogInformation($"Agent {agentId} successfully joined conversation {conversationId}");
+                }
+                else
+                {
+                    _logger.LogWarning($"Conversation {conversationId} not found for tenant {tenantId} or agent {agentId} doesn't have permission");
+                }
+            }
+            else
+            {
+                _logger.LogWarning($"Invalid conversation ID format: {conversationId} or no agent ID");
+            }
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, $"Error joining conversation {conversationId}");
+        }
+    }
+
+    public async Task LeaveConversation(string conversationId)
+    {
+        try
+        {
+            var agentId = _currentUserService.UserId;
+            await Groups.RemoveFromGroupAsync(Context.ConnectionId, $"conversation_{conversationId}");
+            _logger.LogInformation($"Agent {agentId} left conversation {conversationId}");
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, $"Error leaving conversation {conversationId}");
         }
     }
 
@@ -113,7 +165,7 @@ public class AgentHub : Hub
                 {
                     AgentId = agentId.Value,
                     Status = status,
-                    Timestamp = DateTime.UtcNow
+                    Timestamp = DateTime.UtcNow.ToString("O")
                 });
 
                 _logger.LogInformation($"Agent {agentId} status updated to {status}");
@@ -139,18 +191,30 @@ public class AgentHub : Hub
 
                 if (assigned)
                 {
-                    await Clients.Caller.SendAsync("ConversationAssigned", new
+                    // Get conversation details for complete assignment info
+                    var conversation = await _context.Conversations
+                        .FirstOrDefaultAsync(c => c.Id == convId && c.TenantId == tenantId);
+
+                    var assignmentPayload = new
                     {
                         ConversationId = conversationId,
                         AgentId = agentId.Value,
-                        Timestamp = DateTime.UtcNow
-                    });
+                        AgentName = "Agent", // Could be enhanced to get actual agent name
+                        CustomerName = conversation?.CustomerName,
+                        CustomerEmail = conversation?.CustomerEmail,
+                        Subject = conversation?.Subject,
+                        Language = conversation?.Language,
+                        Status = "active",
+                        Timestamp = DateTime.UtcNow.ToString("O") // ISO 8601 format
+                    };
+
+                    await Clients.Caller.SendAsync("ConversationAssigned", assignmentPayload);
 
                     await Clients.OthersInGroup($"agents_{tenantId}").SendAsync("ConversationTaken", new
                     {
                         ConversationId = conversationId,
                         AgentId = agentId.Value,
-                        Timestamp = DateTime.UtcNow
+                        Timestamp = DateTime.UtcNow.ToString("O")
                     });
 
                     _logger.LogInformation($"Agent {agentId} accepted conversation {conversationId}");
@@ -184,7 +248,7 @@ public class AgentHub : Hub
                         FromAgentId = fromAgentId.Value,
                         ToAgentId = toAgentId,
                         Reason = reason,
-                        Timestamp = DateTime.UtcNow
+                        Timestamp = DateTime.UtcNow.ToString("O")
                     });
 
                     _logger.LogInformation($"Conversation {conversationId} transferred from {fromAgentId} to {toAgentId}: {reason}");
@@ -216,7 +280,7 @@ public class AgentHub : Hub
                         AgentId = agentId,
                         Reason = reason,
                         Priority = QueuePriority.Urgent.ToString(),
-                        Timestamp = DateTime.UtcNow
+                        Timestamp = DateTime.UtcNow.ToString("O")
                     });
 
                     _logger.LogInformation($"Conversation {conversationId} escalated by agent {agentId}: {reason}");
@@ -243,7 +307,7 @@ public class AgentHub : Hub
                     ConversationId = conversationId,
                     RequestingAgentId = agentId.Value,
                     Message = message,
-                    Timestamp = DateTime.UtcNow
+                    Timestamp = DateTime.UtcNow.ToString("O")
                 });
 
                 _logger.LogInformation($"Agent {agentId} requested assistance for conversation {conversationId}");
@@ -272,7 +336,7 @@ public class AgentHub : Hub
                     Message = message,
                     Type = messageType,
                     FromAgentId = agentId,
-                    Timestamp = DateTime.UtcNow
+                    Timestamp = DateTime.UtcNow.ToString("O")
                 });
 
                 _logger.LogInformation($"Admin {agentId} broadcasted message to all agents in tenant {tenantId}");
@@ -306,7 +370,7 @@ public class AgentHub : Hub
             {
                 AgentId = agentId.Value,
                 Status = AgentStatus.Offline.ToString(),
-                Timestamp = DateTime.UtcNow
+                Timestamp = DateTime.UtcNow.ToString("O")
             });
         }
 

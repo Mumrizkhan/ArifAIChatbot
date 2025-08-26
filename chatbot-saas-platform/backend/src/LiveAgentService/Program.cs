@@ -1,15 +1,16 @@
 using LiveAgentService.Hubs;
 using LiveAgentService.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
+using Serilog;
 using Shared.Application.Common.Interfaces;
+using Shared.Infrastructure.Extensions;
 using Shared.Infrastructure.Persistence;
 using Shared.Infrastructure.Services;
-using Shared.Infrastructure.Extensions;
 using System.Text;
-using Serilog;
 
 Log.Logger = new LoggerConfiguration()
     .WriteTo.Console()
@@ -45,8 +46,22 @@ builder.Services.AddSwaggerGen(options =>
         }
     });
 });
-builder.Services.AddSignalR();
-
+builder.Services.AddSignalR(options =>
+{
+    options.EnableDetailedErrors = true;
+    options.KeepAliveInterval = TimeSpan.FromSeconds(15);
+    options.ClientTimeoutInterval = TimeSpan.FromSeconds(30);
+    options.HandshakeTimeout = TimeSpan.FromSeconds(15);
+});
+// Configure for proxy
+builder.Services.Configure<ForwardedHeadersOptions>(options =>
+{
+    options.ForwardedHeaders = ForwardedHeaders.XForwardedFor |
+                             ForwardedHeaders.XForwardedHost |
+                             ForwardedHeaders.XForwardedProto;
+    options.KnownNetworks.Clear();
+    options.KnownProxies.Clear();
+});
 builder.Services.AddInfrastructure(builder.Configuration);
 builder.Services.AddHttpClient<IChatRuntimeIntegrationService, ChatRuntimeIntegrationService>();
 builder.Services.AddScoped<IChatRuntimeIntegrationService, ChatRuntimeIntegrationService>();
@@ -85,32 +100,51 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
         };
     });
 
-builder.Services.AddAuthorization();
+
+
 
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowAll", policy =>
     {
-        policy.AllowAnyOrigin()
+        var allowedOrigins = new[] {
+             "https://api-stg-arif.tetco.sa",
+            "https://chatbot-stg-arif.tetco.sa",
+            "https://agent-stg-arif.tetco.sa",
+            "https://admin-stg-arif.tetco.sa",
+            "https://tenant-stg-arif.tetco.sa",
+            "http://localhost:5173", 
+            "http://localhost:5174", 
+            "http://localhost:5175",
+            "http://localhost:8000"
+        };
+        
+        policy.WithOrigins(allowedOrigins)
               .AllowAnyMethod()
-              .AllowAnyHeader();
+              .AllowAnyHeader()
+              .AllowCredentials();
     });
 });
 
 var app = builder.Build();
-app.UseCors("AllowAll");
 
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
     app.UseSwaggerUI();
 }
+app.UseRouting();
+app.UseCors("AllowAll");
 
 app.UseHttpsRedirection();
 app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();
 app.UseWebSockets();
+
 app.MapHub<AgentHub>("/agentHub").RequireCors("AllowAll");
+//app.MapHub<AgentHub>("agent/agentHub").RequireCors("AllowAll");
 
 app.Run();
+
+

@@ -92,7 +92,7 @@ export const MessageInput: React.FC = () => {
         sender: "user",
         content: messageContent,
         type: "text",
-        timestamp: new Date(),
+        timestamp: new Date().toISOString(),
         // pending: false, // User messages are not pending
       })
     );

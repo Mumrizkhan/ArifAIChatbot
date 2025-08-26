@@ -1,8 +1,10 @@
 using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.SignalR;
 using Shared.Application.Common.Interfaces;
 using Shared.Domain.Enums;
 using LiveAgentService.Services;
 using LiveAgentService.Models;
+using LiveAgentService.Hubs;
 
 namespace LiveAgentService.Services;
 
@@ -10,13 +12,18 @@ public class AgentRoutingService : IAgentRoutingService
 {
     private readonly IApplicationDbContext _context;
     private readonly ILogger<AgentRoutingService> _logger;
+    private readonly IHubContext<AgentHub> _hubContext;
     private readonly Dictionary<Guid, AgentStatus> _agentStatuses = new();
     private readonly Dictionary<Guid, DateTime> _lastActivity = new();
 
-    public AgentRoutingService(IApplicationDbContext context, ILogger<AgentRoutingService> logger)
+    public AgentRoutingService(
+        IApplicationDbContext context, 
+        ILogger<AgentRoutingService> logger,
+        IHubContext<AgentHub> hubContext)
     {
         _context = context;
         _logger = logger;
+        _hubContext = hubContext;
     }
 
     public async Task<Guid?> FindAvailableAgentAsync(Guid tenantId, string? department = null, string? language = null)
@@ -208,5 +215,24 @@ public class AgentRoutingService : IAgentRoutingService
             .CountAsync(c => c.AssignedAgentId == agentId && 
                            c.Status != ConversationStatus.Closed &&
                            c.Status != ConversationStatus.Resolved);
+    }
+
+    public async Task NotifyAgentsOfEscalationAsync(Guid tenantId, object escalationData)
+    {
+        try
+        {
+            _logger.LogInformation("Sending escalation notification to agents in tenant {TenantId}: {Data}", 
+                tenantId, escalationData);
+            
+            // Send ConversationAssigned event to all agents in the tenant group
+            await _hubContext.Clients.Group($"agents_{tenantId}")
+                .SendAsync("ConversationAssigned", escalationData);
+            
+            _logger.LogInformation("Escalation notification sent successfully to agents in tenant {TenantId}", tenantId);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error notifying agents of escalation for tenant {TenantId}", tenantId);
+        }
     }
 }
