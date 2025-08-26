@@ -1,15 +1,16 @@
 using ChatRuntimeService.Hubs;
+using ChatRuntimeService.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
+using Serilog;
 using Shared.Application.Common.Interfaces;
+using Shared.Infrastructure.Extensions;
 using Shared.Infrastructure.Persistence;
 using Shared.Infrastructure.Services;
-using Shared.Infrastructure.Extensions;
 using System.Text;
-using ChatRuntimeService.Services;
-using Serilog;
 
 Log.Logger = new LoggerConfiguration()
     .WriteTo.Console()
@@ -50,7 +51,24 @@ builder.Services.AddSwaggerGen(options =>
 	});
 	options.OperationFilter<FileUploadOperationFilter>();
 });
-builder.Services.AddSignalR();
+
+builder.Services.AddSignalR(options =>
+{
+    options.EnableDetailedErrors = true;
+    options.KeepAliveInterval = TimeSpan.FromSeconds(15);
+    options.ClientTimeoutInterval = TimeSpan.FromSeconds(30);
+    options.HandshakeTimeout = TimeSpan.FromSeconds(15);
+});
+
+// Configure for proxy
+builder.Services.Configure<ForwardedHeadersOptions>(options =>
+{
+    options.ForwardedHeaders = ForwardedHeaders.XForwardedFor |
+                             ForwardedHeaders.XForwardedHost |
+                             ForwardedHeaders.XForwardedProto;
+    options.KnownNetworks.Clear();
+    options.KnownProxies.Clear();
+});
 
 builder.Services.AddInfrastructure(builder.Configuration);
 builder.Services.AddHttpClient<IAIIntegrationService, AIIntegrationService>();
@@ -127,11 +145,17 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
-
+app.UseRouting();
+app.UseCors("AllowAll");
 app.UseHttpsRedirection();
 app.UseAuthentication();
 app.UseAuthorization();
+
 app.MapControllers();
 app.MapHub<ChatHub>("/chatHub").RequireCors("AllowAll");
+//app.MapHub<ChatHub>("chat/chatHub").RequireCors("AllowAll");
 
 app.Run();
+
+
+
