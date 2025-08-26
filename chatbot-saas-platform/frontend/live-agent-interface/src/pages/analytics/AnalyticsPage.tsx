@@ -1,7 +1,16 @@
 import React, { useEffect, useState } from "react";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { useTranslation } from "react-i18next";
 import { AppDispatch, RootState } from "../../store/store";
+import {
+  fetchPerformanceData,
+  fetchAnalyticsData,
+  fetchGoalsData,
+  selectPerformanceData,
+  selectAnalyticsData,
+  selectGoalsData,
+  selectAnalyticsLoading,
+} from "../../store/slices/analyticsSlice";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../../components/ui/card";
 import { Skeleton } from "../../components/ui/skeleton";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../../components/ui/tabs";
@@ -29,8 +38,39 @@ const AnalyticsPage = () => {
   const dispatch = useDispatch<AppDispatch>();
   const [activeTab, setActiveTab] = useState("performance");
   const [selectedTimeRange, setSelectedTimeRange] = useState("7d");
+  const { user, token } = useSelector((state: RootState) => state.auth); // Fetch user from auth slice
+  const currentAgentId = user?.id; // Extract the agent's ID
+  // Select data from Redux store
+  const performanceData = useSelector(selectPerformanceData);
+  const analyticsData = useSelector(selectAnalyticsData);
+  const goalsData = useSelector(selectGoalsData);
+  const isLoading = useSelector(selectAnalyticsLoading);
 
-  const isLoading = false;
+  // Helper to get dateFrom and dateTo based on selectedTimeRange
+  const getDateRange = () => {
+    const now = new Date();
+    let dateFrom = new Date();
+    if (selectedTimeRange === "7d") dateFrom.setDate(now.getDate() - 6);
+    else if (selectedTimeRange === "30d") dateFrom.setDate(now.getDate() - 29);
+    else if (selectedTimeRange === "90d") dateFrom.setDate(now.getDate() - 89);
+    else if (selectedTimeRange === "1y") dateFrom.setFullYear(now.getFullYear() - 1);
+    return {
+      dateFrom: dateFrom.toISOString().split("T")[0],
+      dateTo: now.toISOString().split("T")[0],
+    };
+  };
+
+  // Example goalId, replace with your actual logic or state
+  const goalId = currentAgentId;
+
+  useEffect(() => {
+    const { dateFrom, dateTo } = getDateRange();
+    dispatch(fetchPerformanceData({ dateFrom, dateTo }));
+    dispatch(fetchAnalyticsData({ dateFrom, dateTo }));
+    if (goalId) {
+      dispatch(fetchGoalsData(goalId));
+    }
+  }, [dispatch, selectedTimeRange, goalId]);
 
   const handleTimeRangeChange = (timeRange: string) => {
     setSelectedTimeRange(timeRange);
@@ -39,16 +79,6 @@ const AnalyticsPage = () => {
   const handleExport = (format: "csv" | "pdf" | "excel") => {
     console.log(`Exporting analytics as ${format}`);
   };
-
-  const performanceData = [
-    { date: "2024-01-01", conversations: 12, avgRating: 4.5, responseTime: 2.3 },
-    { date: "2024-01-02", conversations: 15, avgRating: 4.7, responseTime: 2.1 },
-    { date: "2024-01-03", conversations: 8, avgRating: 4.2, responseTime: 2.8 },
-    { date: "2024-01-04", conversations: 18, avgRating: 4.8, responseTime: 1.9 },
-    { date: "2024-01-05", conversations: 14, avgRating: 4.6, responseTime: 2.2 },
-    { date: "2024-01-06", conversations: 16, avgRating: 4.9, responseTime: 1.8 },
-    { date: "2024-01-07", conversations: 11, avgRating: 4.4, responseTime: 2.5 },
-  ];
 
   const satisfactionData = [
     { rating: t("analytics.fiveStars"), count: 68, percentage: 68 },
@@ -156,7 +186,7 @@ const AnalyticsPage = () => {
           <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
             <MetricCard
               title={t("analytics.totalConversations")}
-              value="94"
+              value={analyticsData?.totalConversations ?? "—"}
               change={t("analytics.performanceChange1")}
               icon={MessageSquare}
               description={t("analytics.thisWeek")}

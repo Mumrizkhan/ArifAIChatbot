@@ -5,6 +5,7 @@ import conversationReducer from "./slices/conversationSlice";
 import themeReducer from "./slices/themeSlice";
 import notificationReducer from "./slices/notificationSlice";
 import selectedConversationReducer from "./slices/selectedConversationSlice";
+import analyticsReducer from "./slices/analyticsSlice";
 
 export const store = configureStore({
   reducer: {
@@ -14,6 +15,7 @@ export const store = configureStore({
     selectedConversation: selectedConversationReducer,
     theme: themeReducer,
     notifications: notificationReducer,
+    analytics: analyticsReducer,
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({
