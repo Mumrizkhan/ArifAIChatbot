@@ -20,6 +20,10 @@ const ProfilePage = () => {
   const { t } = useTranslation();
   const dispatch = useDispatch<AppDispatch>();
   const { currentAgent, stats: agentStats, isLoading } = useSelector((state: RootState) => state.agent);
+  const { user, token } = useSelector((state: RootState) => state.auth); // Fetch user from auth slice
+  const currentAgentId = user?.id; // Extract the agent's ID
+  console.log(currentAgent, "currentAgent");
+  console.log(currentAgentId, "currentAgent");
 
   const {
     register,
@@ -52,10 +56,10 @@ const ProfilePage = () => {
   });
 
   useEffect(() => {
-    if (currentAgent?.id) {
-      dispatch(fetchAgentProfile(currentAgent.id));
+    if (currentAgentId) {
+      dispatch(fetchAgentProfile(currentAgentId));
     }
-  }, [dispatch, currentAgent?.id]);
+  }, [dispatch, currentAgentId]);
 
   useEffect(() => {
     if (currentAgent) {
@@ -85,8 +89,8 @@ const ProfilePage = () => {
         .map((s: string) => s.trim())
         .filter(Boolean),
     };
-    if (currentAgent?.id) {
-      dispatch(updateAgentProfile({ id: currentAgent.id, profileData }));
+    if (currentAgentId) {
+      dispatch(updateAgentProfile({ id: currentAgentId, profileData }));
     }
   };
 

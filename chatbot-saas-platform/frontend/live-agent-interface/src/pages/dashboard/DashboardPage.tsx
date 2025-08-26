@@ -72,6 +72,12 @@ const DashboardPage = () => {
       dispatch(updateAgentStatusRealtime(statusUpdate));
     });
 
+    // Listen for conversation assignment and refetch conversations
+    agentSignalRService.setOnConversationAssigned((assignment: any) => {
+      console.log("[SignalR] ConversationAssigned event received:", assignment);
+      dispatch(fetchConversations());
+    });
+
     const interval = setInterval(() => {
       if (!isSignalRConnected) {
         dispatch(fetchAgentStats(currentAgentId));
