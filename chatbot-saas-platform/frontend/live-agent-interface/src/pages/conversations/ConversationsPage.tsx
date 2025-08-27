@@ -68,11 +68,32 @@ const ConversationsPage = () => {
         dispatch(transferConversationRealtime(transfer));
       });
 
-      agentSignalRService.setOnMessageReceived((message: any) => {
-        dispatch(addMessage(message));
+      agentSignalRService.setOnMessageReceived((messageDto: any) => {
+        console.log("🔥 Live Agent: ReceiveMessage event received:", messageDto);
+        console.log("🔥 Live Agent: Message sender:", messageDto.sender);
+        console.log("🔥 Live Agent: Message conversation ID:", messageDto.conversationId);
+        console.log("🔥 Live Agent: Current conversation ID:", conversationId);
+        
+        // Transform the message format to match the live agent interface expectations
+        const transformedMessage = {
+          id: messageDto.id,
+          conversationId: messageDto.conversationId,
+          content: messageDto.content,
+          sender: messageDto.sender?.toLowerCase() as "customer" | "agent" | "system", // Convert to lowercase
+          timestamp: messageDto.createdAt || new Date().toISOString(), // Use createdAt as timestamp
+          type: messageDto.type?.toLowerCase() as "text" | "file" | "image" | "system", // Convert to lowercase
+          isRead: false, // New messages are unread by default
+          metadata: {
+            senderId: messageDto.senderId,
+            senderName: messageDto.senderName,
+          }
+        };
+        
+        console.log("✅ Live Agent: Transformed message:", transformedMessage);
+        dispatch(addMessage(transformedMessage));
       });
     }
-  }, [dispatch]);
+  }, [dispatch, conversationId]);
 
   useEffect(() => {
     if (conversationId && conversationId !== previousConversationId) {

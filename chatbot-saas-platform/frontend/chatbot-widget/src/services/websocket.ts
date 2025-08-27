@@ -46,8 +46,8 @@ class SignalRService {
 
       if (conversationId) {
         console.log("Joining conversation:", conversationId);
-        await signalRService.joinConversation(conversationId);
-        signalRService.currentConversationId = conversationId;
+        await this.joinConversation(conversationId);
+        this.currentConversationId = conversationId;
 
         // Set up conversation event handlers AFTER joining conversation
         console.log("Setting up conversation event handlers for:", conversationId);

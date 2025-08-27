@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>WebSocket Test</title>
+</head>
+<body>
+    <h1>WebSocket Connection Test</h1>
+    <div id="status">Testing...</div>
+    <div id="messages"></div>
+
+    <script>
+        // Test WebSocket connection through API Gateway
+        function testWebSocket(url, name) {
+            const ws = new WebSocket(url);
+            const statusDiv = document.getElementById('status');
+            const messagesDiv = document.getElementById('messages');
+            
+            ws.onopen = function() {
+                statusDiv.innerHTML += `<p>${name}: ✅ Connected</p>`;
+                messagesDiv.innerHTML += `<p>${name}: WebSocket connection opened</p>`;
+            };
+            
+            ws.onerror = function(error) {
+                statusDiv.innerHTML += `<p>${name}: ❌ Error</p>`;
+                messagesDiv.innerHTML += `<p>${name}: Error - ${error}</p>`;
+            };
+            
+            ws.onclose = function() {
+                statusDiv.innerHTML += `<p>${name}: 🔌 Closed</p>`;
+                messagesDiv.innerHTML += `<p>${name}: Connection closed</p>`;
+            };
+        }
+
+        // Test both hubs
+        testWebSocket('ws://localhost:8000/chathub', 'Chat Hub');
+        testWebSocket('ws://localhost:8000/agent/agenthub', 'Agent Hub');
+    </script>
+</body>
+</html>

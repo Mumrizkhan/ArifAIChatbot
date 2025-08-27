@@ -302,8 +302,15 @@ public class ChatController : ControllerBase
             };
 
             // Send to conversation participants (customers via ChatHub)
-            await _hubContext.Clients.Group($"conversation_{conversationId}")
+            var groupName = $"conversation_{conversationId}";
+            _logger.LogInformation("🔥 Sending agent message to SignalR group: {GroupName}", groupName);
+            _logger.LogInformation("🔥 Agent message content: {Content}", agentMessage.Content);
+            _logger.LogInformation("🔥 Agent message DTO: {@AgentMessageDto}", agentMessageDto);
+            
+            await _hubContext.Clients.Group(groupName)
                 .SendAsync("ReceiveMessage", agentMessageDto);
+            
+            _logger.LogInformation("✅ Agent message sent to SignalR group: {GroupName}", groupName);
 
             // Also notify agents via LiveAgentService if the conversation has an assigned agent
             if (conversation.AssignedAgentId.HasValue)

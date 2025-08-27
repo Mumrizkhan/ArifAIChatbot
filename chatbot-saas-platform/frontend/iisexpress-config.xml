@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="utf-8"?>
+<configuration>
+  <configSections>
+    <section name="system.applicationHost" type="System.ApplicationHost.ApplicationHostSectionHandler, System.ApplicationHost, Version=7.0.0.0, Culture=neutral, PublicKeyToken=31BF3856AD364E35" requirePermission="false" />
+  </configSections>
+
+  <system.applicationHost>
+    <sites>
+      <site name="API-Gateway" id="1" serverAutoStart="true">
+        <application path="/">
+          <virtualDirectory path="/" physicalPath="C:\ArifWorkspace\ArifAIChatbotGitHub\ArifAIChatbot\chatbot-saas-platform\frontend" />
+        </application>
+        <bindings>
+          <binding protocol="http" bindingInformation="*:8000:localhost" />
+        </bindings>
+      </site>
+    </sites>
+  </system.applicationHost>
+
+  <system.webServer>
+    <webSocket enabled="true" />
+    
+    <rewrite>
+      <rules>
+        <!-- Chat Hub WebSocket -->
+        <rule name="ChatHub WebSocket" enabled="true" patternSyntax="ECMAScript" stopProcessing="true">
+          <match url="^chathub/(.*)" />
+          <conditions trackAllCaptures="false">
+            <add input="{HTTP_CONNECTION}" pattern="Upgrade" ignoreCase="true" />
+            <add input="{HTTP_UPGRADE}" pattern="websocket" ignoreCase="true" />
+          </conditions>
+          <action type="Rewrite" url="http://localhost:5002/chathub/{R:1}" logRewrittenUrl="false" />
+        </rule>
+
+        <!-- Agent Hub WebSocket -->
+        <rule name="AgentHub WebSocket" enabled="true" patternSyntax="ECMAScript" stopProcessing="true">
+          <match url="^agent/agenthub/(.*)" />
+          <conditions trackAllCaptures="false">
+            <add input="{HTTP_CONNECTION}" pattern="Upgrade" ignoreCase="true" />
+            <add input="{HTTP_UPGRADE}" pattern="websocket" ignoreCase="true" />
+          </conditions>
+          <action type="Rewrite" url="http://localhost:5001/agent/agenthub/{R:1}" logRewrittenUrl="false" />
+        </rule>
+
+        <!-- Regular HTTP rules -->
+        <rule name="ChatHub HTTP" enabled="true" patternSyntax="ECMAScript" stopProcessing="true">
+          <match url="^chathub/(.*)" />
+          <action type="Rewrite" url="http://localhost:5002/chathub/{R:1}" logRewrittenUrl="false" />
+        </rule>
+
+        <rule name="Agent API" enabled="true" patternSyntax="ECMAScript" stopProcessing="true">
+          <match url="^agent/(.*)" />
+          <action type="Rewrite" url="http://localhost:5001/agent/{R:1}" logRewrittenUrl="false" />
+        </rule>
+
+        <rule name="Chatbot API" enabled="true" patternSyntax="ECMAScript" stopProcessing="true">
+          <match url="^chatbot/(.*)" />
+          <action type="Rewrite" url="http://localhost:5002/chatbot/{R:1}" logRewrittenUrl="false" />
+        </rule>
+
+        <rule name="Identity API" enabled="true" patternSyntax="ECMAScript" stopProcessing="true">
+          <match url="^identity/(.*)" />
+          <action type="Rewrite" url="http://localhost:5000/identity/{R:1}" logRewrittenUrl="false" />
+        </rule>
+
+        <rule name="Analytics API" enabled="true" patternSyntax="ECMAScript" stopProcessing="true">
+          <match url="^analytic/(.*)" />
+          <action type="Rewrite" url="http://localhost:5003/analytic/{R:1}" logRewrittenUrl="false" />
+        </rule>
+
+        <rule name="Default API" enabled="true" patternSyntax="ECMAScript" stopProcessing="true">
+          <match url="^(.*)$" />
+          <action type="Rewrite" url="http://localhost:5000/{R:1}" logRewrittenUrl="false" />
+        </rule>
+      </rules>
+    </rewrite>
+
+    <httpProtocol>
+      <customHeaders>
+        <add name="Access-Control-Allow-Origin" value="*" />
+        <add name="Access-Control-Allow-Methods" value="GET, POST, PUT, DELETE, OPTIONS" />
+        <add name="Access-Control-Allow-Headers" value="Content-Type, Authorization, X-Requested-With" />
+        <add name="Access-Control-Allow-Credentials" value="true" />
+      </customHeaders>
+    </httpProtocol>
+  </system.webServer>
+</configuration>

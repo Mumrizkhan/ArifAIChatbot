@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SignalR Debug Console</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .debug-section { margin: 20px 0; padding: 15px; border: 1px solid #ccc; border-radius: 5px; }
+        .debug-section h3 { margin-top: 0; color: #333; }
+        button { margin: 5px; padding: 10px 15px; background: #007cba; color: white; border: none; border-radius: 3px; cursor: pointer; }
+        button:hover { background: #005a87; }
+        input { margin: 5px; padding: 8px; border: 1px solid #ccc; border-radius: 3px; }
+        #debugOutput { 
+            height: 400px; 
+            overflow-y: auto; 
+            background: #f5f5f5; 
+            padding: 10px; 
+            font-family: monospace; 
+            font-size: 12px; 
+            border: 1px solid #ccc;
+            white-space: pre-wrap;
+        }
+        .status { padding: 5px 10px; border-radius: 3px; margin: 5px 0; }
+        .status.connected { background: #d4edda; color: #155724; }
+        .status.disconnected { background: #f8d7da; color: #721c24; }
+        .status.connecting { background: #fff3cd; color: #856404; }
+    </style>
+</head>
+<body>
+    <h1>SignalR Debug Console</h1>
+    
+    <div class="debug-section">
+        <h3>Connection Status</h3>
+        <div id="connectionStatus" class="status disconnected">Disconnected</div>
+        <div id="debugInfo"></div>
+    </div>
+
+    <div class="debug-section">
+        <h3>Manual Tests</h3>
+        <input type="text" id="conversationId" placeholder="Enter Conversation ID" value="">
+        <br>
+        <button onclick="testJoinConversation()">Join Conversation</button>
+        <button onclick="testSignalREvents()">Test All Events</button>
+        <button onclick="getDebugInfo()">Get Debug Info</button>
+        <button onclick="listEventHandlers()">List Event Handlers</button>
+        <button onclick="clearOutput()">Clear Output</button>
+    </div>
+
+    <div class="debug-section">
+        <h3>Debug Output</h3>
+        <div id="debugOutput"></div>
+    </div>
+
+    <script>
+        let debugOutput = document.getElementById('debugOutput');
+        let connectionStatus = document.getElementById('connectionStatus');
+        let debugInfo = document.getElementById('debugInfo');
+
+        function log(message) {
+            const timestamp = new Date().toLocaleTimeString();
+            debugOutput.textContent += `[${timestamp}] ${message}\n`;
+            debugOutput.scrollTop = debugOutput.scrollHeight;
+        }
+
+        function clearOutput() {
+            debugOutput.textContent = '';
+        }
+
+        function updateStatus() {
+            if (window.signalRDebug) {
+                const info = window.signalRDebug.getDebugInfo();
+                debugInfo.innerHTML = `
+                    <strong>Hub URL:</strong> ${info.hubUrl}<br>
+                    <strong>Current Conversation:</strong> ${info.currentConversationId || 'None'}<br>
+                    <strong>Reconnect Attempts:</strong> ${info.reconnectAttempts}
+                `;
+                
+                if (info.connectionState === 'Connected') {
+                    connectionStatus.textContent = 'Connected';
+                    connectionStatus.className = 'status connected';
+                } else if (info.connectionState === 'Connecting') {
+                    connectionStatus.textContent = 'Connecting...';
+                    connectionStatus.className = 'status connecting';
+                } else {
+                    connectionStatus.textContent = 'Disconnected';
+                    connectionStatus.className = 'status disconnected';
+                }
+            } else {
+                connectionStatus.textContent = 'SignalR Debug Not Available';
+                connectionStatus.className = 'status disconnected';
+            }
+        }
+
+        function testJoinConversation() {
+            const conversationId = document.getElementById('conversationId').value;
+            if (!conversationId) {
+                log('❌ Please enter a conversation ID');
+                return;
+            }
+            
+            log(`🧪 Testing join conversation: ${conversationId}`);
+            
+            if (window.signalRDebug) {
+                // Note: This would need to be implemented differently as join is part of connect flow
+                log('Join conversation test would require full reconnection with conversation ID');
+            } else {
+                log('❌ SignalR debug methods not available');
+            }
+        }
+
+        function testSignalREvents() {
+            const conversationId = document.getElementById('conversationId').value;
+            if (!conversationId) {
+                log('❌ Please enter a conversation ID');
+                return;
+            }
+            
+            log(`🧪 Testing SignalR events for conversation: ${conversationId}`);
+            
+            if (window.signalRDebug) {
+                window.signalRDebug.testEvents(conversationId)
+                    .then(() => log('✅ SignalR event tests completed'))
+                    .catch(error => log(`❌ SignalR event tests failed: ${error}`));
+            } else {
+                log('❌ SignalR debug methods not available');
+            }
+        }
+
+        function getDebugInfo() {
+            if (window.signalRDebug) {
+                const info = window.signalRDebug.getDebugInfo();
+                log(`📊 Debug Info: ${JSON.stringify(info, null, 2)}`);
+            } else {
+                log('❌ SignalR debug methods not available');
+            }
+        }
+
+        function listEventHandlers() {
+            log('📋 Listing SignalR event handlers...');
+            if (window.signalRDebug) {
+                window.signalRDebug.logEventHandlers();
+                log('✅ Event handlers logged to console');
+            } else {
+                log('❌ SignalR debug methods not available');
+            }
+        }
+
+        // Monitor console for SignalR events
+        const originalConsoleLog = console.log;
+        console.log = function(...args) {
+            const message = args.join(' ');
+            if (message.includes('SignalR:') || message.includes('🔥') || message.includes('✅') || message.includes('❌')) {
+                log(message);
+            }
+            originalConsoleLog.apply(console, args);
+        };
+
+        const originalConsoleError = console.error;
+        console.error = function(...args) {
+            const message = args.join(' ');
+            log(`❌ ERROR: ${message}`);
+            originalConsoleError.apply(console, args);
+        };
+
+        // Update status every 2 seconds
+        setInterval(updateStatus, 2000);
+        updateStatus();
+
+        log('🚀 SignalR Debug Console initialized');
+        log('💡 Open the chatbot widget in another tab and watch events here');
+        log('💡 Use the manual test buttons to debug specific functionality');
+    </script>
+</body>
+</html>
