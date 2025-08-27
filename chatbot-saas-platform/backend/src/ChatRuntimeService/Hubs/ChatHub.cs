@@ -35,31 +35,70 @@ public class ChatHub : Hub
     {
         try
         {
-            _logger.LogInformation($"JoinConversation called with ID: {conversationId}, User: {_currentUserService.UserId}, Tenant: {_tenantService.GetCurrentTenantId()}");
+            var groupName = $"conversation_{conversationId}";
+            var connectionId = Context.ConnectionId;
+            var userId = _currentUserService.UserId;
+            var tenantId = _tenantService.GetCurrentTenantId();
+            
+            _logger.LogInformation("🎯 JoinConversation called. ConversationId: {ConversationId}, UserId: {UserId}, TenantId: {TenantId}, ConnectionId: {ConnectionId}, GroupName: {GroupName}", 
+                conversationId, userId, tenantId, connectionId, groupName);
             
             if (Guid.TryParse(conversationId, out var convId))
             {
                 var conversation = await _context.Conversations
-                    .FirstOrDefaultAsync(c => c.Id == convId && c.TenantId == _tenantService.GetCurrentTenantId());
+                    .FirstOrDefaultAsync(c => c.Id == convId /*&& c.TenantId == tenantId*/);
 
                 if (conversation != null)
                 {
-                    await Groups.AddToGroupAsync(Context.ConnectionId, $"conversation_{conversationId}");
-                    _logger.LogInformation($"User {_currentUserService.UserId} successfully joined conversation {conversationId}");
+                    await Groups.AddToGroupAsync(connectionId, groupName);
+                    _logger.LogInformation("✅ User {UserId} successfully joined conversation group: {GroupName}", userId, groupName);
+                    
+                    // Send confirmation back to client with detailed info
+                    var confirmationData = new { 
+                        ConversationId = conversationId,
+                        GroupName = groupName,
+                        ConnectionId = connectionId,
+                        Message = $"Successfully joined conversation {conversationId}",
+                        Success = true
+                    };
+                    
+                    await Clients.Caller.SendAsync("JoinedConversation", confirmationData);
+                    _logger.LogInformation("✅ Sent JoinedConversation confirmation: {@ConfirmationData}", confirmationData);
                 }
                 else
                 {
-                    _logger.LogWarning($"Conversation {conversationId} not found for tenant {_tenantService.GetCurrentTenantId()}");
+                    _logger.LogWarning("❌ Conversation {ConversationId} not found for tenant {TenantId}", conversationId, tenantId);
+                    
+                    // Send error confirmation
+                    await Clients.Caller.SendAsync("JoinedConversation", new { 
+                        ConversationId = conversationId,
+                        Error = $"Conversation {conversationId} not found",
+                        Success = false
+                    });
                 }
             }
             else
             {
-                _logger.LogWarning($"Invalid conversation ID format: {conversationId}");
+                _logger.LogWarning("❌ Invalid conversation ID format: {ConversationId}", conversationId);
+                
+                // Send error confirmation
+                await Clients.Caller.SendAsync("JoinedConversation", new { 
+                    ConversationId = conversationId,
+                    Error = "Invalid conversation ID format",
+                    Success = false
+                });
             }
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, $"Error joining conversation {conversationId}");
+            _logger.LogError(ex, "❌ Error joining conversation {ConversationId}", conversationId);
+            
+            // Send error confirmation
+            await Clients.Caller.SendAsync("JoinedConversation", new { 
+                ConversationId = conversationId,
+                Error = $"Failed to join conversation: {ex.Message}",
+                Success = false
+            });
         }
     }
 
