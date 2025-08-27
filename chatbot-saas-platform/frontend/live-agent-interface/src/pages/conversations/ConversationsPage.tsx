@@ -87,10 +87,6 @@ const ConversationsPage = () => {
           timestamp: messageDto.createdAt || new Date().toISOString(), // Use createdAt as timestamp
           type: messageDto.type?.toLowerCase() as "text" | "file" | "image" | "system", // Convert to lowercase
           isRead: false, // New messages are unread by default
-          metadata: {
-            senderId: messageDto.senderId,
-            senderName: messageDto.senderName,
-          }
         };
         
         console.log("✅ Live Agent: Transformed message:", transformedMessage);
