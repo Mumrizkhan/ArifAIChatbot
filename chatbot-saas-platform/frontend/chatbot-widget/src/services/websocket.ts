@@ -8,8 +8,8 @@ class SignalRService {
   private reconnectAttempts = 0;
   private maxReconnectAttempts = 5;
   private currentConversationId: string | null = null;
-  private hubUrl: string = import.meta.env.VITE_WEBSOCKET_URL || `${import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000'}/chat/chathub`;
-  
+  private hubUrl: string = import.meta.env.VITE_WEBSOCKET_URL || `${import.meta.env.VITE_API_BASE_URL || "http://localhost:8000"}/chat/chathub`;
+
   async connect(tenantId: string, authToken: string, conversationId?: string): Promise<boolean> {
     try {
       console.log("SignalR connecting...", { tenantId, hubUrl: this.hubUrl, hasAuthToken: !!authToken });
@@ -23,7 +23,7 @@ class SignalRService {
             return authToken;
           },
           skipNegotiation: false,
-          withCredentials: true
+          withCredentials: true,
         })
         .withAutomaticReconnect({
           nextRetryDelayInMilliseconds: (retryContext) => {
@@ -46,13 +46,13 @@ class SignalRService {
 
       if (conversationId) {
         console.log("Joining conversation:", conversationId);
-        await this.joinConversation(conversationId);
-        this.currentConversationId = conversationId;
-        
+        await signalRService.joinConversation(conversationId);
+        signalRService.currentConversationId = conversationId;
+
         // Set up conversation event handlers AFTER joining conversation
         console.log("Setting up conversation event handlers for:", conversationId);
         this.setupConversationEventHandlers();
-        
+
         // Test if we can send a test message to the hub
         try {
           console.log("🧪 Testing SignalR communication with hub...");
@@ -75,11 +75,16 @@ class SignalRService {
   // Helper method to decode JWT for debugging
   private decodeJWT(token: string): unknown {
     try {
-      const base64Url = token.split('.')[1];
-      const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
-      const jsonPayload = decodeURIComponent(atob(base64).split('').map(function(c) {
-        return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
-      }).join(''));
+      const base64Url = token.split(".")[1];
+      const base64 = base64Url.replace(/-/g, "+").replace(/_/g, "/");
+      const jsonPayload = decodeURIComponent(
+        atob(base64)
+          .split("")
+          .map(function (c) {
+            return "%" + ("00" + c.charCodeAt(0).toString(16)).slice(-2);
+          })
+          .join("")
+      );
       return JSON.parse(jsonPayload);
     } catch (e) {
       console.error("Failed to decode JWT:", e);
@@ -102,7 +107,7 @@ class SignalRService {
 
       if (this.currentConversationId) {
         await this.joinConversation(this.currentConversationId);
-        // Re-setup conversation handlers after reconnection
+        console.log("SignalR: Re-joined conversation successfully");
         this.setupConversationEventHandlers();
       }
     });
@@ -131,7 +136,7 @@ class SignalRService {
       console.log("🔥 SignalR: ReceiveMessage event received:", messageDto);
       console.log("🔥 SignalR: Current conversation ID:", this.currentConversationId);
       console.log("🔥 SignalR: Message conversation ID:", messageDto.ConversationId);
-      
+
       // Only process messages for the current conversation
       if (!this.currentConversationId || messageDto.ConversationId === this.currentConversationId) {
         console.log("✅ SignalR: Processing message for current conversation");
@@ -156,7 +161,7 @@ class SignalRService {
     this.connection.on("UserStartedTyping", (typingInfo) => {
       console.log("SignalR: UserStartedTyping event received:", typingInfo);
       console.log("SignalR: Current conversation ID:", this.currentConversationId);
-      
+
       // Only process typing events for the current conversation
       const typingConversationId = typingInfo.ConversationId || typingInfo.conversationId;
       if (!this.currentConversationId || typingConversationId === this.currentConversationId) {
@@ -174,7 +179,7 @@ class SignalRService {
     this.connection.on("UserStoppedTyping", (typingInfo) => {
       console.log("SignalR: UserStoppedTyping event received:", typingInfo);
       console.log("SignalR: Current conversation ID:", this.currentConversationId);
-      
+
       // Only process typing events for the current conversation
       const typingConversationId = typingInfo.ConversationId || typingInfo.conversationId;
       if (!this.currentConversationId || typingConversationId === this.currentConversationId) {
@@ -203,22 +208,22 @@ class SignalRService {
     this.connection.on("ConversationAssigned", (assignmentInfo) => {
       console.log("🔥 SignalR: ConversationAssigned event received:", assignmentInfo);
       console.log("🔥 SignalR: Current conversation ID:", this.currentConversationId);
-      
+
       // Check if this assignment is for the current conversation
       const assignmentConversationId = assignmentInfo.ConversationId || assignmentInfo.conversationId;
       console.log("🔥 SignalR: Assignment conversation ID:", assignmentConversationId);
-      
+
       if (!this.currentConversationId || assignmentConversationId === this.currentConversationId) {
         console.log("✅ SignalR: Processing conversation assignment for current conversation");
-        
+
         // Handle different possible payload structures from the backend
         const agentId = assignmentInfo.AgentId || assignmentInfo.agentId;
         const agentName = assignmentInfo.AgentName || assignmentInfo.agentName || "Agent";
         const agentAvatar = assignmentInfo.AgentAvatar || assignmentInfo.agentAvatar;
-        
+
         if (agentId) {
           console.log("SignalR: Agent assigned to conversation:", { agentId, agentName });
-          
+
           store.dispatch(
             assignAgent({
               id: agentId.toString(),
@@ -226,10 +231,10 @@ class SignalRService {
               avatar: agentAvatar,
             })
           );
-          
+
           // Update conversation status to indicate agent is now handling the conversation
           store.dispatch(updateConversationStatus("active"));
-          
+
           // Add a system message to indicate agent assignment
           store.dispatch(
             addMessage({
@@ -262,14 +267,14 @@ class SignalRService {
     this.connection.on("AgentJoined", (agentInfo) => {
       console.log("Agent joined conversation:", agentInfo);
       console.log("SignalR: Current conversation ID:", this.currentConversationId);
-      
+
       // Only process agent events for the current conversation
       const agentConversationId = agentInfo.ConversationId || agentInfo.conversationId;
       if (!this.currentConversationId || agentConversationId === this.currentConversationId) {
         const agentId = agentInfo.id || agentInfo.Id || agentInfo.agentId || agentInfo.AgentId;
         const agentName = agentInfo.name || agentInfo.Name || agentInfo.agentName || agentInfo.AgentName || "Agent";
         const agentAvatar = agentInfo.avatar || agentInfo.Avatar || agentInfo.agentAvatar || agentInfo.AgentAvatar;
-        
+
         if (agentId) {
           store.dispatch(
             assignAgent({
@@ -278,7 +283,7 @@ class SignalRService {
               avatar: agentAvatar,
             })
           );
-          
+
           store.dispatch(
             addMessage({
               id: `system-agent-joined-${Date.now()}`,
@@ -302,12 +307,12 @@ class SignalRService {
     this.connection.on("AgentLeft", (agentInfo) => {
       console.log("Agent left conversation:", agentInfo);
       console.log("SignalR: Current conversation ID:", this.currentConversationId);
-      
+
       // Only process agent events for the current conversation
       const agentConversationId = agentInfo.ConversationId || agentInfo.conversationId;
       if (!this.currentConversationId || agentConversationId === this.currentConversationId) {
         const agentName = agentInfo.name || agentInfo.Name || agentInfo.agentName || agentInfo.AgentName || "Agent";
-        
+
         store.dispatch(
           addMessage({
             id: `system-agent-left-${Date.now()}`,
@@ -328,12 +333,12 @@ class SignalRService {
     this.connection.on("ConversationEnded", (endInfo) => {
       console.log("Conversation ended:", endInfo);
       console.log("SignalR: Current conversation ID:", this.currentConversationId);
-      
+
       // Only process end events for the current conversation
       const endConversationId = endInfo.ConversationId || endInfo.conversationId || endInfo.Id || endInfo.id;
       if (!this.currentConversationId || endConversationId === this.currentConversationId) {
         store.dispatch(updateConversationStatus("ended"));
-        
+
         store.dispatch(
           addMessage({
             id: `system-conversation-ended-${Date.now()}`,
@@ -356,7 +361,7 @@ class SignalRService {
     if (!this.connection) return;
 
     console.log("Removing existing conversation event handlers");
-    
+
     // Remove all conversation-specific event handlers
     this.connection.off("ReceiveMessage");
     this.connection.off("UserStartedTyping");
@@ -404,10 +409,10 @@ class SignalRService {
         console.log("SignalR: Invoking JoinConversation with ID:", conversationId);
         console.log("SignalR: Connection state:", this.connection.state);
         console.log("SignalR: Connection ID:", this.connection.connectionId);
-        
+
         await this.connection.invoke("JoinConversation", conversationId);
         this.currentConversationId = conversationId;
-        
+
         console.log(`SignalR: Successfully joined conversation: ${conversationId}`);
         console.log(`SignalR: Should now receive events for group: conversation_${conversationId}`);
         return true;
@@ -416,9 +421,9 @@ class SignalRService {
         return false;
       }
     } else {
-      console.warn("SignalR: Cannot join conversation - connection not established", { 
+      console.warn("SignalR: Cannot join conversation - connection not established", {
         state: this.connection?.state,
-        conversationId 
+        conversationId,
       });
     }
     return false;
@@ -449,15 +454,15 @@ class SignalRService {
 
   async startConversation(conversationId: string): Promise<boolean> {
     console.log("SignalR: Starting conversation with ID:", conversationId);
-    
+
     if (!this.connection) {
       console.warn("SignalR: Cannot start conversation - no connection");
       return false;
     }
 
     if (this.connection?.state !== HubConnectionState.Connected) {
-      console.warn("SignalR: Cannot start conversation - connection not ready", { 
-        state: this.connection?.state 
+      console.warn("SignalR: Cannot start conversation - connection not ready", {
+        state: this.connection?.state,
       });
       return false;
     }
@@ -478,15 +483,15 @@ class SignalRService {
 
   async setupExistingConversation(conversationId: string): Promise<boolean> {
     console.log("SignalR: Setting up existing conversation with ID:", conversationId);
-    
+
     if (!this.connection) {
       console.warn("SignalR: Cannot setup existing conversation - no connection");
       return false;
     }
 
     if (this.connection?.state !== HubConnectionState.Connected) {
-      console.warn("SignalR: Cannot setup existing conversation - connection not ready", { 
-        state: this.connection?.state 
+      console.warn("SignalR: Cannot setup existing conversation - connection not ready", {
+        state: this.connection?.state,
       });
       return false;
     }
@@ -548,7 +553,7 @@ class SignalRService {
     if (!this.connection) {
       return [];
     }
-    
+
     // Access the private handlers property (for debugging only)
     const handlers = (this.connection as any)._callbacks || (this.connection as any).handlers || {};
     const eventNames = Object.keys(handlers);
@@ -587,7 +592,7 @@ class SignalRService {
       console.log("SignalR: Testing connection...");
       console.log("SignalR: Current conversation ID:", this.currentConversationId);
       console.log("SignalR: Connection ID:", this.connection.connectionId);
-      
+
       // Test if we can call a simple hub method
       try {
         if (this.currentConversationId) {
