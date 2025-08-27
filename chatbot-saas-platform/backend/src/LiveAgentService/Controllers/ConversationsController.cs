@@ -205,8 +205,17 @@ public class ConversationsController : ControllerBase
                 return Unauthorized();
             }
 
+
             _logger.LogInformation("Updating conversation {ConversationId} status to {Status}", conversationId, request.Status);
-            
+
+            // Update the conversation status in the database
+            var updated = await _agentRoutingService.UpdateConversationStatusAsync(conversationId, request.Status, agentId.Value);
+
+            if (!updated)
+            {
+                return NotFound(new { message = "Conversation not found or status update failed" });
+            }
+
             return Ok(new { conversationId, status = request.Status });
         }
         catch (Exception ex)

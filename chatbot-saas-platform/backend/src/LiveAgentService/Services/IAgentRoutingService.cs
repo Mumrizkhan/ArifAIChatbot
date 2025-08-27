@@ -1,4 +1,7 @@
+using Azure.Core;
 using LiveAgentService.Models;
+using Microsoft.Extensions.Logging;
+using Shared.Domain.Entities;
 
 namespace LiveAgentService.Services;
 
@@ -12,4 +15,5 @@ public interface IAgentRoutingService
     Task<AgentStatus> GetAgentStatusAsync(Guid agentId);
     Task<List<ConversationAssignment>> GetAgentConversationsAsync(Guid agentId);
     Task NotifyAgentsOfEscalationAsync(Guid tenantId, object escalationData);
+    Task<bool> UpdateConversationStatusAsync(Guid conversationId, string status, Guid value);
 }
