@@ -78,13 +78,22 @@ class AgentSignalRService {
   private onConversationTransferred?: (transfer: ConversationTransfer) => void;
   private onConversationEscalated?: (escalation: ConversationEscalation) => void;
   private onMessageReceived?: (message: any) => void;
+  private onMessageMarkedAsRead?: (readInfo: {
+    messageId: string;
+    conversationId: string;
+    readerId: string;
+    readerType: string;
+    readAt: string;
+  }) => void;
+  private onUserStartedTyping?: (typingInfo: { userId: string; userName: string; conversationId: string }) => void;
+  private onUserStoppedTyping?: (typingInfo: { userId: string; conversationId: string }) => void;
   private onAssistanceRequested?: (request: AssistanceRequest) => void;
   private onBroadcastMessage?: (message: BroadcastMessage) => void;
   private onAgentNotification?: (notification: AgentNotification) => void;
   private onConnectionStatusChange?: (isConnected: boolean) => void;
 
   async connect(authToken: string, agentId: string, tenantId: string): Promise<boolean> {
-    console.log("[SignalR] connect called", { authTokenLength: this.safeTokenLength(authToken), agentId, tenantId });
+    console.log("AgentSignalRService.connect called with agentId:", agentId);
 
     if (this.isConnecting) {
       console.warn("Connect already in progress - skipping duplicate call");
@@ -243,7 +252,6 @@ class AgentSignalRService {
   }
 
   private setupEventHandlers(): void {
-    console.log("[SignalR] setupEventHandlers called");
     if (!this.connection) return;
 
     // standard server -> client events
@@ -288,13 +296,45 @@ class AgentSignalRService {
       }
     });
 
-    const handleIncomingMessage = (message: any) => {
-      console.log("Received message:", message);
-      this.onMessageReceived?.(message);
-    };
+    this.connection.on("MessageReceived", (message: any) => {
+      try {
+        this.onMessageReceived?.(message);
+      } catch (e) {
+        console.error("onMessageReceived handler error:", e);
+      }
+    });
 
-    this.connection.on("ReceiveMessage", handleIncomingMessage);
-    this.connection.on("MessageReceived", handleIncomingMessage);
+    // Message read status event
+    this.connection.on(
+      "MessageMarkedAsRead",
+      (readInfo: { messageId: string; conversationId: string; readerId: string; readerType: string; readAt: string }) => {
+        try {
+          console.log("Live Agent: MessageMarkedAsRead event received:", readInfo);
+          this.onMessageMarkedAsRead?.(readInfo);
+        } catch (e) {
+          console.error("onMessageMarkedAsRead handler error:", e);
+        }
+      }
+    );
+
+    // Typing indicator events
+    this.connection.on("UserStartedTyping", (typingInfo: { userId: string; userName: string; conversationId: string }) => {
+      try {
+        console.log("Live Agent: UserStartedTyping event received:", typingInfo);
+        this.onUserStartedTyping?.(typingInfo);
+      } catch (e) {
+        console.error("onUserStartedTyping handler error:", e);
+      }
+    });
+
+    this.connection.on("UserStoppedTyping", (typingInfo: { userId: string; conversationId: string }) => {
+      try {
+        console.log("Live Agent: UserStoppedTyping event received:", typingInfo);
+        this.onUserStoppedTyping?.(typingInfo);
+      } catch (e) {
+        console.error("onUserStoppedTyping handler error:", e);
+      }
+    });
 
     this.connection.on("AssistanceRequested", (request: AssistanceRequest) => {
       try {
@@ -363,58 +403,60 @@ class AgentSignalRService {
   }
 
   setOnAgentStatusChanged(handler: (status: AgentStatusUpdate) => void): void {
-    console.log("[SignalR] setOnAgentStatusChanged called");
     this.onAgentStatusChanged = handler;
   }
 
   setOnConversationAssigned(handler: (assignment: ConversationAssignment) => void): void {
-    console.log("[SignalR] setOnConversationAssigned called");
     this.onConversationAssigned = handler;
   }
 
   setOnConversationTaken(handler: (assignment: ConversationAssignment) => void): void {
-    console.log("[SignalR] setOnConversationTaken called");
     this.onConversationTaken = handler;
   }
 
   setOnConversationTransferred(handler: (transfer: ConversationTransfer) => void): void {
-    console.log("[SignalR] setOnConversationTransferred called");
     this.onConversationTransferred = handler;
   }
 
   setOnConversationEscalated(handler: (escalation: ConversationEscalation) => void): void {
-    console.log("[SignalR] setOnConversationEscalated called");
     this.onConversationEscalated = handler;
   }
 
   setOnMessageReceived(handler: (message: any) => void): void {
-    console.log("[SignalR] setOnMessageReceived called");
     this.onMessageReceived = handler;
   }
 
+  setOnMessageMarkedAsRead(
+    handler: (readInfo: { messageId: string; conversationId: string; readerId: string; readerType: string; readAt: string }) => void
+  ): void {
+    this.onMessageMarkedAsRead = handler;
+  }
+
+  setOnUserStartedTyping(handler: (typingInfo: { userId: string; userName: string; conversationId: string }) => void): void {
+    this.onUserStartedTyping = handler;
+  }
+
+  setOnUserStoppedTyping(handler: (typingInfo: { userId: string; conversationId: string }) => void): void {
+    this.onUserStoppedTyping = handler;
+  }
+
   setOnAssistanceRequested(handler: (request: AssistanceRequest) => void): void {
-    console.log("[SignalR] setOnAssistanceRequested called");
     this.onAssistanceRequested = handler;
   }
 
   setOnBroadcastMessage(handler: (message: BroadcastMessage) => void): void {
-    console.log("[SignalR] setOnBroadcastMessage called");
     this.onBroadcastMessage = handler;
   }
 
   setOnAgentNotification(handler: (notification: AgentNotification) => void): void {
-    console.log("[SignalR] setOnAgentNotification called");
     this.onAgentNotification = handler;
   }
 
   setOnConnectionStatusChange(handler: (isConnected: boolean) => void): void {
-    console.log("[SignalR] setOnConnectionStatusChange called");
     this.onConnectionStatusChange = handler;
   }
 
   async updateAgentStatus(status: "online" | "away" | "busy" | "offline"): Promise<void> {
-    console.log("[SignalR] updateAgentStatus called", { status });
-
     if (!this.isConnected || !this.connection) {
       console.warn("SignalR not connected, cannot update agent status");
       return;
@@ -428,8 +470,6 @@ class AgentSignalRService {
   }
 
   async acceptConversation(conversationId: string): Promise<void> {
-    console.log("[SignalR] acceptConversation called", { conversationId });
-
     if (!this.isConnected || !this.connection) {
       console.warn("SignalR not connected, cannot accept conversation");
       return;
@@ -443,8 +483,6 @@ class AgentSignalRService {
   }
 
   async transferConversation(conversationId: string, targetAgentId: string, reason: string): Promise<void> {
-    console.log("[SignalR] transferConversation called", { conversationId, targetAgentId, reason });
-
     if (!this.isConnected || !this.connection) {
       console.warn("SignalR not connected, cannot transfer conversation");
       return;
@@ -458,8 +496,6 @@ class AgentSignalRService {
   }
 
   async escalateConversation(conversationId: string, reason: string): Promise<void> {
-    console.log("[SignalR] escalateConversation called", { conversationId, reason });
-
     if (!this.isConnected || !this.connection) {
       console.warn("SignalR not connected, cannot escalate conversation");
       return;
@@ -473,8 +509,6 @@ class AgentSignalRService {
   }
 
   async requestAssistance(conversationId: string, message: string): Promise<void> {
-    console.log("[SignalR] requestAssistance called", { conversationId, message });
-
     if (!this.isConnected || !this.connection) {
       console.warn("SignalR not connected, cannot request assistance");
       return;
@@ -488,8 +522,6 @@ class AgentSignalRService {
   }
 
   async broadcastToAgents(message: string, messageType: string = "info"): Promise<void> {
-    console.log("[SignalR] broadcastToAgents called", { message, messageType });
-
     if (!this.isConnected || !this.connection) {
       console.warn("SignalR not connected, cannot broadcast message");
       return;
@@ -503,8 +535,6 @@ class AgentSignalRService {
   }
 
   async joinConversation(conversationId: string): Promise<void> {
-    console.log("[SignalR] joinConversation called", { conversationId });
-
     if (!this.isConnected || !this.connection) {
       console.warn("SignalR not connected, cannot join conversation");
       return;
@@ -518,8 +548,6 @@ class AgentSignalRService {
   }
 
   async leaveConversation(conversationId: string): Promise<void> {
-    console.log("[SignalR] leaveConversation called", { conversationId });
-
     if (!this.isConnected || !this.connection) {
       console.warn("SignalR not connected, cannot leave conversation");
       return;
@@ -532,9 +560,33 @@ class AgentSignalRService {
     }
   }
 
-  async disconnect(): Promise<void> {
-    console.log("[SignalR] disconnect called");
+  async startTyping(conversationId: string): Promise<void> {
+    if (!this.isConnected || !this.connection) {
+      console.warn("SignalR not connected, cannot send typing indicator");
+      return;
+    }
 
+    try {
+      await this.connection.invoke("StartTyping", conversationId);
+    } catch (error) {
+      console.error("Failed to send start typing indicator:", error);
+    }
+  }
+
+  async stopTyping(conversationId: string): Promise<void> {
+    if (!this.isConnected || !this.connection) {
+      console.warn("SignalR not connected, cannot send typing indicator");
+      return;
+    }
+
+    try {
+      await this.connection.invoke("StopTyping", conversationId);
+    } catch (error) {
+      console.error("Failed to send stop typing indicator:", error);
+    }
+  }
+
+  async disconnect(): Promise<void> {
     if (this.connection) {
       try {
         await this.connection.stop();
@@ -551,17 +603,14 @@ class AgentSignalRService {
   }
 
   getConnectionStatus(): boolean {
-    console.log("[SignalR] getConnectionStatus called");
     return this.isConnected;
   }
 
   getAgentId(): string | null {
-    console.log("[SignalR] getAgentId called");
     return this.agentId;
   }
 
   getTenantId(): string | null {
-    console.log("[SignalR] getTenantId called");
     return this.tenantId;
   }
 }

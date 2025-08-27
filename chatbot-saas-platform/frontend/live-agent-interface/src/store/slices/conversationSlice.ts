@@ -1,5 +1,19 @@
 import { createSlice, createAsyncThunk, PayloadAction } from "@reduxjs/toolkit";
 
+// Interface for backend message format
+interface BackendMessage {
+  // Backend returns camelCase properties
+  id: string;
+  conversationId: string;
+  content: string;
+  type: string;
+  sender: string;
+  senderId?: string;
+  senderName?: string;
+  createdAt: string;
+  isRead: boolean;
+}
+
 // API Base URL with fallback
 const API_BASE_URL = (import.meta as any).env.VITE_API_BASE_URL || "https://api-stg-arif.tetco.sa";
 
@@ -23,6 +37,7 @@ export interface Customer {
   id: string;
   name: string;
   email?: string;
+  phone?: string;
   avatar?: string;
   location?: string;
   language: string;
@@ -173,7 +188,6 @@ export const fetchConversation = createAsyncThunk("conversations/fetchOne", asyn
   if (!response.ok) {
     throw new Error("Failed to fetch conversation");
   }
-  console.log("Fetched conversation:", await response.json());
 
   return response.json();
 });
@@ -355,6 +369,19 @@ const conversationSlice = createSlice({
         });
       }
     },
+    markMessageAsRead: (state, action: PayloadAction<{ messageId: string }>) => {
+      for (const conversation of state.conversations) {
+        const message = conversation.messages.find((msg) => msg.id === action.payload.messageId);
+        if (message && !message.isRead) {
+          message.isRead = true;
+          // Decrease unread count if it was an unread customer message
+          if (message.sender === "customer" && conversation.unreadCount > 0) {
+            conversation.unreadCount -= 1;
+          }
+          break;
+        }
+      }
+    },
     clearError: (state) => {
       state.error = null;
     },
@@ -401,11 +428,92 @@ const conversationSlice = createSlice({
         state.error = action.error.message || "Failed to fetch conversations";
       })
       .addCase(fetchConversation.fulfilled, (state, action) => {
-        const existingIndex = state.conversations.findIndex((c) => c.id === action.payload.id);
+        // Transform backend response to match frontend Conversation interface
+        const backendData = action.payload;
+
+        console.log("🔍 Live Agent: Raw backend response:", backendData);
+
+        const transformedConversation: Conversation = {
+          id: backendData.conversationId, // Backend returns camelCase
+          customer: {
+            id: backendData.customerId || "unknown",
+            name: backendData.customerName || "Anonymous User",
+            email: backendData.customerEmail,
+            phone: backendData.customerPhone,
+            avatar: backendData.customerAvatar,
+            language: backendData.language || "en",
+          },
+          assignedAgent: backendData.agentId
+            ? {
+                id: backendData.agentId,
+                name: backendData.agentName || "Agent",
+                avatar: backendData.agentAvatar,
+              }
+            : undefined,
+          status: (backendData.status?.toLowerCase() as "waiting" | "active" | "resolved" | "closed") || "waiting",
+          priority: (() => {
+            // Handle numeric priority (2 = medium, 1 = low, 3 = high, 4 = urgent)
+            const priorityValue = backendData.priority;
+            if (typeof priorityValue === "number") {
+              switch (priorityValue) {
+                case 1:
+                  return "low";
+                case 2:
+                  return "medium";
+                case 3:
+                  return "high";
+                case 4:
+                  return "urgent";
+                default:
+                  return "medium";
+              }
+            }
+            return (priorityValue?.toLowerCase() as "low" | "medium" | "high" | "urgent") || "medium";
+          })(),
+          channel: (backendData.channel?.toLowerCase() as "web" | "mobile" | "email" | "phone") || "web",
+          subject: backendData.subject,
+          tags: backendData.tags || [],
+          messages: (backendData.messages || []).map((msg: BackendMessage) => ({
+            id: msg.id,
+            conversationId: msg.conversationId,
+            content: msg.content,
+            sender: (() => {
+              const senderType = msg.sender?.toLowerCase();
+              // Map 'bot' to 'system' to match our interface
+              if (senderType === "bot") return "system";
+              return senderType as "customer" | "agent" | "system";
+            })(),
+            timestamp: msg.createdAt || new Date().toISOString(),
+            type: (msg.type?.toLowerCase() as "text" | "file" | "image" | "system") || "text",
+            isRead: msg.isRead ?? false,
+            metadata: {
+              senderId: msg.senderId,
+              senderName: msg.senderName,
+            },
+          })),
+          createdAt: backendData.createdAt,
+          updatedAt: backendData.updatedAt,
+          waitTime: backendData.waitTime,
+          responseTime: backendData.responseTime,
+          rating: backendData.rating,
+          feedback: backendData.feedback,
+          unreadCount: (backendData.messages || []).filter((msg: BackendMessage) => !msg.isRead && msg.sender?.toLowerCase() !== "agent").length,
+        };
+
+        console.log("🔄 Live Agent: Transformed conversation:", transformedConversation);
+        console.log("🔄 Live Agent: Message count:", transformedConversation.messages.length);
+        console.log("🔄 Live Agent: Sample messages:", transformedConversation.messages.slice(0, 3));
+
+        const existingIndex = state.conversations.findIndex((c) => c.id === transformedConversation.id);
         if (existingIndex !== -1) {
-          state.conversations[existingIndex] = action.payload;
+          state.conversations[existingIndex] = transformedConversation;
         } else {
-          state.conversations.push(action.payload);
+          state.conversations.push(transformedConversation);
+        }
+
+        // Update active conversation if it matches
+        if (state.activeConversation?.id === transformedConversation.id) {
+          state.activeConversation = transformedConversation;
         }
       })
       .addCase(sendMessage.fulfilled, (state, action) => {
@@ -468,6 +576,7 @@ export const {
   updateFilters,
   setSearchQuery,
   markConversationAsRead,
+  markMessageAsRead,
   clearError,
   setConversationSignalRStatus,
   assignConversationRealtime,
