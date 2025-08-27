@@ -7,6 +7,8 @@ export interface Message {
   sender: "user" | "bot" | "agent";
   type: "text" | "file" | "image" | "typing";
   timestamp: string; // ISO string format for Redux serialization
+  isRead?: boolean;
+  readAt?: string;
   metadata?: {
     fileName?: string;
     fileSize?: number;
@@ -170,6 +172,13 @@ export const requestHumanAgent = createAsyncThunk("chat/requestHumanAgent", asyn
   return await apiClient.post(`/chat/chat/conversations/${conversationId}/escalate`);
 });
 
+export const markMessageAsReadAPI = createAsyncThunk(
+  "chat/markMessageAsReadAPI",
+  async ({ messageId }: { messageId: string }) => {
+    return await apiClient.put(`/chat/chat/messages/${messageId}/mark-read`);
+  }
+);
+
 const chatSlice = createSlice({
   name: "chat",
   initialState,
@@ -224,6 +233,15 @@ const chatSlice = createSlice({
     markAsRead: (state) => {
       state.unreadCount = 0;
       state.lastSeen = new Date().toISOString();
+    },
+    markMessageAsRead: (state, action: PayloadAction<{ messageId: string }>) => {
+      if (state.currentConversation) {
+        const message = state.currentConversation.messages.find(msg => msg.id === action.payload.messageId);
+        if (message) {
+          message.isRead = true;
+          message.readAt = new Date().toISOString();
+        }
+      }
     },
   },
   extraReducers: (builder) => {
@@ -309,6 +327,13 @@ const chatSlice = createSlice({
       .addCase(requestHumanAgent.rejected, (state, action) => {
         state.isLoading = false;
         state.error = action.error.message || "Failed to request human agent";
+      })
+      .addCase(markMessageAsReadAPI.fulfilled, () => {
+        // The API call succeeded, but the actual state update will come via SignalR
+        console.log("Message marked as read via API");
+      })
+      .addCase(markMessageAsReadAPI.rejected, (_, action) => {
+        console.error("Failed to mark message as read:", action.error.message);
       });
   },
 });
@@ -325,6 +350,7 @@ export const {
   assignAgent,
   clearError,
   markAsRead,
+  markMessageAsRead,
 } = chatSlice.actions;
 
 export default chatSlice.reducer;

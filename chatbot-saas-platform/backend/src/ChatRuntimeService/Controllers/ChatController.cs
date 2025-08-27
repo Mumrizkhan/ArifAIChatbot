@@ -433,6 +433,60 @@ public class ChatController : ControllerBase
             return StatusCode(500, new { message = "Internal server error" });
         }
     }
+
+    [HttpPut("messages/{messageId}/mark-read")]
+    [AllowAnonymous]
+    public async Task<IActionResult> MarkMessageAsRead(string messageId, [FromBody] MarkMessageAsReadRequest request)
+    {
+        try
+        {
+            var tenantId = _tenantService.GetCurrentTenantId();
+            _logger.LogInformation("Marking message as read: {MessageId}, Reader: {ReaderId}", messageId, request.ReaderId);
+
+            if (!Guid.TryParse(messageId, out var msgId))
+            {
+                return BadRequest(new { message = "Invalid message ID format" });
+            }
+
+            var message = await _context.Messages
+                .FirstOrDefaultAsync(m => m.Id == msgId && m.TenantId == tenantId);
+
+            if (message == null)
+            {
+                return NotFound(new { message = "Message not found" });
+            }
+
+            // Update message read status
+            message.IsRead = true;
+            message.ReadAt = DateTime.UtcNow;
+            message.UpdatedAt = DateTime.UtcNow;
+
+            await _context.SaveChangesAsync();
+
+            // Notify via SignalR that message was read
+            var readNotification = new
+            {
+                MessageId = messageId,
+                ConversationId = message.ConversationId.ToString(),
+                ReaderId = request.ReaderId,
+                ReaderType = request.ReaderType, // "customer" or "agent"
+                ReadAt = message.ReadAt?.ToString("O")
+            };
+
+            await _hubContext.Clients.Group($"conversation_{message.ConversationId}")
+                .SendAsync("MessageMarkedAsRead", readNotification);
+
+            _logger.LogInformation("Message {MessageId} marked as read by {ReaderType} {ReaderId}", 
+                messageId, request.ReaderType, request.ReaderId);
+
+            return Ok(new { success = true, message = "Message marked as read" });
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error marking message as read: {MessageId}", messageId);
+            return StatusCode(500, new { message = "Internal server error" });
+        }
+    }
 }
 
 public class CreateChatConversationRequest
@@ -458,4 +512,10 @@ public class SendAgentMessageRequest
     public string Content { get; set; } = string.Empty;
     public string Type { get; set; } = "text";
     public Guid? SenderId { get; set; }
+}
+
+public class MarkMessageAsReadRequest
+{
+    public string ReaderId { get; set; } = string.Empty; // User/Agent ID who read the message
+    public string ReaderType { get; set; } = string.Empty; // "customer" or "agent"
 }

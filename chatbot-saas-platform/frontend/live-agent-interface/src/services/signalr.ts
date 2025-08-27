@@ -78,6 +78,9 @@ class AgentSignalRService {
   private onConversationTransferred?: (transfer: ConversationTransfer) => void;
   private onConversationEscalated?: (escalation: ConversationEscalation) => void;
   private onMessageReceived?: (message: any) => void;
+  private onMessageMarkedAsRead?: (readInfo: { messageId: string; conversationId: string; readerId: string; readerType: string; readAt: string }) => void;
+  private onUserStartedTyping?: (typingInfo: { userId: string; userName: string; conversationId: string }) => void;
+  private onUserStoppedTyping?: (typingInfo: { userId: string; conversationId: string }) => void;
   private onAssistanceRequested?: (request: AssistanceRequest) => void;
   private onBroadcastMessage?: (message: BroadcastMessage) => void;
   private onAgentNotification?: (notification: AgentNotification) => void;
@@ -287,11 +290,40 @@ class AgentSignalRService {
       }
     });
 
-    this.connection.on("ReceiveMessage", (message: any) => {
+    this.connection.on("MessageReceived", (message: any) => {
       try {
         this.onMessageReceived?.(message);
       } catch (e) {
         console.error("onMessageReceived handler error:", e);
+      }
+    });
+
+    // Message read status event
+    this.connection.on("MessageMarkedAsRead", (readInfo: { messageId: string; conversationId: string; readerId: string; readerType: string; readAt: string }) => {
+      try {
+        console.log("Live Agent: MessageMarkedAsRead event received:", readInfo);
+        this.onMessageMarkedAsRead?.(readInfo);
+      } catch (e) {
+        console.error("onMessageMarkedAsRead handler error:", e);
+      }
+    });
+
+    // Typing indicator events
+    this.connection.on("UserStartedTyping", (typingInfo: { userId: string; userName: string; conversationId: string }) => {
+      try {
+        console.log("Live Agent: UserStartedTyping event received:", typingInfo);
+        this.onUserStartedTyping?.(typingInfo);
+      } catch (e) {
+        console.error("onUserStartedTyping handler error:", e);
+      }
+    });
+
+    this.connection.on("UserStoppedTyping", (typingInfo: { userId: string; conversationId: string }) => {
+      try {
+        console.log("Live Agent: UserStoppedTyping event received:", typingInfo);
+        this.onUserStoppedTyping?.(typingInfo);
+      } catch (e) {
+        console.error("onUserStoppedTyping handler error:", e);
       }
     });
 
@@ -383,6 +415,18 @@ class AgentSignalRService {
 
   setOnMessageReceived(handler: (message: any) => void): void {
     this.onMessageReceived = handler;
+  }
+
+  setOnMessageMarkedAsRead(handler: (readInfo: { messageId: string; conversationId: string; readerId: string; readerType: string; readAt: string }) => void): void {
+    this.onMessageMarkedAsRead = handler;
+  }
+
+  setOnUserStartedTyping(handler: (typingInfo: { userId: string; userName: string; conversationId: string }) => void): void {
+    this.onUserStartedTyping = handler;
+  }
+
+  setOnUserStoppedTyping(handler: (typingInfo: { userId: string; conversationId: string }) => void): void {
+    this.onUserStoppedTyping = handler;
   }
 
   setOnAssistanceRequested(handler: (request: AssistanceRequest) => void): void {
@@ -502,6 +546,32 @@ class AgentSignalRService {
       await this.connection.invoke("LeaveConversation", conversationId);
     } catch (error) {
       console.error("Failed to leave conversation:", error);
+    }
+  }
+
+  async startTyping(conversationId: string): Promise<void> {
+    if (!this.isConnected || !this.connection) {
+      console.warn("SignalR not connected, cannot send typing indicator");
+      return;
+    }
+
+    try {
+      await this.connection.invoke("StartTyping", conversationId);
+    } catch (error) {
+      console.error("Failed to send start typing indicator:", error);
+    }
+  }
+
+  async stopTyping(conversationId: string): Promise<void> {
+    if (!this.isConnected || !this.connection) {
+      console.warn("SignalR not connected, cannot send typing indicator");
+      return;
+    }
+
+    try {
+      await this.connection.invoke("StopTyping", conversationId);
+    } catch (error) {
+      console.error("Failed to send stop typing indicator:", error);
     }
   }
 

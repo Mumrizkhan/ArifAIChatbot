@@ -21,6 +21,7 @@ public class AgentsController : ControllerBase
     private readonly IAgentRoutingService _agentRoutingService;
     private readonly IQueueManagementService _queueManagementService;
     private readonly IHubContext<AgentHub> _hubContext;
+    private readonly IChatRuntimeIntegrationService _chatRuntimeIntegrationService;
     private readonly ILogger<AgentsController> _logger;
 
     public AgentsController(
@@ -30,6 +31,7 @@ public class AgentsController : ControllerBase
         IAgentRoutingService agentRoutingService,
         IQueueManagementService queueManagementService,
         IHubContext<AgentHub> hubContext,
+        IChatRuntimeIntegrationService chatRuntimeIntegrationService,
         ILogger<AgentsController> logger)
     {
         _agentManagementService = agentManagementService;
@@ -38,6 +40,7 @@ public class AgentsController : ControllerBase
         _agentRoutingService = agentRoutingService;
         _queueManagementService = queueManagementService;
         _hubContext = hubContext;
+        _chatRuntimeIntegrationService = chatRuntimeIntegrationService;
         _logger = logger;
     }
 
@@ -463,6 +466,41 @@ public class AgentsController : ControllerBase
             return StatusCode(500, new { message = "Internal server error" });
         }
     }
+
+    [HttpPut("messages/{messageId}/mark-read")]
+    public async Task<IActionResult> MarkMessageAsRead(string messageId, [FromBody] MarkMessageAsReadRequest request)
+    {
+        try
+        {
+            var tenantId = _tenantService.GetCurrentTenantId();
+            var agentId = _currentUserService.UserId;
+
+            _logger.LogInformation("Agent {AgentId} marking message as read: {MessageId}", agentId, messageId);
+
+            if (!Guid.TryParse(messageId, out var msgId))
+            {
+                return BadRequest(new { message = "Invalid message ID format" });
+            }
+
+            // Call ChatRuntimeService to mark message as read
+            var result = await _chatRuntimeIntegrationService.MarkMessageAsReadAsync(msgId, agentId?.ToString() ?? "agent", "agent");
+
+            if (result)
+            {
+                _logger.LogInformation("Message {MessageId} marked as read by agent {AgentId}", messageId, agentId);
+                return Ok(new { success = true, message = "Message marked as read" });
+            }
+            else
+            {
+                return BadRequest(new { message = "Failed to mark message as read" });
+            }
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error marking message as read: {MessageId}", messageId);
+            return StatusCode(500, new { message = "Internal server error" });
+        }
+    }
 }
 
 public class EscalationNotificationRequest
@@ -472,6 +510,12 @@ public class EscalationNotificationRequest
     public string? CustomerEmail { get; set; }
     public string? Subject { get; set; }
     public string? Language { get; set; }
+}
+
+public class MarkMessageAsReadRequest
+{
+    public string ReaderId { get; set; } = string.Empty; // User/Agent ID who read the message
+    public string ReaderType { get; set; } = string.Empty; // "customer" or "agent"
 }
 
 
