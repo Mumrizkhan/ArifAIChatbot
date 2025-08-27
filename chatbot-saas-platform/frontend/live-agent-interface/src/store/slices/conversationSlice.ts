@@ -98,7 +98,7 @@ const initialState: ConversationState = {
 
 const transformConversationAssignment = (assignment: any): Conversation => {
   console.log("Transforming conversation assignment:", assignment);
-  
+
   return {
     id: assignment.conversationId || assignment.ConversationId,
     customer: {
@@ -173,6 +173,7 @@ export const fetchConversation = createAsyncThunk("conversations/fetchOne", asyn
   if (!response.ok) {
     throw new Error("Failed to fetch conversation");
   }
+  console.log("Fetched conversation:", await response.json());
 
   return response.json();
 });

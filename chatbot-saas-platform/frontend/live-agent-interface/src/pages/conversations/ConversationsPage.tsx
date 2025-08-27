@@ -55,7 +55,7 @@ const ConversationsPage = () => {
         if (assignment.conversationId || assignment.ConversationId) {
           const convId = assignment.conversationId || assignment.ConversationId;
           dispatch(fetchConversation(convId));
-          
+
           // Automatically join the conversation group to receive real-time events
           if (agentSignalRService.getConnectionStatus()) {
             console.log("Auto-joining conversation group after assignment:", convId);
@@ -73,7 +73,7 @@ const ConversationsPage = () => {
         console.log("🔥 Live Agent: Message sender:", messageDto.sender);
         console.log("🔥 Live Agent: Message conversation ID:", messageDto.conversationId);
         console.log("🔥 Live Agent: Current conversation ID:", conversationId);
-        
+
         // Transform the message format to match the live agent interface expectations
         const transformedMessage = {
           id: messageDto.id,
@@ -83,12 +83,21 @@ const ConversationsPage = () => {
           timestamp: messageDto.createdAt || new Date().toISOString(), // Use createdAt as timestamp
           type: messageDto.type?.toLowerCase() as "text" | "file" | "image" | "system", // Convert to lowercase
           isRead: false, // New messages are unread by default
-          metadata: {
-            senderId: messageDto.senderId,
-            senderName: messageDto.senderName,
-          }
+          // metadata is omitted or mapped only if type is file/image
+          ...(messageDto.type?.toLowerCase() === "file" && {
+            metadata: {
+              fileName: messageDto.fileName,
+              fileSize: messageDto.fileSize,
+              fileType: messageDto.fileType,
+            },
+          }),
+          ...(messageDto.type?.toLowerCase() === "image" && {
+            metadata: {
+              imageUrl: messageDto.imageUrl,
+            },
+          }),
         };
-        
+
         console.log("✅ Live Agent: Transformed message:", transformedMessage);
         dispatch(addMessage(transformedMessage));
       });
