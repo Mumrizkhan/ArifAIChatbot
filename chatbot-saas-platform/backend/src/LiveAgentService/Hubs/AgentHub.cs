@@ -150,6 +150,76 @@ public class AgentHub : Hub
         }
     }
 
+    public async Task StartTyping(string conversationId)
+    {
+        try
+        {
+            var agentId = _currentUserService.UserId;
+            var typingInfo = new
+            {
+                UserId = agentId,
+                UserName = "Agent", // Could be enhanced with actual agent name
+                ConversationId = conversationId
+            };
+
+            await Clients.OthersInGroup($"conversation_{conversationId}")
+                .SendAsync("UserStartedTyping", typingInfo);
+
+            _logger.LogInformation($"Agent {agentId} started typing in conversation {conversationId}");
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, $"Error broadcasting agent typing status for conversation {conversationId}");
+        }
+    }
+
+    public async Task StopTyping(string conversationId)
+    {
+        try
+        {
+            var agentId = _currentUserService.UserId;
+            var typingInfo = new
+            {
+                UserId = agentId,
+                ConversationId = conversationId
+            };
+
+            await Clients.OthersInGroup($"conversation_{conversationId}")
+                .SendAsync("UserStoppedTyping", typingInfo);
+
+            _logger.LogInformation($"Agent {agentId} stopped typing in conversation {conversationId}");
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, $"Error broadcasting agent stop typing status for conversation {conversationId}");
+        }
+    }
+
+    public async Task MarkMessageAsRead(string messageId, string conversationId)
+    {
+        try
+        {
+            var agentId = _currentUserService.UserId;
+            var readNotification = new
+            {
+                MessageId = messageId,
+                ConversationId = conversationId,
+                ReaderId = agentId?.ToString(),
+                ReaderType = "agent",
+                ReadAt = DateTime.UtcNow.ToString("O")
+            };
+
+            await Clients.OthersInGroup($"conversation_{conversationId}")
+                .SendAsync("MessageMarkedAsRead", readNotification);
+
+            _logger.LogInformation($"Agent {agentId} marked message {messageId} as read in conversation {conversationId}");
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, $"Error broadcasting agent message read status for message {messageId}");
+        }
+    }
+
     public async Task UpdateAgentStatus(string status)
     {
         try

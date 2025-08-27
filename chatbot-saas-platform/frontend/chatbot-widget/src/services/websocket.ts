@@ -1,6 +1,6 @@
 import { HubConnection, HubConnectionBuilder, HubConnectionState, LogLevel } from "@microsoft/signalr";
 import { store } from "../store/store";
-import { addMessage, setTyping, setConnectionStatus, assignAgent, updateConversationStatus } from "../store/slices/chatSlice";
+import { addMessage, setTyping, setConnectionStatus, assignAgent, updateConversationStatus, markMessageAsRead } from "../store/slices/chatSlice";
 import { ensureISOString } from "../utils/timestamp";
 
 class SignalRService {
@@ -286,6 +286,28 @@ class SignalRService {
         }
       } else {
         console.log("SignalR: Ignoring assignment for different conversation:", assignmentConversationId);
+      }
+    });
+
+    // Handler for message read status updates
+    this.connection.on("MessageMarkedAsRead", (readInfo) => {
+      console.log("🔄 SignalR: MessageMarkedAsRead event received:", readInfo);
+      console.log("🔄 SignalR: Message ID:", readInfo.messageId);
+      console.log("🔄 SignalR: Reader Type:", readInfo.readerType);
+      console.log("🔄 SignalR: Current conversation ID:", this.currentConversationId);
+      
+      // Only process read notifications for the current conversation
+      if (!this.currentConversationId || readInfo.conversationId === this.currentConversationId) {
+        console.log("✅ SignalR: Processing read notification for current conversation");
+        
+        // Update the message read status in the store
+        store.dispatch(markMessageAsRead({
+          messageId: readInfo.messageId
+        }));
+        
+        console.log("✅ SignalR: Message read status updated in store");
+      } else {
+        console.log("❌ SignalR: Ignoring read notification for different conversation:", readInfo.conversationId);
       }
     });
 

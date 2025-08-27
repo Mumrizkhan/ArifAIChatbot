@@ -206,6 +206,30 @@ public class ChatHub : Hub
         }
     }
 
+    public async Task MarkMessageAsRead(string messageId, string conversationId)
+    {
+        try
+        {
+            var readNotification = new
+            {
+                MessageId = messageId,
+                ConversationId = conversationId,
+                ReaderId = _currentUserService.UserId?.ToString(),
+                ReaderType = "customer",
+                ReadAt = DateTime.UtcNow.ToString("O")
+            };
+
+            await Clients.OthersInGroup($"conversation_{conversationId}")
+                .SendAsync("MessageMarkedAsRead", readNotification);
+
+            _logger.LogInformation($"User {_currentUserService.UserId} marked message {messageId} as read in conversation {conversationId}");
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, $"Error broadcasting message read status for message {messageId}");
+        }
+    }
+
     public override async Task OnConnectedAsync()
     {
         _logger.LogInformation($"User {_currentUserService.UserId} connected to chat hub");

@@ -9,6 +9,7 @@ public interface IChatRuntimeIntegrationService
     Task<bool> SendMessageAsync(Guid conversationId, string content, string type = "text", Guid? senderId = null);
     Task<ConversationDetailsDto?> GetConversationDetailsAsync(Guid conversationId);
     Task<List<MessageDto>> GetConversationMessagesAsync(Guid conversationId);
+    Task<bool> MarkMessageAsReadAsync(Guid messageId, string readerId, string readerType);
 }
 
 public class ChatRuntimeIntegrationService : IChatRuntimeIntegrationService
@@ -127,6 +128,41 @@ public class ChatRuntimeIntegrationService : IChatRuntimeIntegrationService
         {
             _logger.LogError(ex, "Error getting messages for conversation {ConversationId}", conversationId);
             return new List<MessageDto>();
+        }
+    }
+
+    public async Task<bool> MarkMessageAsReadAsync(Guid messageId, string readerId, string readerType)
+    {
+        try
+        {
+            SetTenantHeader();
+            
+            var request = new
+            {
+                ReaderId = readerId,
+                ReaderType = readerType
+            };
+            
+            var json = JsonSerializer.Serialize(request);
+            var content = new StringContent(json, System.Text.Encoding.UTF8, "application/json");
+            
+            var response = await _httpClient.PutAsync($"{_chatRuntimeServiceUrl}/api/chat/messages/{messageId}/mark-read", content);
+            
+            if (response.IsSuccessStatusCode)
+            {
+                _logger.LogInformation("Successfully marked message {MessageId} as read by {ReaderType} {ReaderId}", 
+                    messageId, readerType, readerId);
+                return true;
+            }
+            
+            _logger.LogWarning("Failed to mark message {MessageId} as read. Status: {StatusCode}", 
+                messageId, response.StatusCode);
+            return false;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error marking message {MessageId} as read", messageId);
+            return false;
         }
     }
 }

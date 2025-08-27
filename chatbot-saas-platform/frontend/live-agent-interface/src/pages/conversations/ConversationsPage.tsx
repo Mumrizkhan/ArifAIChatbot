@@ -28,11 +28,12 @@ import { Textarea } from "../../components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../../components/ui/select";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "../../components/ui/dialog";
 import { MessageSquare, Send, Phone, Video, MoreHorizontal, Search, Filter, Paperclip, Smile } from "lucide-react";
+import { TypingIndicator } from "../../components/TypingIndicator";
 
 const ConversationsPage = () => {
   const { t } = useTranslation();
   const dispatch = useDispatch<AppDispatch>();
-  const { conversations, isLoading, isSignalRConnected } = useSelector((state: RootState) => state.conversations);
+  const { conversations, isLoading, isSignalRConnected, typingUsers } = useSelector((state: RootState) => state.conversations);
   const { conversationId } = useSelector((state: RootState) => state.selectedConversation);
   const { currentAgent } = useSelector((state: RootState) => state.agent);
 
@@ -41,6 +42,7 @@ const ConversationsPage = () => {
   const [messageText, setMessageText] = useState("");
   const [isTransferDialogOpen, setIsTransferDialogOpen] = useState(false);
   const [previousConversationId, setPreviousConversationId] = useState<string | null>(null);
+  const [typingTimeout, setTypingTimeout] = useState<NodeJS.Timeout | null>(null);
 
   // Get the actual selected conversation object
   const selectedConversation = conversations?.find((conv) => conv.id === conversationId) || null;
@@ -85,15 +87,6 @@ const ConversationsPage = () => {
           timestamp: messageDto.createdAt || new Date().toISOString(), // Use createdAt as timestamp
           type: messageDto.type?.toLowerCase() as "text" | "file" | "image" | "system", // Convert to lowercase
           isRead: false, // New messages are unread by default
-          metadata:
-            messageDto.type?.toLowerCase() === "file" || messageDto.type?.toLowerCase() === "image"
-              ? {
-                  fileName: messageDto.fileName,
-                  fileSize: messageDto.fileSize,
-                  fileType: messageDto.fileType,
-                  imageUrl: messageDto.imageUrl,
-                }
-              : {},
         };
 
         console.log("✅ Live Agent: Transformed message:", transformedMessage);
@@ -165,6 +158,15 @@ const ConversationsPage = () => {
 
   const handleSendMessage = () => {
     if (messageText.trim() && selectedConversation) {
+      // Stop typing indicator
+      if (typingTimeout) {
+        clearTimeout(typingTimeout);
+        setTypingTimeout(null);
+      }
+      if (conversationId) {
+        agentSignalRService.stopTyping(conversationId);
+      }
+
       dispatch(
         sendMessage({
           conversationId: selectedConversation.id,
@@ -189,6 +191,30 @@ const ConversationsPage = () => {
   const handleTransferConversation = (conversationId: string, targetAgentId: string, reason: string) => {
     if (isSignalRConnected) {
       agentSignalRService.transferConversation(conversationId, targetAgentId, reason);
+    }
+  };
+
+  const handleTyping = (text: string) => {
+    setMessageText(text);
+
+    if (conversationId) {
+      // Send typing indicator when user starts typing
+      if (text.length > 0) {
+        agentSignalRService.startTyping(conversationId);
+      }
+
+      // Clear existing timeout
+      if (typingTimeout) {
+        clearTimeout(typingTimeout);
+      }
+
+      // Set timeout to stop typing after 3 seconds of inactivity
+      const timeout = setTimeout(() => {
+        agentSignalRService.stopTyping(conversationId);
+        setTypingTimeout(null);
+      }, 3000);
+
+      setTypingTimeout(timeout);
     }
   };
 
@@ -380,14 +406,28 @@ const ConversationsPage = () => {
                             <p className="font-medium truncate">{conversation.customer?.name || t("conversations.anonymous")}</p>
                             <div className={`w-2 h-2 rounded-full ${getPriorityColor(conversation.priority || "low")}`} />
                           </div>
-                          <p className="text-sm text-muted-foreground truncate">
-                            {conversation.messages?.length > 0
-                              ? conversation.messages[conversation.messages.length - 1]?.content
-                              : t("conversations.noMessagesYet")}
-                          </p>
-                          <p className="text-sm text-muted-foreground truncate">
-                            {conversation.lastMessage?.content || t("conversations.noMessagesYet")}
-                          </p>
+                          {/* Show two most recent messages or "no messages yet" */}
+                          {conversation.messages?.length > 0 ? (
+                            <div className="space-y-1">
+                              {conversation.messages.slice(-2).map((message: any, index: number) => (
+                                <p key={message.id || index} className="text-sm text-muted-foreground truncate">
+                                  <span className="font-medium">
+                                    {message.sender === "customer"
+                                      ? conversation.customer?.name || "Customer"
+                                      : message.sender === "agent"
+                                      ? "Agent"
+                                      : message.sender === "bot"
+                                      ? "Bot"
+                                      : "System"}
+                                    :
+                                  </span>{" "}
+                                  {message.content && message.content.length > 50 ? message.content.substring(0, 30) + "..." : message.content}
+                                </p>
+                              ))}
+                            </div>
+                          ) : (
+                            <p className="text-sm text-muted-foreground truncate">{t("conversations.noMessagesYet")}</p>
+                          )}
                           <div className="flex items-center space-x-2 mt-1">
                             {getStatusBadge(conversation.status)}
                             {/* <span>{new Date(conversation.updatedAt).toLocaleTimeString()}</span> */}
@@ -503,6 +543,9 @@ const ConversationsPage = () => {
                           </div>
                         </div>
                       ))}
+
+                      {/* Typing Indicator */}
+                      {conversationId && typingUsers[conversationId] && <TypingIndicator userName={typingUsers[conversationId].userName} />}
                     </>
                   ) : (
                     <div className="text-center py-8">
@@ -520,7 +563,7 @@ const ConversationsPage = () => {
                       <Textarea
                         placeholder={t("conversations.typeMessage")}
                         value={messageText}
-                        onChange={(e) => setMessageText(e.target.value)}
+                        onChange={(e) => handleTyping(e.target.value)}
                         rows={2}
                         onKeyPress={(e) => {
                           if (e.key === "Enter" && !e.shiftKey) {
