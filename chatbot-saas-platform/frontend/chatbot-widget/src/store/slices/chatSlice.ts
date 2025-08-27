@@ -275,11 +275,8 @@ const chatSlice = createSlice({
         // Remove the pending bot message
         state.currentConversation.messages = state.currentConversation.messages.filter((msg) => !msg.id.startsWith("pending-bot-"));
 
-        // Add the actual bot message
-        if (body.botMessage) {
-          const botMsg = normalizeApiMessage(body.botMessage, "bot");
-          state.currentConversation.messages.push(botMsg);
-        }
+        // Note: Bot message will be added via SignalR ReceiveMessage event to prevent duplicates
+        // No need to add bot message here as it will come through real-time events
       })
       .addCase(sendMessage.rejected, (state, action) => {
         state.isLoading = false;
@@ -354,26 +351,3 @@ export const {
 } = chatSlice.actions;
 
 export default chatSlice.reducer;
-
-// Helper to normalize API messages into your Message shape
-const mapSender = (s: unknown, fallback: "user" | "bot" | "agent"): Message["sender"] => {
-  const v = String(s ?? "").toLowerCase();
-  if (v === "bot") return "bot";
-  if (v === "customer" || v === "user") return "user";
-  if (v === "agent" || v === "human" || v === "support") return "agent";
-  return fallback;
-};
-
-const normalizeApiMessage = (apiMsg: unknown, senderFallback: "user" | "bot" | "agent"): Message => {
-  const msg = apiMsg as Record<string, unknown>;
-  // Use utility to ensure timestamp is always an ISO string
-  const timestamp = ensureISOString(msg.createdAt ?? msg.timestamp);
-
-  return {
-    id: String(msg.id || `msg-${Date.now()}`),
-    content: String(msg.content || ""),
-    type: (msg.type || "text").toString().toLowerCase() as Message["type"], // "Text" -> "text"
-    sender: mapSender(msg.sender, senderFallback), // "Customer"/"Bot" -> "user"/"bot"
-    timestamp: timestamp,
-  };
-};

@@ -28,11 +28,12 @@ import { Textarea } from "../../components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../../components/ui/select";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "../../components/ui/dialog";
 import { MessageSquare, Send, Phone, Video, MoreHorizontal, Search, Filter, Paperclip, Smile } from "lucide-react";
+import { TypingIndicator } from "../../components/TypingIndicator";
 
 const ConversationsPage = () => {
   const { t } = useTranslation();
   const dispatch = useDispatch<AppDispatch>();
-  const { conversations, isLoading, isSignalRConnected } = useSelector((state: RootState) => state.conversations);
+  const { conversations, isLoading, isSignalRConnected, typingUsers } = useSelector((state: RootState) => state.conversations);
   const { conversationId } = useSelector((state: RootState) => state.selectedConversation);
   const { currentAgent } = useSelector((state: RootState) => state.agent);
 
@@ -41,6 +42,7 @@ const ConversationsPage = () => {
   const [messageText, setMessageText] = useState("");
   const [isTransferDialogOpen, setIsTransferDialogOpen] = useState(false);
   const [previousConversationId, setPreviousConversationId] = useState<string | null>(null);
+  const [typingTimeout, setTypingTimeout] = useState<NodeJS.Timeout | null>(null);
 
   // Get the actual selected conversation object
   const selectedConversation = conversations?.find((conv) => conv.id === conversationId) || null;
@@ -158,6 +160,15 @@ const ConversationsPage = () => {
 
   const handleSendMessage = () => {
     if (messageText.trim() && selectedConversation) {
+      // Stop typing indicator
+      if (typingTimeout) {
+        clearTimeout(typingTimeout);
+        setTypingTimeout(null);
+      }
+      if (conversationId) {
+        agentSignalRService.stopTyping(conversationId);
+      }
+      
       dispatch(
         sendMessage({
           conversationId: selectedConversation.id,
@@ -182,6 +193,30 @@ const ConversationsPage = () => {
   const handleTransferConversation = (conversationId: string, targetAgentId: string, reason: string) => {
     if (isSignalRConnected) {
       agentSignalRService.transferConversation(conversationId, targetAgentId, reason);
+    }
+  };
+
+  const handleTyping = (text: string) => {
+    setMessageText(text);
+    
+    if (conversationId) {
+      // Send typing indicator when user starts typing
+      if (text.length > 0) {
+        agentSignalRService.startTyping(conversationId);
+      }
+      
+      // Clear existing timeout
+      if (typingTimeout) {
+        clearTimeout(typingTimeout);
+      }
+      
+      // Set timeout to stop typing after 3 seconds of inactivity
+      const timeout = setTimeout(() => {
+        agentSignalRService.stopTyping(conversationId);
+        setTypingTimeout(null);
+      }, 3000);
+      
+      setTypingTimeout(timeout);
     }
   };
 
@@ -496,6 +531,11 @@ const ConversationsPage = () => {
                           </div>
                         </div>
                       ))}
+                      
+                      {/* Typing Indicator */}
+                      {conversationId && typingUsers[conversationId] && (
+                        <TypingIndicator userName={typingUsers[conversationId].userName} />
+                      )}
                     </>
                   ) : (
                     <div className="text-center py-8">
@@ -513,7 +553,7 @@ const ConversationsPage = () => {
                       <Textarea
                         placeholder={t("conversations.typeMessage")}
                         value={messageText}
-                        onChange={(e) => setMessageText(e.target.value)}
+                        onChange={(e) => handleTyping(e.target.value)}
                         rows={2}
                         onKeyPress={(e) => {
                           if (e.key === "Enter" && !e.shiftKey) {
