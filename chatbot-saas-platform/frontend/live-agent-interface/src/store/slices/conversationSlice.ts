@@ -318,14 +318,22 @@ const conversationSlice = createSlice({
     addMessage: (state, action: PayloadAction<Message>) => {
       const conversation = state.conversations.find((c) => c.id === action.payload.conversationId);
       if (conversation) {
-        conversation.messages.push(action.payload);
-        conversation.updatedAt = new Date().toISOString();
-        if (state.activeConversation?.id !== conversation.id) {
-          conversation.unreadCount += 1;
+        // Check if message already exists to prevent duplicates
+        const existingMessage = conversation.messages.find((m) => m.id === action.payload.id);
+        if (!existingMessage) {
+          conversation.messages.push(action.payload);
+          conversation.updatedAt = new Date().toISOString();
+          if (state.activeConversation?.id !== conversation.id) {
+            conversation.unreadCount += 1;
+          }
         }
       }
       if (state.activeConversation?.id === action.payload.conversationId) {
-        state.activeConversation.messages.push(action.payload);
+        // Check if message already exists in active conversation to prevent duplicates
+        const existingActiveMessage = state.activeConversation.messages.find((m) => m.id === action.payload.id);
+        if (!existingActiveMessage) {
+          state.activeConversation.messages.push(action.payload);
+        }
       }
     },
     updateMessage: (state, action: PayloadAction<Message>) => {

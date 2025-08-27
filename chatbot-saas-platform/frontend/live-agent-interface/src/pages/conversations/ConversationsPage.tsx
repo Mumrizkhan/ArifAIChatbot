@@ -119,6 +119,19 @@ const ConversationsPage = () => {
         dispatch(markMessageAsRead({ messageId: readInfo.messageId }));
       });
     }
+
+    // Cleanup function to prevent duplicate handlers
+    return () => {
+      if (agentSignalRService.getConnectionStatus()) {
+        // Clear handlers to prevent duplicates on re-render
+        agentSignalRService.setOnConversationAssigned(() => {});
+        agentSignalRService.setOnConversationTransferred(() => {});
+        agentSignalRService.setOnMessageReceived(() => {});
+        agentSignalRService.setOnUserStartedTyping(() => {});
+        agentSignalRService.setOnUserStoppedTyping(() => {});
+        agentSignalRService.setOnMessageMarkedAsRead(() => {});
+      }
+    };
   }, [dispatch]); // Remove conversationId from dependency array to prevent re-fetching all conversations
 
   // Effect to fetch conversation details when a conversation is selected

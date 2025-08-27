@@ -205,7 +205,6 @@ public class ConversationsController : ControllerBase
                 return Unauthorized();
             }
 
-
             _logger.LogInformation("Updating conversation {ConversationId} status to {Status}", conversationId, request.Status);
 
             // Update the conversation status in the database
@@ -214,6 +213,13 @@ public class ConversationsController : ControllerBase
             if (!updated)
             {
                 return NotFound(new { message = "Conversation not found or status update failed" });
+            }
+
+            // If the status is resolved, remove the conversation from the agent queue
+            if (request.Status.Equals("Resolved", StringComparison.OrdinalIgnoreCase))
+            {
+                await _queueManagementService.RemoveFromQueueAsync(conversationId);
+                _logger.LogInformation("Conversation {ConversationId} removed from the agent queue as it is resolved", conversationId);
             }
 
             return Ok(new { conversationId, status = request.Status });
