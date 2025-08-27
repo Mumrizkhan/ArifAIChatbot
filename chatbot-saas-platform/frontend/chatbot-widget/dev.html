@@ -139,14 +139,14 @@
                 addResult('Initialization', e.message || e, false);
                 console.error(e);
             }
-            
+
             // Expose SignalR testing method globally
             window.testSignalR = async (content = "Test message") => {
                 try {
                     const { signalRService } = await import('./src/services/websocket.ts');
                     const state = widget.store.getState();
                     const conversationId = state.chat?.currentConversation?.id;
-                    
+
                     if (conversationId) {
                         console.log('🧪 Testing SignalR with conversation:', conversationId);
                         const result = await signalRService.sendTestMessage(conversationId, content);

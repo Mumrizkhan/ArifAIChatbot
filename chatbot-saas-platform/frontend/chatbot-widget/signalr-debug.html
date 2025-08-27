@@ -1,35 +1,86 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SignalR Debug Console</title>
     <style>
-        body { font-family: Arial, sans-serif; margin: 20px; }
-        .debug-section { margin: 20px 0; padding: 15px; border: 1px solid #ccc; border-radius: 5px; }
-        .debug-section h3 { margin-top: 0; color: #333; }
-        button { margin: 5px; padding: 10px 15px; background: #007cba; color: white; border: none; border-radius: 3px; cursor: pointer; }
-        button:hover { background: #005a87; }
-        input { margin: 5px; padding: 8px; border: 1px solid #ccc; border-radius: 3px; }
-        #debugOutput { 
-            height: 400px; 
-            overflow-y: auto; 
-            background: #f5f5f5; 
-            padding: 10px; 
-            font-family: monospace; 
-            font-size: 12px; 
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+
+        .debug-section {
+            margin: 20px 0;
+            padding: 15px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+
+        .debug-section h3 {
+            margin-top: 0;
+            color: #333;
+        }
+
+        button {
+            margin: 5px;
+            padding: 10px 15px;
+            background: #007cba;
+            color: white;
+            border: none;
+            border-radius: 3px;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background: #005a87;
+        }
+
+        input {
+            margin: 5px;
+            padding: 8px;
+            border: 1px solid #ccc;
+            border-radius: 3px;
+        }
+
+        #debugOutput {
+            height: 400px;
+            overflow-y: auto;
+            background: #f5f5f5;
+            padding: 10px;
+            font-family: monospace;
+            font-size: 12px;
             border: 1px solid #ccc;
             white-space: pre-wrap;
         }
-        .status { padding: 5px 10px; border-radius: 3px; margin: 5px 0; }
-        .status.connected { background: #d4edda; color: #155724; }
-        .status.disconnected { background: #f8d7da; color: #721c24; }
-        .status.connecting { background: #fff3cd; color: #856404; }
+
+        .status {
+            padding: 5px 10px;
+            border-radius: 3px;
+            margin: 5px 0;
+        }
+
+        .status.connected {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .status.disconnected {
+            background: #f8d7da;
+            color: #721c24;
+        }
+
+        .status.connecting {
+            background: #fff3cd;
+            color: #856404;
+        }
     </style>
 </head>
+
 <body>
     <h1>SignalR Debug Console</h1>
-    
+
     <div class="debug-section">
         <h3>Connection Status</h3>
         <div id="connectionStatus" class="status disconnected">Disconnected</div>
@@ -75,7 +126,7 @@
                     <strong>Current Conversation:</strong> ${info.currentConversationId || 'None'}<br>
                     <strong>Reconnect Attempts:</strong> ${info.reconnectAttempts}
                 `;
-                
+
                 if (info.connectionState === 'Connected') {
                     connectionStatus.textContent = 'Connected';
                     connectionStatus.className = 'status connected';
@@ -98,9 +149,9 @@
                 log('❌ Please enter a conversation ID');
                 return;
             }
-            
+
             log(`🧪 Testing join conversation: ${conversationId}`);
-            
+
             if (window.signalRDebug) {
                 // Note: This would need to be implemented differently as join is part of connect flow
                 log('Join conversation test would require full reconnection with conversation ID');
@@ -115,9 +166,9 @@
                 log('❌ Please enter a conversation ID');
                 return;
             }
-            
+
             log(`🧪 Testing SignalR events for conversation: ${conversationId}`);
-            
+
             if (window.signalRDebug) {
                 window.signalRDebug.testEvents(conversationId)
                     .then(() => log('✅ SignalR event tests completed'))
@@ -148,7 +199,7 @@
 
         // Monitor console for SignalR events
         const originalConsoleLog = console.log;
-        console.log = function(...args) {
+        console.log = function (...args) {
             const message = args.join(' ');
             if (message.includes('SignalR:') || message.includes('🔥') || message.includes('✅') || message.includes('❌')) {
                 log(message);
@@ -157,7 +208,7 @@
         };
 
         const originalConsoleError = console.error;
-        console.error = function(...args) {
+        console.error = function (...args) {
             const message = args.join(' ');
             log(`❌ ERROR: ${message}`);
             originalConsoleError.apply(console, args);
@@ -172,4 +223,5 @@
         log('💡 Use the manual test buttons to debug specific functionality');
     </script>
 </body>
+
 </html>

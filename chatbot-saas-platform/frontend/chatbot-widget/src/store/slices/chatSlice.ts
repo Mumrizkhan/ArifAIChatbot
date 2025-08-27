@@ -91,7 +91,7 @@ export const sendMessage = createAsyncThunk(
     try {
       const { chat } = getState() as RootState;
       const conversationId = chat.currentConversation?.id;
-      
+
       // Conversation should already exist when chat is opened
       if (!conversationId) {
         throw new Error("No active conversation found. Please open the chat widget first.");
@@ -113,7 +113,7 @@ export const sendMessage = createAsyncThunk(
 
 export const startConversation = createAsyncThunk("chat/startConversation", async (tenantId: string, { getState }) => {
   console.log("🚀 Starting conversation for tenant:", tenantId);
-  
+
   const data = await apiClient.post("/chat/chat/conversations", {
     tenantId,
     customerName: "Anonymous User",
@@ -134,7 +134,7 @@ export const startConversation = createAsyncThunk("chat/startConversation", asyn
     const { signalRService } = await import("../../services/websocket");
     const state = getState() as any;
     const authToken = state.config?.widget?.authToken;
-    
+
     if (authToken) {
       // First establish SignalR connection if not already connected
       if (!signalRService.isConnected()) {
@@ -193,11 +193,10 @@ const chatSlice = createSlice({
     },
     addMessage: (state, action: PayloadAction<Message>) => {
       if (state.currentConversation) {
-        state.currentConversation.messages.push(action.payload);
-      } else {
-        // If no conversation exists, we should not create a temp conversation
-        // Instead, we'll create a real conversation through the API
-        console.warn("No active conversation found. A new conversation should be created through the API first.");
+        const exists = state.currentConversation.messages.some((msg) => msg.id === action.payload.id);
+        if (!exists) {
+          state.currentConversation.messages.push(action.payload);
+        }
       }
     },
     setTyping: (state, action: PayloadAction<{ isTyping: boolean; user?: string }>) => {
@@ -283,7 +282,7 @@ const chatSlice = createSlice({
         // Preserve existing messages if they already exist
         state.currentConversation = {
           id: conv.id || `conv-${Date.now()}`,
-          status: conv.status as Conversation["status"] || "active",
+          status: (conv.status as Conversation["status"]) || "active",
           startedAt: ensureISOString(conv.startedAt),
           messages: state.currentConversation?.messages.length
             ? state.currentConversation.messages
