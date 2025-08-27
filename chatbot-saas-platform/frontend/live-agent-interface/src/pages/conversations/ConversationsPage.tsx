@@ -404,14 +404,31 @@ const ConversationsPage = () => {
                             <p className="font-medium truncate">{conversation.customer?.name || t("conversations.anonymous")}</p>
                             <div className={`w-2 h-2 rounded-full ${getPriorityColor(conversation.priority || "low")}`} />
                           </div>
-                          <p className="text-sm text-muted-foreground truncate">
-                            {conversation.messages?.length > 0
-                              ? conversation.messages[conversation.messages.length - 1]?.content
-                              : t("conversations.noMessagesYet")}
-                          </p>
-                          <p className="text-sm text-muted-foreground truncate">
-                            {conversation.lastMessage?.content || t("conversations.noMessagesYet")}
-                          </p>
+                          {/* Show two most recent messages or "no messages yet" */}
+                          {conversation.messages?.length > 0 ? (
+                            <div className="space-y-1">
+                              {conversation.messages.slice(-2).map((message: any, index: number) => (
+                                <p key={message.id || index} className="text-sm text-muted-foreground truncate">
+                                  <span className="font-medium">
+                                    {message.sender === 'customer' 
+                                      ? conversation.customer?.name || 'Customer'
+                                      : message.sender === 'agent' 
+                                        ? 'Agent'
+                                        : message.sender === 'bot'
+                                          ? 'Bot'
+                                          : 'System'
+                                    }:
+                                  </span> {message.content && message.content.length > 50 
+                                    ? message.content.substring(0, 30) + '...'
+                                    : message.content}
+                                </p>
+                              ))}
+                            </div>
+                          ) : (
+                            <p className="text-sm text-muted-foreground truncate">
+                              {t("conversations.noMessagesYet")}
+                            </p>
+                          )}
                           <div className="flex items-center space-x-2 mt-1">
                             {getStatusBadge(conversation.status)}
                             {/* <span>{new Date(conversation.updatedAt).toLocaleTimeString()}</span> */}
