@@ -3,17 +3,21 @@ import { useDispatch, useSelector } from "react-redux";
 import { useTranslation } from "react-i18next";
 import { AppDispatch, RootState } from "../../store/store";
 import { fetchConversations } from "../../store/slices/conversationSlice";
-import { fetchAgentProfile, fetchAgentStats, updateAgentStatusRealtime } from "../../store/slices/agentSlice";
+import { fetchAgentProfile, updateAgentStatusRealtime } from "../../store/slices/agentSlice";
 import { 
   fetchDashboardStats, 
   fetchPerformanceData, 
   fetchConversationMetrics,
   fetchAgentMetrics,
+  fetchAgentStats,
+  fetchAgentPerformance,
   fetchRealtimeAnalytics,
   selectDashboardStats,
   selectPerformanceData,
   selectConversationMetrics,
   selectAgentMetrics,
+  selectAgentStats,
+  selectAgentPerformance,
   selectRealtimeAnalytics,
   selectAnalyticsLoading,
   selectAnalyticsError
@@ -33,13 +37,15 @@ const DashboardPage = () => {
 
   // Fetch data from Redux store
   const { conversations, isLoading: conversationsLoading } = useSelector((state: RootState) => state.conversations);
-  const { stats: agentStats, isSignalRConnected } = useSelector((state: RootState) => state.agent);
+  const { stats: agentStatsFromSlice, isSignalRConnected } = useSelector((state: RootState) => state.agent);
   const { user, token } = useSelector((state: RootState) => state.auth);
   
   const dashboardStats = useSelector(selectDashboardStats);
   const performanceData = useSelector(selectPerformanceData);
   const conversationMetrics = useSelector(selectConversationMetrics);
   const agentMetrics = useSelector(selectAgentMetrics);
+  const agentStats = useSelector(selectAgentStats);
+  const agentPerformance = useSelector(selectAgentPerformance);
   const realtimeAnalytics = useSelector(selectRealtimeAnalytics);
   const analyticsLoading = useSelector(selectAnalyticsLoading);
   const analyticsError = useSelector(selectAnalyticsError);
@@ -70,19 +76,22 @@ const DashboardPage = () => {
   useEffect(() => {
     dispatch(fetchConversations());
     
-    dispatch(fetchDashboardStats());
-    dispatch(fetchPerformanceData({ 
-      dateFrom: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString(),
-      dateTo: new Date().toISOString()
-    }));
-    dispatch(fetchConversationMetrics({ timeRange: '7d', tenantId: currentTenantId }));
-    dispatch(fetchAgentMetrics({ timeRange: '7d', tenantId: currentTenantId }));
-    dispatch(fetchRealtimeAnalytics());
+    if (currentTenantId) {
+      dispatch(fetchDashboardStats(currentTenantId));
+      dispatch(fetchConversationMetrics({ timeRange: '7d', tenantId: currentTenantId }));
+      dispatch(fetchAgentMetrics({ timeRange: '7d', tenantId: currentTenantId }));
+      dispatch(fetchRealtimeAnalytics());
+    }
+    
+    if (currentAgentId) {
+      const endDate = new Date().toISOString();
+      const startDate = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString();
+      dispatch(fetchAgentStats({ agentId: currentAgentId, startDate, endDate }));
+      dispatch(fetchAgentPerformance({ startDate, endDate }));
+      dispatch(fetchAgentProfile(currentAgentId));
+    }
 
     if (!currentAgentId || !token) return;
-
-    dispatch(fetchAgentProfile(currentAgentId));
-    dispatch(fetchAgentStats(currentAgentId));
 
     // avoid multiple connect attempts (React Strict Mode / multiple mounts)
     const connectedRef = { current: (agentSignalRService as any).isConnected ?? false } as { current: boolean };
@@ -101,8 +110,6 @@ const DashboardPage = () => {
           const startDate = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString();
           await agentSignalRService.requestTenantAnalyticsUpdate(currentTenantId, startDate, endDate);
           await agentSignalRService.requestTenantRealtimeUpdate(currentTenantId);
-        }
-        if (ok) {
           await agentSignalRService.requestDashboardStatsUpdate();
         }
       } catch (error) {
@@ -122,7 +129,7 @@ const DashboardPage = () => {
     agentSignalRService.setOnConversationAssigned((assignment: any) => {
       console.log("Dashboard: ConversationAssigned event received:", assignment);
       // Refresh agent stats to reflect new assignment
-      dispatch(fetchAgentStats(currentAgentId));
+      dispatch(fetchAgentStats({ agentId: currentAgentId }));
 
       // Auto-join conversation group for real-time events
       if (assignment.conversationId || assignment.ConversationId) {
@@ -136,7 +143,7 @@ const DashboardPage = () => {
 
     const interval = setInterval(() => {
       if (!isSignalRConnected) {
-        dispatch(fetchAgentStats(currentAgentId));
+        dispatch(fetchAgentStats({ agentId: currentAgentId }));
       }
     }, 30000);
 
@@ -216,41 +223,41 @@ const DashboardPage = () => {
 
   const recentConversations = Array.isArray(conversations) ? conversations.slice(0, 5) : [];
   
-  const chartPerformanceData = performanceData ? [
+  const chartPerformanceData = agentStats ? [
     { 
       date: "2024-01-01", 
-      conversations: conversationMetrics?.total || 12, 
-      avgRating: conversationMetrics?.averageRating || 4.5 
+      conversations: (agentStats.totalConversations || 0) * 0.7, 
+      avgRating: (agentStats.customerSatisfactionRating || 0) * 0.9 
     },
     { 
       date: "2024-01-02", 
-      conversations: Math.floor((conversationMetrics?.total || 15) * 1.1), 
-      avgRating: (conversationMetrics?.averageRating || 4.7) 
+      conversations: (agentStats.totalConversations || 0) * 0.8, 
+      avgRating: (agentStats.customerSatisfactionRating || 0) * 0.95 
     },
     { 
       date: "2024-01-03", 
-      conversations: Math.floor((conversationMetrics?.total || 8) * 0.8), 
-      avgRating: (conversationMetrics?.averageRating || 4.2) 
+      conversations: (agentStats.totalConversations || 0) * 0.9, 
+      avgRating: (agentStats.customerSatisfactionRating || 0) * 1.05 
     },
     { 
       date: "2024-01-04", 
-      conversations: Math.floor((conversationMetrics?.total || 18) * 1.2), 
-      avgRating: (conversationMetrics?.averageRating || 4.6) 
+      conversations: agentStats.totalConversations || 0, 
+      avgRating: agentStats.customerSatisfactionRating || 0 
     },
     { 
       date: "2024-01-05", 
-      conversations: Math.floor((conversationMetrics?.total || 14) * 0.9), 
-      avgRating: (conversationMetrics?.averageRating || 4.3) 
+      conversations: (agentStats.totalConversations || 0) * 1.1, 
+      avgRating: (agentStats.customerSatisfactionRating || 0) * 1.02 
     },
     { 
       date: "2024-01-06", 
-      conversations: Math.floor((conversationMetrics?.total || 22) * 1.3), 
-      avgRating: (conversationMetrics?.averageRating || 4.8) 
+      conversations: (agentStats.totalConversations || 0) * 1.2, 
+      avgRating: (agentStats.customerSatisfactionRating || 0) * 1.08 
     },
     { 
       date: "2024-01-07", 
-      conversations: Math.floor((conversationMetrics?.total || 11) * 0.7), 
-      avgRating: (conversationMetrics?.averageRating || 4.4) 
+      conversations: (agentStats.totalConversations || 0) * 0.85, 
+      avgRating: (agentStats.customerSatisfactionRating || 0) * 0.98 
     },
   ] : [
     { date: "2024-01-01", conversations: 12, avgRating: 4.5 },
@@ -332,7 +339,7 @@ const DashboardPage = () => {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">
-              {conversationMetrics?.total || agentStats?.totalConversations || 0}
+              {agentStats?.totalConversations || agentStatsFromSlice?.totalConversations || 0}
             </div>
             <div className="flex items-center text-xs text-muted-foreground">
               <TrendingUp className="mr-1 h-3 w-3" />
@@ -348,9 +355,9 @@ const DashboardPage = () => {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">
-              {performanceData?.averageResponseTime || 
-               agentMetrics?.averageResponseTime || 
-               agentStats?.averageResponseTime || 0}m
+              {agentPerformance?.averageResponseTime?.totalMinutes || 
+               agentStats?.averageResponseTimeMinutes || 
+               agentStatsFromSlice?.averageResponseTime || 0}m
             </div>
             <div className="flex items-center text-xs text-muted-foreground">
               <TrendingUp className="mr-1 h-3 w-3" />
@@ -366,9 +373,9 @@ const DashboardPage = () => {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">
-              {conversationMetrics?.averageRating || 
-               agentMetrics?.averageRating || 
-               agentStats?.averageRating || 0}
+              {agentStats?.customerSatisfactionRating || 
+               agentPerformance?.customerSatisfactionScore || 
+               agentStatsFromSlice?.customerSatisfaction || 0}
             </div>
             <div className="flex items-center text-xs text-muted-foreground">
               <TrendingUp className="mr-1 h-3 w-3" />
@@ -526,22 +533,22 @@ const DashboardPage = () => {
                 <div className="grid gap-3">
                   <div className="flex items-center justify-between">
                     <span className="text-sm font-medium">{t("dashboard.totalConversations")}</span>
-                    <span className="text-sm">{agentStats?.totalConversations || 0}</span>
+                    <span className="text-sm">{agentStats?.totalConversations || agentStatsFromSlice?.totalConversations || 0}</span>
                   </div>
                   <div className="flex items-center justify-between">
                     <span className="text-sm font-medium">{t("dashboard.avgRating")}</span>
                     <div className="flex items-center">
                       <Star className="mr-1 h-4 w-4 text-yellow-400" />
-                      <span className="text-sm">{agentStats?.averageRating || 0}</span>
+                      <span className="text-sm">{agentStats?.customerSatisfactionRating || agentStatsFromSlice?.customerSatisfaction || 0}</span>
                     </div>
                   </div>
                   <div className="flex items-center justify-between">
                     <span className="text-sm font-medium">{t("dashboard.responseTime")}</span>
-                    <span className="text-sm">{agentStats?.averageResponseTime || 0}m</span>
+                    <span className="text-sm">{agentStats?.averageResponseTimeMinutes || agentStatsFromSlice?.averageResponseTime || 0}m</span>
                   </div>
                   <div className="flex items-center justify-between">
                     <span className="text-sm font-medium">{t("dashboard.resolutionRate")}</span>
-                    <span className="text-sm">{agentStats?.resolutionRate || 0}%</span>
+                    <span className="text-sm">{((agentStats?.resolutionRate || agentStatsFromSlice?.resolutionRate || 0) * 100).toFixed(1)}%</span>
                   </div>
                 </div>
 

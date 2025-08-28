@@ -45,8 +45,8 @@ export interface AnalyticsData {
 }
 
 export const analyticsApi = {
-  getDashboardStats: () =>
-    apiClient.get<DashboardStats>('/analytics/dashboard'),
+  getDashboardStats: (tenantId?: string) =>
+    apiClient.get<DashboardStats>('/analytics/dashboard', tenantId ? { tenantId } : {}),
   
   getConversationMetrics: (timeRange: string = '7d', tenantId?: string) =>
     apiClient.get<ConversationMetrics>('/analytics/conversations', { timeRange, tenantId }),
@@ -62,4 +62,10 @@ export const analyticsApi = {
 
   getAnalytics: (dateFrom?: string, dateTo?: string, tenantId?: string) =>
     apiClient.get<AnalyticsData>('/analytics/analytics', { dateFrom, dateTo, tenantId }),
+
+  getAgentStats: (agentId: string, startDate?: string, endDate?: string) =>
+    apiClient.get<any>(`/agent/agents/${agentId}/stats`, { startDate, endDate }),
+  
+  getAgentPerformance: (startDate?: string, endDate?: string) =>
+    apiClient.get<any>('/agent/performance', { startDate, endDate }),
 };

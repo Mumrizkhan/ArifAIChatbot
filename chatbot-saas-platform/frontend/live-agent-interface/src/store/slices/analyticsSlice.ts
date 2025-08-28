@@ -12,8 +12,8 @@ import {
 
 export const fetchDashboardStats = createAsyncThunk(
   "analytics/fetchDashboardStats",
-  async () => {
-    const response = await analyticsApi.getDashboardStats();
+  async (tenantId?: string) => {
+    const response = await analyticsApi.getDashboardStats(tenantId);
     if (!response.success) throw new Error(response.message);
     return response.data;
   }
@@ -64,6 +64,24 @@ export const fetchAnalyticsData = createAsyncThunk(
   }
 );
 
+export const fetchAgentStats = createAsyncThunk(
+  "analytics/fetchAgentStats",
+  async ({ agentId, startDate, endDate }: { agentId: string; startDate?: string; endDate?: string }) => {
+    const response = await analyticsApi.getAgentStats(agentId, startDate, endDate);
+    if (!response.success) throw new Error(response.message);
+    return response.data;
+  }
+);
+
+export const fetchAgentPerformance = createAsyncThunk(
+  "analytics/fetchAgentPerformance", 
+  async ({ startDate, endDate }: { startDate?: string; endDate?: string } = {}) => {
+    const response = await analyticsApi.getAgentPerformance(startDate, endDate);
+    if (!response.success) throw new Error(response.message);
+    return response.data;
+  }
+);
+
 interface AnalyticsState {
   dashboardStats: DashboardStats | null;
   performanceData: PerformanceMetrics | null;
@@ -71,6 +89,8 @@ interface AnalyticsState {
   agentMetrics: AgentMetrics | null;
   realtimeAnalytics: RealtimeAnalytics | null;
   analyticsData: AnalyticsData | null;
+  agentStats: any | null;
+  agentPerformance: any | null;
   isLoading: boolean;
   error: string | null;
 }
@@ -82,6 +102,8 @@ const initialState: AnalyticsState = {
   agentMetrics: null,
   realtimeAnalytics: null,
   analyticsData: null,
+  agentStats: null,
+  agentPerformance: null,
   isLoading: false,
   error: null,
 };
@@ -181,6 +203,30 @@ const analyticsSlice = createSlice({
       .addCase(fetchAnalyticsData.rejected, (state, action) => {
         state.isLoading = false;
         state.error = action.error.message || "Error fetching analytics data";
+      })
+      .addCase(fetchAgentStats.pending, (state) => {
+        state.isLoading = true;
+        state.error = null;
+      })
+      .addCase(fetchAgentStats.fulfilled, (state, action) => {
+        state.agentStats = action.payload;
+        state.isLoading = false;
+      })
+      .addCase(fetchAgentStats.rejected, (state, action) => {
+        state.isLoading = false;
+        state.error = action.error.message || "Error fetching agent stats";
+      })
+      .addCase(fetchAgentPerformance.pending, (state) => {
+        state.isLoading = true;
+        state.error = null;
+      })
+      .addCase(fetchAgentPerformance.fulfilled, (state, action) => {
+        state.agentPerformance = action.payload;
+        state.isLoading = false;
+      })
+      .addCase(fetchAgentPerformance.rejected, (state, action) => {
+        state.isLoading = false;
+        state.error = action.error.message || "Error fetching agent performance";
       });
   },
 });
@@ -201,5 +247,7 @@ export const selectConversationMetrics = (state: RootState) => state.analytics.c
 export const selectAgentMetrics = (state: RootState) => state.analytics.agentMetrics;
 export const selectRealtimeAnalytics = (state: RootState) => state.analytics.realtimeAnalytics;
 export const selectAnalyticsData = (state: RootState) => state.analytics.analyticsData;
+export const selectAgentStats = (state: RootState) => state.analytics.agentStats;
+export const selectAgentPerformance = (state: RootState) => state.analytics.agentPerformance;
 export const selectAnalyticsLoading = (state: RootState) => state.analytics.isLoading;
 export const selectAnalyticsError = (state: RootState) => state.analytics.error;
