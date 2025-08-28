@@ -960,6 +960,10 @@ namespace IdentityService.Migrations
                         .HasColumnType("nvarchar(7)")
                         .HasDefaultValue("#64748B");
 
+                    b.Property<string>("Settings")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<int>("Status")
                         .HasColumnType("int");
 

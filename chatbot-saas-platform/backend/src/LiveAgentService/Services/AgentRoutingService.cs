@@ -235,4 +235,37 @@ public class AgentRoutingService : IAgentRoutingService
             _logger.LogError(ex, "Error notifying agents of escalation for tenant {TenantId}", tenantId);
         }
     }
+
+    public async Task<bool> UpdateConversationStatusAsync(Guid conversationId, string status, Guid value)
+    {
+        try
+        {
+            var conversation = await _context.Conversations
+                .FirstOrDefaultAsync(c => c.Id == conversationId);
+
+            if (conversation == null)
+                return false;
+
+            if (Enum.TryParse<ConversationStatus>(status, true, out var parsedStatus))
+            {
+                conversation.Status = parsedStatus;
+                conversation.UpdatedAt = DateTime.UtcNow;
+
+                if (parsedStatus == ConversationStatus.Escalated)
+                {
+                    conversation.AssignedAgentId = value;
+                }
+
+                await _context.SaveChangesAsync();
+                return true;
+            }
+
+            return false;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error updating conversation {ConversationId} status to {Status}", conversationId, status);
+            return false;
+        }
+    }
 }

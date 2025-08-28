@@ -68,7 +68,7 @@ public class QueueManagementService : IQueueManagementService
                 var conversation = await _context.Conversations
                     .FirstOrDefaultAsync(c => c.Id == conversationId);
 
-                if (conversation != null)
+                if (conversation != null && conversation.Status!= ConversationStatus.Resolved)
                 {
                     conversation.Status = ConversationStatus.Active;
                     conversation.UpdatedAt = DateTime.UtcNow;

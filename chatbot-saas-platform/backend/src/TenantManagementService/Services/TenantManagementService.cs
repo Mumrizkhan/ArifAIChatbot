@@ -124,7 +124,7 @@ public class TenantManagementService : ITenantManagementService
         return new TenantSettingsDto
         {
             TenantId = tenant.Id,
-            Settings = new Dictionary<string, object>()
+            Settings = tenant.Settings.ToDictionary(entry => entry.Key, entry => entry.Value)
         };
     }
 
@@ -132,6 +132,14 @@ public class TenantManagementService : ITenantManagementService
     {
         var tenant = await _context.Tenants.FindAsync(id);
         if (tenant == null) return false;
+
+        if (request.Settings != null && request.Settings.Any())
+        {
+            foreach (var setting in request.Settings)
+            {
+                tenant.Settings[setting.Key] = setting.Value;
+            }
+        }
 
         await _context.SaveChangesAsync();
         return true;

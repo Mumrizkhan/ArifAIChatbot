@@ -6,7 +6,7 @@ const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "https://api-stg-arif.
 export const fetchPerformanceData = createAsyncThunk(
   "analytics/fetchPerformanceData",
   async ({ dateFrom, dateTo }: { dateFrom: string; dateTo: string }) => {
-    const res = await fetch(`${API_BASE_URL}/analytics/analytics/performance?dateFrom=${dateFrom}&dateTo=${dateTo}`);
+    const res = await fetch(`${API_BASE_URL}/agent/Agents/performance?startDate=${dateFrom}&endDate=${dateTo}`);
     if (!res.ok) throw new Error("Failed to fetch analytics performance data");
     return await res.json();
   }

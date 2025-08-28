@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useTranslation } from "react-i18next";
 import { AppDispatch, RootState } from "../../store/store";
@@ -27,7 +27,7 @@ import { Skeleton } from "../../components/ui/skeleton";
 import { Textarea } from "../../components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../../components/ui/select";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "../../components/ui/dialog";
-import { MessageSquare, Send, Phone, Video, MoreHorizontal, Search, Filter, Paperclip, Smile } from "lucide-react";
+import { MessageSquare, Send, Phone, Video, MoreHorizontal, Search, Filter, Paperclip, Smile, User, Bot, UserCheck } from "lucide-react";
 import { TypingIndicator } from "../../components/TypingIndicator";
 
 const ConversationsPage = () => {
@@ -43,6 +43,9 @@ const ConversationsPage = () => {
   const [isTransferDialogOpen, setIsTransferDialogOpen] = useState(false);
   const [previousConversationId, setPreviousConversationId] = useState<string | null>(null);
   const [typingTimeout, setTypingTimeout] = useState<NodeJS.Timeout | null>(null);
+
+  // Ref for auto-scrolling messages container
+  const messagesEndRef = useRef<HTMLDivElement>(null);
 
   // Get the actual selected conversation object
   const selectedConversation = conversations?.find((conv) => conv.id === conversationId) || null;
@@ -77,6 +80,14 @@ const ConversationsPage = () => {
         console.log("🔥 Live Agent: MessageReceived event received:", messageDto);
         console.log("🔥 Live Agent: Message sender:", messageDto.sender);
         console.log("🔥 Live Agent: Message conversation ID:", messageDto.conversationId);
+        console.log("🔥 Live Agent: Current agent ID:", currentAgent?.id);
+
+        // Skip messages sent by the current agent to prevent duplicates
+        // (agent messages are already added via sendMessage.fulfilled)
+        if (messageDto.sender === "agent" && messageDto.agentId === currentAgent?.id) {
+          console.log("🚫 Live Agent: Skipping own message to prevent duplicate");
+          return;
+        }
 
         // Transform the message format to match the live agent interface expectations
         const transformedMessage = {
@@ -97,22 +108,22 @@ const ConversationsPage = () => {
       // Set up typing indicator handlers
       agentSignalRService.setOnUserStartedTyping((typingInfo) => {
         console.log("🔄 Live Agent: Customer started typing:", typingInfo);
-        if (typingInfo.conversationId === conversationId) {
-          dispatch(
-            setTypingUser({
-              conversationId: typingInfo.conversationId,
-              userId: typingInfo.userId,
-              userName: typingInfo.userName || "Customer",
-            })
-          );
-        }
+        // Show typing for any conversation, not just the currently selected one
+        dispatch(
+          setTypingUser({
+            conversationId: typingInfo.conversationId,
+            userId: typingInfo.userId,
+            userName: typingInfo.userName || "Customer",
+          })
+        );
+        console.log("🔄 Live Agent: Dispatched setTypingUser action");
       });
 
       agentSignalRService.setOnUserStoppedTyping((typingInfo) => {
         console.log("🔄 Live Agent: Customer stopped typing:", typingInfo);
-        if (typingInfo.conversationId === conversationId) {
-          dispatch(removeTypingUser(typingInfo.conversationId));
-        }
+        // Remove typing for any conversation, not just the currently selected one
+        dispatch(removeTypingUser(typingInfo.conversationId));
+        console.log("🔄 Live Agent: Dispatched removeTypingUser action");
       });
 
       // Set up message read status handler
@@ -121,7 +132,20 @@ const ConversationsPage = () => {
         dispatch(markMessageAsRead({ messageId: readInfo.messageId }));
       });
     }
-  }, [dispatch]); // Remove conversationId from dependency array to prevent re-fetching all conversations
+
+    // Cleanup function to prevent duplicate handlers
+    return () => {
+      if (agentSignalRService.getConnectionStatus()) {
+        // Clear handlers to prevent duplicates on re-render
+        agentSignalRService.setOnConversationAssigned(() => {});
+        agentSignalRService.setOnConversationTransferred(() => {});
+        agentSignalRService.setOnMessageReceived(() => {});
+        agentSignalRService.setOnUserStartedTyping(() => {});
+        agentSignalRService.setOnUserStoppedTyping(() => {});
+        agentSignalRService.setOnMessageMarkedAsRead(() => {});
+      }
+    };
+  }, [dispatch, currentAgent?.id]); // Added currentAgent dependency
 
   // Effect to fetch conversation details when a conversation is selected
   useEffect(() => {
@@ -144,6 +168,13 @@ const ConversationsPage = () => {
       setPreviousConversationId(conversationId);
     }
   }, [conversationId, previousConversationId]);
+
+  // Auto-scroll to bottom when messages change
+  useEffect(() => {
+    if (messagesEndRef.current) {
+      messagesEndRef.current.scrollIntoView({ behavior: "smooth" });
+    }
+  }, [selectedConversation?.messages, typingUsers]);
 
   const filteredConversations = Array.isArray(conversations)
     ? conversations.filter((conversation) => {
@@ -531,21 +562,68 @@ const ConversationsPage = () => {
                   {selectedConversation.messages && selectedConversation.messages.length > 0 ? (
                     <>
                       {console.log("🔍 Live Agent: Displaying messages:", selectedConversation.messages)}
-                      {selectedConversation.messages.map((message: any) => (
-                        <div key={message.id} className={`flex ${message.sender === "agent" ? "justify-end" : "justify-start"}`}>
-                          <div
-                            className={`max-w-xs lg:max-w-md px-4 py-2 rounded-lg ${
-                              message.sender === "agent" ? "bg-primary text-primary-foreground" : "bg-muted"
-                            }`}
-                          >
-                            <p className="text-sm">{message.content}</p>
-                            <p className="text-xs opacity-70 mt-1">{new Date(message.timestamp).toLocaleTimeString()}</p>
+                      {selectedConversation.messages.map((message: any) => {
+                        const isAgent = message.sender === "agent";
+                        const isCustomer = message.sender === "customer";
+                        const isBot = message.sender === "bot" || message.sender === "system";
+
+                        return (
+                          <div key={message.id} className={`flex ${isAgent ? "justify-end" : "justify-start"} items-start space-x-2`}>
+                            {/* Avatar for non-agent messages (left side) */}
+                            {!isAgent && (
+                              <div className="flex-shrink-0">
+                                {isCustomer ? (
+                                  <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
+                                    <User className="w-4 h-4 text-blue-600" />
+                                  </div>
+                                ) : (
+                                  <div className="w-8 h-8 bg-gray-100 rounded-full flex items-center justify-center">
+                                    <Bot className="w-4 h-4 text-gray-600" />
+                                  </div>
+                                )}
+                              </div>
+                            )}
+
+                            {/* Message bubble */}
+                            <div
+                              className={`max-w-xs lg:max-w-md px-4 py-2 rounded-lg ${
+                                isAgent
+                                  ? "bg-primary text-primary-foreground"
+                                  : isCustomer
+                                  ? "bg-blue-50 border border-blue-200"
+                                  : "bg-gray-50 border border-gray-200"
+                              }`}
+                            >
+                              {/* Sender name for non-agent messages */}
+                              {!isAgent && (
+                                <p className="text-xs font-medium text-muted-foreground mb-1">
+                                  {isCustomer ? selectedConversation.customer?.name || "Customer" : isBot ? "AI Assistant" : "System"}
+                                </p>
+                              )}
+
+                              <p className={`text-sm ${isAgent ? "" : "text-gray-900"}`}>{message.content}</p>
+                              <p className={`text-xs mt-1 ${isAgent ? "opacity-70" : "text-gray-500"}`}>
+                                {new Date(message.timestamp).toLocaleTimeString()}
+                              </p>
+                            </div>
+
+                            {/* Avatar for agent messages (right side) */}
+                            {isAgent && (
+                              <div className="flex-shrink-0">
+                                <div className="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center">
+                                  <UserCheck className="w-4 h-4 text-green-600" />
+                                </div>
+                              </div>
+                            )}
                           </div>
-                        </div>
-                      ))}
+                        );
+                      })}
 
                       {/* Typing Indicator */}
                       {conversationId && typingUsers[conversationId] && <TypingIndicator userName={typingUsers[conversationId].userName} />}
+
+                      {/* Auto-scroll target */}
+                      <div ref={messagesEndRef} />
                     </>
                   ) : (
                     <div className="text-center py-8">
