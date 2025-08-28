@@ -1,5 +1,5 @@
-import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit';
-import { analyticsApi } from '../../services/api';
+import { createSlice, createAsyncThunk, PayloadAction } from "@reduxjs/toolkit";
+import { analyticsApi } from "../../services/api";
 
 interface DashboardStats {
   totalTenants: number;
@@ -38,7 +38,7 @@ interface AgentMetrics {
 
 interface SystemNotification {
   id: string;
-  type: 'info' | 'warning' | 'error' | 'success';
+  type: "info" | "warning" | "error" | "success";
   title: string;
   message: string;
   timestamp: Date;
@@ -67,22 +67,19 @@ const initialState: AnalyticsState = {
   customReports: [],
   isLoading: false,
   error: null,
-  selectedTimeRange: '7d',
+  selectedTimeRange: "7d",
   selectedTenant: null,
   isSignalRConnected: false,
   systemNotifications: [],
 };
 
-export const fetchDashboardStats = createAsyncThunk(
-  'analytics/fetchDashboardStats',
-  async () => {
-    const response = await analyticsApi.getDashboardStats();
-    return response;
-  }
-);
+export const fetchDashboardStats = createAsyncThunk("analytics/fetchDashboardStats", async () => {
+  const response = await analyticsApi.getDashboardStats();
+  return response;
+});
 
 export const fetchConversationMetrics = createAsyncThunk(
-  'analytics/fetchConversationMetrics',
+  "analytics/fetchConversationMetrics",
   async ({ timeRange, tenantId }: { timeRange: string; tenantId?: string }) => {
     const response = await analyticsApi.getConversationMetrics(timeRange, tenantId);
     return response;
@@ -90,7 +87,7 @@ export const fetchConversationMetrics = createAsyncThunk(
 );
 
 export const fetchAgentMetrics = createAsyncThunk(
-  'analytics/fetchAgentMetrics',
+  "analytics/fetchAgentMetrics",
   async ({ timeRange, tenantId }: { timeRange: string; tenantId?: string }) => {
     const response = await analyticsApi.getAgentMetrics(timeRange, tenantId);
     return response;
@@ -98,23 +95,20 @@ export const fetchAgentMetrics = createAsyncThunk(
 );
 
 export const fetchBotMetrics = createAsyncThunk(
-  'analytics/fetchBotMetrics',
+  "analytics/fetchBotMetrics",
   async ({ timeRange, tenantId }: { timeRange: string; tenantId?: string }) => {
     const response = await analyticsApi.getBotMetrics(timeRange, tenantId);
     return response;
   }
 );
 
-export const generateCustomReport = createAsyncThunk(
-  'analytics/generateCustomReport',
-  async (reportConfig: any) => {
-    const response = await analyticsApi.getCustomReport(reportConfig);
-    return response;
-  }
-);
+export const generateCustomReport = createAsyncThunk("analytics/generateCustomReport", async (reportConfig: any) => {
+  const response = await analyticsApi.getCustomReport(reportConfig);
+  return response;
+});
 
 const analyticsSlice = createSlice({
-  name: 'analytics',
+  name: "analytics",
   initialState,
   reducers: {
     clearError: (state) => {
@@ -148,9 +142,7 @@ const analyticsSlice = createSlice({
       }
     },
     removeSystemNotification: (state, action: PayloadAction<string>) => {
-      state.systemNotifications = state.systemNotifications.filter(
-        notification => notification.id !== action.payload
-      );
+      state.systemNotifications = state.systemNotifications.filter((notification) => notification.id !== action.payload);
     },
     clearSystemNotifications: (state) => {
       state.systemNotifications = [];
@@ -168,7 +160,7 @@ const analyticsSlice = createSlice({
       })
       .addCase(fetchDashboardStats.rejected, (state, action) => {
         state.isLoading = false;
-        state.error = action.error.message || 'Failed to fetch dashboard stats';
+        state.error = action.error.message || "Failed to fetch dashboard stats";
       })
       .addCase(fetchConversationMetrics.fulfilled, (state, action) => {
         state.conversationMetrics = action.payload;
@@ -185,10 +177,10 @@ const analyticsSlice = createSlice({
   },
 });
 
-export const { 
-  clearError, 
-  setTimeRange, 
-  setSelectedTenant, 
+export const {
+  clearError,
+  setTimeRange,
+  setSelectedTenant,
   clearCustomReports,
   setSignalRConnectionStatus,
   updateDashboardStatsRealtime,
@@ -196,6 +188,6 @@ export const {
   updateAgentMetricsRealtime,
   addSystemNotification,
   removeSystemNotification,
-  clearSystemNotifications
+  clearSystemNotifications,
 } = analyticsSlice.actions;
 export default analyticsSlice.reducer;

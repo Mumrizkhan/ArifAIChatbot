@@ -1,5 +1,5 @@
-import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit';
-import { subscriptionApi } from '../../services/api';
+import { createSlice, createAsyncThunk, PayloadAction } from "@reduxjs/toolkit";
+import { subscriptionApi } from "../../services/api";
 
 interface Plan {
   id: string;
@@ -74,56 +74,41 @@ const initialState: SubscriptionState = {
   pageSize: 20,
 };
 
-export const fetchPlans = createAsyncThunk(
-  'subscription/fetchPlans',
-  async () => {
-    const response = await subscriptionApi.getPlans();
-    return response;
-  }
-);
+export const fetchPlans = createAsyncThunk("subscription/fetchPlans", async () => {
+  const response = await subscriptionApi.getPlans();
+  return response;
+});
 
 export const fetchSubscriptions = createAsyncThunk(
-  'subscription/fetchSubscriptions',
+  "subscription/fetchSubscriptions",
   async ({ page, pageSize }: { page: number; pageSize: number }) => {
     const response = await subscriptionApi.getSubscriptions(page, pageSize);
     return response;
   }
 );
 
-export const fetchBillingStats = createAsyncThunk(
-  'subscription/fetchBillingStats',
-  async () => {
-    const response = await subscriptionApi.getBillingStats();
-    return response;
-  }
-);
+export const fetchBillingStats = createAsyncThunk("subscription/fetchBillingStats", async () => {
+  const response = await subscriptionApi.getBillingStats();
+  return response;
+});
 
-export const createSubscription = createAsyncThunk(
-  'subscription/createSubscription',
-  async (subscriptionData: any) => {
-    const response = await subscriptionApi.createSubscription(subscriptionData);
-    return response;
-  }
-);
+export const createSubscription = createAsyncThunk("subscription/createSubscription", async (subscriptionData: any) => {
+  const response = await subscriptionApi.createSubscription(subscriptionData);
+  return response;
+});
 
-export const updateSubscription = createAsyncThunk(
-  'subscription/updateSubscription',
-  async ({ id, data }: { id: string; data: any }) => {
-    const response = await subscriptionApi.updateSubscription(id, data);
-    return response;
-  }
-);
+export const updateSubscription = createAsyncThunk("subscription/updateSubscription", async ({ id, data }: { id: string; data: any }) => {
+  const response = await subscriptionApi.updateSubscription(id, data);
+  return response;
+});
 
-export const cancelSubscription = createAsyncThunk(
-  'subscription/cancelSubscription',
-  async (id: string) => {
-    await subscriptionApi.cancelSubscription(id);
-    return id;
-  }
-);
+export const cancelSubscription = createAsyncThunk("subscription/cancelSubscription", async (id: string) => {
+  await subscriptionApi.cancelSubscription(id);
+  return id;
+});
 
 const subscriptionSlice = createSlice({
-  name: 'subscription',
+  name: "subscription",
   initialState,
   reducers: {
     clearError: (state) => {
@@ -148,7 +133,7 @@ const subscriptionSlice = createSlice({
       })
       .addCase(fetchPlans.rejected, (state, action) => {
         state.isLoading = false;
-        state.error = action.error.message || 'Failed to fetch plans';
+        state.error = action.error.message || "Failed to fetch plans";
       })
       .addCase(fetchSubscriptions.pending, (state) => {
         state.isLoading = true;
@@ -162,7 +147,7 @@ const subscriptionSlice = createSlice({
       })
       .addCase(fetchSubscriptions.rejected, (state, action) => {
         state.isLoading = false;
-        state.error = action.error.message || 'Failed to fetch subscriptions';
+        state.error = action.error.message || "Failed to fetch subscriptions";
       })
       .addCase(fetchBillingStats.fulfilled, (state, action) => {
         state.billingStats = action.payload;
@@ -172,15 +157,15 @@ const subscriptionSlice = createSlice({
         state.totalCount += 1;
       })
       .addCase(updateSubscription.fulfilled, (state, action) => {
-        const index = state.subscriptions.findIndex(s => s.id === action.payload.id);
+        const index = state.subscriptions.findIndex((s) => s.id === action.payload.id);
         if (index !== -1) {
           state.subscriptions[index] = action.payload;
         }
       })
       .addCase(cancelSubscription.fulfilled, (state, action) => {
-        const index = state.subscriptions.findIndex(s => s.id === action.payload);
+        const index = state.subscriptions.findIndex((s) => s.id === action.payload);
         if (index !== -1) {
-          state.subscriptions[index].status = 'Cancelled';
+          state.subscriptions[index].status = "Cancelled";
         }
       });
   },
