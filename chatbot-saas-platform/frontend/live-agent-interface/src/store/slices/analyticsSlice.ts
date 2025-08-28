@@ -1,46 +1,87 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import { RootState } from "../store";
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "https://api-stg-arif.tetco.sa";
+import { 
+  analyticsApi, 
+  DashboardStats, 
+  ConversationMetrics, 
+  AgentMetrics, 
+  PerformanceMetrics, 
+  RealtimeAnalytics,
+  AnalyticsData
+} from '../../services/analyticsApi';
 
-// Thunk for performance data
+export const fetchDashboardStats = createAsyncThunk(
+  "analytics/fetchDashboardStats",
+  async () => {
+    const response = await analyticsApi.getDashboardStats();
+    if (!response.success) throw new Error(response.message);
+    return response.data;
+  }
+);
+
 export const fetchPerformanceData = createAsyncThunk(
   "analytics/fetchPerformanceData",
-  async ({ dateFrom, dateTo }: { dateFrom: string; dateTo: string }) => {
-    const res = await fetch(`${API_BASE_URL}/agent/Agents/performance?startDate=${dateFrom}&endDate=${dateTo}`);
-    if (!res.ok) throw new Error("Failed to fetch analytics performance data");
-    return await res.json();
+  async ({ dateFrom, dateTo }: { dateFrom?: string; dateTo?: string } = {}) => {
+    const response = await analyticsApi.getPerformanceMetrics(dateFrom, dateTo);
+    if (!response.success) throw new Error(response.message);
+    return response.data;
   }
 );
 
-// Thunk for general analytics data
+export const fetchConversationMetrics = createAsyncThunk(
+  "analytics/fetchConversationMetrics",
+  async ({ timeRange, tenantId }: { timeRange?: string; tenantId?: string } = {}) => {
+    const response = await analyticsApi.getConversationMetrics(timeRange, tenantId);
+    if (!response.success) throw new Error(response.message);
+    return response.data;
+  }
+);
+
+export const fetchAgentMetrics = createAsyncThunk(
+  "analytics/fetchAgentMetrics",
+  async ({ timeRange, tenantId }: { timeRange?: string; tenantId?: string } = {}) => {
+    const response = await analyticsApi.getAgentMetrics(timeRange, tenantId);
+    if (!response.success) throw new Error(response.message);
+    return response.data;
+  }
+);
+
+export const fetchRealtimeAnalytics = createAsyncThunk(
+  "analytics/fetchRealtimeAnalytics",
+  async () => {
+    const response = await analyticsApi.getRealtimeAnalytics();
+    if (!response.success) throw new Error(response.message);
+    return response.data;
+  }
+);
+
 export const fetchAnalyticsData = createAsyncThunk(
   "analytics/fetchAnalyticsData",
-  async ({ dateFrom, dateTo }: { dateFrom: string; dateTo: string }) => {
-    const res = await fetch(`${API_BASE_URL}/analytics/analytics?dateFrom=${dateFrom}&dateTo=${dateTo}`);
-    if (!res.ok) throw new Error("Failed to fetch analytics summary");
-    return await res.json();
+  async ({ dateFrom, dateTo, tenantId }: { dateFrom?: string; dateTo?: string; tenantId?: string } = {}) => {
+    const response = await analyticsApi.getAnalytics(dateFrom, dateTo, tenantId);
+    if (!response.success) throw new Error(response.message);
+    return response.data;
   }
 );
 
-// Thunk for goals data
-export const fetchGoalsData = createAsyncThunk("analytics/fetchGoalsData", async (id: string) => {
-  const res = await fetch(`${API_BASE_URL}/analytics/analytics/goals:${id}`);
-  if (!res.ok) throw new Error("Failed to fetch analytics goals");
-  return await res.json();
-});
-
 interface AnalyticsState {
-  performanceData: any[];
-  analyticsData: any;
-  goalsData: any;
+  dashboardStats: DashboardStats | null;
+  performanceData: PerformanceMetrics | null;
+  conversationMetrics: ConversationMetrics | null;
+  agentMetrics: AgentMetrics | null;
+  realtimeAnalytics: RealtimeAnalytics | null;
+  analyticsData: AnalyticsData | null;
   isLoading: boolean;
   error: string | null;
 }
 
 const initialState: AnalyticsState = {
-  performanceData: [],
+  dashboardStats: null,
+  performanceData: null,
+  conversationMetrics: null,
+  agentMetrics: null,
+  realtimeAnalytics: null,
   analyticsData: null,
-  goalsData: null,
   isLoading: false,
   error: null,
 };
@@ -48,9 +89,37 @@ const initialState: AnalyticsState = {
 const analyticsSlice = createSlice({
   name: "analytics",
   initialState,
-  reducers: {},
+  reducers: {
+    clearError: (state) => {
+      state.error = null;
+    },
+    updateRealtimeAnalytics: (state, action) => {
+      state.realtimeAnalytics = action.payload;
+    },
+    updateDashboardStats: (state, action) => {
+      state.dashboardStats = action.payload;
+    },
+    updateConversationMetrics: (state, action) => {
+      state.conversationMetrics = action.payload;
+    },
+    updateAgentMetrics: (state, action) => {
+      state.agentMetrics = action.payload;
+    },
+  },
   extraReducers: (builder) => {
     builder
+      .addCase(fetchDashboardStats.pending, (state) => {
+        state.isLoading = true;
+        state.error = null;
+      })
+      .addCase(fetchDashboardStats.fulfilled, (state, action) => {
+        state.dashboardStats = action.payload;
+        state.isLoading = false;
+      })
+      .addCase(fetchDashboardStats.rejected, (state, action) => {
+        state.isLoading = false;
+        state.error = action.error.message || "Error fetching dashboard stats";
+      })
       // Performance Data
       .addCase(fetchPerformanceData.pending, (state) => {
         state.isLoading = true;
@@ -62,9 +131,45 @@ const analyticsSlice = createSlice({
       })
       .addCase(fetchPerformanceData.rejected, (state, action) => {
         state.isLoading = false;
-        state.error = action.error.message || "Error";
+        state.error = action.error.message || "Error fetching performance data";
       })
-      // Analytics Summary Data
+      .addCase(fetchConversationMetrics.pending, (state) => {
+        state.isLoading = true;
+        state.error = null;
+      })
+      .addCase(fetchConversationMetrics.fulfilled, (state, action) => {
+        state.conversationMetrics = action.payload;
+        state.isLoading = false;
+      })
+      .addCase(fetchConversationMetrics.rejected, (state, action) => {
+        state.isLoading = false;
+        state.error = action.error.message || "Error fetching conversation metrics";
+      })
+      .addCase(fetchAgentMetrics.pending, (state) => {
+        state.isLoading = true;
+        state.error = null;
+      })
+      .addCase(fetchAgentMetrics.fulfilled, (state, action) => {
+        state.agentMetrics = action.payload;
+        state.isLoading = false;
+      })
+      .addCase(fetchAgentMetrics.rejected, (state, action) => {
+        state.isLoading = false;
+        state.error = action.error.message || "Error fetching agent metrics";
+      })
+      .addCase(fetchRealtimeAnalytics.pending, (state) => {
+        state.isLoading = true;
+        state.error = null;
+      })
+      .addCase(fetchRealtimeAnalytics.fulfilled, (state, action) => {
+        state.realtimeAnalytics = action.payload;
+        state.isLoading = false;
+      })
+      .addCase(fetchRealtimeAnalytics.rejected, (state, action) => {
+        state.isLoading = false;
+        state.error = action.error.message || "Error fetching realtime analytics";
+      })
+      // Analytics Data
       .addCase(fetchAnalyticsData.pending, (state) => {
         state.isLoading = true;
         state.error = null;
@@ -75,26 +180,26 @@ const analyticsSlice = createSlice({
       })
       .addCase(fetchAnalyticsData.rejected, (state, action) => {
         state.isLoading = false;
-        state.error = action.error.message || "Error";
-      })
-      // Goals Data
-      .addCase(fetchGoalsData.pending, (state) => {
-        state.isLoading = true;
-        state.error = null;
-      })
-      .addCase(fetchGoalsData.fulfilled, (state, action) => {
-        state.goalsData = action.payload;
-        state.isLoading = false;
-      })
-      .addCase(fetchGoalsData.rejected, (state, action) => {
-        state.isLoading = false;
-        state.error = action.error.message || "Error";
+        state.error = action.error.message || "Error fetching analytics data";
       });
   },
 });
 
+export const { 
+  clearError, 
+  updateRealtimeAnalytics, 
+  updateDashboardStats, 
+  updateConversationMetrics, 
+  updateAgentMetrics 
+} = analyticsSlice.actions;
+
 export default analyticsSlice.reducer;
+
+export const selectDashboardStats = (state: RootState) => state.analytics.dashboardStats;
 export const selectPerformanceData = (state: RootState) => state.analytics.performanceData;
+export const selectConversationMetrics = (state: RootState) => state.analytics.conversationMetrics;
+export const selectAgentMetrics = (state: RootState) => state.analytics.agentMetrics;
+export const selectRealtimeAnalytics = (state: RootState) => state.analytics.realtimeAnalytics;
 export const selectAnalyticsData = (state: RootState) => state.analytics.analyticsData;
-export const selectGoalsData = (state: RootState) => state.analytics.goalsData;
 export const selectAnalyticsLoading = (state: RootState) => state.analytics.isLoading;
+export const selectAnalyticsError = (state: RootState) => state.analytics.error;

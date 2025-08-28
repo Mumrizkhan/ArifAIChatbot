@@ -1,4 +1,11 @@
 import { HubConnection, HubConnectionBuilder, HubConnectionState, HttpTransportType, LogLevel } from "@microsoft/signalr";
+import { store } from "../store/store";
+import { 
+  updateRealtimeAnalytics, 
+  updateDashboardStats, 
+  updateConversationMetrics, 
+  updateAgentMetrics 
+} from "../store/slices/analyticsSlice";
 
 interface AgentStatusUpdate {
   agentId: string;
@@ -336,6 +343,39 @@ class AgentSignalRService {
       }
     });
 
+    this.connection.on("DashboardStatsUpdated", (stats) => {
+      console.log("Dashboard stats updated:", stats);
+      store.dispatch(updateDashboardStats(stats));
+    });
+
+    this.connection.on("TenantAnalyticsUpdated", (analytics) => {
+      console.log("Tenant analytics updated:", analytics);
+      if (analytics.conversations) {
+        store.dispatch(updateConversationMetrics(analytics.conversations));
+      }
+      if (analytics.agents) {
+        store.dispatch(updateAgentMetrics(analytics.agents));
+      }
+      if (analytics.realtime) {
+        store.dispatch(updateRealtimeAnalytics(analytics.realtime));
+      }
+    });
+
+    this.connection.on("TenantRealtimeUpdated", (realtime) => {
+      console.log("Tenant realtime updated:", realtime);
+      store.dispatch(updateRealtimeAnalytics(realtime));
+    });
+
+    this.connection.on("ConversationMetricsUpdated", (metrics) => {
+      console.log("Conversation metrics updated:", metrics);
+      store.dispatch(updateConversationMetrics(metrics));
+    });
+
+    this.connection.on("AgentMetricsUpdated", (metrics) => {
+      console.log("Agent metrics updated:", metrics);
+      store.dispatch(updateAgentMetrics(metrics));
+    });
+
     this.connection.on("AssistanceRequested", (request: AssistanceRequest) => {
       try {
         this.onAssistanceRequested?.(request);
@@ -612,6 +652,61 @@ class AgentSignalRService {
 
   getTenantId(): string | null {
     return this.tenantId;
+  }
+
+  async requestDashboardStatsUpdate() {
+    if (this.connection?.state === "Connected") {
+      try {
+        await this.connection.invoke("RequestDashboardStatsUpdate");
+        console.log("Requested dashboard stats update");
+      } catch (error) {
+        console.error("Error requesting dashboard stats update:", error);
+      }
+    }
+  }
+
+  async requestTenantAnalyticsUpdate(tenantId: string, startDate: string, endDate: string) {
+    if (this.connection?.state === "Connected") {
+      try {
+        await this.connection.invoke("RequestTenantAnalyticsUpdate", tenantId, startDate, endDate);
+        console.log(`Requested tenant analytics update for ${tenantId}`);
+      } catch (error) {
+        console.error("Error requesting tenant analytics update:", error);
+      }
+    }
+  }
+
+  async requestTenantRealtimeUpdate(tenantId: string) {
+    if (this.connection?.state === "Connected") {
+      try {
+        await this.connection.invoke("RequestTenantRealtimeUpdate", tenantId);
+        console.log(`Requested tenant realtime update for ${tenantId}`);
+      } catch (error) {
+        console.error("Error requesting tenant realtime update:", error);
+      }
+    }
+  }
+
+  async requestConversationMetricsUpdate(timeRange: string, tenantId?: string) {
+    if (this.connection?.state === "Connected") {
+      try {
+        await this.connection.invoke("RequestConversationMetricsUpdate", timeRange, tenantId);
+        console.log(`Requested conversation metrics update for timeRange: ${timeRange}`);
+      } catch (error) {
+        console.error("Error requesting conversation metrics update:", error);
+      }
+    }
+  }
+
+  async requestAgentMetricsUpdate(timeRange: string, tenantId?: string) {
+    if (this.connection?.state === "Connected") {
+      try {
+        await this.connection.invoke("RequestAgentMetricsUpdate", timeRange, tenantId);
+        console.log(`Requested agent metrics update for timeRange: ${timeRange}`);
+      } catch (error) {
+        console.error("Error requesting agent metrics update:", error);
+      }
+    }
   }
 }
 
