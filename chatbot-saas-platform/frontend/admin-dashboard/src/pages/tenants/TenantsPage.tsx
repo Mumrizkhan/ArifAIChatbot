@@ -387,14 +387,77 @@ const TenantsPage: React.FC = () => {
                 />
               </div>
               <div className="grid grid-cols-4 items-center gap-4">
-                <Label htmlFor="edit-domain" className="text-right">
+                <Label htmlFor="edit-subdomain" className="text-right">
                   {t("tenants.domain")}
                 </Label>
                 <Input
-                  id="edit-domain"
-                  value={editingTenant.domain}
-                  onChange={(e) => setEditingTenant({ ...editingTenant, domain: e.target.value })}
+                  id="edit-subdomain"
+                  value={editingTenant.subdomain || editingTenant.domain}
+                  onChange={(e) => setEditingTenant({ ...editingTenant, subdomain: e.target.value })}
                   className="col-span-3"
+                />
+              </div>
+              <div className="grid grid-cols-4 items-center gap-4">
+                <Label htmlFor="edit-customDomain" className="text-right">
+                  {t("tenants.customDomain")}
+                </Label>
+                <Input
+                  id="edit-customDomain"
+                  value={editingTenant.customDomain || ""}
+                  onChange={(e) => setEditingTenant({ ...editingTenant, customDomain: e.target.value })}
+                  className="col-span-3"
+                />
+              </div>
+              <div className="grid grid-cols-4 items-center gap-4">
+                <Label htmlFor="edit-primaryColor" className="text-right">
+                  {t("tenants.primaryColor")}
+                </Label>
+                <Input
+                  id="edit-primaryColor"
+                  type="color"
+                  value={editingTenant.primaryColor || "#3B82F6"}
+                  onChange={(e) => setEditingTenant({ ...editingTenant, primaryColor: e.target.value })}
+                  className="col-span-3 h-10 w-16 p-0 border-none bg-transparent"
+                  style={{ minWidth: "60px" }}
+                />
+              </div>
+              <div className="grid grid-cols-4 items-center gap-4">
+                <Label htmlFor="edit-secondaryColor" className="text-right">
+                  {t("tenants.secondaryColor")}
+                </Label>
+                <Input
+                  id="edit-secondaryColor"
+                  type="color"
+                  value={editingTenant.secondaryColor || "#64748B"}
+                  onChange={(e) => setEditingTenant({ ...editingTenant, secondaryColor: e.target.value })}
+                  className="col-span-3 h-10 w-16 p-0 border-none bg-transparent"
+                  style={{ minWidth: "60px" }}
+                />
+              </div>
+              <div className="grid grid-cols-4 items-center gap-4">
+                <Label htmlFor="edit-defaultLanguage" className="text-right">
+                  {t("tenants.defaultLanguage")}
+                </Label>
+                <Select value={editingTenant.defaultLanguage || "en"} onValueChange={(value) => setEditingTenant({ ...editingTenant, defaultLanguage: value })}>
+                  <SelectTrigger className="col-span-3">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="en">{t("language.english")}</SelectItem>
+                    <SelectItem value="ar">{t("language.arabic")}</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="grid grid-cols-4 items-center gap-4">
+                <Label htmlFor="edit-isRtlEnabled" className="text-right">
+                  {t("tenants.isRtlEnabled")}
+                </Label>
+                <Input
+                  type="checkbox"
+                  id="edit-isRtlEnabled"
+                  checked={editingTenant.isRtlEnabled || false}
+                  onChange={(e) => setEditingTenant({ ...editingTenant, isRtlEnabled: e.target.checked })}
+                  className="col-span-3 h-5 w-5 accent-primary"
                 />
               </div>
               <div className="grid grid-cols-4 items-center gap-4">

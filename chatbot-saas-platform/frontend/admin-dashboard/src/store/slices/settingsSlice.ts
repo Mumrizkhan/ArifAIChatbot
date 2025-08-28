@@ -1,5 +1,5 @@
 import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit';
-import { tenantApi } from '../../services/api';
+import { systemSettingsApi } from '../../services/api';
 
 interface SystemSettings {
   companyName: string;
@@ -71,16 +71,16 @@ const initialState: SettingsState = {
 
 export const fetchSettings = createAsyncThunk(
   'settings/fetchSettings',
-  async (tenantId: string) => {
-    const response = await tenantApi.getTenantSettings(tenantId);
+  async () => {
+    const response = await systemSettingsApi.getSystemSettings();
     return response;
   }
 );
 
 export const updateSettings = createAsyncThunk(
   'settings/updateSettings',
-  async ({ tenantId, settings }: { tenantId: string; settings: Record<string, any> }) => {
-    await tenantApi.updateTenantSettings(tenantId, { settings });
+  async (settings: { systemSettings?: Record<string, any>; notificationSettings?: Record<string, any>; integrationSettings?: Record<string, any> }) => {
+    await systemSettingsApi.updateSystemSettings(settings);
     return settings;
   }
 );
@@ -110,15 +110,15 @@ const settingsSlice = createSlice({
       })
       .addCase(fetchSettings.fulfilled, (state, action) => {
         state.isLoading = false;
-        const settings = action.payload.settings || {};
-        if (settings.system) {
-          state.systemSettings = { ...state.systemSettings, ...settings.system };
+        const data = action.payload;
+        if (data.systemSettings) {
+          state.systemSettings = { ...state.systemSettings, ...data.systemSettings };
         }
-        if (settings.notifications) {
-          state.notificationSettings = { ...state.notificationSettings, ...settings.notifications };
+        if (data.notificationSettings) {
+          state.notificationSettings = { ...state.notificationSettings, ...data.notificationSettings };
         }
-        if (settings.integrations) {
-          state.integrationSettings = { ...state.integrationSettings, ...settings.integrations };
+        if (data.integrationSettings) {
+          state.integrationSettings = { ...state.integrationSettings, ...data.integrationSettings };
         }
       })
       .addCase(fetchSettings.rejected, (state, action) => {

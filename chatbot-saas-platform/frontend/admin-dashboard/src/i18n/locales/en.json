@@ -388,6 +388,8 @@
     "language": "Language",
     "title": "Settings",
     "description": "Manage your application settings and preferences",
+    "saveSettings": "Save Settings",
+    "saving": "Saving...",
     "loadingSettings": "Loading settings...",
     "tabs": {
       "general": "General",

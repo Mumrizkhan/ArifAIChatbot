@@ -23,10 +23,8 @@ const SettingsPage: React.FC = () => {
   const { systemSettings, notificationSettings, integrationSettings, isLoading, isSaving, error } = useSelector((state: RootState) => state.settings);
 
   useEffect(() => {
-    if (user?.tenantId) {
-      dispatch(fetchSettings(user.tenantId));
-    }
-  }, [dispatch, user?.tenantId]);
+    dispatch(fetchSettings());
+  }, [dispatch]);
   useEffect(() => {
     const direction = language === "ar" ? "rtl" : "ltr";
     document.documentElement.dir = direction; // Set the direction (RTL or LTR)
@@ -55,17 +53,18 @@ const SettingsPage: React.FC = () => {
   };
 
   const handleSaveSettings = async () => {
-    if (user?.tenantId) {
+    try {
       await dispatch(
         updateSettings({
-          tenantId: user.tenantId,
-          settings: {
-            system: systemSettings,
-            notifications: notificationSettings,
-            integrations: integrationSettings,
-          },
+          systemSettings: systemSettings,
+          notificationSettings: notificationSettings,
+          integrationSettings: integrationSettings,
         })
-      );
+      ).unwrap();
+      
+      console.log("System settings saved successfully");
+    } catch (error) {
+      console.error("Failed to save system settings:", error);
     }
   };
 
@@ -531,6 +530,15 @@ const SettingsPage: React.FC = () => {
           {t("settings.loadingSettings")}
         </div>
       )}
+
+      <div className="flex justify-end space-x-4 pt-6 border-t">
+        <Button variant="outline" onClick={() => dispatch(clearError())}>
+          {t("common.cancel")}
+        </Button>
+        <Button onClick={handleSaveSettings} disabled={isSaving}>
+          {isSaving ? t("settings.saving") : t("settings.saveSettings")}
+        </Button>
+      </div>
     </div>
   );
 };

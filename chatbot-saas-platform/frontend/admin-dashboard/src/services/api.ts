@@ -90,6 +90,14 @@ export const authApi = {
   },
 };
 
+export const systemSettingsApi = {
+  getSystemSettings: () =>
+    apiClient.get('/tenant-management/systemsettings'),
+  
+  updateSystemSettings: (data: { systemSettings?: Record<string, any>; notificationSettings?: Record<string, any>; integrationSettings?: Record<string, any> }) =>
+    apiClient.put('/tenant-management/systemsettings', data),
+};
+
 export const tenantApi = {
   getTenants: async (page: number, pageSize: number, search?: string) => {
     const params = new URLSearchParams({

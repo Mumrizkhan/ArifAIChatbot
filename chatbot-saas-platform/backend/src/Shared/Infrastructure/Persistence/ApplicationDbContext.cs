@@ -59,6 +59,8 @@ public class ApplicationDbContext : DbContext, IApplicationDbContext
 
     public DbSet<Workflow> Workflows => Set<Workflow>();
 
+    public DbSet<SystemSettings> SystemSettings => Set<SystemSettings>();
+
     public new DbSet<TEntity> Set<TEntity>() where TEntity : class => base.Set<TEntity>();
     public EntityEntry<TEntity> Entry<TEntity>(TEntity entity) where TEntity : class
        => base.Entry(entity);
@@ -450,6 +452,20 @@ public class ApplicationDbContext : DbContext, IApplicationDbContext
                 );
           
         });
+
+        builder.Entity<SystemSettings>(entity =>
+        {
+            entity.HasKey(e => e.Id);
+            entity.Property(e => e.Category).IsRequired().HasMaxLength(64);
+            entity.Property(e => e.Settings)
+                .HasColumnType("nvarchar(max)")
+                .HasConversion(
+                    v => System.Text.Json.JsonSerializer.Serialize(v, new System.Text.Json.JsonSerializerOptions()),
+                    v => System.Text.Json.JsonSerializer.Deserialize<Dictionary<string, object>>(v, new System.Text.Json.JsonSerializerOptions())
+                );
+            entity.Property(e => e.IsActive).IsRequired();
+        });
+
         base.OnModelCreating(builder);
     }
 

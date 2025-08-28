@@ -389,6 +389,8 @@
     "language": "اللغة",
     "title": "الإعدادات",
     "description": "إدارة إعدادات التطبيق وتفضيلاتك",
+    "saveSettings": "حفظ الإعدادات",
+    "saving": "جاري الحفظ...",
     "loadingSettings": "جارٍ تحميل الإعدادات...",
     "tabs": {
       "general": "عام",
