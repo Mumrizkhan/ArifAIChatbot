@@ -56,16 +56,22 @@ const SettingsPage: React.FC = () => {
 
   const handleSaveSettings = async () => {
     if (user?.tenantId) {
-      await dispatch(
-        updateSettings({
-          tenantId: user.tenantId,
-          settings: {
-            system: systemSettings,
-            notifications: notificationSettings,
-            integrations: integrationSettings,
-          },
-        })
-      );
+      try {
+        await dispatch(
+          updateSettings({
+            tenantId: user.tenantId,
+            settings: {
+              system: systemSettings,
+              notifications: notificationSettings,
+              integrations: integrationSettings,
+            },
+          })
+        ).unwrap();
+        
+        console.log("Settings saved successfully");
+      } catch (error) {
+        console.error("Failed to save settings:", error);
+      }
     }
   };
 
@@ -531,6 +537,15 @@ const SettingsPage: React.FC = () => {
           {t("settings.loadingSettings")}
         </div>
       )}
+
+      <div className="flex justify-end space-x-4 pt-6 border-t">
+        <Button variant="outline" onClick={() => dispatch(clearError())}>
+          {t("common.cancel")}
+        </Button>
+        <Button onClick={handleSaveSettings} disabled={isSaving}>
+          {isSaving ? t("settings.saving") : t("settings.saveSettings")}
+        </Button>
+      </div>
     </div>
   );
 };
