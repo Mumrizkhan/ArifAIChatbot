@@ -27,7 +27,7 @@ import { Skeleton } from "../../components/ui/skeleton";
 import { Textarea } from "../../components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../../components/ui/select";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "../../components/ui/dialog";
-import { MessageSquare, Send, Phone, Video, MoreHorizontal, Search, Filter, Paperclip, Smile } from "lucide-react";
+import { MessageSquare, Send, Phone, Video, MoreHorizontal, Search, Filter, Paperclip, Smile, User, Bot, UserCheck } from "lucide-react";
 import { TypingIndicator } from "../../components/TypingIndicator";
 
 const ConversationsPage = () => {
@@ -545,18 +545,69 @@ const ConversationsPage = () => {
                   {selectedConversation.messages && selectedConversation.messages.length > 0 ? (
                     <>
                       {console.log("🔍 Live Agent: Displaying messages:", selectedConversation.messages)}
-                      {selectedConversation.messages.map((message: any) => (
-                        <div key={message.id} className={`flex ${message.sender === "agent" ? "justify-end" : "justify-start"}`}>
-                          <div
-                            className={`max-w-xs lg:max-w-md px-4 py-2 rounded-lg ${
-                              message.sender === "agent" ? "bg-primary text-primary-foreground" : "bg-muted"
-                            }`}
-                          >
-                            <p className="text-sm">{message.content}</p>
-                            <p className="text-xs opacity-70 mt-1">{new Date(message.timestamp).toLocaleTimeString()}</p>
+                      {selectedConversation.messages.map((message: any) => {
+                        const isAgent = message.sender === "agent";
+                        const isCustomer = message.sender === "customer";
+                        const isBot = message.sender === "bot" || message.sender === "system";
+                        
+                        return (
+                          <div key={message.id} className={`flex ${isAgent ? "justify-end" : "justify-start"} items-start space-x-2`}>
+                            {/* Avatar for non-agent messages (left side) */}
+                            {!isAgent && (
+                              <div className="flex-shrink-0">
+                                {isCustomer ? (
+                                  <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
+                                    <User className="w-4 h-4 text-blue-600" />
+                                  </div>
+                                ) : (
+                                  <div className="w-8 h-8 bg-gray-100 rounded-full flex items-center justify-center">
+                                    <Bot className="w-4 h-4 text-gray-600" />
+                                  </div>
+                                )}
+                              </div>
+                            )}
+                            
+                            {/* Message bubble */}
+                            <div
+                              className={`max-w-xs lg:max-w-md px-4 py-2 rounded-lg ${
+                                isAgent 
+                                  ? "bg-primary text-primary-foreground" 
+                                  : isCustomer
+                                    ? "bg-blue-50 border border-blue-200" 
+                                    : "bg-gray-50 border border-gray-200"
+                              }`}
+                            >
+                              {/* Sender name for non-agent messages */}
+                              {!isAgent && (
+                                <p className="text-xs font-medium text-muted-foreground mb-1">
+                                  {isCustomer 
+                                    ? selectedConversation.customer?.name || "Customer" 
+                                    : isBot 
+                                      ? "AI Assistant" 
+                                      : "System"
+                                  }
+                                </p>
+                              )}
+                              
+                              <p className={`text-sm ${isAgent ? "" : "text-gray-900"}`}>
+                                {message.content}
+                              </p>
+                              <p className={`text-xs mt-1 ${isAgent ? "opacity-70" : "text-gray-500"}`}>
+                                {new Date(message.timestamp).toLocaleTimeString()}
+                              </p>
+                            </div>
+                            
+                            {/* Avatar for agent messages (right side) */}
+                            {isAgent && (
+                              <div className="flex-shrink-0">
+                                <div className="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center">
+                                  <UserCheck className="w-4 h-4 text-green-600" />
+                                </div>
+                              </div>
+                            )}
                           </div>
-                        </div>
-                      ))}
+                        );
+                      })}
                       
                       {/* Typing Indicator */}
                       {conversationId && typingUsers[conversationId] && (
