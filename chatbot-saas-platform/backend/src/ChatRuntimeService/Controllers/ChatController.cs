@@ -82,6 +82,8 @@ public class ChatController : ControllerBase
     {
         try
         {
+            _logger.LogInformation($"📨 Received message request for conversation {request.ConversationId}");
+            
             if (string.IsNullOrWhiteSpace(request.Content))
             {
                 return BadRequest(new { message = "Message content is required" });
@@ -179,6 +181,8 @@ public class ChatController : ControllerBase
                 _tenantService.GetCurrentTenantId().ToString(),
                 conversation.Language ?? "en");
 
+            _logger.LogInformation($"🤖 Creating bot message for conversation {conversationId}");
+
             var botMessage = new Message
             {
                 Id = Guid.NewGuid(),
@@ -192,10 +196,14 @@ public class ChatController : ControllerBase
                 IsRead = false
             };
 
+            _logger.LogInformation($"🤖 Adding bot message to database: {botMessage.Id} for conversation {conversationId}");
             _context.Messages.Add(botMessage);
             conversation.MessageCount++;
             conversation.UpdatedAt = DateTime.UtcNow;
+            
+            _logger.LogInformation($"🤖 Saving bot message to database: {botMessage.Id}");
             await _context.SaveChangesAsync();
+            _logger.LogInformation($"🤖 Bot message saved successfully: {botMessage.Id}");
 
             var botMessageDto = new
             {

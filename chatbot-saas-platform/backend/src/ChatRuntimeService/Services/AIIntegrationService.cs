@@ -42,11 +42,19 @@ public class AIIntegrationService : IAIIntegrationService
             }
 
             _logger.LogWarning($"AI service returned {response.StatusCode} for conversation {conversationId}");
+            
+            // Trigger escalation when AI service is unavailable or returns error
+            await TriggerEscalationAsync(conversationId, tenantId);
+            
             return "I'm sorry, I'm having trouble understanding. Let me connect you with a human agent.";
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, $"Error getting AI response for conversation {conversationId}");
+            
+            // Trigger escalation to human agent when experiencing technical difficulties
+            await TriggerEscalationAsync(conversationId, tenantId);
+            
             return "I'm experiencing technical difficulties. Please wait while I connect you with a human agent.";
         }
     }
@@ -55,6 +63,35 @@ public class AIIntegrationService : IAIIntegrationService
     {
         _httpClient.DefaultRequestHeaders.Remove("X-Tenant-ID");
         _httpClient.DefaultRequestHeaders.Add("X-Tenant-ID", tenantId);
+    }
+
+    private async Task TriggerEscalationAsync(string conversationId, string tenantId)
+    {
+        try
+        {
+            _logger.LogInformation($"Triggering escalation for conversation {conversationId} due to AI technical difficulties");
+            
+            // Set tenant header for the escalation request
+            SetTenantId(tenantId);
+            
+            // Call the escalation endpoint on the same service (ChatRuntimeService)
+            var escalationUrl = _configuration["Services:ChatRuntime"] ?? "http://localhost:5002";
+            var response = await _httpClient.PostAsync($"{escalationUrl}/api/chat/conversations/{conversationId}/escalate", null);
+            
+            if (response.IsSuccessStatusCode)
+            {
+                _logger.LogInformation($"Successfully triggered escalation for conversation {conversationId}");
+            }
+            else
+            {
+                _logger.LogWarning($"Failed to trigger escalation for conversation {conversationId}. Status: {response.StatusCode}");
+            }
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, $"Error triggering escalation for conversation {conversationId}");
+            // Don't rethrow - escalation failure shouldn't prevent the error message from being returned
+        }
     }
 
     public async Task<bool> ShouldTransferToAgentAsync(string message, string conversationId,string tenantId)

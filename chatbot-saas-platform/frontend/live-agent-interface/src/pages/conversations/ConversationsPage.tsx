@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useTranslation } from "react-i18next";
 import { AppDispatch, RootState } from "../../store/store";
@@ -43,6 +43,9 @@ const ConversationsPage = () => {
   const [isTransferDialogOpen, setIsTransferDialogOpen] = useState(false);
   const [previousConversationId, setPreviousConversationId] = useState<string | null>(null);
   const [typingTimeout, setTypingTimeout] = useState<NodeJS.Timeout | null>(null);
+  
+  // Ref for auto-scrolling messages container
+  const messagesEndRef = useRef<HTMLDivElement>(null);
 
   // Get the actual selected conversation object
   const selectedConversation = conversations?.find((conv) => conv.id === conversationId) || null;
@@ -77,6 +80,14 @@ const ConversationsPage = () => {
         console.log("🔥 Live Agent: MessageReceived event received:", messageDto);
         console.log("🔥 Live Agent: Message sender:", messageDto.sender);
         console.log("🔥 Live Agent: Message conversation ID:", messageDto.conversationId);
+        console.log("🔥 Live Agent: Current agent ID:", currentAgent?.id);
+        
+        // Skip messages sent by the current agent to prevent duplicates
+        // (agent messages are already added via sendMessage.fulfilled)
+        if (messageDto.sender === "agent" && messageDto.agentId === currentAgent?.id) {
+          console.log("🚫 Live Agent: Skipping own message to prevent duplicate");
+          return;
+        }
         
         // Transform the message format to match the live agent interface expectations
         const transformedMessage = {
@@ -97,20 +108,20 @@ const ConversationsPage = () => {
       // Set up typing indicator handlers
       agentSignalRService.setOnUserStartedTyping((typingInfo) => {
         console.log("🔄 Live Agent: Customer started typing:", typingInfo);
-        if (typingInfo.conversationId === conversationId) {
-          dispatch(setTypingUser({
-            conversationId: typingInfo.conversationId,
-            userId: typingInfo.userId,
-            userName: typingInfo.userName || "Customer"
-          }));
-        }
+        // Show typing for any conversation, not just the currently selected one
+        dispatch(setTypingUser({
+          conversationId: typingInfo.conversationId,
+          userId: typingInfo.userId,
+          userName: typingInfo.userName || "Customer"
+        }));
+        console.log("🔄 Live Agent: Dispatched setTypingUser action");
       });
 
       agentSignalRService.setOnUserStoppedTyping((typingInfo) => {
         console.log("🔄 Live Agent: Customer stopped typing:", typingInfo);
-        if (typingInfo.conversationId === conversationId) {
-          dispatch(removeTypingUser(typingInfo.conversationId));
-        }
+        // Remove typing for any conversation, not just the currently selected one
+        dispatch(removeTypingUser(typingInfo.conversationId));
+        console.log("🔄 Live Agent: Dispatched removeTypingUser action");
       });
 
       // Set up message read status handler
@@ -132,7 +143,7 @@ const ConversationsPage = () => {
         agentSignalRService.setOnMessageMarkedAsRead(() => {});
       }
     };
-  }, [dispatch]); // Remove conversationId from dependency array to prevent re-fetching all conversations
+  }, [dispatch, currentAgent?.id]); // Added currentAgent dependency
 
   // Effect to fetch conversation details when a conversation is selected
   useEffect(() => {
@@ -155,6 +166,13 @@ const ConversationsPage = () => {
       setPreviousConversationId(conversationId);
     }
   }, [conversationId, previousConversationId]);
+
+  // Auto-scroll to bottom when messages change
+  useEffect(() => {
+    if (messagesEndRef.current) {
+      messagesEndRef.current.scrollIntoView({ behavior: 'smooth' });
+    }
+  }, [selectedConversation?.messages, typingUsers]);
 
   const filteredConversations = Array.isArray(conversations)
     ? conversations.filter((conversation) => {
@@ -613,6 +631,9 @@ const ConversationsPage = () => {
                       {conversationId && typingUsers[conversationId] && (
                         <TypingIndicator userName={typingUsers[conversationId].userName} />
                       )}
+                      
+                      {/* Auto-scroll target */}
+                      <div ref={messagesEndRef} />
                     </>
                   ) : (
                     <div className="text-center py-8">

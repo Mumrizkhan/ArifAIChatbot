@@ -190,6 +190,7 @@ public class TenantsController : ControllerBase
             return StatusCode(500, new { message = "Internal server error" });
         }
     }
+    
 
     [HttpDelete("{id}")]
     public async Task<IActionResult> DeleteTenant(Guid id)
