@@ -23,10 +23,8 @@ const SettingsPage: React.FC = () => {
   const { systemSettings, notificationSettings, integrationSettings, isLoading, isSaving, error } = useSelector((state: RootState) => state.settings);
 
   useEffect(() => {
-    if (user?.tenantId) {
-      dispatch(fetchSettings(user.tenantId));
-    }
-  }, [dispatch, user?.tenantId]);
+    dispatch(fetchSettings());
+  }, [dispatch]);
   useEffect(() => {
     const direction = language === "ar" ? "rtl" : "ltr";
     document.documentElement.dir = direction; // Set the direction (RTL or LTR)
@@ -55,23 +53,18 @@ const SettingsPage: React.FC = () => {
   };
 
   const handleSaveSettings = async () => {
-    if (user?.tenantId) {
-      try {
-        await dispatch(
-          updateSettings({
-            tenantId: user.tenantId,
-            settings: {
-              system: systemSettings,
-              notifications: notificationSettings,
-              integrations: integrationSettings,
-            },
-          })
-        ).unwrap();
-        
-        console.log("Settings saved successfully");
-      } catch (error) {
-        console.error("Failed to save settings:", error);
-      }
+    try {
+      await dispatch(
+        updateSettings({
+          systemSettings: systemSettings,
+          notificationSettings: notificationSettings,
+          integrationSettings: integrationSettings,
+        })
+      ).unwrap();
+      
+      console.log("System settings saved successfully");
+    } catch (error) {
+      console.error("Failed to save system settings:", error);
     }
   };
 

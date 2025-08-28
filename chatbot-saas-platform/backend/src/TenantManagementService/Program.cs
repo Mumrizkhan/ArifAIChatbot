@@ -51,6 +51,7 @@ builder.Services.AddInfrastructure(builder.Configuration);
 builder.Services.AddScoped<ITenantManagementService, TenantManagementService.Services.TenantManagementService>();
 builder.Services.AddScoped<IChatbotConfigService, ChatbotConfigService>();
 builder.Services.AddScoped<ITeamService, TeamService>();
+builder.Services.AddScoped<ISystemSettingsService, SystemSettingsService>();
 builder.Services.AddHttpContextAccessor();
 
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
