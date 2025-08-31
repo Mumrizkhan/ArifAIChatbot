@@ -107,6 +107,11 @@ export const cancelSubscription = createAsyncThunk("subscription/cancelSubscript
   return id;
 });
 
+export const createPlan = createAsyncThunk("subscription/createPlan", async (planData: any) => {
+  const response = await subscriptionApi.createPlan(planData);
+  return response;
+});
+
 const subscriptionSlice = createSlice({
   name: "subscription",
   initialState,
@@ -167,6 +172,9 @@ const subscriptionSlice = createSlice({
         if (index !== -1) {
           state.subscriptions[index].status = "Cancelled";
         }
+      })
+      .addCase(createPlan.fulfilled, (state, action) => {
+        state.plans.unshift(action.payload);
       });
   },
 });

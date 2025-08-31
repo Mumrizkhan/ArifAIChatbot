@@ -22,7 +22,8 @@
     "confirm": "Confirm",
     "yes": "Yes",
     "no": "No",
-    "retry": "Retry"
+    "retry": "Retry",
+    "remove": "Remove"
   },
   "navigation": {
     "dashboard": "Dashboard",
@@ -303,7 +304,30 @@
     "planTypes": {
       "basic": "Basic",
       "pro": "Pro",
-      "enterprise": "Enterprise"
+      "enterprise": "Enterprise",
+      "standard": "Standard",
+      "premium": "Premium"
+    },
+    "fields": {
+      "name": "Name",
+      "description": "Description",
+      "monthlyPrice": "Monthly Price",
+      "yearlyPrice": "Yearly Price",
+      "currency": "Currency",
+      "stripePriceIdMonthly": "Stripe Price ID (Monthly)",
+      "stripePriceIdYearly": "Stripe Price ID (Yearly)",
+      "trialDays": "Trial Days",
+      "sortOrder": "Sort Order",
+      "tenantId": "Tenant ID",
+      "isActive": "Active",
+      "isPublic": "Public",
+      "type": "Plan Type",
+      "features": "Features",
+      "featureName": "Feature Name",
+      "featureDescription": "Feature Description",
+      "featureIsEnabled": "Enabled",
+      "featureLimit": "Limit",
+      "addFeature": "Add Feature"
     },
     "status": {
       "label": "Status",
