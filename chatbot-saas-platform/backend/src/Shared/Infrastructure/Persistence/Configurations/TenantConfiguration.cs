@@ -42,10 +42,12 @@ public class TenantConfiguration : IEntityTypeConfiguration<Tenant>
             .HasMaxLength(10)
             .HasDefaultValue("en");
 
-        builder.Property(t => t.Settings)
-            .HasConversion(
-                v => System.Text.Json.JsonSerializer.Serialize(v, new System.Text.Json.JsonSerializerOptions()),
-                v => System.Text.Json.JsonSerializer.Deserialize<Dictionary<string, object>>(v, new System.Text.Json.JsonSerializerOptions()))
-           .HasColumnType("nvarchar(max)");
+        
+builder.Property(t => t.Settings)
+    .HasConversion(
+        v => System.Text.Json.JsonSerializer.Serialize(v, new System.Text.Json.JsonSerializerOptions()),
+        v => System.Text.Json.JsonSerializer.Deserialize<Dictionary<string, object>>(v, new System.Text.Json.JsonSerializerOptions()) ?? new Dictionary<string, object>())
+    .HasColumnType("nvarchar(max)");
+              
     }
 }

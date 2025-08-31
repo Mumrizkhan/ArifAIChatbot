@@ -14,6 +14,7 @@ public class TenantDto
     public DateTime? TrialEndsAt { get; set; }
     public DateTime CreatedAt { get; set; }
     public string? LogoUrl { get; set; }
+    public Dictionary<string, object> Settings { get; set; }
     public string? Role { get; set; }
 }
 

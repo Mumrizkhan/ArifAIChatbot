@@ -71,20 +71,25 @@ public class TenantManagementService : ITenantManagementService
             query = query.Where(t => t.Name.Contains(search) || 
                                    (t.Domain != null && t.Domain.Contains(search)));
         }
-
-        var totalCount = await query.CountAsync();
-        var tenants = await query
-            .Skip((page - 1) * pageSize)
-            .Take(pageSize)
-            .ToListAsync();
-
-        return new PaginatedResult<TenantDto>
+        try
         {
-            Items = tenants.Select(MapToDto).ToList(),
-            TotalCount = totalCount,
-            Page = page,
-            PageSize = pageSize
-        };
+            var totalCount = await query.CountAsync();
+            var tenants = await query
+                .Skip((page - 1) * pageSize)
+                .Take(pageSize)
+                .ToListAsync();
+
+            return new PaginatedResult<TenantDto>
+            {
+                Items = tenants.Select(MapToDto).ToList(),
+                TotalCount = totalCount,
+                Page = page,
+                PageSize = pageSize
+            };
+        }catch(Exception ex)
+        {
+            return null;
+        }
     }
 
     public async Task<TenantDto?> GetTenantAsync(Guid id, Guid? userId)
@@ -254,7 +259,8 @@ public class TenantManagementService : ITenantManagementService
             IsRtlEnabled = tenant.IsRtlEnabled,
             TrialEndsAt = tenant.TrialEndsAt,
             CreatedAt = tenant.CreatedAt,
-            LogoUrl = tenant.LogoUrl
+            LogoUrl = tenant.LogoUrl,
+            Settings = tenant.Settings
         };
     }
 }
