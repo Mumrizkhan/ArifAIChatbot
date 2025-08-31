@@ -22,7 +22,8 @@
     "yes": "نعم",
     "no": "لا",
     "unknown": "غير معروف",
-    "retry": "إعادة المحاولة"
+    "retry": "إعادة المحاولة",
+    "remove": ""
   },
   "navigation": {
     "dashboard": "لوحة التحكم",
@@ -302,9 +303,11 @@
     "manageSubscriptions": "إدارة جميع اشتراكات العملاء",
     "searchPlaceholder": "البحث في الاشتراكات...",
     "planTypes": {
-      "basic": "أساسي",
-      "pro": "احترافي",
-      "enterprise": "مؤسسي"
+      "standard": "Standard",
+      "premium": "Premium",
+      "enterprise": "Enterprise",
+      "basic": "Basic",
+      "pro": "Pro"
     },
     "status": {
       "label": "الحالة",
@@ -379,6 +382,27 @@
     },
     "errors": {
       "loadingError": "خطأ في تحميل الاشتراكات"
+    },
+    "fields": {
+      "name": "الاسم",
+      "description": "الوصف",
+      "monthlyPrice": "السعر الشهري",
+      "yearlyPrice": "السعر السنوي",
+      "currency": "العملة",
+      "stripePriceIdMonthly": "معرف Stripe الشهري",
+      "stripePriceIdYearly": "معرف Stripe السنوي",
+      "trialDays": "أيام التجربة",
+      "sortOrder": "ترتيب العرض",
+      "tenantId": "معرف المستأجر",
+      "isActive": "نشط",
+      "isPublic": "عام",
+      "type": "نوع الخطة",
+      "features": "الميزات",
+      "featureName": "اسم الميزة",
+      "featureDescription": "وصف الميزة",
+      "featureIsEnabled": "مفعلة",
+      "featureLimit": "الحد",
+      "addFeature": "إضافة ميزة"
     }
   },
   "settings": {
