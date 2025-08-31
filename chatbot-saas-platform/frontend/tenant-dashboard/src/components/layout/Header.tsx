@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { useAppSelector, useAppDispatch } from '../../hooks/redux';
 import { logout } from '../../store/slices/authSlice';
 import { setLanguage, toggleDarkMode } from '../../store/slices/themeSlice';
+import { TenantNotificationCenter } from '../TenantNotificationCenter';
 import { 
   Menu, 
   Moon, 
@@ -11,7 +12,8 @@ import {
   LogOut,
   Settings,
   User,
-  ChevronDown
+  ChevronDown,
+  Bell
 } from 'lucide-react';
 
 interface HeaderProps {
@@ -22,9 +24,11 @@ export const Header: React.FC<HeaderProps> = ({ onToggleSidebar }) => {
   const { t } = useTranslation();
   const dispatch = useAppDispatch();
   const [userMenuOpen, setUserMenuOpen] = useState(false);
+  const [notificationCenterOpen, setNotificationCenterOpen] = useState(false);
   
   const { user } = useAppSelector((state) => state.auth);
   const { isDarkMode, language } = useAppSelector((state) => state.theme);
+  const { tenantNotifications } = useAppSelector((state) => state.analytics);
 
   const handleLogout = () => {
     dispatch(logout());
@@ -48,6 +52,18 @@ export const Header: React.FC<HeaderProps> = ({ onToggleSidebar }) => {
         </div>
 
         <div className="flex items-center space-x-4 rtl:space-x-reverse">
+          <button
+            onClick={() => setNotificationCenterOpen(!notificationCenterOpen)}
+            className="relative p-2 rounded-md text-gray-400 hover:text-gray-600 hover:bg-gray-100 dark:hover:bg-gray-700"
+          >
+            <Bell size={20} />
+            {tenantNotifications.length > 0 && (
+              <span className="absolute -top-1 -right-1 h-4 w-4 bg-red-500 text-white text-xs rounded-full flex items-center justify-center">
+                {tenantNotifications.length > 9 ? '9+' : tenantNotifications.length}
+              </span>
+            )}
+          </button>
+
           <button
             onClick={() => dispatch(toggleDarkMode())}
             className="p-2 rounded-md text-gray-400 hover:text-gray-600 hover:bg-gray-100 dark:hover:bg-gray-700"
@@ -101,6 +117,11 @@ export const Header: React.FC<HeaderProps> = ({ onToggleSidebar }) => {
           </div>
         </div>
       </div>
+      
+      <TenantNotificationCenter 
+        isOpen={notificationCenterOpen} 
+        onClose={() => setNotificationCenterOpen(false)} 
+      />
     </header>
   );
 };

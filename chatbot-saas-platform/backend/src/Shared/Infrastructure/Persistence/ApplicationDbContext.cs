@@ -58,14 +58,12 @@ public class ApplicationDbContext : DbContext, IApplicationDbContext
     public DbSet<ChatbotConfig> ChatbotConfigs => Set<ChatbotConfig>();
 
     public DbSet<Workflow> Workflows => Set<Workflow>();
-
+    public DbSet<Notification> Notifications => Set<Notification>();
     public DbSet<SystemSettings> SystemSettings => Set<SystemSettings>();
 
     public new DbSet<TEntity> Set<TEntity>() where TEntity : class => base.Set<TEntity>();
     public EntityEntry<TEntity> Entry<TEntity>(TEntity entity) where TEntity : class
        => base.Entry(entity);
-    // Example usage of ApplicationDbContextOptionsBuilder.Configure
-    // This would typically be in your startup or composition root, not inside ApplicationDbContext itself.
 
 
     protected override void OnModelCreating(ModelBuilder builder)
@@ -94,13 +92,13 @@ public class ApplicationDbContext : DbContext, IApplicationDbContext
                 .HasColumnType("nvarchar(max)")
                 .HasConversion(
                     v => System.Text.Json.JsonSerializer.Serialize(v, new System.Text.Json.JsonSerializerOptions()),
-                    v => System.Text.Json.JsonSerializer.Deserialize<Dictionary<string, PlanFeature>>(v, new System.Text.Json.JsonSerializerOptions())
+                    v => string.IsNullOrEmpty(v) ? new Dictionary<string, PlanFeature>() : System.Text.Json.JsonSerializer.Deserialize<Dictionary<string, PlanFeature>>(v, new System.Text.Json.JsonSerializerOptions())
                 );
             entity.Property(e => e.Limits)
                 .HasColumnType("nvarchar(max)")
                 .HasConversion(
                     v => System.Text.Json.JsonSerializer.Serialize(v, new System.Text.Json.JsonSerializerOptions()),
-                    v => System.Text.Json.JsonSerializer.Deserialize<Dictionary<string, int>>(v, new System.Text.Json.JsonSerializerOptions())
+                    v => string.IsNullOrEmpty(v) ? new Dictionary<string, int>() : System.Text.Json.JsonSerializer.Deserialize<Dictionary<string, int>>(v, new System.Text.Json.JsonSerializerOptions())
                 );
             entity.Property(e => e.StripePriceIdMonthly).HasMaxLength(64);
             entity.Property(e => e.StripePriceIdYearly).HasMaxLength(64);
@@ -129,7 +127,7 @@ public class ApplicationDbContext : DbContext, IApplicationDbContext
                 .HasColumnType("nvarchar(max)")
                 .HasConversion(
                     v => System.Text.Json.JsonSerializer.Serialize(v, new System.Text.Json.JsonSerializerOptions()),
-                    v => System.Text.Json.JsonSerializer.Deserialize<Dictionary<string, object>>(v, new System.Text.Json.JsonSerializerOptions())
+                    v => string.IsNullOrEmpty(v) ? new Dictionary<string, object>() : System.Text.Json.JsonSerializer.Deserialize<Dictionary<string, object>>(v, new System.Text.Json.JsonSerializerOptions())
                 );
             entity.Property(e => e.TrialDays);
             entity.Property(e => e.TrialEndDate);
@@ -160,7 +158,7 @@ public class ApplicationDbContext : DbContext, IApplicationDbContext
                  .HasColumnType("nvarchar(max)")
                  .HasConversion(
                      v => System.Text.Json.JsonSerializer.Serialize(v, new System.Text.Json.JsonSerializerOptions()),
-                     v => System.Text.Json.JsonSerializer.Deserialize<Dictionary<string, object>>(v, new System.Text.Json.JsonSerializerOptions())
+                     v => string.IsNullOrEmpty(v) ? new Dictionary<string, object>() : System.Text.Json.JsonSerializer.Deserialize<Dictionary<string, object>>(v, new System.Text.Json.JsonSerializerOptions())
                  );
         });
 
@@ -178,7 +176,7 @@ public class ApplicationDbContext : DbContext, IApplicationDbContext
                 .HasColumnType("nvarchar(max)")
                 .HasConversion(
                     v => System.Text.Json.JsonSerializer.Serialize(v, new System.Text.Json.JsonSerializerOptions()),
-                    v => System.Text.Json.JsonSerializer.Deserialize<Dictionary<string, object>>(v, new System.Text.Json.JsonSerializerOptions())
+                    v => string.IsNullOrEmpty(v) ? new Dictionary<string, object>() : System.Text.Json.JsonSerializer.Deserialize<Dictionary<string, object>>(v, new System.Text.Json.JsonSerializerOptions())
                 );
             entity.HasOne(e => e.Subscription)
                 .WithMany(s => s.UsageRecords)
@@ -194,7 +192,7 @@ public class ApplicationDbContext : DbContext, IApplicationDbContext
                 .HasColumnType("nvarchar(max)")
                 .HasConversion(
                     v => System.Text.Json.JsonSerializer.Serialize(v, new System.Text.Json.JsonSerializerOptions()),
-                    v => System.Text.Json.JsonSerializer.Deserialize<Dictionary<string, object>>(v, new System.Text.Json.JsonSerializerOptions())
+                    v => string.IsNullOrEmpty(v) ? new Dictionary<string, object>() : System.Text.Json.JsonSerializer.Deserialize<Dictionary<string, object>>(v, new System.Text.Json.JsonSerializerOptions())
                 );
         });
 
@@ -215,7 +213,7 @@ public class ApplicationDbContext : DbContext, IApplicationDbContext
                   .HasColumnType("nvarchar(max)")
                   .HasConversion(
                       v => System.Text.Json.JsonSerializer.Serialize(v, new System.Text.Json.JsonSerializerOptions()),
-                      v => System.Text.Json.JsonSerializer.Deserialize<Dictionary<string, object>>(v, new System.Text.Json.JsonSerializerOptions())
+                      v => string.IsNullOrEmpty(v) ? new Dictionary<string, object>() : System.Text.Json.JsonSerializer.Deserialize<Dictionary<string, object>>(v, new System.Text.Json.JsonSerializerOptions())
                   );
             entity.HasOne<Invoice>()
                   .WithMany(i => i.LineItems)
@@ -232,7 +230,7 @@ public class ApplicationDbContext : DbContext, IApplicationDbContext
                   .HasColumnType("nvarchar(max)")
                   .HasConversion(
                       v => System.Text.Json.JsonSerializer.Serialize(v, new System.Text.Json.JsonSerializerOptions()),
-                      v => System.Text.Json.JsonSerializer.Deserialize<Dictionary<string, object>>(v, new System.Text.Json.JsonSerializerOptions())
+                      v => string.IsNullOrEmpty(v) ? new Dictionary<string, object>() : System.Text.Json.JsonSerializer.Deserialize<Dictionary<string, object>>(v, new System.Text.Json.JsonSerializerOptions())
                   );
         });
 
@@ -245,7 +243,7 @@ public class ApplicationDbContext : DbContext, IApplicationDbContext
                  .HasColumnType("nvarchar(max)")
                  .HasConversion(
                      v => System.Text.Json.JsonSerializer.Serialize(v, new System.Text.Json.JsonSerializerOptions()),
-                     v => System.Text.Json.JsonSerializer.Deserialize<Dictionary<string, object>>(v, new System.Text.Json.JsonSerializerOptions())
+                     v => string.IsNullOrEmpty(v) ? new Dictionary<string, object>() : System.Text.Json.JsonSerializer.Deserialize<Dictionary<string, object>>(v, new System.Text.Json.JsonSerializerOptions())
                  );
         });
 
@@ -272,7 +270,7 @@ public class ApplicationDbContext : DbContext, IApplicationDbContext
                 .HasColumnType("nvarchar(max)")
                 .HasConversion(
                     v => System.Text.Json.JsonSerializer.Serialize(v, new System.Text.Json.JsonSerializerOptions()),
-                    v => System.Text.Json.JsonSerializer.Deserialize<Dictionary<string, object>>(v, new System.Text.Json.JsonSerializerOptions())
+                    v => string.IsNullOrEmpty(v) ? new Dictionary<string, object>() : System.Text.Json.JsonSerializer.Deserialize<Dictionary<string, object>>(v, new System.Text.Json.JsonSerializerOptions())
                 );
             entity.Property(e => e.ChunkCount);
             entity.Property(e => e.IsEmbedded);
@@ -296,13 +294,13 @@ public class ApplicationDbContext : DbContext, IApplicationDbContext
                 .HasColumnType("nvarchar(max)")
                 .HasConversion(
                     v => System.Text.Json.JsonSerializer.Serialize(v, new System.Text.Json.JsonSerializerOptions()),
-                    v => System.Text.Json.JsonSerializer.Deserialize<Dictionary<string, object>>(v, new System.Text.Json.JsonSerializerOptions())
+                    v => string.IsNullOrEmpty(v) ? new Dictionary<string, object>() : System.Text.Json.JsonSerializer.Deserialize<Dictionary<string, object>>(v, new System.Text.Json.JsonSerializerOptions())
                 );
             entity.Property(e => e.Position)
                 .HasColumnType("nvarchar(max)")
                 .HasConversion(
                     v => System.Text.Json.JsonSerializer.Serialize(v, new System.Text.Json.JsonSerializerOptions()),
-                    v => System.Text.Json.JsonSerializer.Deserialize<WorkflowStepPosition>(v, new System.Text.Json.JsonSerializerOptions())
+                    v => string.IsNullOrEmpty(v) ? null : System.Text.Json.JsonSerializer.Deserialize<WorkflowStepPosition>(v, new System.Text.Json.JsonSerializerOptions())
                 );
             entity.Property(e => e.InputPorts)
                 .HasConversion(
@@ -320,7 +318,7 @@ public class ApplicationDbContext : DbContext, IApplicationDbContext
                 .HasColumnType("nvarchar(max)")
                 .HasConversion(
                     v => System.Text.Json.JsonSerializer.Serialize(v, new System.Text.Json.JsonSerializerOptions()),
-                    v => System.Text.Json.JsonSerializer.Deserialize<WorkflowStepCondition>(v, new System.Text.Json.JsonSerializerOptions())
+                    v => string.IsNullOrEmpty(v) ? null : System.Text.Json.JsonSerializer.Deserialize<WorkflowStepCondition>(v, new System.Text.Json.JsonSerializerOptions())
                 );
         });
 
@@ -334,7 +332,7 @@ public class ApplicationDbContext : DbContext, IApplicationDbContext
                 .HasColumnType("nvarchar(max)")
                 .HasConversion(
                     v => System.Text.Json.JsonSerializer.Serialize(v, new System.Text.Json.JsonSerializerOptions()),
-                    v => System.Text.Json.JsonSerializer.Deserialize<WorkflowStepPosition>(v, new System.Text.Json.JsonSerializerOptions())
+                    v => string.IsNullOrEmpty(v) ? null : System.Text.Json.JsonSerializer.Deserialize<WorkflowStepPosition>(v, new System.Text.Json.JsonSerializerOptions())
                 );
         });
 
@@ -357,13 +355,13 @@ public class ApplicationDbContext : DbContext, IApplicationDbContext
                 .HasColumnType("nvarchar(max)")
                 .HasConversion(
                     v => System.Text.Json.JsonSerializer.Serialize(v, new System.Text.Json.JsonSerializerOptions()),
-                    v => System.Text.Json.JsonSerializer.Deserialize<WorkflowDefinition>(v, new System.Text.Json.JsonSerializerOptions())
+                    v => string.IsNullOrEmpty(v) ? null : System.Text.Json.JsonSerializer.Deserialize<WorkflowDefinition>(v, new System.Text.Json.JsonSerializerOptions())
                 );
             entity.Property(e => e.DefaultVariables)
                 .HasColumnType("nvarchar(max)")
                 .HasConversion(
                     v => System.Text.Json.JsonSerializer.Serialize(v, new System.Text.Json.JsonSerializerOptions()),
-                    v => System.Text.Json.JsonSerializer.Deserialize<Dictionary<string, object>>(v, new System.Text.Json.JsonSerializerOptions())
+                    v => string.IsNullOrEmpty(v) ? new Dictionary<string, object>() : System.Text.Json.JsonSerializer.Deserialize<Dictionary<string, object>>(v, new System.Text.Json.JsonSerializerOptions())
                 );
             entity.Property(e => e.Tags)
                 .HasConversion(
@@ -383,7 +381,7 @@ public class ApplicationDbContext : DbContext, IApplicationDbContext
                   .HasColumnType("nvarchar(max)")
                   .HasConversion(
                       v => System.Text.Json.JsonSerializer.Serialize(v, new System.Text.Json.JsonSerializerOptions()),
-                      v => System.Text.Json.JsonSerializer.Deserialize<Dictionary<string, object>>(v, new System.Text.Json.JsonSerializerOptions())
+                      v => string.IsNullOrEmpty(v) ? new Dictionary<string, object>() : System.Text.Json.JsonSerializer.Deserialize<Dictionary<string, object>>(v, new System.Text.Json.JsonSerializerOptions())
                   );
         });
 
@@ -402,9 +400,10 @@ public class ApplicationDbContext : DbContext, IApplicationDbContext
                 .HasColumnType("nvarchar(max)")
                 .HasConversion(
                     v => System.Text.Json.JsonSerializer.Serialize(v, new System.Text.Json.JsonSerializerOptions()),
-                    v => System.Text.Json.JsonSerializer.Deserialize<Dictionary<string, object>>(v, new System.Text.Json.JsonSerializerOptions())
+                    v => string.IsNullOrEmpty(v) ? new Dictionary<string, object>() : System.Text.Json.JsonSerializer.Deserialize<Dictionary<string, object>>(v, new System.Text.Json.JsonSerializerOptions())
                 );
         });
+
         builder.Entity<ChatbotConfig>(entity =>
         {
             entity.HasKey(e => e.Id);
@@ -415,13 +414,14 @@ public class ApplicationDbContext : DbContext, IApplicationDbContext
                 .HasColumnType("nvarchar(max)")
                 .HasConversion(
                     v => System.Text.Json.JsonSerializer.Serialize(v, new System.Text.Json.JsonSerializerOptions()),
-                    v => System.Text.Json.JsonSerializer.Deserialize<Dictionary<string, object>>(v, new System.Text.Json.JsonSerializerOptions())
+                    v => string.IsNullOrEmpty(v) ? new Dictionary<string, object>() : System.Text.Json.JsonSerializer.Deserialize<Dictionary<string, object>>(v, new System.Text.Json.JsonSerializerOptions())
                 );
             
             entity.Property(e => e.IsActive).IsRequired();
             entity.Property(e => e.CreatedAt).IsRequired();
             entity.Property(e => e.UpdatedAt);
         });
+
         builder.Entity<Workflow>(entity =>
         {
             entity.HasKey(e => e.Id);
@@ -430,27 +430,26 @@ public class ApplicationDbContext : DbContext, IApplicationDbContext
                 .HasColumnType("nvarchar(max)")
                 .HasConversion(
                     v => System.Text.Json.JsonSerializer.Serialize(v, new System.Text.Json.JsonSerializerOptions()),
-                    v => System.Text.Json.JsonSerializer.Deserialize<WorkflowDefinition>(v, new System.Text.Json.JsonSerializerOptions())
+                    v => string.IsNullOrEmpty(v) ? null : System.Text.Json.JsonSerializer.Deserialize<WorkflowDefinition>(v, new System.Text.Json.JsonSerializerOptions())
                 );
             entity.Property(e => e.Trigger)
                 .HasColumnType("nvarchar(max)")
                 .HasConversion(
                     v => System.Text.Json.JsonSerializer.Serialize(v, new System.Text.Json.JsonSerializerOptions()),
-                    v => System.Text.Json.JsonSerializer.Deserialize<WorkflowTrigger>(v, new System.Text.Json.JsonSerializerOptions())
+                    v => string.IsNullOrEmpty(v) ? null : System.Text.Json.JsonSerializer.Deserialize<WorkflowTrigger>(v, new System.Text.Json.JsonSerializerOptions())
                 );
             entity.Property(e => e.Settings)
                 .HasColumnType("nvarchar(max)")
                 .HasConversion(
                     v => System.Text.Json.JsonSerializer.Serialize(v, new System.Text.Json.JsonSerializerOptions()),
-                    v => System.Text.Json.JsonSerializer.Deserialize<WorkflowSettings>(v, new System.Text.Json.JsonSerializerOptions())
+                    v => string.IsNullOrEmpty(v) ? null : System.Text.Json.JsonSerializer.Deserialize<WorkflowSettings>(v, new System.Text.Json.JsonSerializerOptions())
                 );
             entity.Property(e => e.Variables)
                 .HasColumnType("nvarchar(max)")
                 .HasConversion(
                     v => System.Text.Json.JsonSerializer.Serialize(v, new System.Text.Json.JsonSerializerOptions()),
-                    v => System.Text.Json.JsonSerializer.Deserialize<Dictionary<string, object>>(v, new System.Text.Json.JsonSerializerOptions())
+                    v => string.IsNullOrEmpty(v) ? new Dictionary<string, object>() : System.Text.Json.JsonSerializer.Deserialize<Dictionary<string, object>>(v, new System.Text.Json.JsonSerializerOptions())
                 );
-          
         });
 
         builder.Entity<SystemSettings>(entity =>
@@ -461,10 +460,34 @@ public class ApplicationDbContext : DbContext, IApplicationDbContext
                 .HasColumnType("nvarchar(max)")
                 .HasConversion(
                     v => System.Text.Json.JsonSerializer.Serialize(v, new System.Text.Json.JsonSerializerOptions()),
-                    v => System.Text.Json.JsonSerializer.Deserialize<Dictionary<string, object>>(v, new System.Text.Json.JsonSerializerOptions())
+                    v => string.IsNullOrEmpty(v) ? new Dictionary<string, object>() : System.Text.Json.JsonSerializer.Deserialize<Dictionary<string, object>>(v, new System.Text.Json.JsonSerializerOptions())
                 );
             entity.Property(e => e.IsActive).IsRequired();
         });
+        builder.Entity<Notification>(entity =>
+        {
+            entity.HasKey(e => e.Id);
+            entity.Property(e => e.UserId).IsRequired();
+            entity.Property(e => e.TenantId).IsRequired();
+            entity.Property(e => e.Type).IsRequired().HasMaxLength(128);
+            entity.Property(e => e.Content).IsRequired();
+            entity.Property(e => e.IsRead).IsRequired();
+            entity.Property(e => e.Data)
+                .HasColumnType("nvarchar(max)")
+                .HasConversion(
+                    v => System.Text.Json.JsonSerializer.Serialize(v, new System.Text.Json.JsonSerializerOptions()),
+                    v => string.IsNullOrEmpty(v) ? new Dictionary<string, object>() : System.Text.Json.JsonSerializer.Deserialize<Dictionary<string, object>>(v, new System.Text.Json.JsonSerializerOptions())
+                );
+            entity.Property(e => e.TemplateData)
+                .HasColumnType("nvarchar(max)")
+                .HasConversion(
+                    v => System.Text.Json.JsonSerializer.Serialize(v, new System.Text.Json.JsonSerializerOptions()),
+                    v => string.IsNullOrEmpty(v) ? new Dictionary<string, object>() : System.Text.Json.JsonSerializer.Deserialize<Dictionary<string, object>>(v, new System.Text.Json.JsonSerializerOptions())
+                );
+            entity.Property(e => e.CreatedAt).IsRequired();
+        });
+       
+
 
         base.OnModelCreating(builder);
     }

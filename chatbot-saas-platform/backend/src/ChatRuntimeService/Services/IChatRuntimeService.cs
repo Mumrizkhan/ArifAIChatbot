@@ -13,9 +13,9 @@ public interface IChatRuntimeService
     Task<MessageDto> SendMessageAsync(Guid conversationId, SendMessageRequest request, Guid tenantId, Guid? userId);
 }
 
-public interface IChatService
-{
-    Task<MessageDto> SendMessageAsync(SendChatMessageRequest request, Guid tenantId);
-    Task<ConversationDto> StartConversationAsync(StartConversationRequest request, Guid tenantId);
-    Task<bool> EscalateConversationAsync(Guid conversationId, Guid tenantId);
-}
+//public interface IChatService
+//{
+//    Task<MessageDto> SendMessageAsync(SendChatMessageRequest request, Guid tenantId);
+//    Task<ConversationDto> StartConversationAsync(StartConversationRequest request, Guid tenantId);
+//    Task<bool> EscalateConversationAsync(Guid conversationId, Guid tenantId);
+//}

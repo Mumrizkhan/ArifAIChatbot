@@ -123,6 +123,24 @@ public class BulkNotificationRequest
     public string Language { get; set; } = "en";
 }
 
+public class SendEmailNotificationRequest
+{
+    public string Subject { get; set; } = string.Empty;
+    public string Message { get; set; } = string.Empty;
+    public List<string> Recipients { get; set; } = new();
+    public NotificationType Type { get; set; } = NotificationType.SystemAlert;
+    public bool IsHtml { get; set; } = true;
+    public string? TemplateId { get; set; }
+    public Dictionary<string, object> TemplateData { get; set; } = new();
+}
+
+public class TestNotificationRequest
+{
+    public string? TestEmail { get; set; }
+    public bool IncludeEmailTest { get; set; } = false;
+    public bool IncludeRealTimeTest { get; set; } = true;
+}
+
 public class NotificationStatistics
 {
     public int TotalSent { get; set; }

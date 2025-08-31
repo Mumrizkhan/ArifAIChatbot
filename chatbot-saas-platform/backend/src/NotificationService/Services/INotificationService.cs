@@ -15,4 +15,8 @@ public interface INotificationService
     Task<bool> CancelNotificationAsync(Guid notificationId, Guid tenantId);
     Task<bool> RetryFailedNotificationAsync(Guid notificationId, Guid tenantId);
     Task ProcessScheduledNotificationsAsync();
+    
+    // Maintenance methods for Hangfire recurring jobs
+    Task CleanupOldNotificationsAsync(DateTime cutoffDate);
+    Task RetryFailedNotificationsAsync();
 }

@@ -21,6 +21,7 @@ public class ChatController : ControllerBase
     private readonly IAIIntegrationService _aiIntegrationService;
     private readonly IHubContext<ChatHub> _hubContext;
     private readonly ILiveAgentIntegrationService _liveAgentIntegrationService;
+    private readonly HttpClient _httpClient;
 
     public ChatController(
         IApplicationDbContext context,
@@ -28,7 +29,8 @@ public class ChatController : ControllerBase
         ILogger<ChatController> logger,
         IAIIntegrationService aiIntegrationService,
         IHubContext<ChatHub> hubContext,
-        ILiveAgentIntegrationService liveAgentIntegrationService)
+        ILiveAgentIntegrationService liveAgentIntegrationService,
+        HttpClient httpClient)
     {
         _context = context;
         _tenantService = tenantService;
@@ -36,6 +38,7 @@ public class ChatController : ControllerBase
         _aiIntegrationService = aiIntegrationService;
         _hubContext = hubContext;
         _liveAgentIntegrationService = liveAgentIntegrationService;
+        _httpClient = httpClient;
     }
 
     [HttpPost("conversations")]
@@ -157,6 +160,14 @@ public class ChatController : ControllerBase
                         conversation.CustomerName ?? "Customer",
                         userMessage.CreatedAt
                     );
+
+                    // Send notification to assigned agent
+                    await SendNotificationAsync(
+                        "NewMessage",
+                        "New Message from Customer",
+                        $"{conversation.CustomerName ?? "Customer"}: {userMessage.Content.Substring(0, Math.Min(userMessage.Content.Length, 50))}...",
+                        conversation.AssignedAgentId
+                    );
                 }
                 
                 return Ok(new
@@ -200,6 +211,7 @@ public class ChatController : ControllerBase
             _context.Messages.Add(botMessage);
             conversation.MessageCount++;
             conversation.UpdatedAt = DateTime.UtcNow;
+
             
             _logger.LogInformation($"🤖 Saving bot message to database: {botMessage.Id}");
             await _context.SaveChangesAsync();
@@ -417,6 +429,14 @@ public class ChatController : ControllerBase
                         conversation.Language
                     );
 
+                    // Send notification to assigned agent
+                    await SendNotificationAsync(
+                        "ConversationAssigned",
+                        "New Conversation Assigned",
+                        $"You have been assigned to help {conversation.CustomerName ?? "Customer"} with: {conversation.Subject ?? "General inquiry"}",
+                        availableAgentId.Value
+                    );
+
                     return Ok(new { 
                         success = true, 
                         message = "Conversation assigned to human agent",
@@ -427,6 +447,14 @@ public class ChatController : ControllerBase
 
             // No available agent - add to queue and notify agents via LiveAgentService
             await _liveAgentIntegrationService.AddToQueueAsync(id);
+            
+            // Send notification to all available agents
+            await SendNotificationAsync(
+                "ConversationEscalated",
+                "New Conversation in Queue",
+                $"{conversation.CustomerName ?? "Customer"} needs assistance with: {conversation.Subject ?? "General inquiry"}",
+                null // Send to all agents in tenant
+            );
             
           
 
@@ -493,6 +521,38 @@ public class ChatController : ControllerBase
         {
             _logger.LogError(ex, "Error marking message as read: {MessageId}", messageId);
             return StatusCode(500, new { message = "Internal server error" });
+        }
+    }
+
+    private async Task SendNotificationAsync(string type, string title, string content, Guid? userId = null, string? email = null)
+    {
+        try
+        {
+            var tenantId = _tenantService.GetCurrentTenantId();
+            var notificationRequest = new
+            {
+                Title = title,
+                Content = content,
+                Type = type,
+                Channels = new[] { "InApp", "Email" },
+                UserId = userId,
+                RecipientEmail = email,
+                TenantId = tenantId
+            };
+
+            _httpClient.DefaultRequestHeaders.Remove("X-Tenant-ID");
+            _httpClient.DefaultRequestHeaders.Add("X-Tenant-ID", tenantId.ToString());
+
+            var response = await _httpClient.PostAsJsonAsync("http://localhost:5006/api/notifications/send", notificationRequest);
+            
+            if (!response.IsSuccessStatusCode)
+            {
+                _logger.LogWarning($"Failed to send notification. Status: {response.StatusCode}");
+            }
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error sending notification");
         }
     }
 }

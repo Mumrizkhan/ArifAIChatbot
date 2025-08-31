@@ -31,4 +31,7 @@ public class Conversation : AggregateRoot
     public int? AverageResponseTime { get; set; }
     public int? Priority { get; set; }
     public Guid ChatbotConfigId { get; set; }
+    public DateTime AssignedAt { get; set; }
+    public DateTime EscalatedAt { get; set; }
+    public DateTime? LastMessageAt { get; set; }
 }

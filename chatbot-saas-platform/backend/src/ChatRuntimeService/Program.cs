@@ -1,16 +1,14 @@
-using ChatRuntimeService.Hubs;
-using ChatRuntimeService.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.AspNetCore.HttpOverrides;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
-using Serilog;
+using ChatRuntimeService.Hubs;
+using ChatRuntimeService.Services;
 using Shared.Application.Common.Interfaces;
 using Shared.Infrastructure.Extensions;
-using Shared.Infrastructure.Persistence;
+using Shared.Infrastructure.Messaging;
 using Shared.Infrastructure.Services;
 using System.Text;
+using Serilog;
 
 Log.Logger = new LoggerConfiguration()
     .WriteTo.Console()
@@ -18,69 +16,53 @@ Log.Logger = new LoggerConfiguration()
     .CreateLogger();
 
 var builder = WebApplication.CreateBuilder(args);
-
-// Replace default logging with Serilog
 builder.Host.UseSerilog();
 
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(options =>
 {
-	options.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
-	{
-		Name = "Authorization",
-		Type = SecuritySchemeType.Http,
-		Scheme = "Bearer",
-		BearerFormat = "JWT",
-		In = ParameterLocation.Header,
-		Description = "Enter 'Bearer' [space] and then your valid token in the text input below.\nExample: \"Bearer eyJhbGciOiJIUzI1NiIs...\""
-	});
-	options.AddSecurityRequirement(new OpenApiSecurityRequirement
-	{
-		{
-			new OpenApiSecurityScheme
-			{
-				Reference = new OpenApiReference
-				{
-					Type = ReferenceType.SecurityScheme,
-					Id = "Bearer"
-				}
-			},
-			Array.Empty<string>()
-		}
-	});
-	options.OperationFilter<FileUploadOperationFilter>();
+    options.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
+    {
+        Name = "Authorization",
+        Type = SecuritySchemeType.Http,
+        Scheme = "Bearer",
+        BearerFormat = "JWT",
+        In = ParameterLocation.Header,
+        Description = "Enter 'Bearer' [space] and then your valid token in the text input below.\nExample: \"Bearer eyJhbGciOiJIUzI1NiIs...\""
+    });
+    options.AddSecurityRequirement(new OpenApiSecurityRequirement
+    {
+        {
+            new OpenApiSecurityScheme
+            {
+                Reference = new OpenApiReference
+                {
+                    Type = ReferenceType.SecurityScheme,
+                    Id = "Bearer"
+                }
+            },
+            Array.Empty<string>()
+        }
+    });
 });
 
-builder.Services.AddSignalR(options =>
-{
-    options.EnableDetailedErrors = true;
-    options.KeepAliveInterval = TimeSpan.FromSeconds(15);
-    options.ClientTimeoutInterval = TimeSpan.FromSeconds(30);
-    options.HandshakeTimeout = TimeSpan.FromSeconds(15);
-});
+builder.Services.AddSignalR();
 
-// Configure for proxy
-builder.Services.Configure<ForwardedHeadersOptions>(options =>
-{
-    options.ForwardedHeaders = ForwardedHeaders.XForwardedFor |
-                             ForwardedHeaders.XForwardedHost |
-                             ForwardedHeaders.XForwardedProto;
-    options.KnownNetworks.Clear();
-    options.KnownProxies.Clear();
-});
-
+// Add infrastructure services including message bus
 builder.Services.AddInfrastructure(builder.Configuration);
-builder.Services.AddHttpClient<IAIIntegrationService, AIIntegrationService>();
-builder.Services.AddHttpClient<ILiveAgentIntegrationService, LiveAgentIntegrationService>();
-builder.Services.AddHttpClient<IAnalyticsIntegrationService, AnalyticsIntegrationService>();
+
+// Add HTTP client
+builder.Services.AddHttpClient();
+
+// Add application services
+builder.Services.AddScoped<IChatService, ChatService>();
+builder.Services.AddScoped<IChatRuntimeService, ChatRuntimeService.Services.ChatRuntimeService>();
+builder.Services.AddScoped<IAnalyticsIntegrationService, AnalyticsIntegrationService>();
 builder.Services.AddScoped<IAIIntegrationService, AIIntegrationService>();
 builder.Services.AddScoped<ILiveAgentIntegrationService, LiveAgentIntegrationService>();
-builder.Services.AddScoped<IAnalyticsIntegrationService, AnalyticsIntegrationService>();
 builder.Services.AddScoped<IMessageQueueService, MessageQueueService>();
-builder.Services.AddScoped<IFileUploadService, FileUploadService>();
-builder.Services.AddScoped<IChatRuntimeService, ChatRuntimeService.Services.ChatRuntimeService>();
-builder.Services.AddScoped<IChatService, ChatService>();
+
 builder.Services.AddHttpContextAccessor();
 
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
@@ -119,43 +101,27 @@ builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowAll", policy =>
     {
-        var allowedOrigins = new[] { 
-            "https://api-stg-arif.tetco.sa",
-            "https://chatbot-stg-arif.tetco.sa",
-            "https://agent-stg-arif.tetco.sa",
-            "https://admin-stg-arif.tetco.sa",
-            "https://tenant-stg-arif.tetco.sa",
-            "http://localhost:5173", 
-            "http://localhost:5174", 
-            "http://localhost:5175",
-            "http://localhost:8000"
-        };
-        
-        policy.WithOrigins(allowedOrigins)
+        policy.AllowAnyOrigin()
               .AllowAnyMethod()
-              .AllowAnyHeader()
-              .AllowCredentials();
+              .AllowAnyHeader();
     });
 });
 
 var app = builder.Build();
+
 app.UseCors("AllowAll");
-app.UseWebSockets();
+
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
     app.UseSwaggerUI();
 }
 
-app.UseRouting();
-app.UseCors("AllowAll");
 app.UseHttpsRedirection();
 app.UseAuthentication();
 app.UseAuthorization();
-
 app.MapControllers();
 app.MapHub<ChatHub>("/chatHub").RequireCors("AllowAll");
-//app.MapHub<ChatHub>("chat/chatHub").RequireCors("AllowAll");
 
 app.Run();
 

@@ -17,6 +17,7 @@ import {
   markMessageAsRead,
 } from "../../store/slices/conversationSlice";
 import { setSelectedConversation } from "../../store/slices/selectedConversationSlice";
+import { addAgentNotification } from "../../store/slices/agentSlice";
 import { agentSignalRService } from "../../services/signalr";
 import { Card, CardContent, CardHeader, CardTitle } from "../../components/ui/card";
 import { Button } from "../../components/ui/button";
@@ -77,15 +78,24 @@ const ConversationsPage = () => {
       });
 
       agentSignalRService.setOnMessageReceived((messageDto: any) => {
-        console.log("🔥 Live Agent: MessageReceived event received:", messageDto);
+        console.log("🔥 Live Agent: MessageReceived event received (FULL OBJECT):", JSON.stringify(messageDto, null, 2));
         console.log("🔥 Live Agent: Message sender:", messageDto.sender);
         console.log("🔥 Live Agent: Message conversation ID:", messageDto.conversationId);
         console.log("🔥 Live Agent: Current agent ID:", currentAgent?.id);
+        
+        // Log all possible sender ID fields to identify the correct one
+        console.log("🔥 Live Agent: Message SenderId (capital S):", messageDto.SenderId);
+        console.log("🔥 Live Agent: Message senderId (lowercase s):", messageDto.senderId);
+        console.log("🔥 Live Agent: Message agentId:", messageDto.agentId);
+        console.log("🔥 Live Agent: Message userId:", messageDto.userId);
+        console.log("🔥 Live Agent: Message createdBy:", messageDto.createdBy);
+        console.log("🔥 Live Agent: Message author:", messageDto.author);
+        console.log("🔥 Live Agent: All message keys:", Object.keys(messageDto));
 
-        // Skip messages sent by the current agent to prevent duplicates
+        // Skip ALL agent messages to prevent duplicates
         // (agent messages are already added via sendMessage.fulfilled)
-        if (messageDto.sender === "agent" && messageDto.agentId === currentAgent?.id) {
-          console.log("🚫 Live Agent: Skipping own message to prevent duplicate");
+        if (messageDto.sender === "agent") {
+          console.log("🚫 Live Agent: Skipping agent message to prevent duplicate");
           return;
         }
 
@@ -130,6 +140,13 @@ const ConversationsPage = () => {
       agentSignalRService.setOnMessageMarkedAsRead((readInfo) => {
         console.log("🔄 Live Agent: MessageMarkedAsRead event received:", readInfo);
         dispatch(markMessageAsRead({ messageId: readInfo.messageId }));
+      });
+
+      // Set up notification handler
+      agentSignalRService.setOnAgentNotification((notification) => {
+        console.log("🔔 Live Agent: AgentNotification received:", notification);
+        // Add to notification store
+        dispatch(addAgentNotification(notification));
       });
     }
 

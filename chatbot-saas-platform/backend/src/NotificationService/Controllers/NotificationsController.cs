@@ -14,6 +14,7 @@ public class NotificationsController : ControllerBase
 {
     private readonly INotificationService _notificationService;
     private readonly ITemplateService _templateService;
+    private readonly IEmailService _emailService;
     private readonly ITenantService _tenantService;
     private readonly ICurrentUserService _currentUserService;
     private readonly ILogger<NotificationsController> _logger;
@@ -21,12 +22,14 @@ public class NotificationsController : ControllerBase
     public NotificationsController(
         INotificationService notificationService,
         ITemplateService templateService,
+        IEmailService emailService,
         ITenantService tenantService,
         ICurrentUserService currentUserService,
         ILogger<NotificationsController> logger)
     {
         _notificationService = notificationService;
         _templateService = templateService;
+        _emailService = emailService;
         _tenantService = tenantService;
         _currentUserService = currentUserService;
         _logger = logger;
@@ -50,6 +53,104 @@ public class NotificationsController : ControllerBase
         {
             _logger.LogError(ex, "Error sending notification");
             return StatusCode(500, new { message = "Internal server error" });
+        }
+    }
+
+    [HttpPost("send-email")]
+    public async Task<IActionResult> SendEmailNotification([FromBody] SendEmailNotificationRequest request)
+    {
+        try
+        {
+            var tenantId = _tenantService.GetCurrentTenantId();
+            
+            // Send real-time notification first
+            var notificationId = await _notificationService.SendNotificationAsync(new SendNotificationRequest
+            {
+                Title = request.Subject,
+                Content = request.Message,
+                Type = request.Type,
+                RecipientEmail = string.Join(",", request.Recipients),
+                Channels = new List<NotificationChannel> { NotificationChannel.Email }
+            }, tenantId);
+
+            // Send email notifications
+            var emailTasks = request.Recipients.Select(recipient => 
+                _emailService.SendEmailAsync(recipient, request.Subject, request.Message)
+            );
+            
+            await Task.WhenAll(emailTasks);
+
+            return Ok(new
+            {
+                NotificationId = notificationId,
+                EmailsSent = request.Recipients.Count,
+                Message = "Email notifications sent successfully"
+            });
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error sending email notification");
+            return StatusCode(500, new { message = "Internal server error" });
+        }
+    }
+
+    [HttpPost("test-system")]
+    public async Task<IActionResult> TestNotificationSystem([FromBody] TestSystemRequest request)
+    {
+        try
+        {
+            var tenantId = _tenantService.GetCurrentTenantId();
+            var results = new List<string>();
+
+            // Test real-time notification
+            try
+            {
+                var notificationId = await _notificationService.SendNotificationAsync(new SendNotificationRequest
+                {
+                    Title = "🧪 Test Notification",
+                    Content = "This is a test notification to verify the real-time notification system is working properly.",
+                    Type = NotificationType.SystemAlert,
+                    UserId = _currentUserService.UserId,
+                    Channels = new List<NotificationChannel> { NotificationChannel.InApp }
+                }, tenantId);
+                
+                results.Add($"✅ Real-time notification sent successfully (ID: {notificationId})");
+            }
+            catch (Exception ex)
+            {
+                results.Add($"❌ Real-time notification failed: {ex.Message}");
+            }
+
+            // Test email notification (if email provided)
+            if (!string.IsNullOrEmpty(request.TestEmail))
+            {
+                try
+                {
+                    await _emailService.SendEmailAsync(
+                        request.TestEmail,
+                        "🧪 Test Email Notification",
+                        "This is a test email to verify the email notification system is working properly."
+                        
+                    );
+                    results.Add($"✅ Email notification sent successfully to {request.TestEmail}");
+                }
+                catch (Exception ex)
+                {
+                    results.Add($"❌ Email notification failed: {ex.Message}");
+                }
+            }
+
+            return Ok(new
+            {
+                Message = "Notification system test completed",
+                Results = results,
+                Timestamp = DateTime.UtcNow
+            });
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error testing notification system");
+            return StatusCode(500, new { message = "Internal server error during notification test" });
         }
     }
 
@@ -330,7 +431,7 @@ public class NotificationsController : ControllerBase
             template.Id = templateId;
             template.TenantId = tenantId;
 
-            var updated = await _templateService.UpdateTemplateAsync(template);
+            var updated = await _templateService.UpdateTemplateAsync(template,tenantId);
 
             if (!updated)
             {
@@ -367,4 +468,9 @@ public class NotificationsController : ControllerBase
             return StatusCode(500, new { message = "Internal server error" });
         }
     }
+}
+
+public class TestSystemRequest
+{
+    public string? TestEmail { get; set; }
 }

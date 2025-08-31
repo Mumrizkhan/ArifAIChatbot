@@ -117,7 +117,7 @@ public class TemplateService : ITemplateService
         }
     }
 
-    public async Task<bool> UpdateTemplateAsync(NotificationTemplate template)
+    public async Task<bool> UpdateTemplateAsync(NotificationTemplate template, Guid tenantId)
     {
         try
         {
@@ -136,7 +136,7 @@ public class TemplateService : ITemplateService
             existingTemplate.IsActive = template.IsActive;
             existingTemplate.DefaultData = template.DefaultData;
             existingTemplate.UpdatedAt = DateTime.UtcNow;
-
+            existingTemplate.TenantId = tenantId;
             await _context.SaveChangesAsync();
             return true;
         }

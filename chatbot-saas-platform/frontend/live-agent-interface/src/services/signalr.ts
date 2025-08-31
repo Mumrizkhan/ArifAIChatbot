@@ -343,6 +343,16 @@ class AgentSignalRService {
       }
     });
 
+    // Real-time notification event
+    this.connection.on("ReceiveNotification", (notification: any) => {
+      try {
+        console.log("Live Agent: ReceiveNotification event received:", notification);
+        this.onAgentNotification?.(notification);
+      } catch (e) {
+        console.error("onAgentNotification handler error:", e);
+      }
+    });
+
     this.connection.on("DashboardStatsUpdated", (stats) => {
       console.log("Dashboard stats updated:", stats);
       store.dispatch(updateDashboardStats(stats));

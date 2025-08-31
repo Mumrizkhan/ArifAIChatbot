@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useAppSelector } from '../../hooks/redux';
 import { Sidebar } from './Sidebar';
 import { Header } from './Header';
+import { TenantToastContainer } from '../TenantToastContainer';
 
 interface LayoutProps {
   children: React.ReactNode;
@@ -31,6 +32,8 @@ export const Layout: React.FC<LayoutProps> = ({ children }) => {
           {children}
         </main>
       </div>
+      
+      <TenantToastContainer />
     </div>
   );
 };

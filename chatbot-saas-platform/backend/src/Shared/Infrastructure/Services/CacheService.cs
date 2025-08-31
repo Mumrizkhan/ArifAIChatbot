@@ -1,6 +1,7 @@
 using Microsoft.Extensions.Caching.Distributed;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Logging;
+using Shared.Application.Common.Interfaces;
 using StackExchange.Redis;
 using System;
 using System.Text.Json;
@@ -71,6 +72,28 @@ public class CacheService : ICacheService
         try
         {
             var value = await factory();
+            if (value != null)
+            {
+                await SetAsync(key, value, expiry);
+            }
+            return value;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error executing factory method for cache key: {Key}", key);
+            return null;
+        }
+    }
+
+    public async Task<T> GetOrSetAsync<T>(string key, Func<Task<T>> getItem, TimeSpan? expiry = null) where T : class
+    {
+        var cachedValue = await GetAsync<T>(key);
+        if (cachedValue != null)
+            return cachedValue;
+
+        try
+        {
+            var value = await getItem();
             if (value != null)
             {
                 await SetAsync(key, value, expiry);

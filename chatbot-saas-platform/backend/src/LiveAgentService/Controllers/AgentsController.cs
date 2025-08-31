@@ -23,6 +23,7 @@ public class AgentsController : ControllerBase
     private readonly IHubContext<AgentHub> _hubContext;
     private readonly IChatRuntimeIntegrationService _chatRuntimeIntegrationService;
     private readonly ILogger<AgentsController> _logger;
+    private readonly HttpClient _httpClient;
 
     public AgentsController(
         IAgentManagementService agentManagementService,
@@ -32,7 +33,8 @@ public class AgentsController : ControllerBase
         IQueueManagementService queueManagementService,
         IHubContext<AgentHub> hubContext,
         IChatRuntimeIntegrationService chatRuntimeIntegrationService,
-        ILogger<AgentsController> logger)
+        ILogger<AgentsController> logger,
+        HttpClient httpClient)
     {
         _agentManagementService = agentManagementService;
         _currentUserService = currentUserService;
@@ -42,6 +44,7 @@ public class AgentsController : ControllerBase
         _hubContext = hubContext;
         _chatRuntimeIntegrationService = chatRuntimeIntegrationService;
         _logger = logger;
+        _httpClient = httpClient;
     }
 
     [HttpGet("workloads")]
@@ -499,6 +502,38 @@ public class AgentsController : ControllerBase
         {
             _logger.LogError(ex, "Error marking message as read: {MessageId}", messageId);
             return StatusCode(500, new { message = "Internal server error" });
+        }
+    }
+
+    private async Task SendNotificationAsync(string type, string title, string content, Guid? userId = null, string? email = null)
+    {
+        try
+        {
+            var tenantId = _tenantService.GetCurrentTenantId();
+            var notificationRequest = new
+            {
+                Title = title,
+                Content = content,
+                Type = type,
+                Channels = new[] { "InApp", "Email" },
+                UserId = userId,
+                RecipientEmail = email,
+                TenantId = tenantId
+            };
+
+            _httpClient.DefaultRequestHeaders.Remove("X-Tenant-ID");
+            _httpClient.DefaultRequestHeaders.Add("X-Tenant-ID", tenantId.ToString());
+
+            var response = await _httpClient.PostAsJsonAsync("http://localhost:5006/api/notifications/send", notificationRequest);
+            
+            if (!response.IsSuccessStatusCode)
+            {
+                _logger.LogWarning($"Failed to send notification. Status: {response.StatusCode}");
+            }
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error sending notification");
         }
     }
 }

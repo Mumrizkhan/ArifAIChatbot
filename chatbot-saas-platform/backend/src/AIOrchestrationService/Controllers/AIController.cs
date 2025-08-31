@@ -99,23 +99,23 @@ public class AIController : ControllerBase
 
             aiResponse.Intents = await _aiService.ExtractIntentsAsync(request.Message);
 
-            if (aiResponse.IsSuccessful)
-            {
-                var message = new Message
-                {
-                    ConversationId = request.ConversationId,
-                    Content = aiResponse.Content,
-                    Type = MessageType.Text,
-                    Sender = MessageSender.Bot,
-                    CreatedAt = DateTime.UtcNow,
-                    TenantId = _tenantService.GetCurrentTenantId()
-                };
+            //if (aiResponse.IsSuccessful)
+            //{
+            //    var message = new Message
+            //    {
+            //        ConversationId = request.ConversationId,
+            //        Content = aiResponse.Content,
+            //        Type = MessageType.Text,
+            //        Sender = MessageSender.Bot,
+            //        CreatedAt = DateTime.UtcNow,
+            //        TenantId = _tenantService.GetCurrentTenantId()
+            //    };
 
-                _context.Messages.Add(message);
-                conversation.MessageCount++;
-                conversation.UpdatedAt = DateTime.UtcNow;
-                await _context.SaveChangesAsync();
-            }
+            //    _context.Messages.Add(message);
+            //    conversation.MessageCount++;
+            //    conversation.UpdatedAt = DateTime.UtcNow;
+            //    await _context.SaveChangesAsync();
+            //}
 
             return Ok(new ChatResponse
             {

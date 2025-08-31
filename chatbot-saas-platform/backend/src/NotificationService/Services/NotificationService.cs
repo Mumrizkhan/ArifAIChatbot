@@ -384,12 +384,8 @@ public class NotificationService : INotificationService
                     case NotificationChannel.Email:
                         if (!string.IsNullOrEmpty(notification.RecipientEmail))
                         {
-                            success = await _emailService.SendEmailAsync(
-                                notification.RecipientEmail,
-                                notification.Title,
-                                notification.Content,
-                                notification.TemplateId,
-                                notification.TemplateData);
+                            // Use the enhanced email service method for better integration
+                            success = await _emailService.SendNotificationEmailAsync(notification);
                         }
                         break;
 
@@ -424,11 +420,19 @@ public class NotificationService : INotificationService
                                     notification.Id,
                                     notification.Title,
                                     notification.Content,
-                                    notification.Type,
+                                    Type = notification.Type.ToString(),
+                                    Channel = notification.Channel.ToString(),
                                     notification.Data,
                                     notification.CreatedAt
                                 });
                             success = true;
+                        }
+                        break;
+
+                    case NotificationChannel.Webhook:
+                        if (!string.IsNullOrEmpty(notification.RecipientDeviceToken)) // Using DeviceToken field for webhook URL
+                        {
+                            success = await SendWebhookNotificationAsync(notification);
                         }
                         break;
                 }
@@ -437,16 +441,21 @@ public class NotificationService : INotificationService
                     break;
             }
 
-            notification.Status = success ? NotificationStatus.Sent : NotificationStatus.Failed;
-            notification.SentAt = success ? DateTime.UtcNow : null;
-            notification.UpdatedAt = DateTime.UtcNow;
-
-            if (!success)
+            // Status update will be handled by the enhanced email service for email notifications
+            // For other channels, update status here
+            if (notification.Channel != NotificationChannel.Email)
             {
-                notification.ErrorMessage = "Failed to send through all channels";
-            }
+                notification.Status = success ? NotificationStatus.Sent : NotificationStatus.Failed;
+                notification.SentAt = success ? DateTime.UtcNow : null;
+                notification.UpdatedAt = DateTime.UtcNow;
 
-            await _context.SaveChangesAsync();
+                if (!success)
+                {
+                    notification.ErrorMessage = $"Failed to send through {notification.Channel} channel";
+                }
+
+                await _context.SaveChangesAsync();
+            }
         }
         catch (Exception ex)
         {
@@ -456,6 +465,117 @@ public class NotificationService : INotificationService
             notification.ErrorMessage = ex.Message;
             notification.UpdatedAt = DateTime.UtcNow;
             await _context.SaveChangesAsync();
+        }
+    }
+
+    /// <summary>
+    /// Send webhook notification
+    /// </summary>
+    private async Task<bool> SendWebhookNotificationAsync(Notification notification)
+    {
+        try
+        {
+            using var httpClient = new HttpClient();
+            
+            var payload = new
+            {
+                notificationId = notification.Id,
+                title = notification.Title,
+                content = notification.Content,
+                type = notification.Type.ToString(),
+                tenantId = notification.TenantId,
+                userId = notification.UserId,
+                data = notification.Data,
+                createdAt = notification.CreatedAt
+            };
+
+            var json = System.Text.Json.JsonSerializer.Serialize(payload);
+            var content = new StringContent(json, System.Text.Encoding.UTF8, "application/json");
+
+            var response = await httpClient.PostAsync(notification.RecipientDeviceToken, content);
+            
+            if (response.IsSuccessStatusCode)
+            {
+                _logger.LogInformation("Webhook notification sent successfully to {Url}", notification.RecipientDeviceToken);
+                return true;
+            }
+            else
+            {
+                _logger.LogError("Failed to send webhook notification to {Url}. Status: {Status}", 
+                    notification.RecipientDeviceToken, response.StatusCode);
+                return false;
+            }
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error sending webhook notification to {Url}", notification.RecipientDeviceToken);
+            return false;
+        }
+    }
+
+    public async Task CleanupOldNotificationsAsync(DateTime cutoffDate)
+    {
+        try
+        {
+            _logger.LogInformation("Cleaning up notifications older than {CutoffDate}", cutoffDate);
+
+            var oldNotifications = await _context.Set<Notification>()
+                .Where(n => n.CreatedAt < cutoffDate)
+                .ToListAsync();
+
+            if (oldNotifications.Any())
+            {
+                _context.Set<Notification>().RemoveRange(oldNotifications);
+                await _context.SaveChangesAsync();
+
+                _logger.LogInformation("Cleaned up {Count} old notifications", oldNotifications.Count);
+            }
+            else
+            {
+                _logger.LogInformation("No old notifications found to clean up");
+            }
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error cleaning up old notifications");
+            throw;
+        }
+    }
+
+    public async Task RetryFailedNotificationsAsync()
+    {
+        try
+        {
+            _logger.LogInformation("Retrying failed notifications");
+
+            var failedNotifications = await _context.Set<Notification>()
+                .Where(n => n.Status == NotificationStatus.Failed && 
+                           n.RetryCount < n.MaxRetries)
+                .ToListAsync();
+
+            foreach (var notification in failedNotifications)
+            {
+                notification.Status = NotificationStatus.Pending;
+                notification.RetryCount++;
+                notification.UpdatedAt = DateTime.UtcNow;
+
+                var channels = new List<NotificationChannel> { notification.Channel };
+                await ProcessNotificationAsync(notification, channels);
+            }
+
+            if (failedNotifications.Any())
+            {
+                _logger.LogInformation("Retried {Count} failed notifications", failedNotifications.Count);
+            }
+            else
+            {
+                _logger.LogDebug("No failed notifications to retry");
+            }
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error retrying failed notifications");
+            throw;
         }
     }
 }

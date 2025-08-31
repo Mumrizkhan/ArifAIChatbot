@@ -1,6 +1,6 @@
 import { createSlice, createAsyncThunk, PayloadAction } from "@reduxjs/toolkit";
 export const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "https://api-stg-arif.tetco.sa";
-interface TenantNotification {
+export interface TenantNotification {
   id: string;
   type: "info" | "warning" | "error" | "success";
   title: string;

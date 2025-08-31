@@ -4,6 +4,8 @@ using TenantManagementService.Services;
 using TenantManagementService.Models;
 using Shared.Infrastructure.Services;
 using Shared.Application.Common.Interfaces;
+using System.Text;
+using System.Text.Json;
 
 namespace TenantManagementService.Controllers;
 
@@ -15,15 +17,42 @@ public class TenantsController : ControllerBase
     private readonly ITenantManagementService _tenantManagementService;
     private readonly ICurrentUserService _currentUserService;
     private readonly ILogger<TenantsController> _logger;
+    private readonly HttpClient _httpClient;
 
     public TenantsController(
         ITenantManagementService tenantManagementService,
         ICurrentUserService currentUserService,
-        ILogger<TenantsController> logger)
+        ILogger<TenantsController> logger,
+        HttpClient httpClient)
     {
         _tenantManagementService = tenantManagementService;
         _currentUserService = currentUserService;
         _logger = logger;
+        _httpClient = httpClient;
+    }
+
+    private async Task SendNotificationAsync(string tenantId, string type, string title, string message)
+    {
+        try
+        {
+            var notification = new
+            {
+                TenantId = tenantId,
+                Type = type,
+                Title = title,
+                Message = message,
+                Timestamp = DateTime.UtcNow
+            };
+
+            var json = JsonSerializer.Serialize(notification);
+            var content = new StringContent(json, Encoding.UTF8, "application/json");
+            
+            await _httpClient.PostAsync("https://localhost:7005/api/notifications", content);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Failed to send notification for tenant {TenantId}", tenantId);
+        }
     }
 
     [HttpPost]
@@ -32,6 +61,15 @@ public class TenantsController : ControllerBase
         try
         {
             var tenant = await _tenantManagementService.CreateTenantAsync(request, _currentUserService.UserId);
+            
+            // Send notification about tenant creation
+            await SendNotificationAsync(
+                tenant.Id.ToString(),
+                "success",
+                "Tenant Created Successfully",
+                $"New tenant '{tenant.Name}' has been created and is ready for configuration."
+            );
+            
             return Ok(tenant);
         }
         catch (InvalidOperationException ex)

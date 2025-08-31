@@ -9,6 +9,6 @@ public interface ITemplateService
     Task<NotificationTemplate?> GetTemplateAsync(string templateId, Guid tenantId, string language = "en");
     Task<List<NotificationTemplate>> GetTemplatesAsync(Guid tenantId, NotificationType? type = null, NotificationChannel? channel = null);
     Task<NotificationTemplate> CreateTemplateAsync(NotificationTemplate template);
-    Task<bool> UpdateTemplateAsync(NotificationTemplate template);
+    Task<bool> UpdateTemplateAsync(NotificationTemplate template,Guid tenantId);
     Task<bool> DeleteTemplateAsync(string templateId, Guid tenantId);
 }

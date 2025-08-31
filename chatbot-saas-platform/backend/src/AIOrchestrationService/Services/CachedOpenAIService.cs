@@ -1,5 +1,6 @@
 using AIOrchestrationService.Models;
 using AIOrchestrationService.Services;
+using Shared.Application.Common.Interfaces;
 using Shared.Infrastructure.Services;
 using Shared.Infrastructure.Messaging;
 using Shared.Infrastructure.Messaging.Events;

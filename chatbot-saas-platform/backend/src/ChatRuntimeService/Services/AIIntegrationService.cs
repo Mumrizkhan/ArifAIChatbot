@@ -75,8 +75,8 @@ public class AIIntegrationService : IAIIntegrationService
             SetTenantId(tenantId);
             
             // Call the escalation endpoint on the same service (ChatRuntimeService)
-            var escalationUrl = _configuration["Services:ChatRuntime"] ?? "http://localhost:5002";
-            var response = await _httpClient.PostAsync($"{escalationUrl}/api/chat/conversations/{conversationId}/escalate", null);
+           
+            var response = await _httpClient.PostAsync($"{_aiServiceUrl}/chat/chat/conversations/{conversationId}/escalate", null);
             
             if (response.IsSuccessStatusCode)
             {

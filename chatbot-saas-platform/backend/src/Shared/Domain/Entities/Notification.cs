@@ -9,6 +9,8 @@ namespace Shared.Domain.Entities
 {
     public class Notification : AuditableEntity
     {
+        public bool IsRead { get; set; }
+
         public Guid Id { get; set; }
         public string Title { get; set; } = string.Empty;
         public string Content { get; set; } = string.Empty;

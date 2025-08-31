@@ -14,32 +14,31 @@ public static class ServiceCollectionExtensions
 {
     public static IServiceCollection AddInfrastructure(this IServiceCollection services, IConfiguration configuration)
     {
+        // Add Entity Framework
         services.AddDbContext<ApplicationDbContext>(options =>
             options.UseSqlServer(configuration.GetConnectionString("DefaultConnection")));
 
         services.AddScoped<IApplicationDbContext>(provider => provider.GetRequiredService<ApplicationDbContext>());
+
+        // Add common services
         services.AddScoped<ITenantService, TenantService>();
         services.AddScoped<ICurrentUserService, CurrentUserService>();
+        services.AddScoped<IFileStorageService, FileStorageService>();
 
+        // Add Redis and caching
         services.AddStackExchangeRedisCache(options =>
         {
             options.Configuration = configuration.GetValue<string>("Redis:ConnectionString") ?? "localhost:6379";
-            options.InstanceName = "ArifChatbot";   
-// Log the Redis configuration
-            var logger = services.BuildServiceProvider().GetRequiredService<ILoggerFactory>().CreateLogger("ServiceCollectionExtensions");
-            logger.LogInformation("Configuring Redis cache with connection string: {ConnectionString}", options.Configuration);
-
+            options.InstanceName = "ArifChatbot";
         });
+        
         services.AddMemoryCache();
+        
         services.AddSingleton<IConnectionMultiplexer>(provider =>
         {
-            // Replace this line:
-            // var logger = provider.GetRequiredService<ILogger<ServiceCollectionExtensions>>();
-            // With the following:
             var logger = provider.GetRequiredService<ILoggerFactory>().CreateLogger("ServiceCollectionExtensions");
             var connectionString = configuration.GetValue<string>("Redis:ConnectionString") ?? "localhost:6379";
 
-            // Log the Redis connection string
             logger.LogInformation("Connecting to Redis with connection string: {ConnectionString}", connectionString);
             if (string.IsNullOrWhiteSpace(connectionString))
             {
@@ -47,9 +46,15 @@ public static class ServiceCollectionExtensions
             }
             return ConnectionMultiplexer.Connect(connectionString);
         });
+        
+        // Add cache service
         services.AddScoped<ICacheService, CacheService>();
 
+        // Add message bus
         services.AddSingleton<IMessageBus, RabbitMQMessageBus>();
+        
+        // Add message bus notification service
+        services.AddScoped<IMessageBusNotificationService, MessageBusNotificationService>();
 
         return services;
     }

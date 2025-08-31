@@ -1,5 +1,6 @@
 using KnowledgeBaseService.Models;
 using KnowledgeBaseService.Services;
+using Shared.Application.Common.Interfaces;
 using Shared.Domain.Entities;
 using Shared.Infrastructure.Services;
 using Shared.Infrastructure.Messaging;

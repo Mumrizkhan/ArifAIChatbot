@@ -4,6 +4,8 @@ using TenantManagementService.Services;
 using TenantManagementService.Models;
 using Shared.Infrastructure.Services;
 using Shared.Application.Common.Interfaces;
+using System.Text;
+using System.Text.Json;
 
 namespace TenantManagementService.Controllers;
 
@@ -16,17 +18,44 @@ public class TeamController : ControllerBase
     private readonly ITenantService _tenantService;
     private readonly ICurrentUserService _currentUserService;
     private readonly ILogger<TeamController> _logger;
+    private readonly HttpClient _httpClient;
 
     public TeamController(
         ITeamService teamService,
         ITenantService tenantService,
         ICurrentUserService currentUserService,
-        ILogger<TeamController> logger)
+        ILogger<TeamController> logger,
+        HttpClient httpClient)
     {
         _teamService = teamService;
         _tenantService = tenantService;
         _currentUserService = currentUserService;
         _logger = logger;
+        _httpClient = httpClient;
+    }
+
+    private async Task SendNotificationAsync(string tenantId, string type, string title, string message)
+    {
+        try
+        {
+            var notification = new
+            {
+                TenantId = tenantId,
+                Type = type,
+                Title = title,
+                Message = message,
+                Timestamp = DateTime.UtcNow
+            };
+
+            var json = JsonSerializer.Serialize(notification);
+            var content = new StringContent(json, Encoding.UTF8, "application/json");
+            
+            await _httpClient.PostAsync("https://localhost:7005/api/notifications", content);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Failed to send notification for tenant {TenantId}", tenantId);
+        }
     }
 
     [HttpGet("members")]
@@ -52,6 +81,15 @@ public class TeamController : ControllerBase
         {
             var tenantId = _tenantService.GetCurrentTenantId();
             var member = await _teamService.AddTeamMemberAsync(request, tenantId);
+            
+            // Send notification about team member invitation
+            await SendNotificationAsync(
+                tenantId.ToString(),
+                "info",
+                "Team Member Invited",
+                $"A new team member invitation has been sent to {request.Email} with role: {request.Role}"
+            );
+            
             return Ok(new { message = "Team member invited successfully", member });
         }
         catch (InvalidOperationException ex)

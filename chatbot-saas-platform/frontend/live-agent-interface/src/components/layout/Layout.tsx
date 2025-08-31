@@ -4,6 +4,7 @@ import { useAppSelector } from '../../hooks/redux';
 import { Sidebar } from './Sidebar';
 import { Header } from './Header';
 import { NotificationCenter } from '../notifications/NotificationCenter';
+import { ToastContainer } from '../ToastContainer';
 
 interface LayoutProps {
   children: React.ReactNode;
@@ -41,6 +42,8 @@ export const Layout: React.FC<LayoutProps> = ({ children }) => {
         isOpen={notificationCenterOpen}
         onClose={() => setNotificationCenterOpen(false)}
       />
+
+      <ToastContainer />
     </div>
   );
 };
