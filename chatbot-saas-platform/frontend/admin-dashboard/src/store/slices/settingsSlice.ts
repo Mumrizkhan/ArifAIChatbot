@@ -1,5 +1,5 @@
-import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit';
-import { systemSettingsApi } from '../../services/api';
+import { createSlice, createAsyncThunk, PayloadAction } from "@reduxjs/toolkit";
+import { systemSettingsApi } from "../../services/api";
 
 interface SystemSettings {
   companyName: string;
@@ -40,10 +40,10 @@ interface SettingsState {
 
 const initialState: SettingsState = {
   systemSettings: {
-    companyName: 'Arif Platform',
-    adminEmail: '',
-    timezone: 'utc',
-    language: 'en',
+    companyName: "Arif Platform",
+    adminEmail: "",
+    timezone: "utc",
+    language: "en",
     maintenanceMode: false,
     userRegistration: true,
     compactMode: false,
@@ -69,24 +69,25 @@ const initialState: SettingsState = {
   isSaving: false,
 };
 
-export const fetchSettings = createAsyncThunk(
-  'settings/fetchSettings',
-  async () => {
-    const response = await systemSettingsApi.getSystemSettings();
-    return response;
-  }
-);
+export const fetchSettings = createAsyncThunk("settings/fetchSettings", async () => {
+  const response = await systemSettingsApi.getSystemSettings();
+  return response;
+});
 
 export const updateSettings = createAsyncThunk(
-  'settings/updateSettings',
-  async (settings: { systemSettings?: Record<string, any>; notificationSettings?: Record<string, any>; integrationSettings?: Record<string, any> }) => {
+  "settings/updateSettings",
+  async (settings: {
+    systemSettings?: Record<string, any>;
+    notificationSettings?: Record<string, any>;
+    integrationSettings?: Record<string, any>;
+  }) => {
     await systemSettingsApi.updateSystemSettings(settings);
     return settings;
   }
 );
 
 const settingsSlice = createSlice({
-  name: 'settings',
+  name: "settings",
   initialState,
   reducers: {
     clearError: (state) => {
@@ -110,7 +111,11 @@ const settingsSlice = createSlice({
       })
       .addCase(fetchSettings.fulfilled, (state, action) => {
         state.isLoading = false;
-        const data = action.payload;
+        const data = action.payload as {
+          systemSettings?: Partial<SystemSettings>;
+          notificationSettings?: Partial<NotificationSettings>;
+          integrationSettings?: Partial<IntegrationSettings>;
+        };
         if (data.systemSettings) {
           state.systemSettings = { ...state.systemSettings, ...data.systemSettings };
         }
@@ -123,7 +128,7 @@ const settingsSlice = createSlice({
       })
       .addCase(fetchSettings.rejected, (state, action) => {
         state.isLoading = false;
-        state.error = action.error.message || 'Failed to fetch settings';
+        state.error = action.error.message || "Failed to fetch settings";
       })
       .addCase(updateSettings.pending, (state) => {
         state.isSaving = true;
@@ -134,15 +139,10 @@ const settingsSlice = createSlice({
       })
       .addCase(updateSettings.rejected, (state, action) => {
         state.isSaving = false;
-        state.error = action.error.message || 'Failed to update settings';
+        state.error = action.error.message || "Failed to update settings";
       });
   },
 });
 
-export const { 
-  clearError, 
-  updateSystemSettings, 
-  updateNotificationSettings, 
-  updateIntegrationSettings 
-} = settingsSlice.actions;
+export const { clearError, updateSystemSettings, updateNotificationSettings, updateIntegrationSettings } = settingsSlice.actions;
 export default settingsSlice.reducer;
