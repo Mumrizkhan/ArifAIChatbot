@@ -28,6 +28,10 @@ const SubscriptionsPage: React.FC = () => {
     dispatch(fetchBillingStats());
   }, [dispatch]);
 
+  useEffect(() => {
+    console.log("Plans from Redux state:", plans);
+  }, [plans]);
+
   const mockSubscriptions = [
     {
       id: "1",

@@ -91,11 +91,13 @@ export const authApi = {
 };
 
 export const systemSettingsApi = {
-  getSystemSettings: () =>
-    apiClient.get('/tenant-management/systemsettings'),
-  
-  updateSystemSettings: (data: { systemSettings?: Record<string, any>; notificationSettings?: Record<string, any>; integrationSettings?: Record<string, any> }) =>
-    apiClient.put('/tenant-management/systemsettings', data),
+  getSystemSettings: () => apiClient.get("/tenant-management/systemsettings"),
+
+  updateSystemSettings: (data: {
+    systemSettings?: Record<string, any>;
+    notificationSettings?: Record<string, any>;
+    integrationSettings?: Record<string, any>;
+  }) => apiClient.put("/tenant-management/systemsettings", data),
 };
 
 export const tenantApi = {
@@ -208,7 +210,7 @@ export const analyticsApi = {
 
 export const subscriptionApi = {
   getPlans: async () => {
-    return apiClient.get<any[]>("/subscription/plans");
+    return apiClient.get<any[]>("/Plans");
   },
 
   getSubscriptions: async (page: number, pageSize: number) => {
@@ -221,26 +223,26 @@ export const subscriptionApi = {
       totalCount: number;
       currentPage: number;
       pageSize: number;
-    }>(`/subscription/subscriptions?${params}`);
+    }>(`/subscriptions?${params}`);
   },
 
   createSubscription: async (subscriptionData: any) => {
-    return apiClient.post<any>("/subscription/subscriptions", subscriptionData);
+    return apiClient.post<any>("/subscriptions", subscriptionData);
   },
 
   updateSubscription: async (id: string, subscriptionData: any) => {
-    return apiClient.put<any>(`/subscription/subscriptions/${id}`, subscriptionData);
+    return apiClient.put<any>(`/subscriptions/${id}`, subscriptionData);
   },
 
   cancelSubscription: async (id: string) => {
-    return apiClient.post(`/subscription/subscriptions/${id}/cancel`);
+    return apiClient.post(`/subscriptions/${id}/cancel`);
   },
 
   getBillingStats: async () => {
-    return apiClient.get<any>("subscription/subscriptions/billing/stats");
+    return apiClient.get<any>("/subscriptions/billing/stats");
   },
   createPlan: async (planData: any) => {
-    return apiClient.post<any>("/subscription/Plans", planData);
+    return apiClient.post<any>("/Plans", planData);
   },
 };
 

@@ -11,9 +11,12 @@ type Feature = {
 };
 
 const planTypeMap: Record<string, number> = {
-  Standard: 0,
-  Premium: 1,
-  Enterprise: 2,
+  Free: 0,
+  Basic: 1,
+  Standard: 2,
+  Premium: 3,
+  Enterprise: 4,
+  Custom: 5,
 };
 
 interface PlanFormProps {
@@ -229,9 +232,12 @@ const PlanForm: React.FC<PlanFormProps> = ({ initialData, mode, onSubmit, onCanc
       <label className="block">
         {t("subscriptions.fields.type")}
         <select name="type" value={form.type} onChange={handleChange} className="border p-2 mt-1 w-full" disabled={isView}>
-          <option value="Standard">{t("subscriptions.planTypes.standard")}</option>
-          <option value="Premium">{t("subscriptions.planTypes.premium")}</option>
-          <option value="Enterprise">{t("subscriptions.planTypes.enterprise")}</option>
+          <option value="Free">{t("subscriptions.planTypes.free") || "Free"}</option>
+          <option value="Basic">{t("subscriptions.planTypes.basic") || "Basic"}</option>
+          <option value="Standard">{t("subscriptions.planTypes.standard") || "Standard"}</option>
+          <option value="Premium">{t("subscriptions.planTypes.premium") || "Premium"}</option>
+          <option value="Enterprise">{t("subscriptions.planTypes.enterprise") || "Enterprise"}</option>
+          <option value="Custom">{t("subscriptions.planTypes.custom") || "Custom"}</option>
         </select>
       </label>
       <label className="block font-bold mt-4">{t("subscriptions.fields.features")}</label>
