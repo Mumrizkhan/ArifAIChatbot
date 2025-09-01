@@ -1,4 +1,4 @@
-import { apiClient } from './api';
+import { apiClient } from "./api";
 
 export interface DashboardStats {
   totalTenants: number;
@@ -45,27 +45,24 @@ export interface AnalyticsData {
 }
 
 export const analyticsApi = {
-  getDashboardStats: (tenantId?: string) =>
-    apiClient.get<DashboardStats>('/analytics/analytics/dashboard', tenantId ? { tenantId } : {}),
+  getDashboardStats: (tenantId?: string) => apiClient.get<DashboardStats>("/analytics/analytics/dashboard", tenantId ? { tenantId } : {}),
 
-  getConversationMetrics: (timeRange: string = '7d', tenantId?: string) =>
-    apiClient.get<ConversationMetrics>('/analytics/analytics/conversations', { timeRange, tenantId }),
-  
-  getAgentMetrics: (timeRange: string = '7d', tenantId?: string) =>
-    apiClient.get<AgentMetrics>('/analytics/analytics/agents', { timeRange, tenantId }),
+  getConversationMetrics: (timeRange: string = "7d", tenantId?: string) =>
+    apiClient.get<ConversationMetrics>("/analytics/analytics/conversations", { timeRange, tenantId }),
+
+  getAgentMetrics: (timeRange: string = "7d", tenantId?: string) =>
+    apiClient.get<AgentMetrics>("/analytics/analytics/agents", { timeRange, tenantId }),
 
   getPerformanceMetrics: (dateFrom?: string, dateTo?: string) =>
-    apiClient.get<PerformanceMetrics>('/analytics/agents/performance', { dateFrom, dateTo }),
+    apiClient.get<PerformanceMetrics>("/analytics/agents/performance", { dateFrom, dateTo }),
 
-  getRealtimeAnalytics: () =>
-    apiClient.get<RealtimeAnalytics>('/analytics/analytics/realtime'),
+  getRealtimeAnalytics: () => apiClient.get<RealtimeAnalytics>("/analytics/analytics/realtime"),
 
   getAnalytics: (dateFrom?: string, dateTo?: string, tenantId?: string) =>
-    apiClient.get<AnalyticsData>('/analytics/analytics', { dateFrom, dateTo, tenantId }),
+    apiClient.post<AnalyticsData>("/analytics/analytics", { dateFrom, dateTo, tenantId }),
 
   getAgentStats: (agentId: string, startDate?: string, endDate?: string) =>
     apiClient.get<any>(`/agent/agents/${agentId}/stats`, { startDate, endDate }),
-  
-  getAgentPerformance: (startDate?: string, endDate?: string) =>
-    apiClient.get<any>('/agent/agents/performance', { startDate, endDate }),
+
+  getAgentPerformance: (startDate?: string, endDate?: string) => apiClient.get<any>("/agent/agents/performance", { startDate, endDate }),
 };
