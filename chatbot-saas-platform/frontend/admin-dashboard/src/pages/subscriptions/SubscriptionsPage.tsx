@@ -12,65 +12,21 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "../../components/ui/ta
 import { Skeleton } from "../../components/ui/skeleton";
 import { XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, LineChart, Line, PieChart, Pie, Cell } from "recharts";
 import { Plus, Search, DollarSign, Users, TrendingUp, CreditCard, CheckCircle, XCircle, Clock, Calendar, Download } from "lucide-react";
+import PlanForm from "./PlanForm"; // adjust path as needed
 
 const SubscriptionsPage: React.FC = () => {
   const { t, i18n } = useTranslation();
   const dispatch = useDispatch<AppDispatch>();
   const { plans, subscriptions, billingStats, isLoading, error } = useSelector((state: RootState) => state.subscription);
   const direction = i18n.language === "ar" ? "rtl" : "ltr";
-  const [showCreateModal, setShowCreateModal] = useState(false);
-  const [form, setForm] = useState({
-    name: "",
-    description: "",
-    monthlyPrice: 0,
-    yearlyPrice: 0,
-    currency: "USD",
-    isActive: true,
-    isPublic: true,
-    type: "Standard",
-    features: {},
-    limits: {},
-    stripePriceIdMonthly: "",
-    stripePriceIdYearly: "",
-    trialDays: 14,
-    sortOrder: 0,
-    tenantId: "", // You may want to set this from context or user
-  });
-  const [formError, setFormError] = useState<string | null>(null);
-
-  // Add this helper type at the top (optional, for TypeScript users)
-  type Feature = {
-    key: string;
-    name: string;
-    description: string;
-    isEnabled: boolean;
-    limit?: number;
-    configuration: Record<string, any>;
-  };
-
-  // Add this inside your SubscriptionsPage component:
-  const [featureList, setFeatureList] = useState<Feature[]>([]);
+  const [modalMode, setModalMode] = useState<"create" | "edit" | "view" | null>(null);
+  const [modalPlan, setModalPlan] = useState<any | null>(null);
 
   useEffect(() => {
     dispatch(fetchPlans());
     dispatch(fetchSubscriptions({ page: 1, pageSize: 20 }));
     dispatch(fetchBillingStats());
   }, [dispatch]);
-
-  // Sync features object in form with featureList
-  useEffect(() => {
-    const featuresObj: Record<string, any> = {};
-    featureList.forEach((f) => {
-      featuresObj[f.key] = {
-        name: f.name,
-        description: f.description,
-        isEnabled: f.isEnabled,
-        limit: f.limit,
-        configuration: f.configuration,
-      };
-    });
-    setForm((prev) => ({ ...prev, features: featuresObj }));
-  }, [featureList]);
 
   const mockSubscriptions = [
     {
@@ -236,52 +192,6 @@ const SubscriptionsPage: React.FC = () => {
     );
   };
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
-    const { name, value, type } = e.target;
-    setForm((prev) => ({
-      ...prev,
-      [name]: type === "checkbox" ? (e.target as HTMLInputElement).checked : value,
-    }));
-  };
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setFormError(null);
-    const planTypeMap: Record<string, number> = {
-      Standard: 0,
-      Premium: 1,
-      Enterprise: 2,
-    };
-
-    const planToSend = {
-      ...form,
-      type: planTypeMap[form.type] ?? 0,
-    };
-
-    try {
-      await dispatch(createPlan({ plan: planToSend }));
-      setShowCreateModal(false);
-      dispatch(fetchPlans());
-    } catch (err: any) {
-      setFormError(err.message || "Failed to create plan");
-    }
-  };
-
-  const handleFeatureChange = (idx: number, field: string, value: any) => {
-    setFeatureList((prev) => prev.map((f, i) => (i === idx ? { ...f, [field]: value } : f)));
-  };
-
-  const addFeature = () => {
-    setFeatureList((prev) => [
-      ...prev,
-      { key: `key_${Date.now()}`, name: "", description: "", isEnabled: false, limit: undefined, configuration: {} },
-    ]);
-  };
-
-  const removeFeature = (idx: number) => {
-    setFeatureList((prev) => prev.filter((_, i) => i !== idx));
-  };
-
   if (isLoading) {
     return (
       <div className="space-y-6">
@@ -334,7 +244,12 @@ const SubscriptionsPage: React.FC = () => {
           <h1 className="text-3xl font-bold">{t("subscriptions.title")}</h1>
           <p className="text-muted-foreground">{t("subscriptions.description")}</p>
         </div>
-        <Button onClick={() => setShowCreateModal(true)}>
+        <Button
+          onClick={() => {
+            setModalMode("create");
+            setModalPlan(null);
+          }}
+        >
           <Plus className="mr-2 h-4 w-4" />
           {t("subscriptions.createPlan")}
         </Button>
@@ -460,7 +375,14 @@ const SubscriptionsPage: React.FC = () => {
                           </li>
                         ))}
                   </ul>
-                  <Button className="w-full mt-4" variant="outline">
+                  <Button
+                    className="w-full mt-4"
+                    variant="outline"
+                    onClick={() => {
+                      setModalMode("edit");
+                      setModalPlan(plan);
+                    }}
+                  >
                     {t("subscriptions.editPlan")}
                   </Button>
                 </CardContent>
@@ -584,197 +506,37 @@ const SubscriptionsPage: React.FC = () => {
         </TabsContent>
       </Tabs>
 
-      {/* Create Plan Modal */}
-      {showCreateModal && (
+      {/* Create/Edit Plan Modal */}
+      {modalMode && (
         <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-40 z-50">
           <div className="bg-white p-6 rounded shadow-lg w-full max-w-2xl max-h-[90vh] overflow-y-auto">
-            <h2 className="text-xl font-bold mb-4">{t("subscriptions.createPlan")}</h2>
-            <form onSubmit={handleSubmit} className="space-y-3">
-              <label className="block">
-                {t("subscriptions.fields.name")}
-                <input
-                  name="name"
-                  value={form.name}
-                  onChange={handleChange}
-                  placeholder={t("subscriptions.fields.name")}
-                  required
-                  className="w-full border p-2 mt-1"
-                />
-              </label>
-              <label className="block">
-                {t("subscriptions.fields.description")}
-                <textarea
-                  name="description"
-                  value={form.description}
-                  onChange={handleChange}
-                  placeholder={t("subscriptions.fields.description")}
-                  className="w-full border p-2 mt-1"
-                />
-              </label>
-              <label className="block">
-                {t("subscriptions.fields.monthlyPrice")}
-                <input
-                  name="monthlyPrice"
-                  type="number"
-                  value={form.monthlyPrice}
-                  onChange={handleChange}
-                  placeholder={t("subscriptions.fields.monthlyPrice")}
-                  className="w-full border p-2 mt-1"
-                />
-              </label>
-              <label className="block">
-                {t("subscriptions.fields.yearlyPrice")}
-                <input
-                  name="yearlyPrice"
-                  type="number"
-                  value={form.yearlyPrice}
-                  onChange={handleChange}
-                  placeholder={t("subscriptions.fields.yearlyPrice")}
-                  className="w-full border p-2 mt-1"
-                />
-              </label>
-              <label className="block">
-                {t("subscriptions.fields.currency")}
-                <input
-                  name="currency"
-                  value={form.currency}
-                  onChange={handleChange}
-                  placeholder={t("subscriptions.fields.currency")}
-                  className="w-full border p-2 mt-1"
-                />
-              </label>
-              <label className="block">
-                {t("subscriptions.fields.stripePriceIdMonthly")}
-                <input
-                  name="stripePriceIdMonthly"
-                  value={form.stripePriceIdMonthly}
-                  onChange={handleChange}
-                  placeholder={t("subscriptions.fields.stripePriceIdMonthly")}
-                  className="w-full border p-2 mt-1"
-                />
-              </label>
-              <label className="block">
-                {t("subscriptions.fields.stripePriceIdYearly")}
-                <input
-                  name="stripePriceIdYearly"
-                  value={form.stripePriceIdYearly}
-                  onChange={handleChange}
-                  placeholder={t("subscriptions.fields.stripePriceIdYearly")}
-                  className="w-full border p-2 mt-1"
-                />
-              </label>
-              <label className="block">
-                {t("subscriptions.fields.trialDays")}
-                <input
-                  name="trialDays"
-                  type="number"
-                  value={form.trialDays}
-                  onChange={handleChange}
-                  placeholder={t("subscriptions.fields.trialDays")}
-                  className="w-full border p-2 mt-1"
-                />
-              </label>
-              <label className="block">
-                {t("subscriptions.fields.sortOrder")}
-                <input
-                  name="sortOrder"
-                  type="number"
-                  value={form.sortOrder}
-                  onChange={handleChange}
-                  placeholder={t("subscriptions.fields.sortOrder")}
-                  className="w-full border p-2 mt-1"
-                />
-              </label>
-              <label className="block">
-                {t("subscriptions.fields.tenantId")}
-                <input
-                  name="tenantId"
-                  value={form.tenantId}
-                  onChange={handleChange}
-                  placeholder={t("subscriptions.fields.tenantId")}
-                  className="w-full border p-2 mt-1"
-                />
-              </label>
-              <label className="flex items-center">
-                <input type="checkbox" name="isActive" checked={form.isActive} onChange={handleChange} className="mr-2" />
-                {t("subscriptions.fields.isActive")}
-              </label>
-              <label className="flex items-center">
-                <input type="checkbox" name="isPublic" checked={form.isPublic} onChange={handleChange} className="mr-2" />
-                {t("subscriptions.fields.isPublic")}
-              </label>
-              <label className="block">
-                {t("subscriptions.fields.type")}
-                <select name="type" value={form.type} onChange={handleChange} className="border p-2 mt-1 w-full">
-                  <option value="Standard">{t("subscriptions.planTypes.standard")}</option>
-                  <option value="Premium">{t("subscriptions.planTypes.premium")}</option>
-                  <option value="Enterprise">{t("subscriptions.planTypes.enterprise")}</option>
-                </select>
-              </label>
-
-              {/* Features and Limits can be added as advanced fields */}
-              <label className="block font-bold mt-4">{t("subscriptions.fields.features")}</label>
-              {featureList.map((feature, idx) => (
-                <div key={feature.key} className="border p-2 mb-2 rounded bg-gray-50">
-                  <div className="flex gap-2 mb-2">
-                    <label className="flex-1">
-                      {t("subscriptions.fields.featureName")}
-                      <input
-                        className="w-full border p-1 mt-1"
-                        value={feature.name}
-                        onChange={(e) => handleFeatureChange(idx, "name", e.target.value)}
-                        placeholder={t("subscriptions.fields.featureName")}
-                      />
-                    </label>
-                    <label className="flex-1">
-                      {t("subscriptions.fields.featureDescription")}
-                      <input
-                        className="w-full border p-1 mt-1"
-                        value={feature.description}
-                        onChange={(e) => handleFeatureChange(idx, "description", e.target.value)}
-                        placeholder={t("subscriptions.fields.featureDescription")}
-                      />
-                    </label>
-                  </div>
-                  <div className="flex gap-2 mb-2">
-                    <label className="flex items-center">
-                      <input
-                        type="checkbox"
-                        checked={feature.isEnabled}
-                        onChange={(e) => handleFeatureChange(idx, "isEnabled", e.target.checked)}
-                        className="mr-2"
-                      />
-                      {t("subscriptions.fields.featureIsEnabled")}
-                    </label>
-                    <label>
-                      {t("subscriptions.fields.featureLimit")}
-                      <input
-                        type="number"
-                        className="border p-1 ml-2"
-                        value={feature.limit ?? ""}
-                        onChange={(e) => handleFeatureChange(idx, "limit", e.target.value ? Number(e.target.value) : undefined)}
-                        placeholder={t("subscriptions.fields.featureLimit")}
-                      />
-                    </label>
-                    <Button type="button" variant="destructive" size="sm" onClick={() => removeFeature(idx)}>
-                      {t("common.remove")}
-                    </Button>
-                  </div>
-                  {/* You can add configuration editing here if needed */}
-                </div>
-              ))}
-              <Button type="button" variant="outline" onClick={addFeature}>
-                {t("subscriptions.fields.addFeature")}
-              </Button>
-
-              {formError && <div className="text-red-500">{formError}</div>}
-              <div className="flex gap-2 mt-4">
-                <Button type="submit">{t("common.save")}</Button>
-                <Button type="button" variant="outline" onClick={() => setShowCreateModal(false)}>
-                  {t("common.cancel")}
-                </Button>
-              </div>
-            </form>
+            <h2 className="text-xl font-bold mb-4">
+              {modalMode === "create"
+                ? t("subscriptions.createPlan")
+                : modalMode === "edit"
+                ? t("subscriptions.editPlan")
+                : t("subscriptions.viewPlan")}
+            </h2>
+            <PlanForm
+              initialData={modalPlan}
+              mode={modalMode}
+              t={t}
+              onSubmit={async (planToSend) => {
+                if (modalMode === "create") {
+                  await dispatch(createPlan({ plan: planToSend }));
+                } else if (modalMode === "edit") {
+                  // await dispatch(updatePlan({ plan: planToSend })); // implement updatePlan thunk
+                  await dispatch(createPlan({ plan: { ...planToSend, id: modalPlan.id } })); // fallback if update not available
+                }
+                setModalMode(null);
+                setModalPlan(null);
+                dispatch(fetchPlans());
+              }}
+              onCancel={() => {
+                setModalMode(null);
+                setModalPlan(null);
+              }}
+            />
           </div>
         </div>
       )}
