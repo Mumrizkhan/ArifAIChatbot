@@ -239,10 +239,10 @@ export const subscriptionApi = {
   },
 
   getBillingStats: async () => {
-    return apiClient.get<any>("/subscriptions/billing/stats");
+    return apiClient.get<any>("/subscription/subscriptions/billing/stats");
   },
   createPlan: async (planData: any) => {
-    return apiClient.post<any>("/Plans", planData);
+    return apiClient.post<any>("/subscription/Plans", planData);
   },
 };
 
