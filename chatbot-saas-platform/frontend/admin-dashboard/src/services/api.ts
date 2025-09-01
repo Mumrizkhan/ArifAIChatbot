@@ -210,7 +210,7 @@ export const analyticsApi = {
 
 export const subscriptionApi = {
   getPlans: async () => {
-    return apiClient.get<any[]>("/Plans");
+    return apiClient.get<any[]>("/subscription/Plans");
   },
 
   getSubscriptions: async (page: number, pageSize: number) => {
@@ -223,19 +223,19 @@ export const subscriptionApi = {
       totalCount: number;
       currentPage: number;
       pageSize: number;
-    }>(`/subscriptions?${params}`);
+    }>(`/subscription/subscriptions?${params}`);
   },
 
   createSubscription: async (subscriptionData: any) => {
-    return apiClient.post<any>("/subscriptions", subscriptionData);
+    return apiClient.post<any>("/subscription/subscriptions", subscriptionData);
   },
 
   updateSubscription: async (id: string, subscriptionData: any) => {
-    return apiClient.put<any>(`/subscriptions/${id}`, subscriptionData);
+    return apiClient.put<any>(`/subscription/subscriptions/${id}`, subscriptionData);
   },
 
   cancelSubscription: async (id: string) => {
-    return apiClient.post(`/subscriptions/${id}/cancel`);
+    return apiClient.post(`/subscription/subscriptions/${id}/cancel`);
   },
 
   getBillingStats: async () => {
