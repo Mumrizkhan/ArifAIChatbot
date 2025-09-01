@@ -306,7 +306,9 @@
       "pro": "Pro",
       "enterprise": "Enterprise",
       "standard": "Standard",
-      "premium": "Premium"
+      "premium": "Premium",
+      "free": "Free",
+      "custom": "Custom"
     },
     "fields": {
       "name": "Name",

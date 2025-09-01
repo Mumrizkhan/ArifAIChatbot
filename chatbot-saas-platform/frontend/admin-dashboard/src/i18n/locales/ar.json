@@ -303,11 +303,13 @@
     "manageSubscriptions": "إدارة جميع اشتراكات العملاء",
     "searchPlaceholder": "البحث في الاشتراكات...",
     "planTypes": {
-      "standard": "Standard",
-      "premium": "Premium",
-      "enterprise": "Enterprise",
-      "basic": "Basic",
-      "pro": "Pro"
+      "standard": "قياسي",
+      "premium": "مميز",
+      "enterprise": "مؤسسي",
+      "basic": "أساسي",
+      "pro": "احترافي",
+      "free": "مجاني",
+      "custom": "مخصص"
     },
     "status": {
       "label": "الحالة",
