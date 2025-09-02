@@ -142,26 +142,33 @@ export const sendMessage = createAsyncThunk(
   }
 );
 
+interface CustomerInfo {
+  customerName?: string;
+  userEmail?: string;
+  language?: string;
+  userId?: string;
+}
+
 export const fetchCustomerInfo = createAsyncThunk("chat/fetchCustomerInfo", async (payload: { tenantId: string; userId?: string }, { getState }) => {
   console.log("🚀 Fetching customer info for:", payload);
 
-  // const state = getState() as RootState;
-  // const authToken = state.config?.widget?.authToken;
+  const state = getState() as RootState;
+  const authToken = state.config?.widget?.authToken;
 
   // Make API call to get customer information
-  // const data = await apiClient.get(`/chat/customers/${payload.userId || "current"}`, {
-  //   headers: authToken ? { Authorization: `Bearer ${authToken}` } : {},
-  //   params: { tenantId: payload.tenantId },
-  // });
+  const data = await apiClient.get(`/chat/customers/${payload.userId || "current"}`, {
+    headers: authToken ? { Authorization: `Bearer ${authToken}` } : {},
+    params: { tenantId: payload.tenantId },
+  });
 
-  // console.log("✅ Customer info fetched:", data);
+  console.log("✅ Customer info fetched:", data);
 
-  // return {
-  //   customerName: data.customerName || data.name || data.displayName,
-  //   userEmail: data.email,
-  //   language: data.preferredLanguage || data.language,
-  //   userId: data.id || data.userId,
-  // };
+  return {
+    customerName: data.customerName || data.name || data.displayName,
+    userEmail: data.email,
+    language: data.preferredLanguage || data.language,
+    userId: data.id || data.userId,
+  } as CustomerInfo;
 });
 
 export const startConversation = createAsyncThunk("chat/startConversation", async (tenantId: string, { getState, dispatch }) => {
@@ -177,9 +184,9 @@ export const startConversation = createAsyncThunk("chat/startConversation", asyn
       const userId = state.config?.userId;
       if (userId) {
         console.log("🔍 Fetching customer info from API...");
-        const customerInfo = await dispatch(fetchCustomerInfo({ tenantId, userId })).unwrap();
-        customerName = customerInfo.customerName || customerName;
-        language = customerInfo.language || language;
+        // const customerInfo = (await (dispatch as any)(fetchCustomerInfo({ tenantId, userId })).unwrap()) as CustomerInfo;
+        // customerName = customerInfo?.customerName || customerName;
+        // language = customerInfo?.language || language;
         console.log("✅ Customer info updated:", { customerName, language });
       }
     } catch (error) {
