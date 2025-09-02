@@ -142,12 +142,51 @@ export const sendMessage = createAsyncThunk(
   }
 );
 
-export const startConversation = createAsyncThunk("chat/startConversation", async (tenantId: string, { getState }) => {
+export const fetchCustomerInfo = createAsyncThunk("chat/fetchCustomerInfo", async (payload: { tenantId: string; userId?: string }, { getState }) => {
+  console.log("🚀 Fetching customer info for:", payload);
+
+  // const state = getState() as RootState;
+  // const authToken = state.config?.widget?.authToken;
+
+  // Make API call to get customer information
+  // const data = await apiClient.get(`/chat/customers/${payload.userId || "current"}`, {
+  //   headers: authToken ? { Authorization: `Bearer ${authToken}` } : {},
+  //   params: { tenantId: payload.tenantId },
+  // });
+
+  // console.log("✅ Customer info fetched:", data);
+
+  // return {
+  //   customerName: data.customerName || data.name || data.displayName,
+  //   userEmail: data.email,
+  //   language: data.preferredLanguage || data.language,
+  //   userId: data.id || data.userId,
+  // };
+});
+
+export const startConversation = createAsyncThunk("chat/startConversation", async (tenantId: string, { getState, dispatch }) => {
   console.log("🚀 Starting conversation for tenant:", tenantId);
 
   const state = getState() as RootState;
-  const customerName = state.config?.widget?.customerName || state.config?.widget?.userName || state.config?.widget?.userEmail || "Anonymous User";
-  const language = state.config?.widget?.language || "en";
+  let customerName = state.config?.widget?.customerName || state.config?.widget?.userName || state.config?.widget?.userEmail || "Anonymous User";
+  let language = state.config?.widget?.language || "en";
+
+  // Optionally fetch customer info from API if customerName is not set or is "Anonymous User"
+  if (!state.config?.widget?.customerName || customerName === "Anonymous User") {
+    try {
+      const userId = state.config?.userId;
+      if (userId) {
+        console.log("🔍 Fetching customer info from API...");
+        const customerInfo = await dispatch(fetchCustomerInfo({ tenantId, userId })).unwrap();
+        customerName = customerInfo.customerName || customerName;
+        language = customerInfo.language || language;
+        console.log("✅ Customer info updated:", { customerName, language });
+      }
+    } catch (error) {
+      console.warn("⚠️ Failed to fetch customer info, using fallback:", error);
+      // Continue with existing values
+    }
+  }
 
   const data = await apiClient.post("/chat/chat/conversations", {
     tenantId,
@@ -391,6 +430,17 @@ const chatSlice = createSlice({
       .addCase(submitRating.rejected, (state, action) => {
         state.isLoading = false;
         state.error = action.error.message || "Failed to submit rating";
+      })
+      .addCase(fetchCustomerInfo.pending, () => {
+        console.log("Fetching customer info...");
+      })
+      .addCase(fetchCustomerInfo.fulfilled, (_, action) => {
+        console.log("Customer info fetched successfully:", action.payload);
+        // Customer info is handled in startConversation, no state update needed here
+      })
+      .addCase(fetchCustomerInfo.rejected, (_, action) => {
+        console.warn("Failed to fetch customer info:", action.error.message);
+        // Don't set error state since this is optional
       });
   },
 });
