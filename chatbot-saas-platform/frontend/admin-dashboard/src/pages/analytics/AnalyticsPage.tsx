@@ -6,6 +6,7 @@ import {
   fetchConversationMetrics,
   fetchAgentMetrics,
   fetchBotMetrics,
+  fetchPerformanceMetrics,
   setTimeRange,
   setSelectedTenant,
   updateConversationMetricsRealtime,
@@ -40,16 +41,47 @@ const AnalyticsPage: React.FC = () => {
   const { t, i18n } = useTranslation();
   const direction = i18n.language === "ar" ? "rtl" : "ltr";
   const dispatch = useDispatch<AppDispatch>();
-  const { conversationMetrics, agentMetrics, isLoading, selectedTimeRange, selectedTenant, isSignalRConnected } = useSelector(
+  const { conversationMetrics, agentMetrics, performanceMetrics, isLoading, selectedTimeRange, selectedTenant, isSignalRConnected } = useSelector(
     (state: RootState) => state.analytics
   );
 
   const [activeTab, setActiveTab] = useState("conversations");
 
+  // Utility function to convert time range to date range
+  const getDateRangeFromTimeRange = (timeRange: string) => {
+    const endDate = new Date();
+    const startDate = new Date();
+
+    switch (timeRange) {
+      case "7d":
+        startDate.setDate(endDate.getDate() - 7);
+        break;
+      case "30d":
+        startDate.setDate(endDate.getDate() - 30);
+        break;
+      case "90d":
+        startDate.setDate(endDate.getDate() - 90);
+        break;
+      case "1y":
+        startDate.setFullYear(endDate.getFullYear() - 1);
+        break;
+      default:
+        startDate.setDate(endDate.getDate() - 7);
+    }
+
+    return {
+      dateFrom: startDate.toISOString().split("T")[0], // YYYY-MM-DD format
+      dateTo: endDate.toISOString().split("T")[0],
+    };
+  };
+
   useEffect(() => {
+    const { dateFrom, dateTo } = getDateRangeFromTimeRange(selectedTimeRange);
+
     dispatch(fetchConversationMetrics({ timeRange: selectedTimeRange, tenantId: selectedTenant || undefined }));
     dispatch(fetchAgentMetrics({ timeRange: selectedTimeRange, tenantId: selectedTenant || undefined }));
     dispatch(fetchBotMetrics({ timeRange: selectedTimeRange, tenantId: selectedTenant || undefined }));
+    dispatch(fetchPerformanceMetrics({ dateFrom, dateTo, tenantId: selectedTenant || undefined }));
 
     if (isSignalRConnected) {
       adminSignalRService.setOnConversationMetricsUpdate((metrics) => {
@@ -66,7 +98,11 @@ const AnalyticsPage: React.FC = () => {
   }, [dispatch, selectedTimeRange, selectedTenant, isSignalRConnected]);
 
   const handleTimeRangeChange = (timeRange: string) => {
+    const { dateFrom, dateTo } = getDateRangeFromTimeRange(timeRange);
+
     dispatch(setTimeRange(timeRange));
+    dispatch(fetchPerformanceMetrics({ dateFrom, dateTo, tenantId: selectedTenant || undefined }));
+
     if (isSignalRConnected) {
       adminSignalRService.requestConversationMetricsUpdate(timeRange, selectedTenant || undefined);
       adminSignalRService.requestAgentMetricsUpdate(timeRange, selectedTenant || undefined);
@@ -75,7 +111,11 @@ const AnalyticsPage: React.FC = () => {
 
   const handleTenantChange = (tenantId: string) => {
     const newTenantId = tenantId === "all" ? null : tenantId;
+    const { dateFrom, dateTo } = getDateRangeFromTimeRange(selectedTimeRange);
+
     dispatch(setSelectedTenant(newTenantId));
+    dispatch(fetchPerformanceMetrics({ dateFrom, dateTo, tenantId: newTenantId || undefined }));
+
     if (isSignalRConnected) {
       adminSignalRService.requestConversationMetricsUpdate(selectedTimeRange, newTenantId || undefined);
       adminSignalRService.requestAgentMetricsUpdate(selectedTimeRange, newTenantId || undefined);
@@ -201,6 +241,7 @@ const AnalyticsPage: React.FC = () => {
           <TabsTrigger value="conversations">{t("analytics.tabs.conversations")}</TabsTrigger>
           <TabsTrigger value="agents">{t("analytics.tabs.agents")}</TabsTrigger>
           <TabsTrigger value="bot">{t("analytics.tabs.bot")}</TabsTrigger>
+          <TabsTrigger value="performance">{t("analytics.tabs.performance")}</TabsTrigger>
           <TabsTrigger value="custom">{t("analytics.tabs.custom")}</TabsTrigger>
         </TabsList>
 
@@ -413,6 +454,78 @@ const AnalyticsPage: React.FC = () => {
                   <span>{t("analytics.intents.other")}</span>
                   <Badge variant="secondary">8%</Badge>
                 </div>
+              </CardContent>
+            </Card>
+          </div>
+        </TabsContent>
+
+        <TabsContent value="performance" className="space-y-4">
+          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+            <MetricCard
+              title={t("analytics.metrics.responseTime")}
+              value={performanceMetrics?.responseTime ? `${performanceMetrics.responseTime}ms` : "N/A"}
+              change={t("analytics.changes.responseTimeImproved")}
+              icon={Clock}
+              description={t("analytics.descriptions.averageResponseTime")}
+            />
+            <MetricCard
+              title={t("analytics.metrics.throughput")}
+              value={performanceMetrics?.throughput ? `${performanceMetrics.throughput}/s` : "N/A"}
+              change={t("analytics.changes.throughputIncrease")}
+              icon={TrendingUp}
+              description={t("analytics.descriptions.requestsPerSecond")}
+            />
+            <MetricCard
+              title={t("analytics.metrics.errorRate")}
+              value={performanceMetrics?.errorRate ? `${performanceMetrics.errorRate}%` : "N/A"}
+              change={t("analytics.changes.errorRateDecrease")}
+              icon={BarChart3}
+              description={t("analytics.descriptions.failedRequests")}
+            />
+            <MetricCard
+              title={t("analytics.metrics.uptime")}
+              value={performanceMetrics?.uptime ? `${performanceMetrics.uptime}%` : "N/A"}
+              change={t("analytics.changes.uptimeImproved")}
+              icon={Star}
+              description={t("analytics.descriptions.systemAvailability")}
+            />
+          </div>
+
+          <div className="grid gap-4 md:grid-cols-2">
+            <Card>
+              <CardHeader>
+                <CardTitle>{t("analytics.charts.performanceTrends")}</CardTitle>
+                <CardDescription>{t("analytics.charts.performanceTrendsDescription")}</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <ResponsiveContainer width="100%" height={300}>
+                  <LineChart data={performanceMetrics?.dailyData || []}>
+                    <CartesianGrid strokeDasharray="3 3" />
+                    <XAxis dataKey="date" tickFormatter={(value) => new Date(value).toLocaleDateString()} />
+                    <YAxis />
+                    <Tooltip />
+                    <Line type="monotone" dataKey="responseTime" stroke="#3b82f6" strokeWidth={2} name="Response Time (ms)" />
+                    <Line type="monotone" dataKey="throughput" stroke="#10b981" strokeWidth={2} name="Throughput (req/s)" />
+                  </LineChart>
+                </ResponsiveContainer>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader>
+                <CardTitle>{t("analytics.charts.errorRate")}</CardTitle>
+                <CardDescription>{t("analytics.charts.errorRateDescription")}</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <ResponsiveContainer width="100%" height={300}>
+                  <AreaChart data={performanceMetrics?.dailyData || []}>
+                    <CartesianGrid strokeDasharray="3 3" />
+                    <XAxis dataKey="date" tickFormatter={(value) => new Date(value).toLocaleDateString()} />
+                    <YAxis />
+                    <Tooltip />
+                    <Area type="monotone" dataKey="errorRate" stroke="#ef4444" fill="#ef4444" fillOpacity={0.6} name="Error Rate %" />
+                  </AreaChart>
+                </ResponsiveContainer>
               </CardContent>
             </Card>
           </div>

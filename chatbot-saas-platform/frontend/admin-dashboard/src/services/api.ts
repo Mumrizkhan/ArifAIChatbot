@@ -203,6 +203,15 @@ export const analyticsApi = {
     return apiClient.get<any>(`/analytics/analytics/bot?${params}`);
   },
 
+  getPerformanceMetrics: async (dateFrom: string, dateTo: string, tenantId?: string) => {
+    const params = new URLSearchParams({
+      dateFrom,
+      dateTo,
+    });
+    if (tenantId) params.append("tenantId", tenantId);
+    return apiClient.get<any>(`/analytics/Analytics/performance?${params}`);
+  },
+
   getCustomReport: async (reportConfig: any) => {
     return apiClient.post<any>("/analytics/analytics/reports/custom", reportConfig);
   },

@@ -205,6 +205,7 @@
       "conversations": "Conversation Metrics",
       "agents": "Agent Performance",
       "bot": "Bot Effectiveness",
+      "performance": "System Performance",
       "custom": "Custom Reports"
     },
     "metrics": {
@@ -219,7 +220,11 @@
       "botAccuracy": "Bot Accuracy",
       "fallbackRate": "Fallback Rate",
       "trainingSessions": "Training Sessions",
-      "knowledgeBase": "Knowledge Base"
+      "knowledgeBase": "Knowledge Base",
+      "responseTime": "Response Time",
+      "throughput": "Throughput",
+      "errorRate": "Error Rate",
+      "uptime": "Uptime"
     },
     "units": {
       "minutes": "min"
@@ -235,7 +240,11 @@
       "accuracyIncrease": "+3% from last period",
       "fallbackDecrease": "-2% from last period",
       "trainingIncrease": "+12 this month",
-      "documentsIncrease": "+45 documents"
+      "documentsIncrease": "+45 documents",
+      "responseTimeImproved": "-8% from last period",
+      "throughputIncrease": "+15% from last period",
+      "errorRateDecrease": "-5% from last period",
+      "uptimeImproved": "+0.2% from last period"
     },
     "descriptions": {
       "allChannels": "All conversation channels",
@@ -250,7 +259,11 @@
       "correctResponses": "Correct responses",
       "escalatedToHumans": "Escalated to humans",
       "modelImprovements": "Model improvements",
-      "totalDocuments": "Total documents"
+      "totalDocuments": "Total documents",
+      "averageResponseTime": "Average system response time",
+      "requestsPerSecond": "Requests processed per second",
+      "failedRequests": "Percentage of failed requests",
+      "systemAvailability": "System uptime and availability"
     },
     "channels": {
       "website": "Website",
@@ -268,7 +281,11 @@
       "botPerformance": "Bot Performance Trends",
       "botPerformanceDescription": "Accuracy and response quality over time",
       "intentRecognition": "Intent Recognition",
-      "intentRecognitionDescription": "Most common user intents"
+      "intentRecognitionDescription": "Most common user intents",
+      "performanceTrends": "Performance Trends",
+      "performanceTrendsDescription": "System response time and throughput over time",
+      "errorRate": "Error Rate Trends",
+      "errorRateDescription": "System error rate and reliability metrics"
     },
     "intents": {
       "productInfo": "Product Information",
