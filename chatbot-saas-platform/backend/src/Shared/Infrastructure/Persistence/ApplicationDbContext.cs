@@ -92,7 +92,7 @@ public class ApplicationDbContext : DbContext, IApplicationDbContext
                 .HasColumnType("nvarchar(max)")
                 .HasConversion(
                     v => System.Text.Json.JsonSerializer.Serialize(v, new System.Text.Json.JsonSerializerOptions()),
-                    v => string.IsNullOrEmpty(v) ? new Dictionary<string, PlanFeature>() : System.Text.Json.JsonSerializer.Deserialize<Dictionary<string, PlanFeature>>(v, new System.Text.Json.JsonSerializerOptions())
+                    v => string.IsNullOrEmpty(v) ? new Dictionary<string, PlanFeature>() : System.Text.Json.JsonSerializer.Deserialize<Dictionary<string, PlanFeature>>(v, new System.Text.Json.JsonSerializer.Options())
                 );
             entity.Property(e => e.Limits)
                 .HasColumnType("nvarchar(max)")
