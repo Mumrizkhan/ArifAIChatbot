@@ -3,6 +3,7 @@ using LiveAgentService.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using Serilog;
@@ -10,6 +11,7 @@ using Shared.Application.Common.Interfaces;
 using Shared.Infrastructure.Extensions;
 using Shared.Infrastructure.Persistence;
 using Shared.Infrastructure.Services;
+using StackExchange.Redis;
 using System.Text;
 
 Log.Logger = new LoggerConfiguration()
@@ -46,13 +48,18 @@ builder.Services.AddSwaggerGen(options =>
         }
     });
 });
+builder.Services.AddInfrastructure(builder.Configuration);
 builder.Services.AddSignalR(options =>
 {
     options.EnableDetailedErrors = true;
     options.KeepAliveInterval = TimeSpan.FromSeconds(15);
     options.ClientTimeoutInterval = TimeSpan.FromSeconds(30);
     options.HandshakeTimeout = TimeSpan.FromSeconds(15);
-});
+}).AddStackExchangeRedis(builder.Configuration.GetValue<string>("Redis:ConnectionString") ?? "", options =>
+     {
+         options.Configuration.ChannelPrefix = "agentHub";
+     });
+
 // Configure for proxy
 builder.Services.Configure<ForwardedHeadersOptions>(options =>
 {
@@ -62,12 +69,13 @@ builder.Services.Configure<ForwardedHeadersOptions>(options =>
     options.KnownNetworks.Clear();
     options.KnownProxies.Clear();
 });
-builder.Services.AddInfrastructure(builder.Configuration);
+
 builder.Services.AddHttpClient<IChatRuntimeIntegrationService, ChatRuntimeIntegrationService>();
 builder.Services.AddScoped<IChatRuntimeIntegrationService, ChatRuntimeIntegrationService>();
 builder.Services.AddScoped<IAgentRoutingService, AgentRoutingService>();
 builder.Services.AddScoped<IQueueManagementService, QueueManagementService>();
 builder.Services.AddScoped<IAgentManagementService, AgentManagementService>();
+builder.Services.AddScoped<IConversationRatingService, ConversationRatingService>();
 builder.Services.AddHttpContextAccessor();
 
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
@@ -113,12 +121,12 @@ builder.Services.AddCors(options =>
             "https://agent-stg-arif.tetco.sa",
             "https://admin-stg-arif.tetco.sa",
             "https://tenant-stg-arif.tetco.sa",
-            "http://localhost:5173", 
-            "http://localhost:5174", 
+            "http://localhost:5173",
+            "http://localhost:5174",
             "http://localhost:5175",
             "http://localhost:8000"
         };
-        
+
         policy.WithOrigins(allowedOrigins)
               .AllowAnyMethod()
               .AllowAnyHeader()

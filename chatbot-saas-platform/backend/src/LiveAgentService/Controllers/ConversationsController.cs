@@ -4,6 +4,7 @@ using LiveAgentService.Services;
 using LiveAgentService.Models;
 using Shared.Infrastructure.Services;
 using Shared.Application.Common.Interfaces;
+using Shared.Domain.Entities;
 
 namespace LiveAgentService.Controllers;
 
@@ -18,6 +19,7 @@ public class ConversationsController : ControllerBase
     private readonly IAgentRoutingService _agentRoutingService;
     private readonly IQueueManagementService _queueManagementService;
     private readonly IChatRuntimeIntegrationService _chatRuntimeIntegrationService;
+    private readonly IConversationRatingService _conversationRatingService;
     private readonly ILogger<ConversationsController> _logger;
 
     public ConversationsController(
@@ -27,6 +29,7 @@ public class ConversationsController : ControllerBase
         IAgentRoutingService agentRoutingService,
         IQueueManagementService queueManagementService,
         IChatRuntimeIntegrationService chatRuntimeIntegrationService,
+        IConversationRatingService conversationRatingService,
         ILogger<ConversationsController> logger)
     {
         _agentManagementService = agentManagementService;
@@ -35,6 +38,7 @@ public class ConversationsController : ControllerBase
         _agentRoutingService = agentRoutingService;
         _queueManagementService = queueManagementService;
         _chatRuntimeIntegrationService = chatRuntimeIntegrationService;
+        _conversationRatingService = conversationRatingService;
         _logger = logger;
     }
 
@@ -79,6 +83,9 @@ public class ConversationsController : ControllerBase
                         ? lastMessage.Content.Substring(0, 50) + "..." 
                         : lastMessage?.Content ?? "";
 
+                    // Get rating information
+                    var rating = await _conversationRatingService.GetConversationRatingAsync(assignment.ConversationId);
+
                     enrichedConversations.Add(new
                     {
                         ConversationId = assignment.ConversationId,
@@ -96,7 +103,10 @@ public class ConversationsController : ControllerBase
                         MessageCount = conversationDetails.MessageCount,
                         Priority = assignment.Priority,
                         CreatedAt = conversationDetails.CreatedAt,
-                        UpdatedAt = conversationDetails.UpdatedAt
+                        UpdatedAt = conversationDetails.UpdatedAt,
+                        Rating = rating?.Rating,
+                        Feedback = rating?.Feedback,
+                        HasRating = rating != null
                     });
                 }
                 else
@@ -114,7 +124,8 @@ public class ConversationsController : ControllerBase
                         LastMessagePreview = "Unable to load messages",
                         UnreadMessages = assignment.UnreadMessages,
                         Priority = assignment.Priority,
-                        MessageCount = 0
+                        MessageCount = 0,
+                        HasRating = false
                     });
                 }
             }
@@ -156,6 +167,9 @@ public class ConversationsController : ControllerBase
                 return NotFound(new { message = "Conversation details not found" });
             }
 
+            // Get rating information
+            var rating = await _conversationRatingService.GetConversationRatingAsync(conversationId);
+
             return Ok(new
             {
                 ConversationId = conversationId,
@@ -173,6 +187,10 @@ public class ConversationsController : ControllerBase
                 UpdatedAt = conversationDetails.UpdatedAt,
                 MessageCount = conversationDetails.MessageCount,
                 Priority = assignment.Priority,
+                Rating = rating?.Rating,
+                Feedback = rating?.Feedback,
+                RatedAt = rating?.RatedAt,
+                HasRating = rating != null,
                 Messages = messages.Select(m => new 
                 {
                     Id = m.Id,
@@ -255,7 +273,7 @@ public class ConversationsController : ControllerBase
                     id = Guid.NewGuid(),
                     conversationId,
                     content = request.Content,
-                    sender = "agent",
+                    sender = "Agent",
                     senderId = agentId.Value,
                     timestamp = DateTime.UtcNow,
                     type = request.Type ?? "text",
@@ -272,6 +290,53 @@ public class ConversationsController : ControllerBase
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error sending message to conversation {ConversationId}", conversationId);
+            return StatusCode(500, new { message = "Internal server error" });
+        }
+    }
+
+    [HttpGet("{conversationId}/messages")]
+    public async Task<IActionResult> GetMessages(Guid conversationId)
+    {
+        try
+        {
+            var agentId = _currentUserService.UserId;
+            if (!agentId.HasValue)
+            {
+                return Unauthorized();
+            }
+
+            // Verify agent has access to this conversation
+            var conversations = await _agentRoutingService.GetAgentConversationsAsync(agentId.Value);
+            var hasAccess = conversations.Any(c => c.ConversationId == conversationId);
+
+            if (!hasAccess)
+            {
+                return Forbid();
+            }
+
+            // Get messages from ChatRuntimeService
+            var messages = await _chatRuntimeIntegrationService.GetConversationMessagesAsync(conversationId);
+
+            var formattedMessages = messages.Select(m => new 
+            {
+                Id = m.Id,
+                ConversationId = m.ConversationId,
+                Content = m.Content,
+                Type = m.Type,
+                Sender = m.Sender,
+                SenderId = m.SenderId,
+                SenderName = m.SenderName,
+                CreatedAt = m.CreatedAt,
+                IsRead = m.IsRead,
+               // AttachmentUrl = m.AttachmentUrl,
+               // Metadata = m.Metadata
+            }).OrderBy(m => m.CreatedAt).ToList();
+
+            return Ok(formattedMessages);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error getting messages for conversation {ConversationId}", conversationId);
             return StatusCode(500, new { message = "Internal server error" });
         }
     }
@@ -351,13 +416,158 @@ public class ConversationsController : ControllerBase
     {
         try
         {
-            _logger.LogInformation("Rating conversation {ConversationId} with rating {Rating}", conversationId, request.Rating);
+            var agentId = _currentUserService.UserId;
+            if (!agentId.HasValue)
+            {
+                return Unauthorized(new { message = "Agent authentication required" });
+            }
 
-            return Ok(new { conversationId, rating = request.Rating, feedback = request.Feedback });
+            // Validate the rating range
+            if (request.Rating < 1 || request.Rating > 5)
+            {
+                return BadRequest(new { message = "Rating must be between 1 and 5" });
+            }
+
+            _logger.LogInformation("Agent {AgentId} is rating conversation {ConversationId} with rating {Rating}", 
+                agentId.Value, conversationId, request.Rating);
+
+            // Use the rating service to handle the rating
+            var success = await _conversationRatingService.RateConversationAsync(conversationId, request, agentId.Value);
+
+            if (success)
+            {
+                // Get updated rating information
+                var ratingResult = await _conversationRatingService.GetConversationRatingAsync(conversationId);
+
+                return Ok(new { 
+                    conversationId, 
+                    rating = request.Rating, 
+                    feedback = request.Feedback,
+                    ratedBy = agentId.Value,
+                    ratedAt = DateTime.UtcNow,
+                    message = "Conversation rated successfully"
+                });
+            }
+            else
+            {
+                return BadRequest(new { message = "Failed to rate conversation. Please check if you have permission to rate this conversation." });
+            }
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error rating conversation {ConversationId}", conversationId);
+            return StatusCode(500, new { message = "Internal server error" });
+        }
+    }
+
+    [HttpGet("{conversationId}/rating")]
+    public async Task<IActionResult> GetConversationRating(Guid conversationId)
+    {
+        try
+        {
+            var agentId = _currentUserService.UserId;
+            if (!agentId.HasValue)
+            {
+                return Unauthorized();
+            }
+
+            var rating = await _conversationRatingService.GetConversationRatingAsync(conversationId);
+
+            if (rating == null)
+            {
+                return NotFound(new { message = "No rating found for this conversation" });
+            }
+
+            return Ok(rating);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error getting rating for conversation {ConversationId}", conversationId);
+            return StatusCode(500, new { message = "Internal server error" });
+        }
+    }
+
+    [HttpGet("ratings/statistics")]
+    public async Task<IActionResult> GetRatingStatistics([FromQuery] DateTime? startDate, [FromQuery] DateTime? endDate)
+    {
+        try
+        {
+            var tenantId = _tenantService.GetCurrentTenantId();
+            var statistics = await _conversationRatingService.GetRatingStatisticsAsync(tenantId, startDate, endDate);
+
+            return Ok(statistics);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error getting rating statistics");
+            return StatusCode(500, new { message = "Internal server error" });
+        }
+    }
+
+    [HttpGet("agent/{agentId}/ratings")]
+    public async Task<IActionResult> GetAgentRatings(Guid agentId, [FromQuery] DateTime? startDate, [FromQuery] DateTime? endDate)
+    {
+        try
+        {
+            var currentAgentId = _currentUserService.UserId;
+            if (!currentAgentId.HasValue)
+            {
+                return Unauthorized();
+            }
+
+            // Agents can only view their own ratings unless they have admin privileges
+            if (currentAgentId.Value != agentId)
+            {
+                // TODO: Add admin role check here
+                return Forbid("You can only view your own ratings");
+            }
+
+            var ratings = await _conversationRatingService.GetAgentRatingsAsync(agentId, startDate, endDate);
+
+            return Ok(new
+            {
+                agentId,
+                ratings,
+                totalRatings = ratings.Count,
+                averageRating = ratings.Any() ? Math.Round(ratings.Average(r => r.Rating), 2) : 0,
+                periodStart = startDate,
+                periodEnd = endDate
+            });
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error getting ratings for agent {AgentId}", agentId);
+            return StatusCode(500, new { message = "Internal server error" });
+        }
+    }
+
+    [HttpPost("{id}/feedback-message")]
+    public async Task<IActionResult> SendFeedbackMessage(Guid id, [FromBody] SendFeedbackMessageRequest request)
+    {
+        try
+        {
+            var agentId = _currentUserService.UserId;
+            if (!agentId.HasValue)
+            {
+                return Unauthorized();
+            }
+
+            // Call ChatRuntimeService to send the feedback message
+            var result = await _chatRuntimeIntegrationService.SendFeedbackMessageAsync(id, request);
+            
+            if (result.IsSuccess)
+            {
+                return Ok(result.Data);
+            }
+            else
+            {
+                _logger.LogError("Failed to send feedback message: {Error}", result.ErrorMessage);
+                return BadRequest(new { message = result.ErrorMessage });
+            }
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error sending feedback message for conversation {ConversationId}", id);
             return StatusCode(500, new { message = "Internal server error" });
         }
     }

@@ -32,7 +32,14 @@ export const MessageList: React.FC = () => {
 
     // Use MessageBubble for pending bot message
     return (
-      <MessageBubble key={message.id} message={message} isFirstInGroup={isFirstInGroup} isLastInGroup={isLastInGroup} showAvatar={isLastInGroup} />
+      <MessageBubble 
+        key={message.id} 
+        message={message} 
+        isFirstInGroup={isFirstInGroup} 
+        isLastInGroup={isLastInGroup} 
+        showAvatar={isLastInGroup}
+        conversationId={currentConversation?.id}
+      />
     );
   };
 

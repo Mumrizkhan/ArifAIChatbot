@@ -6,12 +6,14 @@ import { Message } from '../store/slices/chatSlice';
 import { Bot, User, UserCheck, Download, FileText, Image } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
 import { ensureISOString } from '../utils/timestamp';
+import { FeedbackMessage } from './FeedbackMessage';
 
 interface MessageBubbleProps {
   message: Message;
   isFirstInGroup: boolean;
   isLastInGroup: boolean;
   showAvatar: boolean;
+  conversationId?: string;
 }
 
 export const MessageBubble: React.FC<MessageBubbleProps> = ({
@@ -19,6 +21,7 @@ export const MessageBubble: React.FC<MessageBubbleProps> = ({
   isFirstInGroup,
   isLastInGroup,
   showAvatar,
+  conversationId,
 }) => {
   const { t } = useTranslation();
   const { currentConversation } = useSelector((state: RootState) => state.chat);
@@ -128,12 +131,29 @@ export const MessageBubble: React.FC<MessageBubbleProps> = ({
     </div>
   );
 
+  const renderFeedbackMessage = () => {
+    return (
+      <div className="message-feedback">
+        <div className="message-text">
+          {message.content}
+        </div>
+        <FeedbackMessage 
+          conversationId={conversationId || ''}
+          messageId={message.id}
+          metadata={message.metadata}
+        />
+      </div>
+    );
+  };
+
   const renderMessageContent = () => {
     switch (message.type) {
       case 'file':
         return renderFileMessage();
       case 'image':
         return renderImageMessage();
+      case 'feedback':
+        return renderFeedbackMessage();
       case 'text':
       default:
         return renderTextMessage();

@@ -15,6 +15,7 @@ import {
   setTypingUser,
   removeTypingUser,
   markMessageAsRead,
+  sendFeedbackMessage,
 } from "../../store/slices/conversationSlice";
 import { setSelectedConversation } from "../../store/slices/selectedConversationSlice";
 import { addAgentNotification } from "../../store/slices/agentSlice";
@@ -94,7 +95,7 @@ const ConversationsPage = () => {
 
         // Skip ALL agent messages to prevent duplicates
         // (agent messages are already added via sendMessage.fulfilled)
-        if (messageDto.sender === "agent") {
+        if (messageDto.sender === "Agent") {
           console.log("🚫 Live Agent: Skipping agent message to prevent duplicate");
           return;
         }
@@ -164,6 +165,27 @@ const ConversationsPage = () => {
     };
   }, [dispatch, currentAgent?.id]); // Added currentAgent dependency
 
+  // Effect to load message history for conversations that don't have messages loaded
+  useEffect(() => {
+    if (conversations && Array.isArray(conversations)) {
+      // Find conversations that don't have message history loaded
+      const conversationsNeedingHistory = conversations.filter(conv => 
+        conv.id && (!conv.messages || conv.messages.length === 0)
+      );
+      
+      // Load message history for up to 5 conversations at a time to avoid overwhelming the server
+      const conversationsToLoad = conversationsNeedingHistory.slice(0, 5);
+      
+      conversationsToLoad.forEach((conversation, index) => {
+        // Add a small delay between requests to avoid overwhelming the server
+        setTimeout(() => {
+          console.log("🔍 Loading message history for conversation:", conversation.id);
+          dispatch(fetchConversation(conversation.id));
+        }, index * 200); // 200ms delay between each request
+      });
+    }
+  }, [conversations, dispatch]);
+
   // Effect to fetch conversation details when a conversation is selected
   useEffect(() => {
     if (conversationId) {
@@ -226,8 +248,40 @@ const ConversationsPage = () => {
     }
   };
 
-  const handleStatusChange = (conversationId: string, status: "waiting" | "active" | "resolved" | "closed") => {
+  const handleStatusChange = async (conversationId: string, status: "waiting" | "active" | "resolved" | "closed") => {
+    // Update the conversation status
     dispatch(updateConversationStatus({ conversationId, status }));
+
+    // If status is changed to "resolved", automatically send a feedback message to the chatbot
+    if (status === "resolved") {
+      try {
+        console.log("🔔 Conversation resolved - sending feedback message to chatbot...");
+        await dispatch(sendFeedbackMessage({ conversationId })).unwrap();
+        console.log("✅ Feedback message sent successfully");
+        
+        // Optionally show a notification to the agent
+        dispatch(addAgentNotification({
+          id: `feedback-sent-${Date.now()}`,
+          type: "success" as const,
+          title: "Feedback Request Sent",
+          message: "A feedback request has been automatically sent to the customer.",
+          timestamp: new Date().toISOString(),
+          agentId: currentAgent?.id || ""
+        }));
+      } catch (error) {
+        console.error("❌ Failed to send feedback message:", error);
+        
+        // Show error notification to agent
+        dispatch(addAgentNotification({
+          id: `feedback-error-${Date.now()}`,
+          type: "error" as const,
+          title: "Feedback Request Failed",
+          message: "Failed to send feedback request to customer. Please try again.",
+          timestamp: new Date().toISOString(),
+          agentId: currentAgent?.id || ""
+        }));
+      }
+    }
   };
 
   const handleAcceptConversation = (conversationId: string) => {
@@ -462,7 +516,7 @@ const ConversationsPage = () => {
                                   <span className="font-medium">
                                     {message.sender === "customer"
                                       ? conversation.customer?.name || "Customer"
-                                      : message.sender === "agent"
+                                      : message.sender === "Agent"
                                       ? "Agent"
                                       : message.sender === "bot"
                                       ? "Bot"
@@ -580,8 +634,8 @@ const ConversationsPage = () => {
                     <>
                       {console.log("🔍 Live Agent: Displaying messages:", selectedConversation.messages)}
                       {selectedConversation.messages.map((message: any) => {
-                        const isAgent = message.sender === "agent";
-                        const isCustomer = message.sender === "customer";
+                        const isAgent = message.sender === "Agent";
+                        const isCustomer = message.sender === "Customer";
                         const isBot = message.sender === "bot" || message.sender === "system";
 
                         return (

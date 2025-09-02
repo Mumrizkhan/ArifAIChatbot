@@ -4,12 +4,23 @@ using LiveAgentService.Models;
 
 namespace LiveAgentService.Services;
 
+public class ServiceResult<T>
+{
+    public bool IsSuccess { get; set; }
+    public T? Data { get; set; }
+    public string? ErrorMessage { get; set; }
+    
+    public static ServiceResult<T> Success(T data) => new() { IsSuccess = true, Data = data };
+    public static ServiceResult<T> Failure(string error) => new() { IsSuccess = false, ErrorMessage = error };
+}
+
 public interface IChatRuntimeIntegrationService
 {
     Task<bool> SendMessageAsync(Guid conversationId, string content, string type = "text", Guid? senderId = null);
     Task<ConversationDetailsDto?> GetConversationDetailsAsync(Guid conversationId);
     Task<List<MessageDto>> GetConversationMessagesAsync(Guid conversationId);
     Task<bool> MarkMessageAsReadAsync(Guid messageId, string readerId, string readerType);
+    Task<ServiceResult<object>> SendFeedbackMessageAsync(Guid conversationId, SendFeedbackMessageRequest request);
 }
 
 public class ChatRuntimeIntegrationService : IChatRuntimeIntegrationService
@@ -163,6 +174,53 @@ public class ChatRuntimeIntegrationService : IChatRuntimeIntegrationService
         {
             _logger.LogError(ex, "Error marking message {MessageId} as read", messageId);
             return false;
+        }
+    }
+
+    public async Task<ServiceResult<object>> SendFeedbackMessageAsync(Guid conversationId, SendFeedbackMessageRequest request)
+    {
+        try
+        {
+            SetTenantHeader();
+            
+            var messageData = new
+            {
+                conversationId,
+                content = request.Content,
+                type = request.Type,
+                metadata = request.Metadata ?? new Dictionary<string, object>
+                {
+                    { "systemMessage", true },
+                    { "feedbackRequest", true },
+                    { "ratingScale", new { min = 1, max = 5, labels = new[] { "Poor", "Fair", "Good", "Very Good", "Excellent" } } },
+                    { "feedbackPrompt", "How would you rate our service today?" }
+                }
+            };
+
+            var json = JsonSerializer.Serialize(messageData);
+            var content = new StringContent(json, System.Text.Encoding.UTF8, "application/json");
+
+            var response = await _httpClient.PostAsync($"{_chatRuntimeServiceUrl}/api/conversations/{conversationId}/messages", content);
+
+            if (response.IsSuccessStatusCode)
+            {
+                var responseContent = await response.Content.ReadAsStringAsync();
+                var result = JsonSerializer.Deserialize<object>(responseContent) ?? new { message = "Feedback message sent successfully" };
+                _logger.LogInformation("Successfully sent feedback message to conversation {ConversationId}", conversationId);
+                return ServiceResult<object>.Success(result);
+            }
+            else
+            {
+                var errorContent = await response.Content.ReadAsStringAsync();
+                _logger.LogWarning("Failed to send feedback message to conversation {ConversationId}. Status: {StatusCode}, Error: {Error}", 
+                    conversationId, response.StatusCode, errorContent);
+                return ServiceResult<object>.Failure($"Failed to send feedback message: {response.StatusCode}");
+            }
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error sending feedback message to conversation {ConversationId}", conversationId);
+            return ServiceResult<object>.Failure($"Error sending feedback message: {ex.Message}");
         }
     }
 }
