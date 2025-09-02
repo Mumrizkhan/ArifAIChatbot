@@ -206,6 +206,7 @@
       "conversations": "مقاييس المحادثات",
       "agents": "أداء الوكلاء",
       "bot": "فعالية البوت",
+      "performance": "أداء النظام",
       "custom": "تقارير مخصصة"
     },
     "metrics": {
@@ -220,7 +221,11 @@
       "botAccuracy": "دقة البوت",
       "fallbackRate": "معدل التراجع",
       "trainingSessions": "جلسات التدريب",
-      "knowledgeBase": "قاعدة المعرفة"
+      "knowledgeBase": "قاعدة المعرفة",
+      "responseTime": "وقت الاستجابة",
+      "throughput": "الإنتاجية",
+      "errorRate": "معدل الأخطاء",
+      "uptime": "وقت التشغيل"
     },
     "units": {
       "minutes": "دقيقة"
@@ -236,7 +241,11 @@
       "accuracyIncrease": "+3% من الفترة الماضية",
       "fallbackDecrease": "-2% من الفترة الماضية",
       "trainingIncrease": "+12 هذا الشهر",
-      "documentsIncrease": "+45 وثيقة"
+      "documentsIncrease": "+45 وثيقة",
+      "responseTimeImproved": "-8% من الفترة الماضية",
+      "throughputIncrease": "+15% من الفترة الماضية",
+      "errorRateDecrease": "-5% من الفترة الماضية",
+      "uptimeImproved": "+0.2% من الفترة الماضية"
     },
     "descriptions": {
       "allChannels": "جميع قنوات المحادثة",
@@ -251,7 +260,11 @@
       "correctResponses": "الردود الصحيحة",
       "escalatedToHumans": "تم تصعيدها للبشر",
       "modelImprovements": "تحسينات النموذج",
-      "totalDocuments": "إجمالي الوثائق"
+      "totalDocuments": "إجمالي الوثائق",
+      "averageResponseTime": "متوسط وقت استجابة النظام",
+      "requestsPerSecond": "الطلبات المعالجة في الثانية",
+      "failedRequests": "نسبة الطلبات الفاشلة",
+      "systemAvailability": "وقت تشغيل النظام والتوفر"
     },
     "channels": {
       "website": "الموقع الإلكتروني",
@@ -269,7 +282,11 @@
       "botPerformance": "اتجاهات أداء البوت",
       "botPerformanceDescription": "الدقة وجودة الاستجابة عبر الزمن",
       "intentRecognition": "التعرف على النوايا",
-      "intentRecognitionDescription": "نوايا المستخدمين الأكثر شيوعاً"
+      "intentRecognitionDescription": "نوايا المستخدمين الأكثر شيوعاً",
+      "performanceTrends": "اتجاهات الأداء",
+      "performanceTrendsDescription": "وقت استجابة النظام والإنتاجية عبر الزمن",
+      "errorRate": "اتجاهات معدل الأخطاء",
+      "errorRateDescription": "معدل أخطاء النظام ومقاييس الموثوقية"
     },
     "intents": {
       "productInfo": "معلومات المنتج",
@@ -303,11 +320,13 @@
     "manageSubscriptions": "إدارة جميع اشتراكات العملاء",
     "searchPlaceholder": "البحث في الاشتراكات...",
     "planTypes": {
-      "standard": "Standard",
-      "premium": "Premium",
-      "enterprise": "Enterprise",
-      "basic": "Basic",
-      "pro": "Pro"
+      "standard": "قياسي",
+      "premium": "مميز",
+      "enterprise": "مؤسسي",
+      "basic": "أساسي",
+      "pro": "احترافي",
+      "free": "مجاني",
+      "custom": "مخصص"
     },
     "status": {
       "label": "الحالة",

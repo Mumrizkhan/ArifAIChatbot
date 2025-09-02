@@ -36,6 +36,19 @@ interface AgentMetrics {
   }>;
 }
 
+interface PerformanceMetrics {
+  responseTime: number;
+  throughput: number;
+  errorRate: number;
+  uptime: number;
+  dailyData: Array<{
+    date: string;
+    responseTime: number;
+    throughput: number;
+    errorRate: number;
+  }>;
+}
+
 interface SystemNotification {
   id: string;
   type: "info" | "warning" | "error" | "success";
@@ -50,6 +63,7 @@ interface AnalyticsState {
   conversationMetrics: ConversationMetrics | null;
   agentMetrics: AgentMetrics | null;
   botMetrics: any | null;
+  performanceMetrics: PerformanceMetrics | null;
   customReports: any[];
   isLoading: boolean;
   error: string | null;
@@ -64,6 +78,7 @@ const initialState: AnalyticsState = {
   conversationMetrics: null,
   agentMetrics: null,
   botMetrics: null,
+  performanceMetrics: null,
   customReports: [],
   isLoading: false,
   error: null,
@@ -98,6 +113,14 @@ export const fetchBotMetrics = createAsyncThunk(
   "analytics/fetchBotMetrics",
   async ({ timeRange, tenantId }: { timeRange: string; tenantId?: string }) => {
     const response = await analyticsApi.getBotMetrics(timeRange, tenantId);
+    return response;
+  }
+);
+
+export const fetchPerformanceMetrics = createAsyncThunk(
+  "analytics/fetchPerformanceMetrics",
+  async ({ dateFrom, dateTo, tenantId }: { dateFrom: string; dateTo: string; tenantId?: string }) => {
+    const response = await analyticsApi.getPerformanceMetrics(dateFrom, dateTo, tenantId);
     return response;
   }
 );
@@ -170,6 +193,9 @@ const analyticsSlice = createSlice({
       })
       .addCase(fetchBotMetrics.fulfilled, (state, action) => {
         state.botMetrics = action.payload;
+      })
+      .addCase(fetchPerformanceMetrics.fulfilled, (state, action) => {
+        state.performanceMetrics = action.payload;
       })
       .addCase(generateCustomReport.fulfilled, (state, action) => {
         state.customReports.push(action.payload);

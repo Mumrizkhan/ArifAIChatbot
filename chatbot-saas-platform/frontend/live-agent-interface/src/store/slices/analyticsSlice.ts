@@ -1,23 +1,20 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import { RootState } from "../store";
-import { 
-  analyticsApi, 
-  DashboardStats, 
-  ConversationMetrics, 
-  AgentMetrics, 
-  PerformanceMetrics, 
+import {
+  analyticsApi,
+  DashboardStats,
+  ConversationMetrics,
+  AgentMetrics,
+  PerformanceMetrics,
   RealtimeAnalytics,
-  AnalyticsData
-} from '../../services/analyticsApi';
+  AnalyticsData,
+} from "../../services/analyticsApi";
 
-export const fetchDashboardStats = createAsyncThunk(
-  "analytics/fetchDashboardStats",
-  async (tenantId?: string) => {
-    const response = await analyticsApi.getDashboardStats(tenantId);
-    if (!response.success) throw new Error(response.message);
-    return response.data;
-  }
-);
+export const fetchDashboardStats = createAsyncThunk("analytics/fetchDashboardStats", async (tenantId?: string) => {
+  const response = await analyticsApi.getDashboardStats(tenantId);
+  if (!response.success) throw new Error(response.message);
+  return response.data;
+});
 
 export const fetchPerformanceData = createAsyncThunk(
   "analytics/fetchPerformanceData",
@@ -46,14 +43,11 @@ export const fetchAgentMetrics = createAsyncThunk(
   }
 );
 
-export const fetchRealtimeAnalytics = createAsyncThunk(
-  "analytics/fetchRealtimeAnalytics",
-  async () => {
-    const response = await analyticsApi.getRealtimeAnalytics();
-    if (!response.success) throw new Error(response.message);
-    return response.data;
-  }
-);
+export const fetchRealtimeAnalytics = createAsyncThunk("analytics/fetchRealtimeAnalytics", async () => {
+  const response = await analyticsApi.getRealtimeAnalytics();
+  if (!response.success) throw new Error(response.message);
+  return response.data;
+});
 
 export const fetchAnalyticsData = createAsyncThunk(
   "analytics/fetchAnalyticsData",
@@ -67,14 +61,18 @@ export const fetchAnalyticsData = createAsyncThunk(
 export const fetchAgentStats = createAsyncThunk(
   "analytics/fetchAgentStats",
   async ({ agentId, startDate, endDate }: { agentId: string; startDate?: string; endDate?: string }) => {
-    const response = await analyticsApi.getAgentStats(agentId, startDate, endDate);
+    // Provide default values if startDate and endDate are undefined
+    const defaultEndDate = new Date().toISOString().split("T")[0];
+    const defaultStartDate = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString().split("T")[0];
+
+    const response = await analyticsApi.getAgentStats(agentId, startDate || defaultStartDate, endDate || defaultEndDate);
     if (!response.success) throw new Error(response.message);
     return response.data;
   }
 );
 
 export const fetchAgentPerformance = createAsyncThunk(
-  "analytics/fetchAgentPerformance", 
+  "analytics/fetchAgentPerformance",
   async ({ startDate, endDate }: { startDate?: string; endDate?: string } = {}) => {
     const response = await analyticsApi.getAgentPerformance(startDate, endDate);
     if (!response.success) throw new Error(response.message);
@@ -231,13 +229,7 @@ const analyticsSlice = createSlice({
   },
 });
 
-export const { 
-  clearError, 
-  updateRealtimeAnalytics, 
-  updateDashboardStats, 
-  updateConversationMetrics, 
-  updateAgentMetrics 
-} = analyticsSlice.actions;
+export const { clearError, updateRealtimeAnalytics, updateDashboardStats, updateConversationMetrics, updateAgentMetrics } = analyticsSlice.actions;
 
 export default analyticsSlice.reducer;
 

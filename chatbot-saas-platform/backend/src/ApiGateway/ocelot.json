@@ -10,7 +10,7 @@
         }
       ],
       "UpstreamPathTemplate": "/identity/{everything}",
-      "UpstreamHttpMethod": [ "GET", "POST", "PUT", "DELETE" ],
+      "UpstreamHttpMethod": ["GET", "POST", "PUT", "DELETE"],
       "RateLimitOptions": {
         "ClientWhitelist": [],
         "EnableRateLimiting": true,
@@ -29,7 +29,7 @@
         }
       ],
       "UpstreamPathTemplate": "/ai/{everything}",
-      "UpstreamHttpMethod": [ "GET", "POST", "PUT", "DELETE" ],
+      "UpstreamHttpMethod": ["GET", "POST", "PUT", "DELETE"],
       "RateLimitOptions": {
         "ClientWhitelist": [],
         "EnableRateLimiting": true,
@@ -38,8 +38,6 @@
         "Limit": 60
       }
     },
-    //for SignalR in chatruntime servcie
-    //---------------------------------
 
     {
       "DownstreamPathTemplate": "/chathub",
@@ -51,7 +49,7 @@
           "Port": 5002
         }
       ],
-      "UpstreamHttpMethod": [ "GET", "POST" ],
+      "UpstreamHttpMethod": ["GET", "POST"],
       "HttpHandlerOptions": {
         "UseProxy": true,
         "UseTracing": false
@@ -67,7 +65,7 @@
           "Port": 5002
         }
       ],
-      "UpstreamHttpMethod": [ "GET", "POST" ],
+      "UpstreamHttpMethod": ["GET", "POST"],
       "HttpHandlerOptions": {
         "UseProxy": true,
         "UseTracing": false
@@ -85,7 +83,7 @@
         }
       ],
       "UpstreamPathTemplate": "/chat/{everything}",
-      "UpstreamHttpMethod": [ "GET", "POST", "PUT", "DELETE" ],
+      "UpstreamHttpMethod": ["GET", "POST", "PUT", "DELETE"],
       "RateLimitOptions": {
         "ClientWhitelist": [],
         "EnableRateLimiting": true,
@@ -94,8 +92,6 @@
         "Limit": 60
       }
     },
-    //for SignalR in live Agent servcie
-    //---------------------------------
 
     {
       "DownstreamPathTemplate": "/agenthub",
@@ -107,7 +103,7 @@
           "Port": 5003
         }
       ],
-      "UpstreamHttpMethod": [ "GET", "POST" ],
+      "UpstreamHttpMethod": ["GET", "POST"],
       "HttpHandlerOptions": {
         "UseProxy": true,
         "UseTracing": false
@@ -123,13 +119,13 @@
           "Port": 5003
         }
       ],
-      "UpstreamHttpMethod": [ "GET", "POST" ],
+      "UpstreamHttpMethod": ["GET", "POST"],
       "HttpHandlerOptions": {
         "UseProxy": true,
         "UseTracing": false
       }
     },
-    //----------------------------------------------
+
     {
       "DownstreamPathTemplate": "/api/{everything}",
       "DownstreamScheme": "http",
@@ -140,7 +136,7 @@
         }
       ],
       "UpstreamPathTemplate": "/agent/{everything}",
-      "UpstreamHttpMethod": [ "GET", "POST", "PUT", "DELETE" ],
+      "UpstreamHttpMethod": ["GET", "POST", "PUT", "DELETE"],
       "RateLimitOptions": {
         "ClientWhitelist": [],
         "EnableRateLimiting": true,
@@ -149,8 +145,6 @@
         "Limit": 60
       }
     },
-    //for SignalR in Notification servcie
-    //---------------------------------
 
     {
       "DownstreamPathTemplate": "/notificationhub",
@@ -162,7 +156,7 @@
           "Port": 5004
         }
       ],
-      "UpstreamHttpMethod": [ "GET", "POST" ],
+      "UpstreamHttpMethod": ["GET", "POST"],
       "HttpHandlerOptions": {
         "UseProxy": true,
         "UseTracing": false
@@ -178,13 +172,13 @@
           "Port": 5004
         }
       ],
-      "UpstreamHttpMethod": [ "GET", "POST" ],
+      "UpstreamHttpMethod": ["GET", "POST"],
       "HttpHandlerOptions": {
         "UseProxy": true,
         "UseTracing": false
       }
     },
-    //----------------------------------------------
+
     {
       "DownstreamPathTemplate": "/api/{everything}",
       "DownstreamScheme": "http",
@@ -195,7 +189,7 @@
         }
       ],
       "UpstreamPathTemplate": "/notification/{everything}",
-      "UpstreamHttpMethod": [ "GET", "POST", "PUT", "DELETE" ],
+      "UpstreamHttpMethod": ["GET", "POST", "PUT", "DELETE"],
       "RateLimitOptions": {
         "ClientWhitelist": [],
         "EnableRateLimiting": true,
@@ -204,8 +198,6 @@
         "Limit": 60
       }
     },
-    //for SignalR in workflow servcie
-    //---------------------------------
 
     {
       "DownstreamPathTemplate": "/workflowhub",
@@ -217,7 +209,7 @@
           "Port": 5004
         }
       ],
-      "UpstreamHttpMethod": [ "GET", "POST" ],
+      "UpstreamHttpMethod": ["GET", "POST"],
       "HttpHandlerOptions": {
         "UseProxy": true,
         "UseTracing": false
@@ -233,13 +225,13 @@
           "Port": 5004
         }
       ],
-      "UpstreamHttpMethod": [ "GET", "POST" ],
+      "UpstreamHttpMethod": ["GET", "POST"],
       "HttpHandlerOptions": {
         "UseProxy": true,
         "UseTracing": false
       }
     },
-    //----------------------------------------------
+
     {
       "DownstreamPathTemplate": "/api/{everything}",
       "DownstreamScheme": "http",
@@ -250,7 +242,7 @@
         }
       ],
       "UpstreamPathTemplate": "/workflow/{everything}",
-      "UpstreamHttpMethod": [ "GET", "POST", "PUT", "DELETE" ],
+      "UpstreamHttpMethod": ["GET", "POST", "PUT", "DELETE"],
       "RateLimitOptions": {
         "ClientWhitelist": [],
         "EnableRateLimiting": true,
@@ -269,7 +261,7 @@
         }
       ],
       "UpstreamPathTemplate": "/analytics/{everything}",
-      "UpstreamHttpMethod": [ "GET", "POST", "PUT", "DELETE" ],
+      "UpstreamHttpMethod": ["GET", "POST", "PUT", "DELETE"],
       "RateLimitOptions": {
         "ClientWhitelist": [],
         "EnableRateLimiting": true,
@@ -288,7 +280,7 @@
         }
       ],
       "UpstreamPathTemplate": "/tenant-management/{everything}",
-      "UpstreamHttpMethod": [ "GET", "POST", "PUT", "DELETE" ],
+      "UpstreamHttpMethod": ["GET", "POST", "PUT", "DELETE"],
       "RateLimitOptions": {
         "ClientWhitelist": [],
         "EnableRateLimiting": true,
@@ -307,7 +299,7 @@
         }
       ],
       "UpstreamPathTemplate": "/subscription/{everything}",
-      "UpstreamHttpMethod": [ "GET", "POST", "PUT", "DELETE" ],
+      "UpstreamHttpMethod": ["GET", "POST", "PUT", "DELETE"],
       "RateLimitOptions": {
         "ClientWhitelist": [],
         "EnableRateLimiting": true,
@@ -326,7 +318,7 @@
         }
       ],
       "UpstreamPathTemplate": "/knowledgebase/{everything}",
-      "UpstreamHttpMethod": [ "GET", "POST", "PUT", "DELETE" ],
+      "UpstreamHttpMethod": ["GET", "POST", "PUT", "DELETE"],
       "RateLimitOptions": {
         "ClientWhitelist": [],
         "EnableRateLimiting": true,

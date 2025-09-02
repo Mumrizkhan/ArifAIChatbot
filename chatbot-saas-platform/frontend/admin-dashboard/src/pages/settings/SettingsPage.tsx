@@ -19,7 +19,7 @@ const SettingsPage: React.FC = () => {
   const { t, i18n } = useTranslation();
   const dispatch = useDispatch<AppDispatch>();
   const { mode, language, primaryColor } = useSelector((state: RootState) => state.theme);
-  const { user } = useSelector((state: RootState) => state.auth);
+  // const { user } = useSelector((state: RootState) => state.auth);
   const { systemSettings, notificationSettings, integrationSettings, isLoading, isSaving, error } = useSelector((state: RootState) => state.settings);
 
   useEffect(() => {
@@ -61,7 +61,7 @@ const SettingsPage: React.FC = () => {
           integrationSettings: integrationSettings,
         })
       ).unwrap();
-      
+
       console.log("System settings saved successfully");
     } catch (error) {
       console.error("Failed to save system settings:", error);

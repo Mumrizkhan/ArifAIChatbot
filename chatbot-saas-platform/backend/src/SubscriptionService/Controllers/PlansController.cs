@@ -104,7 +104,21 @@ public class PlansController : ControllerBase
             {
                 createdPlan.Id,
                 createdPlan.Name,
-                Message = "Plan created successfully"
+                createdPlan.Description,
+                createdPlan.MonthlyPrice,
+                createdPlan.YearlyPrice,
+                createdPlan.Currency,
+                Type = createdPlan.Type.ToString(),
+                createdPlan.Features,
+                createdPlan.Limits,
+                createdPlan.StripePriceIdMonthly,
+                createdPlan.StripePriceIdYearly,
+                createdPlan.TrialDays,
+                createdPlan.IsActive,
+                createdPlan.IsPublic,
+                createdPlan.SortOrder,
+                createdPlan.CreatedAt,
+                createdPlan.UpdatedAt
             });
         }
         catch (Exception ex)

@@ -91,11 +91,13 @@ export const authApi = {
 };
 
 export const systemSettingsApi = {
-  getSystemSettings: () =>
-    apiClient.get('/tenant-management/systemsettings'),
-  
-  updateSystemSettings: (data: { systemSettings?: Record<string, any>; notificationSettings?: Record<string, any>; integrationSettings?: Record<string, any> }) =>
-    apiClient.put('/tenant-management/systemsettings', data),
+  getSystemSettings: () => apiClient.get("/tenant-management/systemsettings"),
+
+  updateSystemSettings: (data: {
+    systemSettings?: Record<string, any>;
+    notificationSettings?: Record<string, any>;
+    integrationSettings?: Record<string, any>;
+  }) => apiClient.put("/tenant-management/systemsettings", data),
 };
 
 export const tenantApi = {
@@ -201,6 +203,15 @@ export const analyticsApi = {
     return apiClient.get<any>(`/analytics/analytics/bot?${params}`);
   },
 
+  getPerformanceMetrics: async (dateFrom: string, dateTo: string, tenantId?: string) => {
+    const params = new URLSearchParams({
+      dateFrom,
+      dateTo,
+    });
+    if (tenantId) params.append("tenantId", tenantId);
+    return apiClient.get<any>(`/analytics/Analytics/performance?${params}`);
+  },
+
   getCustomReport: async (reportConfig: any) => {
     return apiClient.post<any>("/analytics/analytics/reports/custom", reportConfig);
   },
@@ -208,7 +219,7 @@ export const analyticsApi = {
 
 export const subscriptionApi = {
   getPlans: async () => {
-    return apiClient.get<any[]>("/subscription/plans");
+    return apiClient.get<any[]>("/subscription/Plans");
   },
 
   getSubscriptions: async (page: number, pageSize: number) => {
@@ -237,7 +248,7 @@ export const subscriptionApi = {
   },
 
   getBillingStats: async () => {
-    return apiClient.get<any>("subscription/subscriptions/billing/stats");
+    return apiClient.get<any>("/subscription/subscriptions/billing/stats");
   },
   createPlan: async (planData: any) => {
     return apiClient.post<any>("/subscription/Plans", planData);

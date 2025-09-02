@@ -76,6 +76,7 @@ const initialState: SubscriptionState = {
 
 export const fetchPlans = createAsyncThunk("subscription/fetchPlans", async () => {
   const response = await subscriptionApi.getPlans();
+  console.log("fetchPlans API response:", response);
   return response;
 });
 
@@ -108,7 +109,9 @@ export const cancelSubscription = createAsyncThunk("subscription/cancelSubscript
 });
 
 export const createPlan = createAsyncThunk("subscription/createPlan", async (planData: any) => {
-  const response = await subscriptionApi.createPlan(planData);
+  // Extract the plan from the wrapper object if it exists
+  const plan = planData.plan || planData;
+  const response = await subscriptionApi.createPlan(plan);
   return response;
 });
 
@@ -134,6 +137,7 @@ const subscriptionSlice = createSlice({
       })
       .addCase(fetchPlans.fulfilled, (state, action) => {
         state.isLoading = false;
+        console.log("fetchPlans fulfilled, payload:", action.payload);
         state.plans = action.payload;
       })
       .addCase(fetchPlans.rejected, (state, action) => {
