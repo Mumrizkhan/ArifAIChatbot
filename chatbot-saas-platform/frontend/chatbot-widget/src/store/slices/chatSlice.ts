@@ -5,7 +5,7 @@ export interface Message {
   id: string;
   content: string;
   sender: "user" | "bot" | "agent";
-  type: "text" | "file" | "image" | "typing";
+  type: "text" | "file" | "image" | "typing" | "feedback";
   timestamp: string; // ISO string format for Redux serialization
   isRead?: boolean;
   readAt?: string;
@@ -19,6 +19,13 @@ export interface Message {
     systemMessage?: boolean;
     agentId?: string;
     agentName?: string;
+    feedbackRequest?: boolean;
+    ratingScale?: {
+      min: number;
+      max: number;
+      labels: string[];
+    };
+    feedbackPrompt?: string;
   };
 }
 
@@ -33,6 +40,8 @@ export interface Conversation {
   };
   startedAt: string; // ISO string format for Redux serialization
   endedAt?: string; // ISO string format for Redux serialization
+  rating?: number; // Customer rating (1-5)
+  feedback?: string; // Customer feedback text
 }
 
 interface ChatState {
@@ -79,7 +88,23 @@ interface ConversationPayload {
 }
 
 interface ConfigState {
-  tenantId: string;
+  widget: {
+    tenantId: string;
+    apiUrl: string;
+    websocketUrl: string;
+    authToken?: string;
+    features: Record<string, boolean>;
+    behavior: Record<string, unknown>;
+    security: Record<string, unknown>;
+    analytics: Record<string, unknown>;
+    predefinedIntents: unknown[];
+  };
+  isInitialized: boolean;
+  isEmbedded: boolean;
+  parentDomain: string;
+  userId?: string;
+  sessionId: string;
+  metadata: Record<string, unknown>;
 }
 
 interface RootState {
@@ -99,11 +124,11 @@ export const sendMessage = createAsyncThunk(
         throw new Error("No active conversation found. Please open the chat widget first.");
       }
 
-      const res = await apiClient.post("/chat/chat/messages", {
-        conversationId,
-        content: payload.content,
-        type: payload.type,
-      });
+       const res = await apiClient.post("/chat/chat/messages", {
+       conversationId,
+       content: payload.content,
+       type: payload.type,
+     });
 
       return res;
     } catch (e: unknown) {
@@ -117,10 +142,10 @@ export const startConversation = createAsyncThunk("chat/startConversation", asyn
   console.log("🚀 Starting conversation for tenant:", tenantId);
 
   const data = await apiClient.post("/chat/chat/conversations", {
-    tenantId,
-    customerName: "Anonymous User",
-    language: "en",
-  });
+   tenantId,
+   customerName: "Anonymous User",
+   language: "en",
+ });
 
   console.log("✅ Conversation created via API:", data);
 
@@ -134,7 +159,7 @@ export const startConversation = createAsyncThunk("chat/startConversation", asyn
   // Setup SignalR connection and event handlers for this conversation
   try {
     const { signalRService } = await import("../../services/websocket");
-    const state = getState() as any;
+    const state = getState() as RootState;
     const authToken = state.config?.widget?.authToken;
 
     if (authToken) {
@@ -176,6 +201,31 @@ export const markMessageAsReadAPI = createAsyncThunk(
   "chat/markMessageAsReadAPI",
   async ({ messageId }: { messageId: string }) => {
     return await apiClient.put(`/chat/chat/messages/${messageId}/mark-read`);
+  }
+);
+
+export const submitRating = createAsyncThunk(
+  "chat/submitRating",
+  async ({ 
+    conversationId, 
+    messageId, 
+    rating, 
+    feedback 
+  }: { 
+    conversationId: string; 
+    messageId: string; 
+    rating: number; 
+    feedback?: string;
+  }) => {
+    const ratingData = {
+      conversationId,
+      messageId,
+      rating,
+      feedback,
+      submittedAt: new Date().toISOString()
+    };
+
+    return await apiClient.post(`/chat/conversations/${conversationId}/rating`, ratingData);
   }
 );
 
@@ -330,6 +380,22 @@ const chatSlice = createSlice({
       })
       .addCase(markMessageAsReadAPI.rejected, (_, action) => {
         console.error("Failed to mark message as read:", action.error.message);
+      })
+      .addCase(submitRating.pending, (state) => {
+        state.isLoading = true;
+      })
+      .addCase(submitRating.fulfilled, (state, action) => {
+        state.isLoading = false;
+        // Store the rating in the conversation
+        if (state.currentConversation) {
+          state.currentConversation.rating = action.payload.rating;
+          state.currentConversation.feedback = action.payload.feedback;
+        }
+        console.log("Rating submitted successfully");
+      })
+      .addCase(submitRating.rejected, (state, action) => {
+        state.isLoading = false;
+        state.error = action.error.message || "Failed to submit rating";
       });
   },
 });

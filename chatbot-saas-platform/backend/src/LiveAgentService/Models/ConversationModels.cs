@@ -18,6 +18,17 @@ public class RateConversationRequest
     public string? Feedback { get; set; }
 }
 
+public class SendFeedbackMessageRequest
+{
+    public string Content { get; set; } = "Thank you for using our service! Please rate your experience:";
+    public string Type { get; set; } = "feedback";
+    public Dictionary<string, object>? Metadata { get; set; }
+}
+
+
+
+
+
 public class MessageNotificationRequest
 {
     public Guid ConversationId { get; set; }

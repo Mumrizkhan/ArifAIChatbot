@@ -46,11 +46,18 @@ builder.Services.AddSwaggerGen(options =>
         }
     });
 });
-
-builder.Services.AddSignalR();
-
 // Add infrastructure services including message bus
 builder.Services.AddInfrastructure(builder.Configuration);
+builder.Services.AddSignalR(options =>
+{
+    options.EnableDetailedErrors = true;
+    options.KeepAliveInterval = TimeSpan.FromSeconds(15);
+    options.ClientTimeoutInterval = TimeSpan.FromSeconds(30);
+    options.HandshakeTimeout = TimeSpan.FromSeconds(15);
+}).AddStackExchangeRedis(builder.Configuration.GetValue<string>("Redis:ConnectionString") ?? "", options =>
+{
+    options.Configuration.ChannelPrefix = "chatHub";
+}); 
 
 // Add HTTP client
 builder.Services.AddHttpClient();

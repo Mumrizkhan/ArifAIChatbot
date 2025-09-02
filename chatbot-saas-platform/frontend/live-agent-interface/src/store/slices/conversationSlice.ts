@@ -302,6 +302,41 @@ export const rateConversation = createAsyncThunk(
   }
 );
 
+export const sendFeedbackMessage = createAsyncThunk(
+  "conversations/sendFeedbackMessage",
+  async ({ conversationId }: { conversationId: string }) => {
+    const feedbackMessage = {
+      content: "Thank you for using our service! Please rate your experience:",
+      type: "feedback" as const,
+      metadata: {
+        systemMessage: true,
+        feedbackRequest: true,
+        ratingScale: {
+          min: 1,
+          max: 5,
+          labels: ["Poor", "Fair", "Good", "Very Good", "Excellent"]
+        },
+        feedbackPrompt: "How would you rate our service today?"
+      }
+    };
+
+    const response = await fetch(`${API_BASE_URL}/agent/conversations/${conversationId}/feedback-message`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${localStorage.getItem("token")}`,
+      },
+      body: JSON.stringify(feedbackMessage),
+    });
+
+    if (!response.ok) {
+      throw new Error("Failed to send feedback message");
+    }
+
+    return response.json();
+  }
+);
+
 const conversationSlice = createSlice({
   name: "conversations",
   initialState,
@@ -579,6 +614,20 @@ const conversationSlice = createSlice({
           state.activeConversation.rating = action.payload.rating;
           state.activeConversation.feedback = action.payload.feedback;
         }
+      })
+      .addCase(sendFeedbackMessage.pending, (state) => {
+        state.isLoading = true;
+      })
+      .addCase(sendFeedbackMessage.fulfilled, (state, action) => {
+        state.isLoading = false;
+        // Add the feedback message to the active conversation
+        if (state.activeConversation && action.payload) {
+          state.activeConversation.messages.push(action.payload);
+        }
+      })
+      .addCase(sendFeedbackMessage.rejected, (state, action) => {
+        state.isLoading = false;
+        state.error = action.error.message || "Failed to send feedback message";
       });
   },
 });

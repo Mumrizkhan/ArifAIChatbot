@@ -60,6 +60,7 @@ public class ApplicationDbContext : DbContext, IApplicationDbContext
     public DbSet<Workflow> Workflows => Set<Workflow>();
     public DbSet<Notification> Notifications => Set<Notification>();
     public DbSet<SystemSettings> SystemSettings => Set<SystemSettings>();
+    public DbSet<ConversationAssignment> ConversationAssignments => Set<ConversationAssignment>();
 
     public new DbSet<TEntity> Set<TEntity>() where TEntity : class => base.Set<TEntity>();
     public EntityEntry<TEntity> Entry<TEntity>(TEntity entity) where TEntity : class
@@ -92,7 +93,7 @@ public class ApplicationDbContext : DbContext, IApplicationDbContext
                 .HasColumnType("nvarchar(max)")
                 .HasConversion(
                     v => System.Text.Json.JsonSerializer.Serialize(v, new System.Text.Json.JsonSerializerOptions()),
-                    v => string.IsNullOrEmpty(v) ? new Dictionary<string, PlanFeature>() : System.Text.Json.JsonSerializer.Deserialize<Dictionary<string, PlanFeature>>(v, new System.Text.Json.JsonSerializer.Options())
+                    v => string.IsNullOrEmpty(v) ? new Dictionary<string, PlanFeature>() : System.Text.Json.JsonSerializer.Deserialize<Dictionary<string, PlanFeature>>(v, new System.Text.Json.JsonSerializerOptions())
                 );
             entity.Property(e => e.Limits)
                 .HasColumnType("nvarchar(max)")
@@ -379,9 +380,9 @@ public class ApplicationDbContext : DbContext, IApplicationDbContext
             entity.Property(e => e.TenantId);
             entity.Property(e => e.DefaultData)
                   .HasColumnType("nvarchar(max)")
-                  .HasConversion(
-                      v => System.Text.Json.JsonSerializer.Serialize(v, new System.Text.Json.JsonSerializerOptions()),
+                  .HasConversion(v => System.Text.Json.JsonSerializer.Serialize(v, new System.Text.Json.JsonSerializerOptions()),
                       v => string.IsNullOrEmpty(v) ? new Dictionary<string, object>() : System.Text.Json.JsonSerializer.Deserialize<Dictionary<string, object>>(v, new System.Text.Json.JsonSerializerOptions())
+
                   );
         });
 
@@ -416,7 +417,7 @@ public class ApplicationDbContext : DbContext, IApplicationDbContext
                     v => System.Text.Json.JsonSerializer.Serialize(v, new System.Text.Json.JsonSerializerOptions()),
                     v => string.IsNullOrEmpty(v) ? new Dictionary<string, object>() : System.Text.Json.JsonSerializer.Deserialize<Dictionary<string, object>>(v, new System.Text.Json.JsonSerializerOptions())
                 );
-            
+
             entity.Property(e => e.IsActive).IsRequired();
             entity.Property(e => e.CreatedAt).IsRequired();
             entity.Property(e => e.UpdatedAt);
@@ -464,6 +465,7 @@ public class ApplicationDbContext : DbContext, IApplicationDbContext
                 );
             entity.Property(e => e.IsActive).IsRequired();
         });
+
         builder.Entity<Notification>(entity =>
         {
             entity.HasKey(e => e.Id);
@@ -486,7 +488,40 @@ public class ApplicationDbContext : DbContext, IApplicationDbContext
                 );
             entity.Property(e => e.CreatedAt).IsRequired();
         });
-       
+
+        builder.Entity<ConversationAssignment>(entity =>
+        {
+            entity.HasKey(e => e.Id);
+            entity.Property(e => e.ConversationId).IsRequired();
+            entity.Property(e => e.AgentId).IsRequired();
+            entity.Property(e => e.TenantId).IsRequired();
+            entity.Property(e => e.AssignedAt).IsRequired();
+            entity.Property(e => e.Status).IsRequired();
+            entity.Property(e => e.Priority).IsRequired();
+            entity.Property(e => e.CustomerName).HasMaxLength(256);
+            entity.Property(e => e.Subject).HasMaxLength(512);
+            entity.Property(e => e.IsActive).IsRequired();
+
+            entity.HasOne(e => e.Conversation)
+                .WithMany()
+                .HasForeignKey(e => e.ConversationId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            entity.HasOne(e => e.Agent)
+                .WithMany()
+                .HasForeignKey(e => e.AgentId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            entity.HasOne(e => e.Tenant)
+                .WithMany()
+                .HasForeignKey(e => e.TenantId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            // Index for efficient querying
+            entity.HasIndex(e => new { e.AgentId, e.TenantId, e.IsActive });
+            entity.HasIndex(e => new { e.ConversationId, e.TenantId });
+        });
+
 
 
         base.OnModelCreating(builder);
@@ -507,12 +542,11 @@ public class ApplicationDbContext : DbContext, IApplicationDbContext
                 case EntityState.Modified:
                     entry.Entity.UpdatedBy = _currentUserService.UserId?.ToString();
                     entry.Entity.UpdatedAt = DateTime.UtcNow;
-                    
+
                     break;
             }
         }
-
-        return await base.SaveChangesAsync(cancellationToken);
+            return await base.SaveChangesAsync(cancellationToken);
+        
     }
 }
-
