@@ -54,7 +54,7 @@ export const analyticsApi = {
     apiClient.get<AgentMetrics>("/analytics/analytics/agents", { timeRange, tenantId }),
 
   getPerformanceMetrics: (dateFrom?: string, dateTo?: string) =>
-    apiClient.get<PerformanceMetrics>("/analytics/agents/performance", { dateFrom, dateTo }),
+    apiClient.get<PerformanceMetrics>("/agent/agents/performance", { dateFrom, dateTo }),
 
   getRealtimeAnalytics: () => apiClient.get<RealtimeAnalytics>("/analytics/analytics/realtime"),
 
