@@ -79,7 +79,16 @@ interface ConversationPayload {
 }
 
 interface ConfigState {
-  tenantId: string;
+  widget: {
+    tenantId: string;
+    apiUrl: string;
+    websocketUrl: string;
+    authToken?: string;
+    customerName?: string;
+    userName?: string;
+    userEmail?: string;
+    language: string;
+  };
 }
 
 interface RootState {
@@ -116,10 +125,14 @@ export const sendMessage = createAsyncThunk(
 export const startConversation = createAsyncThunk("chat/startConversation", async (tenantId: string, { getState }) => {
   console.log("🚀 Starting conversation for tenant:", tenantId);
 
+  const state = getState() as RootState;
+  const customerName = state.config?.widget?.customerName || state.config?.widget?.userName || state.config?.widget?.userEmail || "Anonymous User";
+  const language = state.config?.widget?.language || "en";
+
   const data = await apiClient.post("/chat/chat/conversations", {
     tenantId,
-    customerName: "Anonymous User",
-    language: "en",
+    customerName,
+    language,
   });
 
   console.log("✅ Conversation created via API:", data);
@@ -172,12 +185,9 @@ export const requestHumanAgent = createAsyncThunk("chat/requestHumanAgent", asyn
   return await apiClient.post(`/chat/chat/conversations/${conversationId}/escalate`);
 });
 
-export const markMessageAsReadAPI = createAsyncThunk(
-  "chat/markMessageAsReadAPI",
-  async ({ messageId }: { messageId: string }) => {
-    return await apiClient.put(`/chat/chat/messages/${messageId}/mark-read`);
-  }
-);
+export const markMessageAsReadAPI = createAsyncThunk("chat/markMessageAsReadAPI", async ({ messageId }: { messageId: string }) => {
+  return await apiClient.put(`/chat/chat/messages/${messageId}/mark-read`);
+});
 
 const chatSlice = createSlice({
   name: "chat",
@@ -235,7 +245,7 @@ const chatSlice = createSlice({
     },
     markMessageAsRead: (state, action: PayloadAction<{ messageId: string }>) => {
       if (state.currentConversation) {
-        const message = state.currentConversation.messages.find(msg => msg.id === action.payload.messageId);
+        const message = state.currentConversation.messages.find((msg) => msg.id === action.payload.messageId);
         if (message) {
           message.isRead = true;
           message.readAt = new Date().toISOString();

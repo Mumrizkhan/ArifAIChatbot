@@ -17,6 +17,9 @@ interface WidgetConfig {
   websocketUrl?: string;
   authToken?: string;
   userId?: string;
+  userName?: string;
+  userEmail?: string;
+  customerName?: string;
   metadata?: Record<string, any>;
   theme?: {
     primaryColor?: string;
@@ -91,7 +94,7 @@ class ChatbotWidget {
     // Store config for later use and normalize tenant ID to lowercase
     this.config = {
       ...widgetConfig,
-      tenantId: widgetConfig.tenantId.toLowerCase() // Normalize GUID to lowercase
+      tenantId: widgetConfig.tenantId.toLowerCase(), // Normalize GUID to lowercase
     };
 
     // Get default values from environment variables with fallbacks
@@ -122,6 +125,10 @@ class ChatbotWidget {
         config: {
           apiUrl: widgetConfig.apiUrl || defaultApiUrl,
           websocketUrl: widgetConfig.websocketUrl || defaultWebsocketUrl,
+          userName: widgetConfig.userName,
+          userEmail: widgetConfig.userEmail,
+          customerName: widgetConfig.customerName,
+          language: widgetConfig.language,
           features: widgetConfig.features,
           behavior: widgetConfig.behavior,
           predefinedIntents: widgetConfig.predefinedIntents,
@@ -143,7 +150,7 @@ class ChatbotWidget {
       const authToken =
         widgetConfig.authToken ||
         "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJuYW1laWQiOiIxZDhmOGQ2MS0zNjRhLTQyMWUtYTllYS1jMWUxYTIyMWQ5N2YiLCJlbWFpbCI6InRlbmFudDFAZXhhbXBsZS5jb20iLCJyb2xlIjoiVGVuYW50QWRtaW4iLCJ0ZW5hbnRfaWQiOiI4Mzc4NGVhNi01MzYwLTRmM2MtODQzYS0xYWJkMThkNzJlNWQiLCJuYmYiOjE3NTUwODM1MDYsImV4cCI6MTc1NTE2OTkwNiwiaWF0IjoxNzU1MDgzNTA2LCJpc3MiOiJBcmlmUGxhdGZvcm0iLCJhdWQiOiJBcmlmUGxhdGZvcm0ifQ.BVlKSkEeS9YsVh48VW0rWfl21zi-NZvHdS4u2p1eQsU";
-      
+
       // Store auth token for later use when conversation is created
       if (authToken) {
         console.log("Auth token stored for SignalR connection after conversation creation");
@@ -154,6 +161,10 @@ class ChatbotWidget {
             config: {
               apiUrl: widgetConfig.apiUrl || defaultApiUrl,
               websocketUrl: widgetConfig.websocketUrl || defaultWebsocketUrl,
+              userName: widgetConfig.userName,
+              userEmail: widgetConfig.userEmail,
+              customerName: widgetConfig.customerName,
+              language: widgetConfig.language,
               features: widgetConfig.features,
               behavior: widgetConfig.behavior,
               predefinedIntents: widgetConfig.predefinedIntents,
@@ -171,6 +182,10 @@ class ChatbotWidget {
             config: {
               apiUrl: widgetConfig.apiUrl || defaultApiUrl,
               websocketUrl: widgetConfig.websocketUrl || defaultWebsocketUrl,
+              userName: widgetConfig.userName,
+              userEmail: widgetConfig.userEmail,
+              customerName: widgetConfig.customerName,
+              language: widgetConfig.language,
               features: widgetConfig.features,
               behavior: widgetConfig.behavior,
               predefinedIntents: widgetConfig.predefinedIntents,
@@ -225,7 +240,7 @@ class ChatbotWidget {
     }
 
     // Analytics tracking
-    if (typeof window !== "undefined" && 'gtag' in window) {
+    if (typeof window !== "undefined" && "gtag" in window) {
       const gtag = (window as unknown as { gtag: Function }).gtag;
       gtag("event", "chatbot_widget_initialized", {
         tenant_id: this.config.tenantId,
@@ -336,6 +351,10 @@ class ChatbotWidget {
           config: {
             apiUrl: this.config.apiUrl || "/api",
             websocketUrl: this.config.websocketUrl || "/chathub",
+            userName: this.config.userName,
+            userEmail: this.config.userEmail,
+            customerName: this.config.customerName,
+            language: this.config.language,
             features: this.config.features,
             behavior: this.config.behavior,
             predefinedIntents: this.config.predefinedIntents,
