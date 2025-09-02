@@ -4,9 +4,9 @@ import { useTranslation } from "react-i18next";
 import { AppDispatch, RootState } from "../../store/store";
 import { fetchConversations } from "../../store/slices/conversationSlice";
 import { fetchAgentProfile, updateAgentStatusRealtime } from "../../store/slices/agentSlice";
-import { 
-  fetchDashboardStats, 
-  fetchPerformanceData, 
+import {
+  fetchDashboardStats,
+  fetchPerformanceData,
   fetchConversationMetrics,
   fetchAgentMetrics,
   fetchAgentStats,
@@ -20,7 +20,7 @@ import {
   selectAgentPerformance,
   selectRealtimeAnalytics,
   selectAnalyticsLoading,
-  selectAnalyticsError
+  selectAnalyticsError,
 } from "../../store/slices/analyticsSlice";
 import { agentSignalRService } from "../../services/signalr";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../../components/ui/card";
@@ -39,7 +39,7 @@ const DashboardPage = () => {
   const { conversations, isLoading: conversationsLoading } = useSelector((state: RootState) => state.conversations);
   const { stats: agentStatsFromSlice, isSignalRConnected } = useSelector((state: RootState) => state.agent);
   const { user, token } = useSelector((state: RootState) => state.auth);
-  
+
   const dashboardStats = useSelector(selectDashboardStats);
   const performanceData = useSelector(selectPerformanceData);
   const conversationMetrics = useSelector(selectConversationMetrics);
@@ -49,7 +49,7 @@ const DashboardPage = () => {
   const realtimeAnalytics = useSelector(selectRealtimeAnalytics);
   const analyticsLoading = useSelector(selectAnalyticsLoading);
   const analyticsError = useSelector(selectAnalyticsError);
-  
+
   const currentAgentId = user?.id;
   const currentTenantId = user?.tenantId;
   console.log(isSignalRConnected, "SignalR Connection Status");
@@ -75,14 +75,14 @@ const DashboardPage = () => {
   };
   useEffect(() => {
     dispatch(fetchConversations());
-    
+
     if (currentTenantId) {
       dispatch(fetchDashboardStats(currentTenantId));
-      dispatch(fetchConversationMetrics({ timeRange: '7d', tenantId: currentTenantId }));
-      dispatch(fetchAgentMetrics({ timeRange: '7d', tenantId: currentTenantId }));
+      dispatch(fetchConversationMetrics({ timeRange: "7d", tenantId: currentTenantId }));
+      dispatch(fetchAgentMetrics({ timeRange: "7d", tenantId: currentTenantId }));
       dispatch(fetchRealtimeAnalytics());
     }
-    
+
     if (currentAgentId) {
       const endDate = new Date().toISOString();
       const startDate = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString();
@@ -104,7 +104,7 @@ const DashboardPage = () => {
         const ok = await agentSignalRService.connect(token, currentAgentId, tenantId);
         console.log("SignalR connected:", ok);
         connectedRef.current = !!ok;
-        
+
         if (ok && currentTenantId) {
           const endDate = new Date().toISOString();
           const startDate = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString();
@@ -222,74 +222,78 @@ const DashboardPage = () => {
   }
 
   const recentConversations = Array.isArray(conversations) ? conversations.slice(0, 5) : [];
-  
-  const chartPerformanceData = agentStats ? [
-    { 
-      date: "2024-01-01", 
-      conversations: (agentStats.totalConversations || 0) * 0.7, 
-      avgRating: (agentStats.customerSatisfactionRating || 0) * 0.9 
-    },
-    { 
-      date: "2024-01-02", 
-      conversations: (agentStats.totalConversations || 0) * 0.8, 
-      avgRating: (agentStats.customerSatisfactionRating || 0) * 0.95 
-    },
-    { 
-      date: "2024-01-03", 
-      conversations: (agentStats.totalConversations || 0) * 0.9, 
-      avgRating: (agentStats.customerSatisfactionRating || 0) * 1.05 
-    },
-    { 
-      date: "2024-01-04", 
-      conversations: agentStats.totalConversations || 0, 
-      avgRating: agentStats.customerSatisfactionRating || 0 
-    },
-    { 
-      date: "2024-01-05", 
-      conversations: (agentStats.totalConversations || 0) * 1.1, 
-      avgRating: (agentStats.customerSatisfactionRating || 0) * 1.02 
-    },
-    { 
-      date: "2024-01-06", 
-      conversations: (agentStats.totalConversations || 0) * 1.2, 
-      avgRating: (agentStats.customerSatisfactionRating || 0) * 1.08 
-    },
-    { 
-      date: "2024-01-07", 
-      conversations: (agentStats.totalConversations || 0) * 0.85, 
-      avgRating: (agentStats.customerSatisfactionRating || 0) * 0.98 
-    },
-  ] : [
-    { date: "2024-01-01", conversations: 12, avgRating: 4.5 },
-    { date: "2024-01-02", conversations: 15, avgRating: 4.7 },
-    { date: "2024-01-03", conversations: 8, avgRating: 4.2 },
-    { date: "2024-01-04", conversations: 18, avgRating: 4.6 },
-    { date: "2024-01-05", conversations: 14, avgRating: 4.3 },
-    { date: "2024-01-06", conversations: 22, avgRating: 4.8 },
-    { date: "2024-01-07", conversations: 11, avgRating: 4.4 },
-  ];
 
-  const channelData = conversationMetrics ? [
-    { 
-      name: t("dashboard.website"), 
-      value: Math.floor((conversationMetrics.total || 0) * 0.65), 
-      color: "#3b82f6" 
-    },
-    { 
-      name: t("dashboard.mobileApp"), 
-      value: Math.floor((conversationMetrics.total || 0) * 0.25), 
-      color: "#10b981" 
-    },
-    { 
-      name: t("dashboard.socialMedia"), 
-      value: Math.floor((conversationMetrics.total || 0) * 0.10), 
-      color: "#f59e0b" 
-    },
-  ] : [
-    { name: t("dashboard.website"), value: 65, color: "#3b82f6" },
-    { name: t("dashboard.mobileApp"), value: 25, color: "#10b981" },
-    { name: t("dashboard.socialMedia"), value: 10, color: "#f59e0b" },
-  ];
+  const chartPerformanceData = agentStats
+    ? [
+        {
+          date: "2024-01-01",
+          conversations: (agentStats.totalConversations || 0) * 0.7,
+          avgRating: (agentStats.customerSatisfactionRating || 0) * 0.9,
+        },
+        {
+          date: "2024-01-02",
+          conversations: (agentStats.totalConversations || 0) * 0.8,
+          avgRating: (agentStats.customerSatisfactionRating || 0) * 0.95,
+        },
+        {
+          date: "2024-01-03",
+          conversations: (agentStats.totalConversations || 0) * 0.9,
+          avgRating: (agentStats.customerSatisfactionRating || 0) * 1.05,
+        },
+        {
+          date: "2024-01-04",
+          conversations: agentStats.totalConversations || 0,
+          avgRating: agentStats.customerSatisfactionRating || 0,
+        },
+        {
+          date: "2024-01-05",
+          conversations: (agentStats.totalConversations || 0) * 1.1,
+          avgRating: (agentStats.customerSatisfactionRating || 0) * 1.02,
+        },
+        {
+          date: "2024-01-06",
+          conversations: (agentStats.totalConversations || 0) * 1.2,
+          avgRating: (agentStats.customerSatisfactionRating || 0) * 1.08,
+        },
+        {
+          date: "2024-01-07",
+          conversations: (agentStats.totalConversations || 0) * 0.85,
+          avgRating: (agentStats.customerSatisfactionRating || 0) * 0.98,
+        },
+      ]
+    : [
+        { date: "2024-01-01", conversations: 12, avgRating: 4.5 },
+        { date: "2024-01-02", conversations: 15, avgRating: 4.7 },
+        { date: "2024-01-03", conversations: 8, avgRating: 4.2 },
+        { date: "2024-01-04", conversations: 18, avgRating: 4.6 },
+        { date: "2024-01-05", conversations: 14, avgRating: 4.3 },
+        { date: "2024-01-06", conversations: 22, avgRating: 4.8 },
+        { date: "2024-01-07", conversations: 11, avgRating: 4.4 },
+      ];
+
+  const channelData = conversationMetrics
+    ? [
+        {
+          name: t("dashboard.website"),
+          value: Math.floor((conversationMetrics.total || 0) * 0.65),
+          color: "#3b82f6",
+        },
+        {
+          name: t("dashboard.mobileApp"),
+          value: Math.floor((conversationMetrics.total || 0) * 0.25),
+          color: "#10b981",
+        },
+        {
+          name: t("dashboard.socialMedia"),
+          value: Math.floor((conversationMetrics.total || 0) * 0.1),
+          color: "#f59e0b",
+        },
+      ]
+    : [
+        { name: t("dashboard.website"), value: 65, color: "#3b82f6" },
+        { name: t("dashboard.mobileApp"), value: 25, color: "#10b981" },
+        { name: t("dashboard.socialMedia"), value: 10, color: "#f59e0b" },
+      ];
 
   return (
     <div className="space-y-6">
@@ -321,9 +325,9 @@ const DashboardPage = () => {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">
-              {realtimeAnalytics?.ongoingConversations || 
-               conversationMetrics?.active || 
-               (Array.isArray(conversations) ? conversations.filter((c: any) => c.status === "active").length : 0)}
+              {realtimeAnalytics?.ongoingConversations ||
+                conversationMetrics?.active ||
+                (Array.isArray(conversations) ? conversations.filter((c: any) => c.status === "active").length : 0)}
             </div>
             <div className="flex items-center text-xs text-muted-foreground">
               <TrendingUp className="mr-1 h-3 w-3" />
@@ -338,9 +342,7 @@ const DashboardPage = () => {
             <BarChart3 className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">
-              {agentStats?.totalConversations || agentStatsFromSlice?.totalConversations || 0}
-            </div>
+            <div className="text-2xl font-bold">{agentStats?.totalConversations || agentStatsFromSlice?.totalConversations || 0}</div>
             <div className="flex items-center text-xs text-muted-foreground">
               <TrendingUp className="mr-1 h-3 w-3" />
               {t("dashboard.changeFromYesterday")}
@@ -355,9 +357,11 @@ const DashboardPage = () => {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">
-              {agentPerformance?.averageResponseTime?.totalMinutes || 
-               agentStats?.averageResponseTimeMinutes || 
-               agentStatsFromSlice?.averageResponseTime || 0}m
+              {agentPerformance?.averageResponseTime?.totalMinutes ||
+                agentStats?.averageResponseTimeMinutes ||
+                agentStatsFromSlice?.averageResponseTime ||
+                0}
+              m
             </div>
             <div className="flex items-center text-xs text-muted-foreground">
               <TrendingUp className="mr-1 h-3 w-3" />
@@ -373,9 +377,10 @@ const DashboardPage = () => {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">
-              {agentStats?.customerSatisfactionRating || 
-               agentPerformance?.customerSatisfactionScore || 
-               agentStatsFromSlice?.customerSatisfaction || 0}
+              {agentStats?.customerSatisfactionRating ||
+                agentPerformance?.customerSatisfactionScore ||
+                agentStatsFromSlice?.customerSatisfaction ||
+                0}
             </div>
             <div className="flex items-center text-xs text-muted-foreground">
               <TrendingUp className="mr-1 h-3 w-3" />
