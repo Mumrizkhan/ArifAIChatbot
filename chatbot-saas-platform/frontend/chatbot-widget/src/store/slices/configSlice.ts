@@ -1,10 +1,13 @@
-import { createSlice, PayloadAction } from '@reduxjs/toolkit';
-
+import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 interface WidgetConfig {
   tenantId: string;
   apiUrl: string;
   websocketUrl: string;
   authToken?: string;
+  customerName?: string;
+  userName?: string;
+  userEmail?: string;
+  language: string;
   features: {
     fileUpload: boolean;
     voiceMessages: boolean;
@@ -54,9 +57,10 @@ interface ConfigState {
 }
 
 const defaultConfig: WidgetConfig = {
-  tenantId: '',
-  apiUrl: '/api',
-  websocketUrl: '/ws',
+  tenantId: "",
+  apiUrl: "/api",
+  websocketUrl: "/ws",
+  language: "en",
   features: {
     fileUpload: true,
     voiceMessages: false,
@@ -73,7 +77,7 @@ const defaultConfig: WidgetConfig = {
     showWelcomeMessage: true,
     persistConversation: true,
     maxFileSize: 10 * 1024 * 1024, // 10MB
-    allowedFileTypes: ['image/*', '.pdf', '.doc', '.docx', '.txt'],
+    allowedFileTypes: ["image/*", ".pdf", ".doc", ".docx", ".txt"],
     maxMessageLength: 1000,
   },
   security: {
@@ -93,34 +97,51 @@ const initialState: ConfigState = {
   widget: defaultConfig,
   isInitialized: false,
   isEmbedded: false,
-  parentDomain: '',
-  sessionId: '',
+  parentDomain: "",
+  sessionId: "",
   metadata: {},
 };
 
 const configSlice = createSlice({
-  name: 'config',
+  name: "config",
   initialState,
   reducers: {
-    initializeWidget: (state, action: PayloadAction<{
-      tenantId: string;
-      config?: {
-        apiUrl?: string;
-        websocketUrl?: string;
-        authToken?: string;
-        features?: Partial<WidgetConfig['features']>;
-        behavior?: Partial<WidgetConfig['behavior']>;
-        predefinedIntents?: WidgetConfig['predefinedIntents'];
-      };
-      userId?: string;
-      metadata?: Record<string, any>;
-    }>) => {
+    initializeWidget: (
+      state,
+      action: PayloadAction<{
+        tenantId: string;
+        config?: {
+          apiUrl?: string;
+          websocketUrl?: string;
+          authToken?: string;
+          customerName?: string;
+          userName?: string;
+          userEmail?: string;
+          language?: string;
+          features?: Partial<WidgetConfig["features"]>;
+          behavior?: Partial<WidgetConfig["behavior"]>;
+          predefinedIntents?: WidgetConfig["predefinedIntents"];
+        };
+        userId?: string;
+        metadata?: Record<string, any>;
+      }>
+    ) => {
       const { tenantId, config, userId, metadata } = action.payload;
       state.widget.tenantId = tenantId;
       if (config) {
         if (config.apiUrl) state.widget.apiUrl = config.apiUrl;
         if (config.websocketUrl) state.widget.websocketUrl = config.websocketUrl;
         if (config.authToken) state.widget.authToken = config.authToken;
+        if (config.customerName) state.widget.customerName = config.customerName;
+        if (config.userName) state.widget.userName = config.userName;
+        if (config.userEmail) state.widget.userEmail = config.userEmail;
+        if (config.language) {
+          state.widget.language = config.language;
+          // Set document direction based on language
+          if (typeof document !== "undefined") {
+            document.body.dir = config.language === "ar" ? "rtl" : "ltr";
+          }
+        }
         if (config.features) {
           state.widget.features = { ...state.widget.features, ...config.features };
         }
@@ -144,13 +165,29 @@ const configSlice = createSlice({
     setUserId: (state, action: PayloadAction<string>) => {
       state.userId = action.payload;
     },
+    setCustomerName: (state, action: PayloadAction<string>) => {
+      state.widget.customerName = action.payload;
+    },
+    setUserName: (state, action: PayloadAction<string>) => {
+      state.widget.userName = action.payload;
+    },
+    setUserEmail: (state, action: PayloadAction<string>) => {
+      state.widget.userEmail = action.payload;
+    },
+    setLanguage: (state, action: PayloadAction<string>) => {
+      state.widget.language = action.payload;
+      // Set document direction based on language
+      if (typeof document !== "undefined") {
+        document.body.dir = action.payload === "ar" ? "rtl" : "ltr";
+      }
+    },
     updateMetadata: (state, action: PayloadAction<Record<string, any>>) => {
       state.metadata = { ...state.metadata, ...action.payload };
     },
-    setFeatureEnabled: (state, action: PayloadAction<{ feature: keyof WidgetConfig['features']; enabled: boolean }>) => {
+    setFeatureEnabled: (state, action: PayloadAction<{ feature: keyof WidgetConfig["features"]; enabled: boolean }>) => {
       state.widget.features[action.payload.feature] = action.payload.enabled;
     },
-    updateBehavior: (state, action: PayloadAction<Partial<WidgetConfig['behavior']>>) => {
+    updateBehavior: (state, action: PayloadAction<Partial<WidgetConfig["behavior"]>>) => {
       state.widget.behavior = { ...state.widget.behavior, ...action.payload };
     },
     trackEvent: (state, action: PayloadAction<{ event: string; data?: any }>) => {
@@ -162,12 +199,12 @@ const configSlice = createSlice({
           tenantId: state.widget.tenantId,
           userId: state.userId,
         };
-        
-        if (typeof window !== 'undefined' && (window as any).gtag) {
-          (window as any).gtag('event', action.payload.event, eventData);
+
+        if (typeof window !== "undefined" && (window as any).gtag) {
+          (window as any).gtag("event", action.payload.event, eventData);
         }
-        
-        console.log('Analytics Event:', eventData);
+
+        console.log("Analytics Event:", eventData);
       }
     },
   },
@@ -181,6 +218,10 @@ export const {
   initializeWidget,
   updateConfig,
   setUserId,
+  setCustomerName,
+  setUserName,
+  setUserEmail,
+  setLanguage,
   updateMetadata,
   setFeatureEnabled,
   updateBehavior,
