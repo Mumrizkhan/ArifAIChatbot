@@ -212,8 +212,8 @@ const TenantsPage: React.FC = () => {
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="en">{t("language.english")}</SelectItem>
-                    <SelectItem value="ar">{t("language.arabic")}</SelectItem>
+                    <SelectItem value="en">{t("settings.general.languages.english")}</SelectItem>
+                    <SelectItem value="ar">{t("settings.general.languages.arabic")}</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
@@ -438,7 +438,10 @@ const TenantsPage: React.FC = () => {
                 <Label htmlFor="edit-defaultLanguage" className="text-right">
                   {t("tenants.defaultLanguage")}
                 </Label>
-                <Select value={editingTenant.defaultLanguage || "en"} onValueChange={(value) => setEditingTenant({ ...editingTenant, defaultLanguage: value })}>
+                <Select
+                  value={editingTenant.defaultLanguage || "en"}
+                  onValueChange={(value) => setEditingTenant({ ...editingTenant, defaultLanguage: value })}
+                >
                   <SelectTrigger className="col-span-3">
                     <SelectValue />
                   </SelectTrigger>
