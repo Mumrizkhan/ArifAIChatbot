@@ -22,9 +22,9 @@ namespace Shared.Domain.Entities
         public string? RecipientEmail { get; set; }
         public string? RecipientPhone { get; set; }
         public string? RecipientDeviceToken { get; set; }
-        public Dictionary<string, object> Data { get; set; } = new();
+        public Dictionary<string, object>? Data { get; set; } = new();
         public string? TemplateId { get; set; }
-        public Dictionary<string, object> TemplateData { get; set; } = new();
+        public Dictionary<string, object>? TemplateData { get; set; } = new();
         public DateTime? ScheduledAt { get; set; }
         public DateTime? SentAt { get; set; }
         public DateTime? DeliveredAt { get; set; }
@@ -47,7 +47,7 @@ namespace Shared.Domain.Entities
         public Guid TenantId { get; set; }
         public string Language { get; set; } = "en";
         public bool IsActive { get; set; } = true;
-        public Dictionary<string, object> DefaultData { get; set; } = new();
+        public Dictionary<string, object>? DefaultData { get; set; } = new();
     }
 
     public class NotificationPreference : AuditableEntity
@@ -56,9 +56,9 @@ namespace Shared.Domain.Entities
         public Guid UserId { get; set; }
         public Guid TenantId { get; set; }
         public NotificationType NotificationType { get; set; }
-        public List<NotificationChannel> EnabledChannels { get; set; } = new();
+        public List<NotificationChannel>? EnabledChannels { get; set; } = new();
         public bool IsEnabled { get; set; } = true;
-        public Dictionary<string, object> Settings { get; set; } = new();
+        public Dictionary<string, object>? Settings { get; set; } = new();
     }
 
     public enum NotificationType

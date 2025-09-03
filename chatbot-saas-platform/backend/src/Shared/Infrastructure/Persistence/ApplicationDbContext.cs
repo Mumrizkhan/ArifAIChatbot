@@ -4,6 +4,7 @@ using Shared.Application.Common.Interfaces;
 using Shared.Domain.Common;
 using Shared.Domain.Entities;
 using System.Reflection;
+using System.Reflection.Emit;
 
 namespace Shared.Infrastructure.Persistence;
 
@@ -61,7 +62,8 @@ public class ApplicationDbContext : DbContext, IApplicationDbContext
     public DbSet<Notification> Notifications => Set<Notification>();
     public DbSet<SystemSettings> SystemSettings => Set<SystemSettings>();
     public DbSet<ConversationAssignment> ConversationAssignments => Set<ConversationAssignment>();
-
+    public DbSet<AnalyticsEvent> AnalyticsEvents => Set<AnalyticsEvent>();
+   public DbSet<ConversationRating> ConversationRatings=> Set<ConversationRating>();
     public new DbSet<TEntity> Set<TEntity>() where TEntity : class => base.Set<TEntity>();
     public EntityEntry<TEntity> Entry<TEntity>(TEntity entity) where TEntity : class
        => base.Entry(entity);
@@ -523,9 +525,86 @@ public class ApplicationDbContext : DbContext, IApplicationDbContext
         });
 
 
+            builder.Entity<AnalyticsEvent>(entity =>
+            {
+                entity.HasKey(e => e.Id);
 
-        base.OnModelCreating(builder);
-    }
+                entity.Property(e => e.Id)
+                    .HasDefaultValueSql("NEWID()");
+
+
+
+                entity.Property(e => e.CreatedAt)
+                    .HasDefaultValueSql("GETUTCDATE()");
+
+
+                entity.Property(e => e.EventType)
+                    .IsRequired()
+                    .HasMaxLength(100);
+
+                entity.Property(e => e.SessionId)
+                    .IsRequired()
+                    .HasMaxLength(100);
+
+                entity.Property(e => e.ConversationId)
+                    .HasMaxLength(100);
+
+                entity.Property(e => e.AgentId)
+                    .HasMaxLength(100);
+
+                entity.Property(e => e.UserId)
+                    .HasMaxLength(100);
+
+                entity.Property(e => e.TenantId)
+                    .IsRequired()
+                    .HasMaxLength(100);
+
+                entity.Property(e => e.Timestamp)
+                    .IsRequired();
+
+
+                entity.Property(e => e.EventData)
+                    .HasColumnType("nvarchar(max)")
+                    .HasConversion(
+                        v => System.Text.Json.JsonSerializer.Serialize(v, new System.Text.Json.JsonSerializerOptions()),
+                        v => string.IsNullOrEmpty(v) ? new Dictionary<string, object>() : System.Text.Json.JsonSerializer.Deserialize<Dictionary<string, object>>(v, new System.Text.Json.JsonSerializerOptions())
+                    );
+
+                entity.Property(e => e.Metadata)
+                    .HasColumnType("nvarchar(max)")
+                    .HasConversion(
+                        v => System.Text.Json.JsonSerializer.Serialize(v, new System.Text.Json.JsonSerializerOptions()),
+                        v => string.IsNullOrEmpty(v) ? new Dictionary<string, object>() : System.Text.Json.JsonSerializer.Deserialize<Dictionary<string, object>>(v, new System.Text.Json.JsonSerializerOptions())
+                    );
+
+                // Indexes for performance
+                entity.HasIndex(e => e.TenantId)
+                    .HasDatabaseName("IX_AnalyticsEvents_TenantId");
+
+                entity.HasIndex(e => e.EventType)
+                    .HasDatabaseName("IX_AnalyticsEvents_EventType");
+
+                entity.HasIndex(e => e.ConversationId)
+                    .HasDatabaseName("IX_AnalyticsEvents_ConversationId");
+
+                entity.HasIndex(e => e.AgentId)
+                    .HasDatabaseName("IX_AnalyticsEvents_AgentId");
+
+                entity.HasIndex(e => e.Timestamp)
+                    .HasDatabaseName("IX_AnalyticsEvents_Timestamp");
+
+                entity.HasIndex(e => new { e.TenantId, e.EventType, e.Timestamp })
+                    .HasDatabaseName("IX_AnalyticsEvents_TenantId_EventType_Timestamp");
+
+                entity.HasIndex(e => new { e.TenantId, e.ConversationId, e.Timestamp })
+                    .HasDatabaseName("IX_AnalyticsEvents_TenantId_ConversationId_Timestamp");
+
+                entity.HasIndex(e => new { e.TenantId, e.AgentId, e.Timestamp })
+                    .HasDatabaseName("IX_AnalyticsEvents_TenantId_AgentId_Timestamp");
+            });
+
+            base.OnModelCreating(builder);
+        }
 
     public override async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
     {
@@ -546,7 +625,7 @@ public class ApplicationDbContext : DbContext, IApplicationDbContext
                     break;
             }
         }
-            return await base.SaveChangesAsync(cancellationToken);
-        
+        return await base.SaveChangesAsync(cancellationToken);
+
     }
 }

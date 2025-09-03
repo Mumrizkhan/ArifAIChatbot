@@ -126,9 +126,9 @@ export const sendMessage = createAsyncThunk(
 
        const res = await apiClient.post("/chat/chat/messages", {
        conversationId,
-       content: payload.content,
-       type: payload.type,
-     });
+        content: payload.content,
+        type: payload.type,
+      });
 
       return res;
     } catch (e: unknown) {
@@ -292,6 +292,12 @@ const chatSlice = createSlice({
         }
       }
     },
+    submitConversationFeedback: (state, action: PayloadAction<{ rating: number; feedback?: string }>) => {
+      if (state.currentConversation) {
+        state.currentConversation.rating = action.payload.rating;
+        state.currentConversation.feedback = action.payload.feedback;
+      }
+    },
   },
   extraReducers: (builder) => {
     builder
@@ -413,6 +419,7 @@ export const {
   clearError,
   markAsRead,
   markMessageAsRead,
+  submitConversationFeedback,
 } = chatSlice.actions;
 
 export default chatSlice.reducer;

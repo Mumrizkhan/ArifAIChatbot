@@ -19,6 +19,7 @@ import {
 } from "../../store/slices/conversationSlice";
 import { setSelectedConversation } from "../../store/slices/selectedConversationSlice";
 import { addAgentNotification } from "../../store/slices/agentSlice";
+import { useNotificationManager } from "../../hooks/useNotificationManager";
 import { agentSignalRService } from "../../services/signalr";
 import { Card, CardContent, CardHeader, CardTitle } from "../../components/ui/card";
 import { Button } from "../../components/ui/button";
@@ -35,6 +36,7 @@ import { TypingIndicator } from "../../components/TypingIndicator";
 const ConversationsPage = () => {
   const { t } = useTranslation();
   const dispatch = useDispatch<AppDispatch>();
+  const { showSuccess, showError } = useNotificationManager();
   const { conversations, isLoading, isSignalRConnected, typingUsers } = useSelector((state: RootState) => state.conversations);
   const { conversationId } = useSelector((state: RootState) => state.selectedConversation);
   const { currentAgent } = useSelector((state: RootState) => state.agent);
@@ -161,6 +163,7 @@ const ConversationsPage = () => {
         agentSignalRService.setOnUserStartedTyping(() => {});
         agentSignalRService.setOnUserStoppedTyping(() => {});
         agentSignalRService.setOnMessageMarkedAsRead(() => {});
+        agentSignalRService.setOnAgentNotification(() => {}); // Fix: Add missing notification handler cleanup
       }
     };
   }, [dispatch, currentAgent?.id]); // Added currentAgent dependency
@@ -249,6 +252,31 @@ const ConversationsPage = () => {
   };
 
   const handleStatusChange = async (conversationId: string, status: "waiting" | "active" | "resolved" | "closed") => {
+    // Prevent multiple status changes for the same conversation in quick succession
+    const statusChangeKey = `${conversationId}-${status}`;
+    
+    // Check if we've already processed this status change recently
+    const recentStatusChanges = JSON.parse(sessionStorage.getItem('recentStatusChanges') || '{}');
+    const now = Date.now();
+    const fiveSecondsAgo = now - 5000;
+    
+    // Clean up old entries
+    Object.keys(recentStatusChanges).forEach(key => {
+      if (recentStatusChanges[key] < fiveSecondsAgo) {
+        delete recentStatusChanges[key];
+      }
+    });
+    
+    // Check if this status change was already processed recently
+    if (recentStatusChanges[statusChangeKey]) {
+      console.log("🚫 Skipping duplicate status change:", statusChangeKey);
+      return;
+    }
+    
+    // Mark this status change as processed
+    recentStatusChanges[statusChangeKey] = now;
+    sessionStorage.setItem('recentStatusChanges', JSON.stringify(recentStatusChanges));
+
     // Update the conversation status
     dispatch(updateConversationStatus({ conversationId, status }));
 
@@ -259,27 +287,31 @@ const ConversationsPage = () => {
         await dispatch(sendFeedbackMessage({ conversationId })).unwrap();
         console.log("✅ Feedback message sent successfully");
         
-        // Optionally show a notification to the agent
-        dispatch(addAgentNotification({
-          id: `feedback-sent-${Date.now()}`,
-          type: "success" as const,
-          title: "Feedback Request Sent",
-          message: "A feedback request has been automatically sent to the customer.",
-          timestamp: new Date().toISOString(),
-          agentId: currentAgent?.id || ""
-        }));
+        // Use the notification manager to prevent duplicates
+        showSuccess(
+          "Feedback Request Sent",
+          "A feedback request has been automatically sent to the customer.",
+          currentAgent?.id || "",
+          {
+            id: `feedback-sent-${conversationId}`,
+            preventDuplicates: true,
+            duplicateWindow: 10000 // 10 seconds
+          }
+        );
       } catch (error) {
         console.error("❌ Failed to send feedback message:", error);
         
-        // Show error notification to agent
-        dispatch(addAgentNotification({
-          id: `feedback-error-${Date.now()}`,
-          type: "error" as const,
-          title: "Feedback Request Failed",
-          message: "Failed to send feedback request to customer. Please try again.",
-          timestamp: new Date().toISOString(),
-          agentId: currentAgent?.id || ""
-        }));
+        // Use the notification manager to prevent duplicate error notifications
+        showError(
+          "Feedback Request Failed",
+          "Failed to send feedback request to customer. Please try again.",
+          currentAgent?.id || "",
+          {
+            id: `feedback-error-${conversationId}`,
+            preventDuplicates: true,
+            duplicateWindow: 10000 // 10 seconds
+          }
+        );
       }
     }
   };

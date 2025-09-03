@@ -9,6 +9,8 @@ using Shared.Infrastructure.Services;
 using Shared.Infrastructure.Extensions;
 using System.Text;
 using AnalyticsService.Services;
+using AnalyticsService.Extensions;
+using Shared.Infrastructure.Messaging;
 using Serilog;
 
 Log.Logger = new LoggerConfiguration()
@@ -49,7 +51,19 @@ builder.Services.AddSwaggerGen(options =>
 });
 
 builder.Services.AddInfrastructure(builder.Configuration);
-builder.Services.AddScoped<IAnalyticsService, AnalyticsService.Services.AnalyticsService>();
+
+builder.Services.AddScoped<IApplicationDbContext>(provider => 
+    provider.GetRequiredService<ApplicationDbContext>());
+
+// Analytics Services
+builder.Services.AddScoped<IAnalyticsService, AnalyticsService.Services.AnalyticsService>();    
+builder.Services.AddScoped<IAnalyticsEventPublisher, AnalyticsEventPublisher>();
+
+
+
+// Add Analytics Message Bus Services
+builder.Services.AddAnalyticsMessageBus();
+
 builder.Services.AddHttpContextAccessor();
 
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
@@ -92,5 +106,8 @@ app.UseHttpsRedirection();
 app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();
+
+// Initialize Analytics Message Bus
+app.InitializeAnalyticsMessageBus();
 
 app.Run();

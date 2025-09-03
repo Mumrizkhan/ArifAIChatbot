@@ -28,5 +28,10 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Shared\Infrastructure\Shared.Infrastructure.csproj" />
+    <ProjectReference Include="..\AnalyticsService\AnalyticsService.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Tests\" />
   </ItemGroup>
 </Project>

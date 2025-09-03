@@ -335,7 +335,7 @@ public class ConversationsController : ControllerBase
 
     [HttpPost("{id}/messages")]
    // [Authorize]
-    public async Task<IActionResult> SendMessage(Guid id, [FromBody] SendMessageRequest request)
+    public async Task<IActionResult> SendMessage(Guid id, [FromBody] SendFeedbackMessageRequest request)
     {
         try
         {
@@ -352,7 +352,7 @@ public class ConversationsController : ControllerBase
                 Id = Guid.NewGuid(),
                 ConversationId = id,
                 Content = request.Content,
-                Type = request.Type,
+                Type =Enum.Parse<MessageType>( request.Type),
                 Sender =MessageSender.Agent,
                 SenderId = _currentUserService.UserId,
                 CreatedAt = DateTime.UtcNow,
@@ -427,7 +427,12 @@ public class SendMessageRequest
     public MessageType Type { get; set; } = MessageType.Text;
     public Dictionary<string, object>? Metadata { get; set; }
 }
-
+public class SendFeedbackMessageRequest
+{
+    public string Content { get; set; } = "Thank you for using our service! Please rate your experience:";
+    public string Type { get; set; } = "feedback";
+    public Dictionary<string, object>? Metadata { get; set; }
+}
 public class CreateConversationRequest
 {
     public string? CustomerName { get; set; }

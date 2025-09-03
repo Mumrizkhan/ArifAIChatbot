@@ -23,6 +23,9 @@ public class StartConversationRequest
     public string InitialMessage { get; set; } = string.Empty;
     public string? CustomerPhone { get; set; }
     public Dictionary<string, object> Metadata { get; set; } = new();
+    public string? UserAgent { get; set; }
+    public string? IpAddress { get; set; }
+    public string? Referrer { get; set; }
 }
 
 public class SendChatMessageRequest

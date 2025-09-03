@@ -22,6 +22,92 @@ namespace IdentityService.Migrations
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
 
+            modelBuilder.Entity("Shared.Domain.Entities.AnalyticsEvent", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier")
+                        .HasDefaultValueSql("NEWID()");
+
+                    b.Property<string>("AgentId")
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<string>("ConversationId")
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("datetime2")
+                        .HasDefaultValueSql("GETUTCDATE()");
+
+                    b.Property<string>("CreatedBy")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("EventData")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("EventType")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<string>("Metadata")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("SessionId")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<string>("TenantId")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<DateTime>("Timestamp")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("UpdatedBy")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("UserId")
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("AgentId")
+                        .HasDatabaseName("IX_AnalyticsEvents_AgentId");
+
+                    b.HasIndex("ConversationId")
+                        .HasDatabaseName("IX_AnalyticsEvents_ConversationId");
+
+                    b.HasIndex("EventType")
+                        .HasDatabaseName("IX_AnalyticsEvents_EventType");
+
+                    b.HasIndex("TenantId")
+                        .HasDatabaseName("IX_AnalyticsEvents_TenantId");
+
+                    b.HasIndex("Timestamp")
+                        .HasDatabaseName("IX_AnalyticsEvents_Timestamp");
+
+                    b.HasIndex("TenantId", "AgentId", "Timestamp")
+                        .HasDatabaseName("IX_AnalyticsEvents_TenantId_AgentId_Timestamp");
+
+                    b.HasIndex("TenantId", "ConversationId", "Timestamp")
+                        .HasDatabaseName("IX_AnalyticsEvents_TenantId_ConversationId_Timestamp");
+
+                    b.HasIndex("TenantId", "EventType", "Timestamp")
+                        .HasDatabaseName("IX_AnalyticsEvents_TenantId_EventType_Timestamp");
+
+                    b.ToTable("AnalyticsEvents");
+                });
+
             modelBuilder.Entity("Shared.Domain.Entities.BillingAddress", b =>
                 {
                     b.Property<Guid>("Id")
@@ -88,7 +174,6 @@ namespace IdentityService.Migrations
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<string>("Configuration")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<DateTime>("CreatedAt")
@@ -311,6 +396,52 @@ namespace IdentityService.Migrations
                     b.ToTable("ConversationAssignments");
                 });
 
+            modelBuilder.Entity("Shared.Domain.Entities.ConversationRating", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Categories")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<Guid>("ConversationId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("CreatedBy")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Feedback")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("RatedBy")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("Rating")
+                        .HasColumnType("int");
+
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("UpdatedBy")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ConversationId");
+
+                    b.ToTable("ConversationRatings");
+                });
+
             modelBuilder.Entity("Shared.Domain.Entities.Document", b =>
                 {
                     b.Property<Guid>("Id")
@@ -355,7 +486,6 @@ namespace IdentityService.Migrations
                         .HasColumnType("nvarchar(16)");
 
                     b.Property<string>("Metadata")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("OriginalFileName")
@@ -428,7 +558,6 @@ namespace IdentityService.Migrations
                         .HasColumnType("int");
 
                     b.Property<string>("Metadata")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<int>("StartPosition")
@@ -478,7 +607,6 @@ namespace IdentityService.Migrations
                         .HasColumnType("datetime2");
 
                     b.Property<string>("Metadata")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<DateTime?>("PaidDate")
@@ -553,7 +681,6 @@ namespace IdentityService.Migrations
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<string>("Metadata")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("PriceId")
@@ -686,7 +813,6 @@ namespace IdentityService.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Data")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<DateTime?>("DeliveredAt")
@@ -733,7 +859,6 @@ namespace IdentityService.Migrations
                         .HasColumnType("int");
 
                     b.Property<string>("TemplateData")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("TemplateId")
@@ -777,7 +902,6 @@ namespace IdentityService.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.PrimitiveCollection<string>("EnabledChannels")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<bool>("IsEnabled")
@@ -787,7 +911,6 @@ namespace IdentityService.Migrations
                         .HasColumnType("int");
 
                     b.Property<string>("Settings")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<Guid>("TenantId")
@@ -827,7 +950,6 @@ namespace IdentityService.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("DefaultData")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<bool>("IsActive")
@@ -895,7 +1017,6 @@ namespace IdentityService.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Metadata")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("StripePaymentMethodId")
@@ -941,7 +1062,6 @@ namespace IdentityService.Migrations
                         .HasColumnType("nvarchar(512)");
 
                     b.Property<string>("Features")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<bool>("IsActive")
@@ -951,7 +1071,6 @@ namespace IdentityService.Migrations
                         .HasColumnType("bit");
 
                     b.Property<string>("Limits")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<decimal>("MonthlyPrice")
@@ -1023,7 +1142,6 @@ namespace IdentityService.Migrations
                         .HasColumnType("datetime2");
 
                     b.Property<string>("Metadata")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<DateTime>("NextBillingDate")
@@ -1089,7 +1207,6 @@ namespace IdentityService.Migrations
                         .HasColumnType("bit");
 
                     b.Property<string>("Settings")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<Guid>("TenantId")
@@ -1227,7 +1344,6 @@ namespace IdentityService.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Metadata")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("MetricName")
@@ -1425,7 +1541,6 @@ namespace IdentityService.Migrations
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<string>("Definition")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Description")
@@ -1446,7 +1561,6 @@ namespace IdentityService.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Settings")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<int>("Status")
@@ -1463,7 +1577,6 @@ namespace IdentityService.Migrations
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<string>("Trigger")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<DateTime?>("UpdatedAt")
@@ -1473,7 +1586,6 @@ namespace IdentityService.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Variables")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Version")
@@ -1531,7 +1643,6 @@ namespace IdentityService.Migrations
                         .HasColumnType("nvarchar(512)");
 
                     b.Property<string>("Variables")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.HasKey("Expression");
@@ -1573,7 +1684,6 @@ namespace IdentityService.Migrations
                         .HasColumnType("float");
 
                     b.Property<string>("ViewportPosition")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.HasKey("Width", "Height", "Zoom");
@@ -1591,7 +1701,6 @@ namespace IdentityService.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Configuration")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("InputPorts")
@@ -1614,7 +1723,6 @@ namespace IdentityService.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Position")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<int>("Type")
@@ -1648,11 +1756,9 @@ namespace IdentityService.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("DefaultVariables")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Definition")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Description")
@@ -1745,6 +1851,17 @@ namespace IdentityService.Migrations
                     b.Navigation("Conversation");
 
                     b.Navigation("Tenant");
+                });
+
+            modelBuilder.Entity("Shared.Domain.Entities.ConversationRating", b =>
+                {
+                    b.HasOne("Shared.Domain.Entities.Conversation", "Conversation")
+                        .WithMany()
+                        .HasForeignKey("ConversationId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Conversation");
                 });
 
             modelBuilder.Entity("Shared.Domain.Entities.Invoice", b =>

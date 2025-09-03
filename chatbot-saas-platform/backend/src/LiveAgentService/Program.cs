@@ -9,10 +9,11 @@ using Microsoft.OpenApi.Models;
 using Serilog;
 using Shared.Application.Common.Interfaces;
 using Shared.Infrastructure.Extensions;
+using Shared.Infrastructure.Messaging;
 using Shared.Infrastructure.Persistence;
-using Shared.Infrastructure.Services;
 using StackExchange.Redis;
 using System.Text;
+using AnalyticsService.Services;
 
 Log.Logger = new LoggerConfiguration()
     .WriteTo.Console()
@@ -108,6 +109,11 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
         };
     });
 
+builder.Services.AddScoped<ILiveAgentAnalyticsService, LiveAgentAnalyticsService>();
+builder.Services.AddScoped<IAnalyticsMessageBusService, AnalyticsMessageBusService>();
+
+// Message Bus
+builder.Services.AddSingleton<IMessageBus, RabbitMQMessageBus>();
 
 
 
@@ -136,6 +142,7 @@ builder.Services.AddCors(options =>
 
 var app = builder.Build();
 
+// Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
@@ -153,6 +160,14 @@ app.UseWebSockets();
 app.MapHub<AgentHub>("/agentHub").RequireCors("AllowAll");
 //app.MapHub<AgentHub>("agent/agentHub").RequireCors("AllowAll");
 
+// Initialize Analytics Message Bus
+using (var scope = app.Services.CreateScope())
+{
+    var analyticsMessageBus = scope.ServiceProvider.GetRequiredService<IAnalyticsMessageBusService>();
+    analyticsMessageBus.InitializeSubscriptions();
+}
+
 app.Run();
+
 
 

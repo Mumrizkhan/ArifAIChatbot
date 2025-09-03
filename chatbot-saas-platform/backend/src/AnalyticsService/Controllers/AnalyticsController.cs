@@ -1,7 +1,7 @@
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Authorization;
-using AnalyticsService.Services;
 using AnalyticsService.Models;
+using AnalyticsService.Services;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 
 namespace AnalyticsService.Controllers;
 
@@ -521,17 +521,121 @@ public class AnalyticsController : ControllerBase
         }
     }
 
-    private DateTime GetStartDateFromTimeRange(string timeRange)
+    [HttpPost("events/batch")]
+    public async Task<IActionResult> TrackEventsBatch([FromBody] AnalyticsEventBatchRequest request)
     {
-        return timeRange switch
+        try
         {
-            "1d" => DateTime.UtcNow.AddDays(-1),
-            "7d" => DateTime.UtcNow.AddDays(-7),
-            "30d" => DateTime.UtcNow.AddDays(-30),
-            "90d" => DateTime.UtcNow.AddDays(-90),
-            _ => DateTime.UtcNow.AddDays(-7)
-        };
+            var tenantId = GetTenantIdFromHeader();
+            var success = await _analyticsService.TrackEventsBatchAsync(request, tenantId);
+
+            if (success)
+            {
+                _logger.LogInformation("Tracked {Count} analytics events for tenant {TenantId}",
+                    request.Events.Count, tenantId);
+
+                return Ok(new { Message = $"Successfully tracked {request.Events.Count} events" });
+            }
+            else
+            {
+                return StatusCode(500, new { Message = "Failed to track analytics events" });
+            }
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Failed to track analytics events");
+            return StatusCode(500, new { Message = "Failed to track analytics events" });
+        }
     }
+
+    /// <summary>
+    /// Get analytics dashboard data for a tenant
+    /// </summary>
+    [HttpGet("dashboard/{tenantId}")]
+    public async Task<IActionResult> GetDashboardData(
+        string tenantId,
+        [FromQuery] DateTime? from,
+        [FromQuery] DateTime? to)
+    {
+        try
+        {
+            var dashboard = await _analyticsService.GetDashboardDataAsync(tenantId, from, to);
+            return Ok(dashboard);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Failed to get dashboard data for tenant {TenantId}", tenantId);
+            return StatusCode(500, new { Message = "Failed to retrieve dashboard data" });
+        }
+    }
+
+    /// <summary>
+    /// Get performance metrics for a specific agent
+    /// </summary>
+    [HttpGet("agents/{agentId}/metrics")]
+    public async Task<IActionResult> GetAgentMetricsDetailed(
+        string agentId,
+        [FromQuery] DateTime? from,
+        [FromQuery] DateTime? to)
+    {
+        try
+        {
+            var tenantId = GetTenantIdFromHeader();
+            var metrics = await _analyticsService.GetAgentMetricsDetailedAsync(agentId, tenantId, from, to);
+            return Ok(metrics);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Failed to get metrics for agent {AgentId}", agentId);
+            return StatusCode(500, new { Message = "Failed to retrieve agent metrics" });
+        }
+    }
+
+    /// <summary>
+    /// Get conversation analytics
+    /// </summary>
+    [HttpGet("conversations/{conversationId}")]
+    public async Task<IActionResult> GetConversationAnalytics(string conversationId)
+    {
+        try
+        {
+            var tenantId = GetTenantIdFromHeader();
+            var analytics = await _analyticsService.GetConversationAnalyticsAsync(conversationId, tenantId);
+            return Ok(analytics);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Failed to get analytics for conversation {ConversationId}", conversationId);
+            return StatusCode(500, new { Message = "Failed to retrieve conversation analytics" });
+        }
+    }
+
+    /// <summary>
+    /// Get real-time analytics summary
+    /// </summary>
+    [HttpGet("realtime/{tenantId}")]
+    public async Task<IActionResult> GetRealtimeAnalyticsDetailed(string tenantId)
+    {
+        try
+        {
+            var realtime = await _analyticsService.GetRealtimeAnalyticsDetailedAsync(tenantId);
+            return Ok(realtime);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Failed to get realtime analytics for tenant {TenantId}", tenantId);
+            return StatusCode(500, new { Message = "Failed to retrieve realtime analytics" });
+        }
+    }
+
+    #region Private Helper Methods
+
+    private string GetTenantIdFromHeader()
+    {
+        return Request.Headers["X-Tenant-ID"].FirstOrDefault() ?? throw new UnauthorizedAccessException("Tenant ID is required");
+    }
+
+    #endregion
 }
 
 //public class CustomReportRequest

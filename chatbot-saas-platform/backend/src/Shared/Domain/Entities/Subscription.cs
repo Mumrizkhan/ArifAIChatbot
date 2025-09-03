@@ -23,7 +23,7 @@ namespace Shared.Domain.Entities
         public string Currency { get; set; } = "USD";
         public string? StripeSubscriptionId { get; set; }
         public string? StripeCustomerId { get; set; }
-        public Dictionary<string, object> Metadata { get; set; } = new();
+        public Dictionary<string, object>? Metadata { get; set; } = new();
         public int TrialDays { get; set; }
         public DateTime? TrialEndDate { get; set; }
         public bool IsTrialActive => TrialEndDate.HasValue && TrialEndDate > DateTime.UtcNow;
@@ -43,13 +43,13 @@ namespace Shared.Domain.Entities
         public bool IsActive { get; set; } = true;
         public bool IsPublic { get; set; } = true;
         public PlanType Type { get; set; } = PlanType.Standard;
-        public Dictionary<string, PlanFeature> Features { get; set; } = new();
-        public Dictionary<string, int> Limits { get; set; } = new();
+        public Dictionary<string, PlanFeature>? Features { get; set; } = new();
+        public Dictionary<string, int>? Limits { get; set; } = new();
         public string? StripePriceIdMonthly { get; set; }
         public string? StripePriceIdYearly { get; set; }
         public int TrialDays { get; set; } = 14;
         public int SortOrder { get; set; }
-        public List<Subscription> Subscriptions { get; set; } = new();
+        public List<Subscription>? Subscriptions { get; set; } = new();
     }
 
     public class PlanFeature
@@ -58,7 +58,7 @@ namespace Shared.Domain.Entities
         public string Description { get; set; } = string.Empty;
         public bool IsEnabled { get; set; }
         public int? Limit { get; set; }
-        public Dictionary<string, object> Configuration { get; set; } = new();
+        public Dictionary<string, object>? Configuration { get; set; } = new();
     }
 
     public class Invoice : AuditableEntity
@@ -81,7 +81,7 @@ namespace Shared.Domain.Entities
         public string? StripeInvoiceId { get; set; }
         public string? PaymentIntentId { get; set; }
         public List<InvoiceLineItem> LineItems { get; set; } = new();
-        public Dictionary<string, object> Metadata { get; set; } = new();
+        public Dictionary<string, object>? Metadata { get; set; } = new();
         public Subscription Subscription { get; set; } = null!;
     }
 
@@ -95,7 +95,7 @@ namespace Shared.Domain.Entities
         public decimal Amount { get; set; }
         public string? ProductId { get; set; }
         public string? PriceId { get; set; }
-        public Dictionary<string, object> Metadata { get; set; } = new();
+        public Dictionary<string, object>? Metadata { get; set; } = new();
         public Invoice Invoice { get; set; } = null!;
     }
 
@@ -109,7 +109,7 @@ namespace Shared.Domain.Entities
         public DateTime RecordedAt { get; set; }
         public DateTime PeriodStart { get; set; }
         public DateTime PeriodEnd { get; set; }
-        public Dictionary<string, object> Metadata { get; set; } = new();
+        public Dictionary<string, object>? Metadata { get; set; } = new();
         public Subscription? Subscription { get; set; }
     }
 
@@ -125,7 +125,7 @@ namespace Shared.Domain.Entities
         public int ExpiryYear { get; set; }
         public bool IsDefault { get; set; }
         public bool IsActive { get; set; } = true;
-        public Dictionary<string, object> Metadata { get; set; } = new();
+        public Dictionary<string, object>? Metadata { get; set; } = new();
     }
 
     public class BillingAddress : AuditableEntity

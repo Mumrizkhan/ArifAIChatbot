@@ -39,6 +39,9 @@ public interface IApplicationDbContext
     DbSet<ChatbotConfig> ChatbotConfigs { get; }
     DbSet<Notification> Notifications { get; }
     DbSet<SystemSettings> SystemSettings { get; }
+    DbSet<AnalyticsEvent> AnalyticsEvents { get;  }
+    DbSet<ConversationRating> ConversationRatings { get; }
+
     // Generic access
     DbSet<TEntity> Set<TEntity>() where TEntity : class;
 
