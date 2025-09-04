@@ -1,12 +1,12 @@
-import React from 'react';
-import { useTranslation } from 'react-i18next';
-import { useSelector } from 'react-redux';
-import { RootState } from '../store/store';
-import { Message } from '../store/slices/chatSlice';
-import { Bot, User, UserCheck, Download, FileText, Image } from 'lucide-react';
-import { formatDistanceToNow } from 'date-fns';
-import { ensureISOString } from '../utils/timestamp';
-import { FeedbackMessage } from './FeedbackMessage';
+import React from "react";
+import { useTranslation } from "react-i18next";
+import { useSelector } from "react-redux";
+import { RootState } from "../store/store";
+import { Message } from "../store/slices/chatSlice";
+import { Bot, User, UserCheck, Download, FileText, Image } from "lucide-react";
+import { formatDistanceToNow } from "date-fns";
+import { ensureISOString } from "../utils/timestamp";
+import { FeedbackMessage } from "./FeedbackMessage";
 
 interface MessageBubbleProps {
   message: Message;
@@ -16,19 +16,13 @@ interface MessageBubbleProps {
   conversationId?: string;
 }
 
-export const MessageBubble: React.FC<MessageBubbleProps> = ({
-  message,
-  isFirstInGroup,
-  isLastInGroup,
-  showAvatar,
-  conversationId,
-}) => {
+export const MessageBubble: React.FC<MessageBubbleProps> = ({ message, isFirstInGroup, isLastInGroup, showAvatar, conversationId }) => {
   const { t } = useTranslation();
   const { currentConversation } = useSelector((state: RootState) => state.chat);
   const { branding, isRTL } = useSelector((state: RootState) => state.theme);
 
-  const isUser = message.sender === 'user';
-  const isAgent = message.sender === 'agent';
+  const isUser = message.sender === "user";
+  const isAgent = message.sender === "agent";
 
   const getAvatar = () => {
     if (isUser) {
@@ -41,11 +35,7 @@ export const MessageBubble: React.FC<MessageBubbleProps> = ({
 
     if (isAgent && currentConversation?.assignedAgent?.avatar) {
       return (
-        <img
-          src={currentConversation.assignedAgent.avatar}
-          alt={currentConversation.assignedAgent.name}
-          className="message-avatar agent-avatar"
-        />
+        <img src={currentConversation.assignedAgent.avatar} alt={currentConversation.assignedAgent.name} className="message-avatar agent-avatar" />
       );
     }
 
@@ -58,13 +48,7 @@ export const MessageBubble: React.FC<MessageBubbleProps> = ({
     }
 
     if (branding.logo) {
-      return (
-        <img
-          src={branding.logo}
-          alt={branding.companyName || t('widget.title')}
-          className="message-avatar bot-avatar"
-        />
-      );
+      return <img src={branding.logo} alt={branding.companyName || t("widget.title")} className="message-avatar bot-avatar" />;
     }
 
     return (
@@ -75,35 +59,32 @@ export const MessageBubble: React.FC<MessageBubbleProps> = ({
   };
 
   const getSenderName = () => {
-    if (isUser) return t('accessibility.userMessage');
+    if (isUser) return t("accessibility.userMessage");
     if (isAgent && currentConversation?.assignedAgent) {
       return currentConversation.assignedAgent.name;
     }
-    if (isAgent) return 'Agent';
-    return branding.companyName || 'Bot';
+    if (isAgent) return t("widget.agent");
+
+    // Check if it's a system message
+    if (message.metadata?.systemMessage) {
+      return t("widget.system");
+    }
+
+    // Return branding company name or default to translated "Bot" or "AI Assistant"
+    return branding.companyName || t("widget.aiAssistant");
   };
 
   const renderFileMessage = () => {
     const { fileName, fileSize, fileType } = message.metadata || {};
-    
+
     return (
       <div className="message-file">
-        <div className="file-icon">
-          {fileType?.startsWith('image/') ? (
-            <Image size={20} />
-          ) : (
-            <FileText size={20} />
-          )}
-        </div>
+        <div className="file-icon">{fileType?.startsWith("image/") ? <Image size={20} /> : <FileText size={20} />}</div>
         <div className="file-info">
           <div className="file-name">{fileName}</div>
-          {fileSize && (
-            <div className="file-size">
-              {(fileSize / 1024 / 1024).toFixed(2)} MB
-            </div>
-          )}
+          {fileSize && <div className="file-size">{(fileSize / 1024 / 1024).toFixed(2)} MB</div>}
         </div>
-        <button className="file-download" aria-label={t('widget.downloadFile')}>
+        <button className="file-download" aria-label={t("widget.downloadFile")}>
           <Download size={16} />
         </button>
       </div>
@@ -112,69 +93,50 @@ export const MessageBubble: React.FC<MessageBubbleProps> = ({
 
   const renderImageMessage = () => {
     const { imageUrl, fileName } = message.metadata || {};
-    
+
     return (
       <div className="message-image">
-        <img
-          src={imageUrl}
-          alt={fileName || 'Uploaded image'}
-          className="message-image-content"
-          loading="lazy"
-        />
+        <img src={imageUrl} alt={fileName || "Uploaded image"} className="message-image-content" loading="lazy" />
       </div>
     );
   };
 
-  const renderTextMessage = () => (
-    <div className="message-text">
-      {message.content}
-    </div>
-  );
+  const renderTextMessage = () => <div className="message-text">{message.content}</div>;
 
   const renderFeedbackMessage = () => {
     return (
       <div className="message-feedback">
-        <div className="message-text">
-          {message.content}
-        </div>
-        <FeedbackMessage 
-          conversationId={conversationId || ''}
-          messageId={message.id}
-          metadata={message.metadata}
-        />
+        <div className="message-text">{message.content}</div>
+        <FeedbackMessage conversationId={conversationId || ""} messageId={message.id} metadata={message.metadata} />
       </div>
     );
   };
 
   const renderMessageContent = () => {
     switch (message.type) {
-      case 'file':
+      case "file":
         return renderFileMessage();
-      case 'image':
+      case "image":
         return renderImageMessage();
-      case 'feedback':
+      case "feedback":
         return renderFeedbackMessage();
-      case 'text':
+      case "text":
       default:
         return renderTextMessage();
     }
   };
 
   const getMessageClasses = () => {
-    const baseClasses = 'message-bubble';
+    const baseClasses = "message-bubble";
     const senderClasses = {
-      user: 'message-user',
-      bot: 'message-bot',
-      agent: 'message-agent',
+      user: "message-user",
+      bot: "message-bot",
+      agent: "message-agent",
     };
-    
-    return [
-      baseClasses,
-      senderClasses[message.sender],
-      isFirstInGroup && 'first-in-group',
-      isLastInGroup && 'last-in-group',
-      isRTL && 'rtl',
-    ].filter(Boolean).join(' ');
+
+    return [baseClasses, senderClasses[message.sender], isFirstInGroup && "first-in-group", isLastInGroup && "last-in-group", isRTL && "rtl"]
+      .filter(Boolean)
+      .join(" ");
   };
 
   const formatTimestamp = (timestamp: string) => {
@@ -185,32 +147,18 @@ export const MessageBubble: React.FC<MessageBubbleProps> = ({
   return (
     <div className={getMessageClasses()}>
       <div className="message-content">
-        {showAvatar && !isUser && (
-          <div className="message-avatar-container">
-            {getAvatar()}
-          </div>
-        )}
-        
+        {showAvatar && !isUser && <div className="message-avatar-container">{getAvatar()}</div>}
+
         <div className="message-body">
-          {isFirstInGroup && !isUser && (
-            <div className="message-sender">
-              {getSenderName()}
-            </div>
-          )}
-          
-          <div 
-            className="message-bubble-content"
-            role="article"
-            aria-label={`${getSenderName()}: ${message.content}`}
-          >
+          {isFirstInGroup && !isUser && <div className="message-sender">{getSenderName()}</div>}
+
+          <div className="message-bubble-content" role="article" aria-label={`${getSenderName()}: ${message.content}`}>
             {renderMessageContent()}
           </div>
-          
+
           {isLastInGroup && (
             <div className="message-timestamp">
-              <time dateTime={ensureISOString(message.timestamp)}>
-                {formatTimestamp(message.timestamp)}
-              </time>
+              <time dateTime={ensureISOString(message.timestamp)}>{formatTimestamp(message.timestamp)}</time>
             </div>
           )}
         </div>

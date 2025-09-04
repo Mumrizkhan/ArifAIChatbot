@@ -20,6 +20,7 @@
     "conversationEnded": "انتهت المحادثة",
     "fileUpload": "رفع ملف",
     "voiceMessage": "رسالة صوتية",
+    "downloadFile": "تحميل الملف",
     "downloadTranscript": "تحميل النص",
     "rateConversation": "قيم هذه المحادثة",
     "thankYou": "شكراً لك على ملاحظاتك!",
@@ -30,7 +31,13 @@
     "recordVoice": "تسجيل رسالة صوتية",
     "stopRecording": "إيقاف التسجيل",
     "playMessage": "تشغيل الرسالة",
-    "pauseMessage": "إيقاف الرسالة مؤقتاً"
+    "pauseMessage": "إيقاف الرسالة مؤقتاً",
+    "bot": "البوت",
+    "agent": "الوكيل",
+    "system": "النظام",
+    "aiAssistant": "المساعد الذكي",
+    "proactiveWelcome": "مرحباً! كيف يمكنني مساعدتك اليوم؟",
+    "proactiveFollowUp": "هل هناك أي شيء آخر يمكنني مساعدتك فيه؟"
   },
   "errors": {
     "connectionFailed": "فشل الاتصال. يرجى المحاولة مرة أخرى.",

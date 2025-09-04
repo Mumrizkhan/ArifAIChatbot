@@ -9,7 +9,7 @@ import { Send, Mic, MicOff, User } from "lucide-react";
 import { addMessage } from "../store/slices/chatSlice";
 
 export const MessageInput: React.FC = () => {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const dispatch = useDispatch<AppDispatch>();
   const inputRef = useRef<HTMLTextAreaElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -21,10 +21,18 @@ export const MessageInput: React.FC = () => {
   const { currentConversation, isLoading, connectionStatus } = useSelector((state: RootState) => state.chat);
   const { branding } = useSelector((state: RootState) => state.theme);
   const { widget } = useSelector((state: RootState) => state.config);
+  console.log(branding, "branding");
 
   const isConnected = connectionStatus === "connected";
   const canSendMessage = isConnected && !isLoading && message.trim().length > 0;
   const maxLength = widget.behavior.maxMessageLength;
+
+  // Effect to handle language changes
+  useEffect(() => {
+    if (widget.language && i18n.language !== widget.language) {
+      i18n.changeLanguage(widget.language);
+    }
+  }, [widget.language, i18n]);
 
   useEffect(() => {
     if (inputRef.current) {
@@ -220,9 +228,15 @@ export const MessageInput: React.FC = () => {
             value={message}
             onChange={handleInputChange}
             onKeyDown={handleKeyDown}
-            placeholder={branding.placeholderText || t("widget.placeholder")}
+            placeholder={t("widget.placeholder")}
             className="message-textarea"
-            style={{ outline: "none", boxShadow: "none", border: "none" }}
+            style={{
+              outline: "none",
+              boxShadow: "none",
+              border: "none",
+              direction: widget.language === "ar" ? "rtl" : "ltr",
+              textAlign: widget.language === "ar" ? "right" : "left",
+            }}
             disabled={!isConnected}
             maxLength={maxLength}
             rows={1}

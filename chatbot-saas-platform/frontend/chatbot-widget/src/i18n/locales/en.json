@@ -30,7 +30,14 @@
     "recordVoice": "Record Voice Message",
     "stopRecording": "Stop Recording",
     "playMessage": "Play Message",
-    "pauseMessage": "Pause Message"
+    "pauseMessage": "Pause Message",
+    "downloadFile": "Download File",
+    "bot": "Bot",
+    "agent": "Agent",
+    "system": "System",
+    "aiAssistant": "AI Assistant",
+    "proactiveWelcome": "Welcome! How can I assist you today?",
+    "proactiveFollowUp": "Is there anything else I can help you with?"
   },
   "errors": {
     "connectionFailed": "Connection failed. Please try again.",
