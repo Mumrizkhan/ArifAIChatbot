@@ -14,7 +14,7 @@ public class KnowledgeBaseService : IKnowledgeBaseService
     private readonly IVectorService _vectorSearchService;
     private readonly ILogger<KnowledgeBaseService> _logger;
     private readonly IConfiguration _configuration;
-    private readonly IServiceProvider _serviceProvider;
+    private readonly IServiceScopeFactory _serviceScopeFactory;
 
     public KnowledgeBaseService(
         IApplicationDbContext context,
@@ -22,14 +22,14 @@ public class KnowledgeBaseService : IKnowledgeBaseService
         IVectorService vectorSearchService,
         ILogger<KnowledgeBaseService> logger,
         IConfiguration configuration,
-        IServiceProvider serviceProvider)
+        IServiceScopeFactory serviceScopeFactory)
     {
         _context = context;
         _documentProcessingService = documentProcessingService;
         _vectorSearchService = vectorSearchService;
         _logger = logger;
         _configuration = configuration;
-        _serviceProvider = serviceProvider;
+        _serviceScopeFactory = serviceScopeFactory;
     }
 
     public async Task<Document> UploadDocumentAsync(DocumentUploadRequest request, Guid tenantId, Guid userId)
@@ -61,8 +61,8 @@ public class KnowledgeBaseService : IKnowledgeBaseService
             await _context.SaveChangesAsync();
 
             _logger.LogInformation("Document {DocumentId} uploaded successfully for tenant {TenantId}. Starting background processing.", document.Id, tenantId);
-
-            _ = Task.Run(async () => await ProcessDocumentInBackgroundAsync(document));
+            var documentId=document.Id;
+            _ = Task.Run(async () => await ProcessDocumentInBackgroundAsync(documentId));
 
             return document;
         }
@@ -288,7 +288,7 @@ public class KnowledgeBaseService : IKnowledgeBaseService
             document.Status = DocumentStatus.Processing;
             await _context.SaveChangesAsync();
 
-            _ = Task.Run(async () => await ProcessDocumentInBackgroundAsync(document));
+            _ = Task.Run(async () => await ProcessDocumentInBackgroundAsync(documentId));
 
             return true;
         }
@@ -330,13 +330,20 @@ public class KnowledgeBaseService : IKnowledgeBaseService
         return filePath;
     }
 
-    private async Task ProcessDocumentInBackgroundAsync(Document document)
+    private async Task ProcessDocumentInBackgroundAsync(Guid documentId)
     {
+        var document = await _context.Set<Document>().FindAsync(documentId);
+        if (document == null)
+        {
+            _logger.LogWarning("Document {DocumentId} not found for background processing", documentId);
+            return;
+        }
+
+        _logger.LogInformation("Starting background processing for document {DocumentId} in tenant {TenantId}", document.Id, document.TenantId);
         try
         {
-            _logger.LogInformation("Starting background processing for document {DocumentId} in tenant {TenantId}", document.Id, document.TenantId);
-
-            using (var scope = _serviceProvider.CreateScope())
+           
+            using (var scope = _serviceScopeFactory.CreateScope())
             {
                 var dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
                 var documentProcessingService = scope.ServiceProvider.GetRequiredService<IDocumentProcessingService>();
@@ -375,9 +382,9 @@ public class KnowledgeBaseService : IKnowledgeBaseService
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error processing document {DocumentId} in background", document.Id);
+            _logger.LogError(ex, "Error processing document {DocumentId} in background", documentId);
             document.Status = DocumentStatus.Failed;
-            using (var scope = _serviceProvider.CreateScope())
+            using (var scope = _serviceScopeFactory.CreateScope())
             {
                 var dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
                 await dbContext.SaveChangesAsync();
