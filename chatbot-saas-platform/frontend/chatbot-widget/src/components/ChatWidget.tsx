@@ -10,12 +10,16 @@ import { MessageInput } from "./MessageInput";
 import { ChatButton } from "./ChatButton";
 import { ConnectionStatus } from "./ConnectionStatus";
 import { signalRService } from "../services/websocket";
+import { useTranslatedTheme } from "../hooks/useTranslatedTheme";
 import "../styles/widget.css";
 
 export const ChatWidget: React.FC = () => {
   const { t, i18n } = useTranslation();
   const dispatch = useDispatch<AppDispatch>();
   const widgetRef = useRef<HTMLDivElement>(null);
+
+  // Use the translation hook to automatically update theme with translations
+  useTranslatedTheme();
 
   const { isOpen, isMinimized, unreadCount, connectionStatus, currentConversation } = useSelector((state: RootState) => state.chat);
   const { config, isRTL, language } = useSelector((state: RootState) => state.theme);
@@ -60,9 +64,9 @@ export const ChatWidget: React.FC = () => {
       currentConversation: currentConversation?.id,
       isInitialized,
       tenantId: widget.tenantId,
-      shouldCreate: isOpen && !currentConversation && isInitialized && widget.tenantId
+      shouldCreate: isOpen && !currentConversation && isInitialized && widget.tenantId,
     });
-    
+
     if (isOpen && !currentConversation && isInitialized && widget.tenantId) {
       console.log("🚀 Chat opened - creating conversation for tenant:", widget.tenantId);
       dispatch(startConversation(widget.tenantId));

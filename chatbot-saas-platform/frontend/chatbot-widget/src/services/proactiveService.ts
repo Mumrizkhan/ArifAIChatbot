@@ -1,13 +1,14 @@
 import { store } from "../store/store";
 import { addMessage } from "../store/slices/chatSlice";
+import i18n from "../i18n";
 
 interface ProactiveTrigger {
   condition: () => boolean;
-  message: string;
+  messageKey: string; // Changed from message to messageKey for translation
   delay: number;
   triggered: boolean;
   id: string;
-  timerId?: ReturnType<typeof setTimeout> | null; // added
+  timerId?: ReturnType<typeof setTimeout> | null;
 }
 
 class ProactiveService {
@@ -15,9 +16,9 @@ class ProactiveService {
   private monitoringInterval: NodeJS.Timeout | null = null;
   private lastActivity: number = Date.now();
 
-  addTrigger(condition: () => boolean, message: string, delay: number = 5000): string {
+  addTrigger(condition: () => boolean, messageKey: string, delay: number = 5000): string {
     const id = `trigger_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
-    this.triggers.push({ condition, message, delay, triggered: false, id });
+    this.triggers.push({ condition, messageKey, delay, triggered: false, id });
     return id;
   }
 
@@ -35,7 +36,7 @@ class ProactiveService {
           // Mark triggered BEFORE scheduling to avoid duplicate timers
           trigger.triggered = true;
           trigger.timerId = setTimeout(() => {
-            this.sendProactiveMessage(trigger.message);
+            this.sendProactiveMessage(trigger.messageKey);
             // We keep triggered = true (fire only once)
             trigger.timerId = null;
           }, trigger.delay);
@@ -55,7 +56,7 @@ class ProactiveService {
     this.lastActivity = Date.now();
   }
 
-  private sendProactiveMessage(content: string) {
+  private sendProactiveMessage(messageKey: string) {
     const state = store.getState();
     const currentConversation = state.chat.currentConversation;
 
@@ -64,6 +65,9 @@ class ProactiveService {
       console.log("Proactive message skipped because there are existing messages.");
       return;
     }
+
+    // Get the translated message dynamically
+    const content = i18n.t(messageKey);
 
     // Add the proactive message
     const message = {
@@ -85,7 +89,7 @@ class ProactiveService {
         const timeSinceActivity = Date.now() - this.lastActivity;
         return state.chat.isOpen && !state.chat.isTyping && timeSinceActivity > 30000;
       },
-      "Is there anything else I can help you with?",
+      "widget.proactiveFollowUp",
       30000
     );
 
@@ -97,7 +101,7 @@ class ProactiveService {
         // Only trigger if the conversation is open and no messages exist
         return state.chat.isOpen && !!currentConversation && currentConversation.messages.length === 0;
       },
-      "Welcome! How can I assist you today?",
+      "widget.proactiveWelcome",
       0 // Fire immediately when the chat opens
     );
   }
