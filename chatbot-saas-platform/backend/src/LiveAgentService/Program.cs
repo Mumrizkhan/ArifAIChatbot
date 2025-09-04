@@ -50,13 +50,14 @@ builder.Services.AddSwaggerGen(options =>
     });
 });
 builder.Services.AddInfrastructure(builder.Configuration);
+var redisConnectionString = builder.Configuration.GetValue<string>("Redis:ConnectionString") ?? "";
 builder.Services.AddSignalR(options =>
 {
     options.EnableDetailedErrors = true;
     options.KeepAliveInterval = TimeSpan.FromSeconds(15);
     options.ClientTimeoutInterval = TimeSpan.FromSeconds(30);
     options.HandshakeTimeout = TimeSpan.FromSeconds(15);
-}).AddStackExchangeRedis(builder.Configuration.GetValue<string>("Redis:ConnectionString") ?? "", options =>
+}).AddStackExchangeRedis(redisConnectionString, options =>
      {
          options.Configuration.ChannelPrefix = "agentHub";
      });
