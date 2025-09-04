@@ -1,9 +1,9 @@
 using Microsoft.Extensions.Logging;
-using AnalyticsService.Events;
+using Shared.Domain.Enums;
+using Shared.Domain.Events.AnalyticsServiceEvents;
 using Shared.Infrastructure.Messaging;
 
-
-namespace AnalyticsService.Services;
+namespace Shared.Infrastructure.Services;
 
 /// <summary>
 /// Service interface for publishing analytics events

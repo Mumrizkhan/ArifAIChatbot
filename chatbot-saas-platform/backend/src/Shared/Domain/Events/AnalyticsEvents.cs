@@ -1,6 +1,7 @@
+using Shared.Domain.Enums;
 using System.Text.Json;
 
-namespace AnalyticsService.Events;
+namespace Shared.Domain.Events.AnalyticsServiceEvents;
 
 /// <summary>
 /// Base interface for all analytics events
@@ -307,20 +308,20 @@ public record LiveAgentSessionDurationEvent : AnalyticsEventBase
 
 #region Enums
 
-public enum MessageType
-{
-    Text,
-    Image,
-    File,
-    Audio,
-    Video,
-    Location,
-    Contact,
-    QuickReply,
-    Button,
-    Carousel,
-    List
-}
+//public enum MessageType
+//{
+//    Text,
+//    Image,
+//    File,
+//    Audio,
+//    Video,
+//    Location,
+//    Contact,
+//    QuickReply,
+//    Button,
+//    Carousel,
+//    List
+//}
 
 public enum FeedbackType
 {

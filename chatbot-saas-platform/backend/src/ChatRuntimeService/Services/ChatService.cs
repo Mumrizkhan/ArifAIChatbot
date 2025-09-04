@@ -6,6 +6,7 @@ using Shared.Domain.Enums;
 using Shared.Domain.Events;
 using ChatRuntimeService.Hubs;
 using ChatRuntimeService.Services;
+using Shared.Domain.Events.AnalyticsServiceEvents;
 
 namespace ChatRuntimeService.Services;
 
@@ -409,7 +410,7 @@ public class ChatService : IChatService
                 conversation.CustomerEmail, // Using email as userId
                 tenantId.ToString(),
                 sessionId,
-                AnalyticsService.Events.ConversationEndReason.Resolved, // Assume resolved when closed
+               ConversationEndReason.Resolved, // Assume resolved when closed
                 conversationDuration,
                 messageCount,
                 chatbotMessages,
@@ -523,7 +524,7 @@ public class ChatService : IChatService
     /// <summary>
     /// Process user feedback and track analytics
     /// </summary>
-    public async Task ProcessFeedbackAsync(Guid conversationId, string messageId, AnalyticsService.Events.FeedbackType feedbackType, 
+    public async Task ProcessFeedbackAsync(Guid conversationId, string messageId, FeedbackType feedbackType, 
         int? rating = null, string? feedbackText = null, bool isHelpful = false)
     {
         try

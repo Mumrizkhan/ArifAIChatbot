@@ -1,9 +1,10 @@
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.DependencyInjection;
 using Shared.Infrastructure.Messaging;
-using AnalyticsService.Events;
-using AnalyticsService.Models;
+
 using System.Text.Json;
+using Shared.Domain.Events.AnalyticsServiceEvents;
+using AnalyticsService.Models;
 
 namespace AnalyticsService.Services;
 

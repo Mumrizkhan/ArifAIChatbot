@@ -1,6 +1,8 @@
 using Microsoft.AspNetCore.Mvc;
 using LiveAgentService.Services;
-using AnalyticsService.Events;
+using Shared.Domain.Enums;
+using Shared.Domain.Events.AnalyticsServiceEvents;
+
 
 namespace LiveAgentService.Controllers;
 

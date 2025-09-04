@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
 using ChatRuntimeService.Services;
-using AnalyticsService.Events;
+
+using Shared.Application.Common.Models;
 
 namespace ChatRuntimeService.Controllers;
 
@@ -97,7 +98,7 @@ public class ChatAnalyticsExampleController : ControllerBase
                 request.MessageId,
                 request.UserId,
                 request.TenantId,
-                request.SessionId,
+                request.SessionId,               
                 request.FeedbackType,
                 request.Rating,
                 request.FeedbackText,
@@ -151,51 +152,4 @@ public class ChatAnalyticsExampleController : ControllerBase
             return StatusCode(500, "Internal server error");
         }
     }
-}
-
-// Request DTOs
-public record StartConversationAnalyticsRequest
-{
-    public string? UserId { get; init; }
-    public required string TenantId { get; init; }
-    public string? InitialMessage { get; init; }
-}
-
-public record SendBotMessageAnalyticsRequest
-{
-    public required Guid ConversationId { get; init; }
-    public required string MessageText { get; init; }
-    public required string TenantId { get; init; }
-    public required string SessionId { get; init; }
-    public bool IsIntentMatch { get; init; }
-    public string? MatchedIntent { get; init; }
-    public double? ConfidenceScore { get; init; }
-    public string? ResponseSource { get; init; }
-}
-
-public record FeedbackAnalyticsRequest
-{
-    public required Guid ConversationId { get; init; }
-    public required string MessageId { get; init; }
-    public string? UserId { get; init; }
-    public required string TenantId { get; init; }
-    public required string SessionId { get; init; }
-    public required FeedbackType FeedbackType { get; init; }
-    public int? Rating { get; init; }
-    public string? FeedbackText { get; init; }
-    public bool IsHelpful { get; init; }
-}
-
-public record ProcessIntentAnalyticsRequest
-{
-    public required Guid ConversationId { get; init; }
-    public required string MessageId { get; init; }
-    public required string UserMessage { get; init; }
-    public string? UserId { get; init; }
-    public required string TenantId { get; init; }
-    public required string SessionId { get; init; }
-    public string? DetectedIntent { get; init; }
-    public double? ConfidenceScore { get; init; }
-    public List<string>? ExtractedEntities { get; init; }
-    public string? ResponseStrategy { get; init; }
 }

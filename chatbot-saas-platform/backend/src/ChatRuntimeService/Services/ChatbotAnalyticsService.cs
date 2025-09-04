@@ -1,6 +1,8 @@
-using AnalyticsService.Events;
+
 using AnalyticsService.Services;
 using Microsoft.Extensions.Logging;
+using Shared.Domain.Enums;
+using Shared.Domain.Events.AnalyticsServiceEvents;
 
 namespace ChatRuntimeService.Services;
 

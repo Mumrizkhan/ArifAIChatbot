@@ -1,8 +1,9 @@
 using AnalyticsService.Services;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Shared.Infrastructure.Services;
 
-namespace AnalyticsService.Extensions;
+namespace Shared.Infrastructure.Extensions;
 
 /// <summary>
 /// Extension methods for registering analytics message bus services
@@ -20,8 +21,8 @@ public static class AnalyticsMessageBusExtensions
         // Register the analytics event handler
         services.AddSingleton<IAnalyticsEventHandler, AnalyticsEventHandler>();
         
-        // Register the background service
-        services.AddHostedService<AnalyticsEventHandlerService>();
+        // Register the analytics event handler service for Hangfire
+        services.AddScoped<AnalyticsEventHandlerService>();
         
         return services;
     }

@@ -1,7 +1,7 @@
 using Microsoft.Extensions.Logging;
 using AnalyticsService.Services;
 
-namespace AnalyticsService.Services;
+namespace Shared.Infrastructure.Services;
 
 /// <summary>
 /// Service that handles analytics events from RabbitMQ using the message bus service pattern
@@ -60,9 +60,9 @@ public class AnalyticsEventHandler : IAnalyticsEventHandler
 }
 
 /// <summary>
-/// Background service to start the analytics event handler
+/// Service to start the analytics event handler via Hangfire jobs
 /// </summary>
-public class AnalyticsEventHandlerService : BackgroundService
+public class AnalyticsEventHandlerService
 {
     private readonly IAnalyticsEventHandler _eventHandler;
     private readonly ILogger<AnalyticsEventHandlerService> _logger;
@@ -75,27 +75,39 @@ public class AnalyticsEventHandlerService : BackgroundService
         _logger = logger;
     }
 
-    protected override async Task ExecuteAsync(CancellationToken stoppingToken)
+    /// <summary>
+    /// Starts the analytics event handler - to be called by Hangfire
+    /// </summary>
+    public async Task StartAnalyticsEventHandlerAsync()
     {
         try
         {
-            await _eventHandler.StartAsync(stoppingToken);
-            
-            // Keep the service running
-            await Task.Delay(Timeout.Infinite, stoppingToken);
-        }
-        catch (OperationCanceledException)
-        {
-            _logger.LogInformation("Analytics event handler service is stopping");
+            _logger.LogInformation("Starting analytics event handler from Hangfire job");
+            await _eventHandler.StartAsync();
+            _logger.LogInformation("Analytics event handler started successfully from Hangfire job");
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Analytics event handler service encountered an error");
+            _logger.LogError(ex, "Analytics event handler service encountered an error in Hangfire job");
             throw;
         }
-        finally
+    }
+
+    /// <summary>
+    /// Stops the analytics event handler - to be called by Hangfire if needed
+    /// </summary>
+    public async Task StopAnalyticsEventHandlerAsync()
+    {
+        try
         {
-            await _eventHandler.StopAsync(stoppingToken);
+            _logger.LogInformation("Stopping analytics event handler from Hangfire job");
+            await _eventHandler.StopAsync();
+            _logger.LogInformation("Analytics event handler stopped successfully from Hangfire job");
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error stopping analytics event handler in Hangfire job");
+            throw;
         }
     }
 }

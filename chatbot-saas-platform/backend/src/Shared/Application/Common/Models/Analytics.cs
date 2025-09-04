@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Shared.Domain.Events.AnalyticsServiceEvents;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -35,8 +36,8 @@ namespace Shared.Application.Common.Models
         public string? UserId { get; init; }
         public required string TenantId { get; init; }
         public required string SessionId { get; init; }
-        //public  FeedbackType FeedbackType { get; init; }
-        public  string FeedbackType { get; init; }
+        public  FeedbackType FeedbackType { get; init; }
+       
         public int? Rating { get; init; }
         public string? FeedbackText { get; init; }
         public bool IsHelpful { get; init; }

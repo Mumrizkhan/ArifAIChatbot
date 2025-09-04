@@ -4,7 +4,8 @@ using Shared.Domain.Entities;
 using Shared.Domain.Enums;
 using LiveAgentService.Models;
 using LiveAgentService.Services;
-using AnalyticsService.Events;
+using Shared.Domain.Events.AnalyticsServiceEvents;
+
 
 namespace LiveAgentService.Services;
 

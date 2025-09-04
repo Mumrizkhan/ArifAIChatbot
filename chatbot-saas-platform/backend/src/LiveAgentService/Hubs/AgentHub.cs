@@ -5,8 +5,9 @@ using Shared.Application.Common.Interfaces;
 using Shared.Domain.Entities;
 using Shared.Domain.Enums;
 using LiveAgentService.Services;
-using AnalyticsService.Events;
+
 using LiveAgentService.Models;
+using Shared.Domain.Events.AnalyticsServiceEvents;
 
 namespace LiveAgentService.Hubs;
 

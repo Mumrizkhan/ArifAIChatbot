@@ -9,7 +9,7 @@ using Shared.Infrastructure.Services;
 using Shared.Infrastructure.Extensions;
 using System.Text;
 using AnalyticsService.Services;
-using AnalyticsService.Extensions;
+
 using Shared.Infrastructure.Messaging;
 using Serilog;
 
