@@ -94,15 +94,24 @@ public class OpenAIService : IAIService
             if (contextDocuments.Any())
             {
                 var contextText = string.Join("\n\n", contextDocuments);
-                var systemPrompt = $"Use the following context to answer the user's question:\n\n{contextText}\n\nIf the context doesn't contain relevant information, don't user your general knowledge, answer \"I don’t know based on the available information.\" and don't include the text \"based on the available information\" if reply is found";
+                var systemPrompt = $@"
+                                    You are a domain-limited assistant. Use ONLY the information in <context>.
+                                    If the question cannot be answered from <context>, say “I don’t know based on the provided context, the bot will answer questions only related to Mosadaqa system.”
+                                    Do not use outside knowledge. Do not invent facts.
+                                    Answer clearly and completely, but stay concise if the context is thin.
+                                    The answer should be in the user language.
+                                    <context>
+                                    {contextText}
+                                    </context>
+                                    ";
                 messages.Add(new SystemChatMessage(systemPrompt));
             }
             
             foreach (var historyMessage in request.ConversationHistory)
             {
-                if (historyMessage.Role == "user")
+                if (historyMessage.Role.ToLower() == "user")
                     messages.Add(new UserChatMessage(historyMessage.Content));
-                else if (historyMessage.Role == "assistant")
+                else if (historyMessage.Role.ToLower() == "assistant" || historyMessage.Role.ToLower() == "agent")
                     messages.Add(new AssistantChatMessage(historyMessage.Content));
             }
             

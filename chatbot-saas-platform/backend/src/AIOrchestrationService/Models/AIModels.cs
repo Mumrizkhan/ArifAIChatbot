@@ -9,7 +9,7 @@ public class AIRequest
     public List<ConversationMessage> ConversationHistory { get; set; } = new();
     public Dictionary<string, object> Context { get; set; } = new();
     public string Model { get; set; } = "gpt-3.5-turbo";
-    public double Temperature { get; set; } = 0.7;
+    public double Temperature { get; set; } = 0.1;
     public int MaxTokens { get; set; } = 1000;
 }
 

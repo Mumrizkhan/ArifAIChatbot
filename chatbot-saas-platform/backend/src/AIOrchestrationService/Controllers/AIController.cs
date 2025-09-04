@@ -67,7 +67,7 @@ public class AIController : ControllerBase
             try
             {
                 var searchResults = await _vectorService.SearchAcrossAllCollectionsAsync(_tenantService.GetCurrentTenantId(),//SearchSimilarAsync(
-                    request.Message, 3);
+                    request.Message, 5);
                 contextDocuments = searchResults.Select(r => r.Content).ToList();
             }
             catch (Exception ex)
@@ -83,8 +83,8 @@ public class AIController : ControllerBase
                 TenantId = _tenantService.GetCurrentTenantId(),
                 ConversationHistory = conversationHistory,
                 Model = request.Model ?? "gpt-4.1",
-                Temperature = request.Temperature ?? 0.7,
-                MaxTokens = request.MaxTokens ?? 200
+                Temperature = request.Temperature ?? 0.1,
+                MaxTokens = request.MaxTokens ?? 1000
             };
 
             AIResponse aiResponse;
