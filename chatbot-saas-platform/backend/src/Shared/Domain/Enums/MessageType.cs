@@ -8,5 +8,6 @@ public enum MessageType
     Audio = 3,
     Video = 4,
     System = 5,
-    Bot = 6
+    Bot = 6,
+    feedback=7
 }

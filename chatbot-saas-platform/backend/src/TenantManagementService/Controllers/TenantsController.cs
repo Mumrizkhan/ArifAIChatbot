@@ -11,7 +11,7 @@ namespace TenantManagementService.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
-[Authorize]
+//[Authorize]
 public class TenantsController : ControllerBase
 {
     private readonly ITenantManagementService _tenantManagementService;

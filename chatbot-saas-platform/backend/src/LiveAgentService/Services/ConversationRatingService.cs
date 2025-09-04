@@ -1,153 +1,318 @@
 using Microsoft.EntityFrameworkCore;
 using Shared.Application.Common.Interfaces;
 using Shared.Domain.Entities;
+using Shared.Domain.Enums;
 using LiveAgentService.Models;
 using LiveAgentService.Services;
+using Shared.Domain.Events.AnalyticsServiceEvents;
+
 
 namespace LiveAgentService.Services;
 
 public class ConversationRatingService : IConversationRatingService
 {
     private readonly IApplicationDbContext _context;
-    private readonly IChatRuntimeIntegrationService _chatRuntimeIntegrationService;
-    private readonly IAgentRoutingService _agentRoutingService;
+    private readonly ICurrentUserService _currentUserService;
     private readonly ITenantService _tenantService;
+    private readonly ILiveAgentAnalyticsService _liveAgentAnalytics;
     private readonly ILogger<ConversationRatingService> _logger;
-    private readonly HttpClient _httpClient;
-    private readonly IConfiguration _configuration;
 
     public ConversationRatingService(
         IApplicationDbContext context,
-        IChatRuntimeIntegrationService chatRuntimeIntegrationService,
-        IAgentRoutingService agentRoutingService,
+        ICurrentUserService currentUserService,
         ITenantService tenantService,
-        ILogger<ConversationRatingService> logger,
-        HttpClient httpClient,
-        IConfiguration configuration)
+        ILiveAgentAnalyticsService liveAgentAnalytics,
+        ILogger<ConversationRatingService> logger)
     {
         _context = context;
-        _chatRuntimeIntegrationService = chatRuntimeIntegrationService;
-        _agentRoutingService = agentRoutingService;
+        _currentUserService = currentUserService;
         _tenantService = tenantService;
+        _liveAgentAnalytics = liveAgentAnalytics;
         _logger = logger;
-        _httpClient = httpClient;
-        _configuration = configuration;
+    }
+
+    public async Task<ConversationRating> RateConversationAsync(RateConversationRequest request)
+    {
+        try
+        {
+            var tenantId = _tenantService.GetCurrentTenantId();
+            var conversation = await _context.Conversations
+                .Include(c => c.Messages)
+                .FirstOrDefaultAsync(c => c.Id == request.ConversationId && c.TenantId == tenantId);
+
+            if (conversation == null)
+                throw new InvalidOperationException("Conversation not found");
+
+            // Check if rating already exists
+            var existingRating = await _context.ConversationRatings
+                .FirstOrDefaultAsync(r => r.ConversationId == request.ConversationId);
+
+            ConversationRating rating;
+            
+            if (existingRating != null)
+            {
+                // Update existing rating
+                existingRating.Rating = request.Rating;
+                existingRating.Feedback = request.Feedback;
+                existingRating.Categories = request.Categories;
+                existingRating.UpdatedAt = DateTime.UtcNow;
+                rating = existingRating;
+            }
+            else
+            {
+                // Create new rating
+                rating = new ConversationRating
+                {
+                    Id = Guid.NewGuid(),
+                    ConversationId = request.ConversationId,
+                    Rating = request.Rating,
+                    Feedback = request.Feedback,
+                    Categories = request.Categories,
+                    RatedBy = request.RatedBy,
+                    TenantId = tenantId,
+                    CreatedAt = DateTime.UtcNow
+                };
+
+                _context.ConversationRatings.Add(rating);
+            }
+
+            await _context.SaveChangesAsync();
+
+            // Calculate conversation metrics for analytics
+            var conversationDuration = conversation.EndedAt.HasValue ? 
+                conversation.EndedAt.Value - conversation.StartedAt : 
+                DateTime.UtcNow - conversation.StartedAt;
+            
+            var messageCount = conversation.Messages?.Count ?? 0;
+            var wasResolved = conversation.Status == ConversationStatus.Resolved;
+
+            // Generate session ID for analytics
+            var sessionId = Guid.NewGuid().ToString();
+
+            // Determine satisfaction level based on rating
+            var satisfactionLevel = request.Rating switch
+            {
+                5 => SatisfactionLevel.VerySatisfied,
+                4 => SatisfactionLevel.Satisfied,
+                3 => SatisfactionLevel.Neutral,
+                2 => SatisfactionLevel.Dissatisfied,
+                _ => SatisfactionLevel.VeryDissatisfied
+            };
+
+            // Publish live agent feedback analytics event
+            await _liveAgentAnalytics.PublishFeedbackAsync(
+                request.ConversationId,
+                conversation.AssignedAgentId?.ToString() ?? "unknown",
+                conversation.CustomerEmail, // Using email as userId
+                tenantId.ToString(),
+                sessionId,
+                request.Rating,
+                satisfactionLevel,
+                request.Feedback,
+                 string.IsNullOrWhiteSpace(request.Categories) ? null :
+        request.Categories.Split(',', StringSplitOptions.RemoveEmptyEntries)
+                         .Select(c => c.Trim())
+                         .ToList(),
+                request.Rating >= 4, // Would recommend if rating is 4 or 5
+                null // Improvement suggestions could be extracted from feedback
+            );
+
+            _logger.LogInformation("Conversation {ConversationId} rated with {Rating} stars by {RatedBy}", 
+                request.ConversationId, request.Rating, request.RatedBy);
+
+            return rating;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error rating conversation {ConversationId}", request.ConversationId);
+            throw;
+        }
+    }
+
+    public async Task<ConversationRating?> GetConversationRatingAsync(Guid conversationId)
+    {
+        try
+        {
+            var tenantId = _tenantService.GetCurrentTenantId();
+            return await _context.ConversationRatings
+                .FirstOrDefaultAsync(r => r.ConversationId == conversationId && r.TenantId == tenantId);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error getting rating for conversation {ConversationId}", conversationId);
+            throw;
+        }
+    }
+
+    public async Task<List<ConversationRating>> GetAgentRatingsAsync(Guid agentId, DateTime? from = null, DateTime? to = null)
+    {
+        try
+        {
+            var tenantId = _tenantService.GetCurrentTenantId();
+            var query = _context.ConversationRatings
+                .Include(r => r.Conversation)
+                .Where(r => r.Conversation.AssignedAgentId == agentId && r.TenantId == tenantId);
+
+            if (from.HasValue)
+                query = query.Where(r => r.CreatedAt >= from.Value);
+
+            if (to.HasValue)
+                query = query.Where(r => r.CreatedAt <= to.Value);
+
+            return await query.OrderByDescending(r => r.CreatedAt).ToListAsync();
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error getting ratings for agent {AgentId}", agentId);
+            throw;
+        }
+    }
+
+    public async Task<double> GetAgentAverageRatingAsync(Guid agentId, DateTime? from = null, DateTime? to = null)
+    {
+        try
+        {
+            var ratings = await GetAgentRatingsAsync(agentId, from, to);
+            return ratings.Any() ? ratings.Average(r => r.Rating) : 0.0;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error calculating average rating for agent {AgentId}", agentId);
+            return 0.0;
+        }
+    }
+
+    public async Task<AgentRatingsSummary> GetAgentRatingsSummaryAsync(Guid agentId, DateTime? from = null, DateTime? to = null)
+    {
+        try
+        {
+            var ratings = await GetAgentRatingsAsync(agentId, from, to);
+            
+            return new AgentRatingsSummary
+            {
+                AgentId = agentId,
+                TotalRatings = ratings.Count,
+                AverageRating = ratings.Any() ? ratings.Average(r => r.Rating) : 0.0,
+                RatingDistribution = ratings.GroupBy(r => r.Rating)
+                    .ToDictionary(g => g.Key, g => g.Count()),
+                Period = new Models.DateRange 
+                { 
+                    From = from ?? DateTime.UtcNow.AddDays(-30), 
+                    To = to ?? DateTime.UtcNow 
+                },
+                LastUpdated = DateTime.UtcNow
+            };
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error getting ratings summary for agent {AgentId}", agentId);
+            throw;
+        }
+    }
+
+    public async Task<bool> DeleteRatingAsync(Guid ratingId)
+    {
+        try
+        {
+            var tenantId = _tenantService.GetCurrentTenantId();
+            var rating = await _context.ConversationRatings
+                .FirstOrDefaultAsync(r => r.Id == ratingId && r.TenantId == tenantId);
+
+            if (rating == null)
+                return false;
+
+            _context.ConversationRatings.Remove(rating);
+            await _context.SaveChangesAsync();
+
+            _logger.LogInformation("Rating {RatingId} deleted", ratingId);
+            return true;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error deleting rating {RatingId}", ratingId);
+            return false;
+        }
     }
 
     public async Task<bool> RateConversationAsync(Guid conversationId, RateConversationRequest request, Guid agentId)
     {
         try
         {
-            // Validate the rating request
-            if (!await ValidateRatingAsync(conversationId, agentId))
-            {
-                _logger.LogWarning("Invalid rating attempt for conversation {ConversationId} by agent {AgentId}", conversationId, agentId);
+            var tenantId = _tenantService.GetCurrentTenantId();
+            var conversation = await _context.Conversations
+                .FirstOrDefaultAsync(c => c.Id == conversationId && c.TenantId == tenantId);
+
+            if (conversation == null)
                 return false;
-            }
 
-            // Validate rating range
-            if (request.Rating < 1 || request.Rating > 5)
-            {
-                _logger.LogWarning("Invalid rating value {Rating} for conversation {ConversationId}", request.Rating, conversationId);
+            if (conversation.AssignedAgentId != agentId)
                 return false;
-            }
 
-            // Submit rating to ChatRuntimeService
-            var success = await SubmitRatingToChatServiceAsync(conversationId, request);
-            
-            if (success)
-            {
-                // Create a local rating record for tracking
-                await CreateLocalRatingRecordAsync(conversationId, request, agentId);
-                
-                _logger.LogInformation("Successfully rated conversation {ConversationId} with rating {Rating} by agent {AgentId}", 
-                    conversationId, request.Rating, agentId);
-                
-                return true;
-            }
-
-            return false;
+            request.ConversationId = conversationId;
+            await RateConversationAsync(request);
+            return true;
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error rating conversation {ConversationId}", conversationId);
+            _logger.LogError(ex, "Error rating conversation {ConversationId} by agent {AgentId}", conversationId, agentId);
             return false;
         }
     }
 
-    public async Task<ConversationRatingResult?> GetConversationRatingAsync(Guid conversationId)
+    async Task<ConversationRatingResult?> IConversationRatingService.GetConversationRatingAsync(Guid conversationId)
     {
         try
         {
             var tenantId = _tenantService.GetCurrentTenantId();
-            
-            // Get conversation details from ChatRuntimeService
-            var conversationDetails = await _chatRuntimeIntegrationService.GetConversationDetailsAsync(conversationId);
-            
-            if (conversationDetails == null)
-            {
-                return null;
-            }
+            var rating = await _context.ConversationRatings
+                .Include(r => r.Conversation)
+                .FirstOrDefaultAsync(r => r.ConversationId == conversationId && r.TenantId == tenantId);
 
-            // Check if conversation has a rating
-            var conversation = await _context.Conversations
-                .FirstOrDefaultAsync(c => c.Id == conversationId && c.TenantId == tenantId);
-
-            if (conversation?.CustomerSatisfactionRating == null)
-            {
+            if (rating == null)
                 return null;
-            }
 
             return new ConversationRatingResult
             {
-                ConversationId = conversationId,
-                AgentId = conversation.AssignedAgentId,
-                Rating = conversation.CustomerSatisfactionRating.Value,
-                Feedback = conversation.CustomerFeedback,
-                RatedAt = conversation.UpdatedAt ?? conversation.CreatedAt,
-                CustomerName = conversationDetails.CustomerName,
-                Subject = conversationDetails.Subject
+                ConversationId = rating.ConversationId,
+                AgentId = rating.Conversation?.AssignedAgentId,
+                RatedAt = rating.CreatedAt
             };
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error getting rating for conversation {ConversationId}", conversationId);
-            return null;
+            _logger.LogError(ex, "Error getting rating result for conversation {ConversationId}", conversationId);
+            throw;
         }
     }
 
-    public async Task<List<ConversationRatingResult>> GetAgentRatingsAsync(Guid agentId, DateTime? startDate = null, DateTime? endDate = null)
+    async Task<List<ConversationRatingResult>> IConversationRatingService.GetAgentRatingsAsync(Guid agentId, DateTime? startDate, DateTime? endDate)
     {
         try
         {
             var tenantId = _tenantService.GetCurrentTenantId();
-            var start = startDate ?? DateTime.UtcNow.AddDays(-30);
-            var end = endDate ?? DateTime.UtcNow;
+            var query = _context.ConversationRatings
+                .Include(r => r.Conversation)
+                .Where(r => r.Conversation.AssignedAgentId == agentId && r.TenantId == tenantId);
 
-            var ratings = await _context.Conversations
-                .Where(c => c.TenantId == tenantId && 
-                           c.AssignedAgentId == agentId &&
-                           c.CustomerSatisfactionRating != null &&
-                           c.UpdatedAt >= start && c.UpdatedAt <= end)
-                .Select(c => new ConversationRatingResult
-                {
-                    ConversationId = c.Id,
-                    AgentId = c.AssignedAgentId,
-                    Rating = c.CustomerSatisfactionRating!.Value,
-                    Feedback = c.CustomerFeedback,
-                    RatedAt = c.UpdatedAt ?? c.CreatedAt,
-                    CustomerName = c.CustomerName,
-                    Subject = c.Subject
-                })
-                .OrderByDescending(r => r.RatedAt)
-                .ToListAsync();
+            if (startDate.HasValue)
+                query = query.Where(r => r.CreatedAt >= startDate.Value);
 
-            return ratings;
+            if (endDate.HasValue)
+                query = query.Where(r => r.CreatedAt <= endDate.Value);
+
+            var ratings = await query.OrderByDescending(r => r.CreatedAt).ToListAsync();
+
+            return ratings.Select(r => new ConversationRatingResult
+            {
+                ConversationId = r.ConversationId,
+                AgentId = r.Conversation?.AssignedAgentId,
+                RatedAt = r.CreatedAt
+            }).ToList();
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error getting ratings for agent {AgentId}", agentId);
-            return new List<ConversationRatingResult>();
+            _logger.LogError(ex, "Error getting rating results for agent {AgentId}", agentId);
+            throw;
         }
     }
 
@@ -155,50 +320,34 @@ public class ConversationRatingService : IConversationRatingService
     {
         try
         {
-            var start = startDate ?? DateTime.UtcNow.AddDays(-30);
-            var end = endDate ?? DateTime.UtcNow;
+            var query = _context.ConversationRatings
+                .Where(r => r.TenantId == tenantId);
 
-            var ratings = await _context.Conversations
-                .Where(c => c.TenantId == tenantId && 
-                           c.CustomerSatisfactionRating != null &&
-                           c.UpdatedAt >= start && c.UpdatedAt <= end)
-                .Select(c => c.CustomerSatisfactionRating!.Value)
-                .ToListAsync();
+            if (startDate.HasValue)
+                query = query.Where(r => r.CreatedAt >= startDate.Value);
 
-            if (!ratings.Any())
-            {
-                return new ConversationRatingStatistics
-                {
-                    PeriodStart = start,
-                    PeriodEnd = end
-                };
-            }
+            if (endDate.HasValue)
+                query = query.Where(r => r.CreatedAt <= endDate.Value);
 
-            var averageRating = ratings.Average();
-            var ratingDistribution = ratings.GroupBy(r => r).ToDictionary(g => g.Key, g => g.Count());
+            var ratings = await query.ToListAsync();
+
+            var ratingDistribution = ratings
+                .GroupBy(r => r.Rating)
+                .ToDictionary(g => g.Key, g => g.Count());
 
             return new ConversationRatingStatistics
             {
-                AverageRating = Math.Round(averageRating, 2),
+                AverageRating = ratings.Any() ? ratings.Average(r => r.Rating) : 0.0,
                 TotalRatings = ratings.Count,
                 RatingDistribution = ratingDistribution,
-                FiveStarCount = ratingDistribution.GetValueOrDefault(5, 0),
-                FourStarCount = ratingDistribution.GetValueOrDefault(4, 0),
-                ThreeStarCount = ratingDistribution.GetValueOrDefault(3, 0),
-                TwoStarCount = ratingDistribution.GetValueOrDefault(2, 0),
-                OneStarCount = ratingDistribution.GetValueOrDefault(1, 0),
-                PeriodStart = start,
-                PeriodEnd = end
+                PeriodStart = startDate,
+                PeriodEnd = endDate
             };
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error getting rating statistics for tenant {TenantId}", tenantId);
-            return new ConversationRatingStatistics
-            {
-                PeriodStart = startDate,
-                PeriodEnd = endDate
-            };
+            throw;
         }
     }
 
@@ -206,100 +355,17 @@ public class ConversationRatingService : IConversationRatingService
     {
         try
         {
-            // Check if agent has access to the conversation through the routing service
-            var agentConversations = await _agentRoutingService.GetAgentConversationsAsync(agentId);
-            var hasAccess = agentConversations.Any(ac => ac.ConversationId == conversationId);
-
-            if (!hasAccess)
-            {
-                _logger.LogWarning("Agent {AgentId} is not assigned to conversation {ConversationId}", agentId, conversationId);
-                return false;
-            }
-
-            // Get conversation details to check status
-            var conversationDetails = await _chatRuntimeIntegrationService.GetConversationDetailsAsync(conversationId);
-            
-            if (conversationDetails == null)
-            {
-                _logger.LogWarning("Conversation {ConversationId} not found", conversationId);
-                return false;
-            }
-
-            // Check if conversation is in a state that can be rated (closed or resolved)
-            var validStatuses = new[] { "Closed", "Resolved" };
-            if (!validStatuses.Contains(conversationDetails.Status))
-            {
-                _logger.LogWarning("Conversation {ConversationId} status {Status} is not valid for rating", 
-                    conversationId, conversationDetails.Status);
-                return false;
-            }
-
-            return true;
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error validating rating for conversation {ConversationId}", conversationId);
-            return false;
-        }
-    }
-
-    private async Task<bool> SubmitRatingToChatServiceAsync(Guid conversationId, RateConversationRequest request)
-    {
-        try
-        {
-            var chatRuntimeBaseUrl = _configuration["Services:ChatRuntime"] ?? "http://localhost:5002";
-            var endpoint = $"{chatRuntimeBaseUrl}/api/conversations/{conversationId}/rating";
-
-            var submitRatingRequest = new
-            {
-                Rating = request.Rating,
-                Feedback = request.Feedback,
-                ConversationId = conversationId.ToString(),
-                SubmittedAt = DateTime.UtcNow.ToString("O")
-            };
-
-            var response = await _httpClient.PostAsJsonAsync(endpoint, submitRatingRequest);
-
-            if (response.IsSuccessStatusCode)
-            {
-                _logger.LogInformation("Successfully submitted rating to ChatRuntimeService for conversation {ConversationId}", conversationId);
-                return true;
-            }
-            else
-            {
-                var errorContent = await response.Content.ReadAsStringAsync();
-                _logger.LogError("Failed to submit rating to ChatRuntimeService. Status: {StatusCode}, Content: {Content}", 
-                    response.StatusCode, errorContent);
-                return false;
-            }
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error submitting rating to ChatRuntimeService for conversation {ConversationId}", conversationId);
-            return false;
-        }
-    }
-
-    private async Task CreateLocalRatingRecordAsync(Guid conversationId, RateConversationRequest request, Guid agentId)
-    {
-        try
-        {
-            // Update local conversation record if it exists
+            var tenantId = _tenantService.GetCurrentTenantId();
             var conversation = await _context.Conversations
-                .FirstOrDefaultAsync(c => c.Id == conversationId);
+                .FirstOrDefaultAsync(c => c.Id == conversationId && c.TenantId == tenantId);
 
-            if (conversation != null)
-            {
-                conversation.CustomerSatisfactionRating = request.Rating;
-                conversation.CustomerFeedback = request.Feedback;
-                conversation.UpdatedAt = DateTime.UtcNow;
-                await _context.SaveChangesAsync();
-            }
+            return conversation != null && conversation.AssignedAgentId == agentId;
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error creating local rating record for conversation {ConversationId}", conversationId);
-            // Don't throw - rating was already submitted to ChatRuntimeService
+            _logger.LogError(ex, "Error validating rating for conversation {ConversationId} and agent {AgentId}", conversationId, agentId);
+            return false;
         }
     }
 }
+

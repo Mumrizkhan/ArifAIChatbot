@@ -17,11 +17,11 @@ namespace Shared.Domain.Entities
         public Guid CreatedByUserId { get; set; }
         public string Version { get; set; } = "1.0";
         public bool IsActive { get; set; } = true;
-        public WorkflowDefinition Definition { get; set; } = new();
-        public Dictionary<string, object> Variables { get; set; } = new();
+        public WorkflowDefinition? Definition { get; set; } = new();
+        public Dictionary<string, object>? Variables { get; set; } = new();
         public List<string> Tags { get; set; } = new();
-        public WorkflowTrigger Trigger { get; set; } = new();
-        public WorkflowSettings Settings { get; set; } = new();
+        public WorkflowTrigger? Trigger { get; set; } = new();
+        public WorkflowSettings? Settings { get; set; } = new();
         public DateTime? LastExecutedAt { get; set; }
         public int ExecutionCount { get; set; }
         public string? TemplateId { get; set; }
@@ -34,9 +34,9 @@ namespace Shared.Domain.Entities
         public Guid TenantId { get; set; }
         public Guid? TriggeredByUserId { get; set; }
         public WorkflowExecutionStatus Status { get; set; } = WorkflowExecutionStatus.Running;
-        public Dictionary<string, object> InputData { get; set; } = new();
-        public Dictionary<string, object> OutputData { get; set; } = new();
-        public List<WorkflowStepExecution> StepExecutions { get; set; } = new();
+        public Dictionary<string, object>? InputData { get; set; } = new();
+        public Dictionary<string, object>? OutputData { get; set; } = new();
+        public List<WorkflowStepExecution>? StepExecutions { get; set; } = new();
         public DateTime StartedAt { get; set; }
         public DateTime? CompletedAt { get; set; }
         public string? ErrorMessage { get; set; }
@@ -52,8 +52,8 @@ namespace Shared.Domain.Entities
         public string StepName { get; set; } = string.Empty;
         public WorkflowStepType StepType { get; set; }
         public WorkflowStepStatus Status { get; set; } = WorkflowStepStatus.Pending;
-        public Dictionary<string, object> InputData { get; set; } = new();
-        public Dictionary<string, object> OutputData { get; set; } = new();
+        public Dictionary<string, object>? InputData { get; set; } = new();
+        public Dictionary<string, object>? OutputData { get; set; } = new();
         public DateTime StartedAt { get; set; }
         public DateTime? CompletedAt { get; set; }
         public string? ErrorMessage { get; set; }
@@ -67,8 +67,8 @@ namespace Shared.Domain.Entities
         public string Name { get; set; } = string.Empty;
         public string Description { get; set; } = string.Empty;
         public string Category { get; set; } = string.Empty;
-        public WorkflowDefinition Definition { get; set; } = new();
-        public Dictionary<string, object> DefaultVariables { get; set; } = new();
+        public WorkflowDefinition? Definition { get; set; } = new();
+        public Dictionary<string, object>? DefaultVariables { get; set; } = new();
         public List<string> Tags { get; set; } = new();
         public bool IsPublic { get; set; }
         public Guid? TenantId { get; set; }
@@ -89,8 +89,8 @@ namespace Shared.Domain.Entities
         public string Id { get; set; } = string.Empty;
         public string Name { get; set; } = string.Empty;
         public WorkflowStepType Type { get; set; }
-        public Dictionary<string, object> Configuration { get; set; } = new();
-        public WorkflowStepPosition Position { get; set; } = new();
+        public Dictionary<string, object>? Configuration { get; set; } = new();
+        public WorkflowStepPosition? Position { get; set; } = new();
         public List<string> InputPorts { get; set; } = new();
         public List<string> OutputPorts { get; set; } = new();
         public bool IsStartStep { get; set; }
@@ -119,7 +119,7 @@ namespace Shared.Domain.Entities
         public double Width { get; set; } = 1200;
         public double Height { get; set; } = 800;
         public double Zoom { get; set; } = 1.0;
-        public WorkflowStepPosition ViewportPosition { get; set; } = new();
+        public WorkflowStepPosition? ViewportPosition { get; set; } = new();
     }
 
     public class WorkflowTrigger
@@ -148,7 +148,7 @@ namespace Shared.Domain.Entities
     public class WorkflowConnectionCondition
     {
         public string Expression { get; set; } = string.Empty;
-        public Dictionary<string, object> Variables { get; set; } = new();
+        public Dictionary<string, object>? Variables { get; set; } = new();
     }
 
     public enum WorkflowStatus

@@ -29,4 +29,8 @@
   <ItemGroup>
     <ProjectReference Include="..\Shared\Infrastructure\Shared.Infrastructure.csproj" />
   </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Tests\" />
+  </ItemGroup>
 </Project>

@@ -58,4 +58,8 @@
     <ProjectReference Include="..\Shared\Infrastructure\Shared.Infrastructure.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Models\" />
+  </ItemGroup>
+
 </Project>

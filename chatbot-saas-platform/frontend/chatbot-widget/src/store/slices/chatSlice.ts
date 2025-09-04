@@ -128,8 +128,8 @@ export const sendMessage = createAsyncThunk(
         throw new Error("No active conversation found. Please open the chat widget first.");
       }
 
-      const res = await apiClient.post("/chat/chat/messages", {
-        conversationId,
+       const res = await apiClient.post("/chat/chat/messages", {
+       conversationId,
         content: payload.content,
         type: payload.type,
       });
@@ -333,6 +333,12 @@ const chatSlice = createSlice({
         }
       }
     },
+    submitConversationFeedback: (state, action: PayloadAction<{ rating: number; feedback?: string }>) => {
+      if (state.currentConversation) {
+        state.currentConversation.rating = action.payload.rating;
+        state.currentConversation.feedback = action.payload.feedback;
+      }
+    },
   },
   extraReducers: (builder) => {
     builder
@@ -465,6 +471,7 @@ export const {
   clearError,
   markAsRead,
   markMessageAsRead,
+  submitConversationFeedback,
 } = chatSlice.actions;
 
 export default chatSlice.reducer;

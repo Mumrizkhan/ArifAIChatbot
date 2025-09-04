@@ -1,6 +1,7 @@
+using AnalyticsService.Services;
+using LiveAgentService.Hubs;
 using LiveAgentService.Models;
 using LiveAgentService.Services;
-using LiveAgentService.Hubs;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.SignalR;
@@ -22,6 +23,7 @@ public class AgentsController : ControllerBase
     private readonly IQueueManagementService _queueManagementService;
     private readonly IHubContext<AgentHub> _hubContext;
     private readonly IChatRuntimeIntegrationService _chatRuntimeIntegrationService;
+    private readonly ILiveAgentAnalyticsService _analyticsService;
     private readonly ILogger<AgentsController> _logger;
     private readonly HttpClient _httpClient;
 
@@ -33,6 +35,7 @@ public class AgentsController : ControllerBase
         IQueueManagementService queueManagementService,
         IHubContext<AgentHub> hubContext,
         IChatRuntimeIntegrationService chatRuntimeIntegrationService,
+        ILiveAgentAnalyticsService analyticsService,
         ILogger<AgentsController> logger,
         HttpClient httpClient)
     {
@@ -43,6 +46,7 @@ public class AgentsController : ControllerBase
         _queueManagementService = queueManagementService;
         _hubContext = hubContext;
         _chatRuntimeIntegrationService = chatRuntimeIntegrationService;
+        _analyticsService = analyticsService;
         _logger = logger;
         _httpClient = httpClient;
     }
@@ -123,6 +127,7 @@ public class AgentsController : ControllerBase
                 var updated = await _agentRoutingService.SetAgentStatusAsync(agentId.Value, status);
                 if (updated)
                 {
+                   
                     return Ok(new { message = "Status updated successfully" });
                 }
             }
@@ -250,6 +255,7 @@ public class AgentsController : ControllerBase
             if (assigned)
             {
                 await _queueManagementService.RemoveFromQueueAsync(request.ConversationId);
+               
                 return Ok(new { message = "Conversation assigned successfully" });
             }
 

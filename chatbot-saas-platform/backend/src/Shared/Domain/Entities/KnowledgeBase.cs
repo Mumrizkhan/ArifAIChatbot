@@ -22,7 +22,7 @@ namespace Shared.Domain.Entities
         public string? Summary { get; set; }
         public List<string> Tags { get; set; } = new();
         public string Language { get; set; } = "en";
-        public Dictionary<string, object> Metadata { get; set; } = new();
+        public Dictionary<string, object>? Metadata { get; set; } = new();
         public int ChunkCount { get; set; }
         public bool IsEmbedded { get; set; }
         public string? VectorCollectionName { get; set; }
@@ -39,7 +39,7 @@ namespace Shared.Domain.Entities
         public int StartPosition { get; set; }
         public int EndPosition { get; set; }
         public string? Embedding { get; set; }
-        public Dictionary<string, object> Metadata { get; set; } = new();
+        public Dictionary<string, object>? Metadata { get; set; } = new();
         public Guid TenantId { get; set; }
     }
 

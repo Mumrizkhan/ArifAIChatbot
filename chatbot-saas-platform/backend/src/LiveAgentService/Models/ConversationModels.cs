@@ -16,6 +16,9 @@ public class RateConversationRequest
 {
     public int Rating { get; set; }
     public string? Feedback { get; set; }
+    public Guid ConversationId { get; internal set; }
+    public string Categories { get; internal set; }
+    public string RatedBy { get; internal set; }
 }
 
 public class SendFeedbackMessageRequest

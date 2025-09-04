@@ -1,9 +1,18 @@
 using AnalyticsService.Models;
+using Shared.Domain.Entities;
 
 namespace AnalyticsService.Services;
 
 public interface IAnalyticsService
 {
+
+    Task<LiveAgentAnalyticsSummary> GetLiveAgentSummaryAsync(string tenantId, DateTime from, DateTime to);
+    Task<List<AgentWorkload>> GetAgentWorkloadsAsync(string tenantId);
+    Task<List<HourlyMetric>> GetHourlyTrendsAsync(string tenantId, DateTime from, DateTime to);
+    Task ProcessAnalyticsEventAsync(AnalyticsEvent analyticsEvent);
+    Task<Dictionary<string, object>> GetRealtimeMetricsAsync(string tenantId);
+    Task<bool> ValidateAnalyticsEventAsync(AnalyticsEventDto eventDto);
+
     Task<ConversationsSummaryDto> GetConversationsSummaryAsync();
     Task<MessagesSummaryDto> GetMessagesSummaryAsync();
     Task<TenantsSummaryDto> GetTenantsSummaryAsync();
@@ -31,4 +40,15 @@ public interface IAnalyticsService
     Task<bool> UpdateGoalAsync(Guid id, UpdateGoalRequest request);
     Task<bool> DeleteGoalAsync(Guid id);
     Task<CustomReportDto> GetCustomReportAsync(CustomReportRequest request);
+
+    // Add new methods for database operations that were in the controller
+    Task<bool> TrackEventsBatchAsync(AnalyticsEventBatchRequest request, string tenantId);
+    Task<AnalyticsDashboard> GetDashboardDataAsync(string tenantId, DateTime? from, DateTime? to);
+    Task<AgentMetrics> GetAgentMetricsDetailedAsync(string agentId, string tenantId, DateTime? from, DateTime? to);
+    Task<ConversationAnalytics> GetConversationAnalyticsAsync(string conversationId, string tenantId);
+    Task<RealtimeAnalytics> GetRealtimeAnalyticsDetailedAsync(string tenantId);
+
+    // Add methods needed by the message bus service
+    Task<List<string>> GetActiveTenantsAsync();
+    Task ProcessPendingEventBatchesAsync();
 }

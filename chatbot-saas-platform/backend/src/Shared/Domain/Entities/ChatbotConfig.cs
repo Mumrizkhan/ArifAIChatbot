@@ -13,5 +13,5 @@ public class ChatbotConfig : AuditableEntity
     public string Language { get; set; } = "en";
     public bool IsActive { get; set; } = true;
    
-    public Dictionary<string, object> Configuration { get; set; }
+    public Dictionary<string, object>? Configuration { get; set; }
 }

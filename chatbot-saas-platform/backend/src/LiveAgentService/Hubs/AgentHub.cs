@@ -1,10 +1,13 @@
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.SignalR;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.EntityFrameworkCore;
 using Shared.Application.Common.Interfaces;
+using Shared.Domain.Entities;
+using Shared.Domain.Enums;
 using LiveAgentService.Services;
+
 using LiveAgentService.Models;
-using LiveAgentService.Models;
+using Shared.Domain.Events.AnalyticsServiceEvents;
 
 namespace LiveAgentService.Hubs;
 
@@ -14,21 +17,26 @@ public class AgentHub : Hub
     private readonly IApplicationDbContext _context;
     private readonly ICurrentUserService _currentUserService;
     private readonly ITenantService _tenantService;
+    private readonly ILiveAgentAnalyticsService _liveAgentAnalytics;
     private readonly IAgentRoutingService _agentRoutingService;
     private readonly IQueueManagementService _queueManagementService;
     private readonly ILogger<AgentHub> _logger;
+    private readonly Dictionary<string, DateTime> _agentJoinTimes = new();
+    private readonly Dictionary<string, int> _messageCounts = new();
 
     public AgentHub(
         IApplicationDbContext context,
         ICurrentUserService currentUserService,
         ITenantService tenantService,
-        IAgentRoutingService agentRoutingService,
+        ILiveAgentAnalyticsService liveAgentAnalytics,
+         IAgentRoutingService agentRoutingService,
         IQueueManagementService queueManagementService,
         ILogger<AgentHub> logger)
     {
         _context = context;
         _currentUserService = currentUserService;
         _tenantService = tenantService;
+        _liveAgentAnalytics = liveAgentAnalytics;
         _agentRoutingService = agentRoutingService;
         _queueManagementService = queueManagementService;
         _logger = logger;
@@ -103,36 +111,50 @@ public class AgentHub : Hub
     {
         try
         {
-            var agentId = _currentUserService.UserId;
+            var userId = _currentUserService.UserId;
             var tenantId = _tenantService.GetCurrentTenantId();
+            
+            if (userId == null || !Guid.TryParse(conversationId, out var convId))
+                return;
 
-            _logger.LogInformation($"Agent {agentId} attempting to join conversation {conversationId}");
+            var conversation = await _context.Conversations
+                .Include(c => c.AssignedAgent)
+                .FirstOrDefaultAsync(c => c.Id == convId && c.TenantId == tenantId);
 
-            if (Guid.TryParse(conversationId, out var convId) && agentId.HasValue)
-            {
-                // Verify the conversation exists and the agent has permission to join it
-                var conversation = await _context.Conversations
-                    .FirstOrDefaultAsync(c => c.Id == convId && c.TenantId == tenantId);
+            if (conversation == null)
+                return;
 
-                if (conversation != null)
-                {
-                    // Add agent to the conversation group
-                    await Groups.AddToGroupAsync(Context.ConnectionId, $"conversation_{conversationId}");
-                    _logger.LogInformation($"Agent {agentId} successfully joined conversation {conversationId}");
-                }
-                else
-                {
-                    _logger.LogWarning($"Conversation {conversationId} not found for tenant {tenantId} or agent {agentId} doesn't have permission");
-                }
-            }
-            else
-            {
-                _logger.LogWarning($"Invalid conversation ID format: {conversationId} or no agent ID");
-            }
+            await Groups.AddToGroupAsync(Context.ConnectionId, $"conversation_{conversationId}");
+            
+            // Track join time for session duration analytics
+            var sessionKey = $"{userId}_{conversationId}";
+            _agentJoinTimes[sessionKey] = DateTime.UtcNow;
+            _messageCounts[sessionKey] = 0;
+
+            // Generate session ID for analytics
+            var sessionId = Guid.NewGuid().ToString();
+
+            // Publish live agent joined analytics event
+            await _liveAgentAnalytics.PublishAgentJoinedAsync(
+                convId,
+                userId.ToString(),
+                conversation.AssignedAgent?.FirstName ?? "Unknown Agent",
+                conversation.CustomerEmail, // Using email as userId
+                tenantId.ToString(),
+                sessionId,
+                null, // Response time - could be calculated from assignment time
+                false, // Not a transfer for now
+                null // No previous agent for simple join
+            );
+
+            await Clients.Group($"conversation_{conversationId}")
+                .SendAsync("AgentJoined", new { AgentId = userId, ConversationId = conversationId });
+
+            _logger.LogInformation("Agent {AgentId} joined conversation {ConversationId}", userId, conversationId);
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, $"Error joining conversation {conversationId}");
+            _logger.LogError(ex, "Error joining conversation {ConversationId}", conversationId);
         }
     }
 
@@ -140,13 +162,64 @@ public class AgentHub : Hub
     {
         try
         {
-            var agentId = _currentUserService.UserId;
+            var userId = _currentUserService.UserId;
+            var tenantId = _tenantService.GetCurrentTenantId();
+            
+            if (userId == null || !Guid.TryParse(conversationId, out var convId))
+                return;
+
+            var conversation = await _context.Conversations
+                .Include(c => c.AssignedAgent)
+                .FirstOrDefaultAsync(c => c.Id == convId && c.TenantId == tenantId);
+
+            if (conversation == null)
+                return;
+
             await Groups.RemoveFromGroupAsync(Context.ConnectionId, $"conversation_{conversationId}");
-            _logger.LogInformation($"Agent {agentId} left conversation {conversationId}");
+            
+            // Calculate session duration and get message count
+            var sessionKey = $"{userId}_{conversationId}";
+            var sessionDuration = TimeSpan.Zero;
+            var messagesSent = 0;
+
+            if (_agentJoinTimes.TryGetValue(sessionKey, out var joinTime))
+            {
+                sessionDuration = DateTime.UtcNow - joinTime;
+                _agentJoinTimes.Remove(sessionKey);
+            }
+
+            if (_messageCounts.TryGetValue(sessionKey, out var msgCount))
+            {
+                messagesSent = msgCount;
+                _messageCounts.Remove(sessionKey);
+            }
+
+            // Generate session ID for analytics
+            var sessionId = Guid.NewGuid().ToString();
+
+            // Publish live agent left analytics event
+            await _liveAgentAnalytics.PublishAgentLeftAsync(
+                convId,
+                userId.ToString(),
+                conversation.AssignedAgent?.FirstName ?? "Unknown Agent",
+                conversation.CustomerEmail, // Using email as userId
+                tenantId.ToString(),
+                sessionId,
+                sessionDuration,
+                LeaveReason.ConversationEnded, // Assume normal conversation end
+                messagesSent,
+                false, // Not a transfer
+                null // No transfer reason
+            );
+
+            await Clients.Group($"conversation_{conversationId}")
+                .SendAsync("AgentLeft", new { AgentId = userId, ConversationId = conversationId });
+
+            _logger.LogInformation("Agent {AgentId} left conversation {ConversationId}", userId, conversationId);
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, $"Error leaving conversation {conversationId}");
+            _logger.LogError(ex, "Error leaving conversation {ConversationId}", conversationId);
         }
     }
 
@@ -297,72 +370,152 @@ public class AgentHub : Hub
         }
     }
 
-    public async Task TransferConversation(string conversationId, string targetAgentId, string reason)
+    public async Task TransferConversation(string conversationId, string targetAgentId, string reason, string transferNotes = "")
     {
         try
         {
-            var fromAgentId = _currentUserService.UserId;
+            var userId = _currentUserService.UserId;
             var tenantId = _tenantService.GetCurrentTenantId();
+            
+            if (userId == null || !Guid.TryParse(conversationId, out var convId) || !Guid.TryParse(targetAgentId, out var toAgent))
+                return;
 
-            if (fromAgentId.HasValue && 
-                Guid.TryParse(conversationId, out var convId) && 
-                Guid.TryParse(targetAgentId, out var toAgentId))
-            {
-                var transferred = await _agentRoutingService.TransferConversationAsync(convId, fromAgentId.Value, toAgentId);
+            var conversation = await _context.Conversations
+                .Include(c => c.Messages)
+                .FirstOrDefaultAsync(c => c.Id == convId && c.TenantId == tenantId);
 
-                if (transferred)
+            if (conversation == null)
+                return;
+
+            var conversationDuration = DateTime.UtcNow - conversation.StartedAt;
+            conversation.AssignedAgentId = toAgent;
+            conversation.UpdatedAt = DateTime.UtcNow;
+            
+            await _context.SaveChangesAsync();
+
+            // Generate session ID for analytics
+            var sessionId = Guid.NewGuid().ToString();
+
+            // Publish live agent transfer analytics event
+            await _liveAgentAnalytics.PublishTransferAsync(
+                convId,
+                userId.ToString(),
+                targetAgentId,
+                conversation.CustomerEmail, // Using email as userId
+                tenantId.ToString(),
+                sessionId,
+                reason,
+                conversationDuration,
+                !string.IsNullOrEmpty(transferNotes), // Warm transfer if notes provided
+                transferNotes
+            );
+
+            await Clients.Group($"conversation_{conversationId}")
+                .SendAsync("ConversationTransferred", new
                 {
-                    await Clients.Group($"agents_{tenantId}").SendAsync("ConversationTransferred", new
-                    {
-                        ConversationId = conversationId,
-                        FromAgentId = fromAgentId.Value,
-                        ToAgentId = toAgentId,
-                        Reason = reason,
-                        Timestamp = DateTime.UtcNow.ToString("O")
-                    });
+                    ConversationId = conversationId,
+                    FromAgentId = userId,
+                    ToAgentId = targetAgentId,
+                    Reason = reason,
+                    TransferNotes = transferNotes
+                });
 
-                    _logger.LogInformation($"Conversation {conversationId} transferred from {fromAgentId} to {toAgentId}: {reason}");
-                }
-            }
+            _logger.LogInformation("Conversation {ConversationId} transferred from agent {FromAgentId} to agent {ToAgentId}", 
+                conversationId, userId, targetAgentId);
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, $"Error transferring conversation {conversationId}");
+            _logger.LogError(ex, "Error transferring conversation {ConversationId}", conversationId);
         }
     }
 
-    public async Task EscalateConversation(string conversationId, string reason)
+    public async Task EscalateConversation(string conversationId, string toAgentId, string reason)
     {
         try
         {
-            var agentId = _currentUserService.UserId;
+            var userId = _currentUserService.UserId;
             var tenantId = _tenantService.GetCurrentTenantId();
+            
+            if (userId == null || !Guid.TryParse(conversationId, out var convId))
+                return;
 
-            if (Guid.TryParse(conversationId, out var convId))
-            {
-                var escalated = await _queueManagementService.EscalateConversationAsync(convId, reason);
+            var conversation = await _context.Conversations
+                .Include(c => c.Messages)
+                .FirstOrDefaultAsync(c => c.Id == convId && c.TenantId == tenantId);
 
-                if (escalated)
+            if (conversation == null)
+                return;
+
+            var conversationDuration = DateTime.UtcNow - conversation.StartedAt;
+            var messageCount = conversation.Messages?.Count ?? 0;
+
+            // Generate session ID for analytics
+            var sessionId = Guid.NewGuid().ToString();
+
+            // Publish live agent escalation analytics event
+            await _liveAgentAnalytics.PublishEscalationAsync(
+                convId,
+                userId.ToString(),
+                toAgentId,
+                conversation.CustomerEmail, // Using email as userId
+                tenantId.ToString(),
+                sessionId,
+                reason,
+                conversationDuration,
+                messageCount,
+                null, // From department - could be determined from agent
+                null  // To department - could be determined from target agent
+            );
+
+            await Clients.Group($"conversation_{conversationId}")
+                .SendAsync("ConversationEscalated", new
                 {
-                    await Clients.Group($"agents_{tenantId}").SendAsync("ConversationEscalated", new
-                    {
-                        ConversationId = conversationId,
-                        AgentId = agentId,
-                        Reason = reason,
-                        Priority = QueuePriority.Urgent.ToString(),
-                        Timestamp = DateTime.UtcNow.ToString("O")
-                    });
+                    ConversationId = conversationId,
+                    FromAgentId = userId,
+                    ToAgentId = toAgentId,
+                    Reason = reason
+                });
 
-                    _logger.LogInformation($"Conversation {conversationId} escalated by agent {agentId}: {reason}");
-                }
-            }
+            _logger.LogInformation("Conversation {ConversationId} escalated from agent {FromAgentId} to agent {ToAgentId}", 
+                conversationId, userId, toAgentId);
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, $"Error escalating conversation {conversationId}");
+            _logger.LogError(ex, "Error escalating conversation {ConversationId}", conversationId);
         }
     }
 
+    private static string DetermineMessageIntent(string content)
+    {
+        // Simple intent detection based on content keywords
+        var lowerContent = content.ToLower();
+        
+        if (lowerContent.Contains("hello") || lowerContent.Contains("hi"))
+            return "greeting";
+        if (lowerContent.Contains("thank"))
+            return "gratitude";
+        if (lowerContent.Contains("help") || lowerContent.Contains("assist"))
+            return "assistance";
+        if (lowerContent.Contains("problem") || lowerContent.Contains("issue"))
+            return "problem_solving";
+        if (lowerContent.Contains("goodbye") || lowerContent.Contains("bye"))
+            return "farewell";
+        
+        return "information";
+    }
+
+    private static string DetermineResponseQuality(string content)
+    {
+        // Simple quality assessment based on content length and characteristics
+        if (content.Length < 10)
+            return "brief";
+        if (content.Length > 200)
+            return "detailed";
+        if (content.Contains("?"))
+            return "clarifying";
+        
+        return "standard";
+    }
     public async Task RequestAssistance(string conversationId, string message)
     {
         try
@@ -417,6 +570,7 @@ public class AgentHub : Hub
             _logger.LogError(ex, "Error broadcasting message to agents");
         }
     }
+
 
     public override async Task OnConnectedAsync()
     {

@@ -1,14 +1,19 @@
-using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.IdentityModel.Tokens;
-using Microsoft.OpenApi.Models;
+using AnalyticsService.Services;
 using ChatRuntimeService.Hubs;
 using ChatRuntimeService.Services;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Options;
+using Microsoft.IdentityModel.Tokens;
+using Microsoft.OpenApi.Models;
+using Serilog;
 using Shared.Application.Common.Interfaces;
 using Shared.Infrastructure.Extensions;
 using Shared.Infrastructure.Messaging;
+using Shared.Infrastructure.Persistence;
 using Shared.Infrastructure.Services;
 using System.Text;
-using Serilog;
 
 Log.Logger = new LoggerConfiguration()
     .WriteTo.Console()
@@ -48,16 +53,17 @@ builder.Services.AddSwaggerGen(options =>
 });
 // Add infrastructure services including message bus
 builder.Services.AddInfrastructure(builder.Configuration);
+var redisConnectionString = builder.Configuration.GetValue<string>("Redis:ConnectionString") ?? "";
 builder.Services.AddSignalR(options =>
 {
     options.EnableDetailedErrors = true;
     options.KeepAliveInterval = TimeSpan.FromSeconds(15);
     options.ClientTimeoutInterval = TimeSpan.FromSeconds(30);
     options.HandshakeTimeout = TimeSpan.FromSeconds(15);
-}).AddStackExchangeRedis(builder.Configuration.GetValue<string>("Redis:ConnectionString") ?? "", options =>
-{
+}).AddStackExchangeRedis(redisConnectionString, options =>
+{    
     options.Configuration.ChannelPrefix = "chatHub";
-}); 
+});
 
 // Add HTTP client
 builder.Services.AddHttpClient();
@@ -65,10 +71,14 @@ builder.Services.AddHttpClient();
 // Add application services
 builder.Services.AddScoped<IChatService, ChatService>();
 builder.Services.AddScoped<IChatRuntimeService, ChatRuntimeService.Services.ChatRuntimeService>();
+builder.Services.AddScoped<ILiveAgentIntegrationService, LiveAgentIntegrationService>();
 builder.Services.AddScoped<IAnalyticsIntegrationService, AnalyticsIntegrationService>();
 builder.Services.AddScoped<IAIIntegrationService, AIIntegrationService>();
-builder.Services.AddScoped<ILiveAgentIntegrationService, LiveAgentIntegrationService>();
 builder.Services.AddScoped<IMessageQueueService, MessageQueueService>();
+
+// Add Analytics Integration
+builder.Services.AddScoped<IChatbotAnalyticsService, ChatbotAnalyticsService>();
+builder.Services.AddScoped<IAnalyticsMessageBusService, AnalyticsMessageBusService>();
 
 builder.Services.AddHttpContextAccessor();
 
@@ -129,6 +139,13 @@ app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();
 app.MapHub<ChatHub>("/chatHub").RequireCors("AllowAll");
+
+// Initialize Analytics Message Bus
+using (var scope = app.Services.CreateScope())
+{
+    var analyticsMessageBus = scope.ServiceProvider.GetRequiredService<IAnalyticsMessageBusService>();
+    analyticsMessageBus.InitializeSubscriptions();
+}
 
 app.Run();
 
